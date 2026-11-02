@@ -14,6 +14,7 @@ import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { AddExpenseDialog } from "@/features/expenses/AddExpenseDialog";
 import { formatPeriodRange } from "@/features/income/format";
+import { CollectionAlerts } from "@/features/receivables/CollectionAlerts";
 import { selectLocale, usePreferences } from "@/store/preferences";
 import { BucketCard } from "./BucketCard";
 import { useSafeToSpend } from "./useSafeToSpend";
@@ -76,6 +77,8 @@ export function Dashboard() {
               </AlertDescription>
             </Alert>
           )}
+
+          <CollectionAlerts />
 
           {overspent.length > 0 && (
             <Alert variant="destructive" role="status">

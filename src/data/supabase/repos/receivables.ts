@@ -1,15 +1,9 @@
-import type { InstallmentStatus } from "@/domain/types";
+import { installmentStatusFor } from "@/domain/installments";
 import type { ReceivablesRepository } from "../../provider";
 import { ProviderError } from "../../provider";
 import type { AppSupabaseClient } from "../client";
 import { toDebtor, toInstallment, toReceivable } from "../mappers";
 import { exec, execNullable, selectAll } from "./query";
-
-/** Status is derived from the collected amount (and enforced by a CHECK). */
-export function installmentStatus(collected: number, amount: number): InstallmentStatus {
-  if (collected <= 0) return "pending";
-  return collected < amount ? "partial" : "collected";
-}
 
 export function createReceivablesRepository(db: AppSupabaseClient): ReceivablesRepository {
   return {
@@ -75,7 +69,7 @@ export function createReceivablesRepository(db: AppSupabaseClient): ReceivablesR
           .update({
             collected_cents: collected,
             collected_on: collected > 0 ? collectedOn : null,
-            status: installmentStatus(collected, current.amount_cents),
+            status: installmentStatusFor(collected, current.amount_cents),
           })
           .eq("id", installmentId)
           .select("*")

@@ -228,18 +228,18 @@ Proyecto único Next.js (App Router), según plan.md: `src/app`, `src/domain`, `
 
 ### Tests for User Story 5 ⚠️
 
-- [ ] T095 [P] [US5] Escribir prueba que falle en `tests/unit/domain/installments.test.ts`: `splitInstallments` (Σ = total, residuo en la última, plazo 1 mes), `buildCollectionSchedule` (`dueOn < cardDueOn` siempre, `dueOn = cardDueOn − collectionLeadDays`, estado de cuenta correcto según corte y compra cerca del corte), `debtorBalance`, y `collectionAlerts` (vencidos con `daysUntilDue` negativo y ventana fija `COLLECTION_ALERT_WINDOW_DAYS = 7`)
-- [ ] T096 [P] [US5] Escribir prueba que falle en `tests/unit/domain/third-party-isolation.test.ts`: con cargos de terceros registrados, `computeSafeToSpend` y las métricas de gasto personal quedan idénticas (US5-5, SC-007), y el cobro de una mensualidad no cambia el Safe-to-Spend (US5-6a)
+- [X] T095 [P] [US5] Escribir prueba que falle en `tests/unit/domain/installments.test.ts`: `splitInstallments` (Σ = total, residuo en la última, plazo 1 mes), `buildCollectionSchedule` (`dueOn < cardDueOn` siempre, `dueOn = cardDueOn − collectionLeadDays`, estado de cuenta correcto según corte y compra cerca del corte), `debtorBalance`, y `collectionAlerts` (vencidos con `daysUntilDue` negativo y ventana fija `COLLECTION_ALERT_WINDOW_DAYS = 7`)
+- [X] T096 [P] [US5] Escribir prueba que falle en `tests/unit/domain/third-party-isolation.test.ts`: con cargos de terceros registrados, `computeSafeToSpend` y las métricas de gasto personal quedan idénticas (US5-5, SC-007), y el cobro de una mensualidad no cambia el Safe-to-Spend (US5-6a)
 
 ### Implementation for User Story 5
 
-- [ ] T097 [US5] Implementar `src/domain/installments.ts` (`splitInstallments`, `buildCollectionSchedule`, `debtorBalance`, `collectionAlerts`) para pasar T095
-- [ ] T098 [P] [US5] Crear `src/features/receivables/schemas.ts` (Zod: `description` 1–120 caracteres, `total` > 0, `termMonths` 1–48, deudor y tarjeta obligatorios; la tarjeta debe ser `credit_card`) y `src/features/receivables/hooks.ts` (`useReceivables`, `useDebtors`, `useCreateReceivable`, `useRecordCollection`, `useCreateDebtor`; selectores de `useFinanceSnapshot` y mutaciones con `updateSnapshot`)
-- [ ] T099 [US5] Crear `src/features/receivables/AddReceivableDialog.tsx` con vista previa del calendario (monto, fecha de cobro y límite de pago por mensualidad) usando `buildCollectionSchedule`, y envío por la RPC atómica
-- [ ] T100 [US5] Crear `src/features/receivables/CollectionDialog.tsx` (marcar mensualidad cobrada, parcial o pendiente; muestra "destinado al pago de la tarjeta") y `src/app/(app)/receivables/page.tsx` con calendario de cobros, saldo por deudor y detalle por compra (US5-6)
-- [ ] T101 [US5] Crear `src/features/receivables/CollectionAlerts.tsx` (alertas calculadas al abrir la app con deudor, monto y fecha; vencidos y próximos 7 días mediante la constante `COLLECTION_ALERT_WINDOW_DAYS`) y montarlo en `src/app/(app)/dashboard/page.tsx`
-- [ ] T102 [P] [US5] Añadir las cadenas EN/ES del namespace `receivables` en `src/i18n/messages/en.json` y `src/i18n/messages/es.json`
-- [ ] T103 [US5] Escribir prueba e2e en `tests/e2e/us5-receivables.spec.ts` (proyecto `live`): flujo completo de MSI y verificación de que el Safe-to-Spend no cambia
+- [X] T097 [US5] Implementar `src/domain/installments.ts` (`splitInstallments`, `buildCollectionSchedule`, `debtorBalance`, `collectionAlerts`) para pasar T095
+- [X] T098 [P] [US5] Crear `src/features/receivables/schemas.ts` (Zod: `description` 1–120 caracteres, `total` > 0, `termMonths` 1–48, deudor y tarjeta obligatorios; la tarjeta debe ser `credit_card`) y `src/features/receivables/hooks.ts` (`useReceivables`, `useDebtors`, `useCreateReceivable`, `useRecordCollection`, `useCreateDebtor`; selectores de `useFinanceSnapshot` y mutaciones con `updateSnapshot`)
+- [X] T099 [US5] Crear `src/features/receivables/AddReceivableDialog.tsx` con vista previa del calendario (monto, fecha de cobro y límite de pago por mensualidad) usando `buildCollectionSchedule`, y envío por la RPC atómica
+- [X] T100 [US5] Crear `src/features/receivables/CollectionDialog.tsx` (marcar mensualidad cobrada, parcial o pendiente; muestra "destinado al pago de la tarjeta") y `src/app/(app)/receivables/page.tsx` con calendario de cobros, saldo por deudor y detalle por compra (US5-6)
+- [X] T101 [US5] Crear `src/features/receivables/CollectionAlerts.tsx` (alertas calculadas al abrir la app con deudor, monto y fecha; vencidos y próximos 7 días mediante la constante `COLLECTION_ALERT_WINDOW_DAYS`) y montarlo en `src/app/(app)/dashboard/page.tsx`
+- [X] T102 [P] [US5] Añadir las cadenas EN/ES del namespace `receivables` en `src/i18n/messages/en.json` y `src/i18n/messages/es.json`
+- [X] T103 [US5] Escribir prueba e2e en `tests/e2e/us5-receivables.spec.ts` (proyecto `live`): flujo completo de MSI y verificación de que el Safe-to-Spend no cambia
 
 **Checkpoint**: MSI a terceros funcional y aislado
 
