@@ -1,0 +1,27 @@
+node_modules/
+.next/
+.next-e2e-*/
+out/
+build/
+dist/
+coverage/
+playwright-report/
+test-results/
+blob-report/
+pnpm-lock.yaml
+next-env.d.ts
+
+# Spec Kit artifacts and Claude config are hand-written docs; don't reformat them.
+.specify/
+.claude/
+specs/
+project-resume.md
+AGENTS.md
+
+# Supabase: generated types and local state
+supabase/.temp/
+supabase/.branches/
+src/data/supabase/database.types.ts
+
+# Rewritten by `next build` / `next typegen` (adds include entries); keep its formatting.
+tsconfig.json

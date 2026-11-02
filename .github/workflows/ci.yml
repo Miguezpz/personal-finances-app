@@ -1,0 +1,136 @@
+name: CI
+
+# Constitution quality gate: type-check, lint, financial-logic tests, RLS/invariant tests, demo isolation
+# and the e2e matrix mode {demo, live} × locale {en, es}. Any failing job fails the build.
+# Free for public repositories (Principle I).
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  NODE_VERSION: 22
+
+jobs:
+  # ---------------------------------------------------------------------------
+  # Static checks + unit tests (no services)
+  # ---------------------------------------------------------------------------
+  quality:
+    name: Typecheck · Lint · Unit · No-uploads
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+
+      - name: Typecheck
+        run: pnpm typecheck
+      - name: Lint
+        run: pnpm lint
+      - name: Format
+        run: pnpm format:check
+      - name: Unit tests (Vitest)
+        run: pnpm test
+      - name: No file uploads (FR-044)
+        # Script is added in T160; until then this step is a no-op.
+        run: pnpm run --if-present check:no-uploads
+
+  # ---------------------------------------------------------------------------
+  # Demo build must not contain Supabase code or keys (Principle IV)
+  # ---------------------------------------------------------------------------
+  demo-bundle:
+    name: Demo bundle isolation
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+
+      - name: Build demo
+        run: pnpm build
+        env:
+          NEXT_PUBLIC_DEMO_MODE: "true"
+      - name: Check demo bundle
+        # Script is added in T136; until then this step is a no-op.
+        run: pnpm run --if-present check:demo-bundle
+
+  # ---------------------------------------------------------------------------
+  # Everything that needs local Supabase: pgTAP, DataProvider contract, e2e matrix
+  # ---------------------------------------------------------------------------
+  supabase:
+    name: pgTAP · Contract · E2E (demo/live × en/es)
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+
+      - name: Start local Supabase
+        # Only the services the app uses: Postgres, Auth (gotrue), PostgREST and the Kong gateway.
+        run: >
+          pnpm exec supabase start
+          -x realtime,storage-api,imgproxy,mailpit,postgres-meta,studio,edge-runtime,logflare,vector,supavisor
+
+      - name: Export local Supabase credentials
+        # Local development keys only (well-known, not secrets). The secret key is for test setup
+        # (creating the test user) and is never exposed through a NEXT_PUBLIC_* variable.
+        run: |
+          status="$(pnpm exec supabase status -o json)"
+          {
+            echo "NEXT_PUBLIC_SUPABASE_URL=$(jq -r '.API_URL' <<<"$status")"
+            echo "NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY=$(jq -r '.PUBLISHABLE_KEY // .ANON_KEY' <<<"$status")"
+            echo "SUPABASE_TEST_SECRET_KEY=$(jq -r '.SECRET_KEY // .SERVICE_ROLE_KEY' <<<"$status")"
+          } >> "$GITHUB_ENV"
+
+      - name: pgTAP (RLS and invariants)
+        run: |
+          if compgen -G "supabase/tests/*.sql" > /dev/null; then
+            pnpm exec supabase test db
+          else
+            echo "No pgTAP tests yet (T024/T025)."
+          fi
+
+      - name: DataProvider contract (Mock + Supabase)
+        run: pnpm test:contract
+
+      - name: Install Playwright browsers
+        run: pnpm exec playwright install --with-deps chromium
+
+      - name: E2E matrix (demo-en, demo-es, live-en, live-es)
+        run: pnpm test:e2e
+        env:
+          E2E_MODES: demo,live
+
+      - name: Upload Playwright report
+        if: ${{ !cancelled() }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: playwright-report
+          path: playwright-report/
+          retention-days: 7
+          if-no-files-found: ignore
+
+      - name: Stop local Supabase
+        if: always()
+        run: pnpm exec supabase stop --no-backup

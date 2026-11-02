@@ -1,10 +1,11 @@
 # Dependencies
 node_modules/
 /.pnp
-.pnp.js
+.pnp.*
 
 # Next.js build output
 /.next/
+/.next-e2e-*/
 /out/
 build/
 dist/
@@ -23,6 +24,7 @@ dist/
 
 # TypeScript & Linter cache
 *.tsbuildinfo
+next-env.d.ts
 .eslintcache
 
 # Debug logs
@@ -33,6 +35,14 @@ pnpm-debug.log*
 
 # Testing & Coverage
 /coverage
+/test-results/
+/playwright-report/
+/blob-report/
+/playwright/.cache/
+
+# Supabase local
+supabase/.branches
+supabase/.temp
 
 # OS metadata
 .DS_Store

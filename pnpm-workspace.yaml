@@ -1,0 +1,7 @@
+# pnpm 11: explicit decision per package on whether its install scripts may run.
+# All of these ship prebuilt platform binaries through optional dependencies, so their scripts are not needed.
+allowBuilds:
+  "@parcel/watcher": false
+  "@swc/core": false
+  sharp: false
+  unrs-resolver: false
