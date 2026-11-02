@@ -1,0 +1,75 @@
+/**
+ * Shared Playwright fixtures.
+ *
+ * `owner` (live projects only): a brand-new user in LOCAL Supabase per test, signed in through
+ * the real login form, deleted afterwards (all rows cascade). Needs the local credentials in the
+ * environment — CI exports them; locally run `pnpm test:e2e:local`. Refuses any non-local URL.
+ * `admin` lets a test assert what was persisted, independent of the UI language.
+ */
+import { createClient, type SupabaseClient } from "@supabase/supabase-js";
+import { test as base, expect, type Page } from "@playwright/test";
+import type { Database } from "../../src/data/supabase/database.types";
+
+const url = process.env.NEXT_PUBLIC_SUPABASE_URL ?? "";
+const secretKey = process.env.SUPABASE_TEST_SECRET_KEY ?? "";
+const isLocal = /^https?:\/\/(127\.0\.0\.1|localhost)(:\d+)?\/?$/.test(url);
+
+export interface Owner {
+  id: string;
+  email: string;
+  password: string;
+}
+
+type Fixtures = {
+  admin: SupabaseClient<Database>;
+  owner: Owner;
+  ownerPage: Page;
+};
+
+export const test = base.extend<Fixtures>({
+  admin: async ({}, use, testInfo) => {
+    testInfo.skip(
+      !url || !secretKey,
+      "Local Supabase credentials missing (use pnpm test:e2e:local)",
+    );
+    if (!isLocal) throw new Error(`Refusing to run e2e against a non-local Supabase (${url}).`);
+    await use(
+      createClient<Database>(url, secretKey, {
+        auth: { persistSession: false, autoRefreshToken: false },
+      }),
+    );
+  },
+
+  owner: async ({ admin }, use, testInfo) => {
+    const email = `e2e-${testInfo.project.name}-${Date.now()}-${Math.random().toString(36).slice(2, 7)}@test.local`;
+    const password = `pw-${crypto.randomUUID()}`;
+    const { data, error } = await admin.auth.admin.createUser({
+      email,
+      password,
+      email_confirm: true,
+    });
+    if (error) throw error;
+    await use({ id: data.user.id, email, password });
+    await admin.auth.admin.deleteUser(data.user.id);
+  },
+
+  ownerPage: async ({ page, owner }, use) => {
+    await page.goto("/");
+    await page.locator("#login-email").fill(owner.email);
+    await page.locator("#login-password").fill(owner.password);
+    await page.locator('form button[type="submit"]').click();
+    await page.waitForURL("**/dashboard");
+    await use(page);
+  },
+});
+
+export { expect };
+
+/** The next 15th that is today or later (in the browser's time zone), as YYYY-MM-DD. */
+export function nextFifteenth(now = new Date()): { received: string; fundedStart: string } {
+  const y = now.getFullYear();
+  const m = now.getMonth(); // 0-based
+  const [year, month] = now.getDate() <= 15 ? [y, m] : m === 11 ? [y + 1, 0] : [y, m + 1];
+  const mm = String(month + 1).padStart(2, "0");
+  return { received: `${year}-${mm}-15`, fundedStart: `${year}-${mm}-16` };
+}

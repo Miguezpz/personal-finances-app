@@ -127,6 +127,11 @@ const eslintConfig = defineConfig([
     rules: { "no-restricted-properties": "off" },
   },
   {
+    // Playwright fixtures call `use()`, which is not React's hook.
+    files: ["tests/e2e/**/*.ts"],
+    rules: { "react-hooks/rules-of-hooks": "off" },
+  },
+  {
     // The single place allowed to build currency formatters.
     files: ["src/i18n/format.ts"],
     rules: { "no-restricted-syntax": ["error", NO_FILE_INPUT] },

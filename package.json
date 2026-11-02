@@ -15,6 +15,7 @@
     "test:contract": "vitest run tests/contract --passWithNoTests",
     "test:contract:local": "node scripts/with-local-supabase.mjs pnpm test:contract",
     "test:e2e": "playwright test --pass-with-no-tests",
+    "test:e2e:local": "node scripts/with-local-supabase.mjs pnpm test:e2e",
     "db:start": "supabase start -x realtime,storage-api,imgproxy,mailpit,edge-runtime,logflare,vector,supavisor",
     "db:reset": "supabase db reset",
     "db:test": "supabase test db",

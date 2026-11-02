@@ -124,21 +124,21 @@ Proyecto único Next.js (App Router), según plan.md: `src/app`, `src/domain`, `
 
 ### Tests for User Story 1 ⚠️
 
-- [ ] T056 [P] [US1] Escribir prueba que falle en `tests/unit/domain/splitter.test.ts`: escenarios US1-1/2 ($20,000 → 10,000/6,000/4,000; inversión 3,600/400), propiedad fast-check de suma exacta con reglas y montos arbitrarios, `RuleNotConfiguredError` sin regla, y `effectiveRule` elige la de mayor `effectiveFrom` ≤ fecha
-- [ ] T057 [P] [US1] Escribir prueba que falle en `tests/unit/domain/funded-period.test.ts`: `fundedPeriodFor` — día 15 → día 16 del mismo mes; último día de mes (28/29/30/31) → día 1 del mes siguiente; 31 de diciembre → 1 de enero del año siguiente (US1-5/6)
-- [ ] T058 [P] [US1] Escribir prueba de validación en `tests/unit/features/rule-schema.test.ts`: el esquema Zod rechaza porcentajes que no suman exactamente 100% (con mensaje que indica el faltante o excedente) y sub-reglas que no suman 100% cuando inversión > 0 (US1-3)
+- [X] T056 [P] [US1] Escribir prueba que falle en `tests/unit/domain/splitter.test.ts`: escenarios US1-1/2 ($20,000 → 10,000/6,000/4,000; inversión 3,600/400), propiedad fast-check de suma exacta con reglas y montos arbitrarios, `RuleNotConfiguredError` sin regla, y `effectiveRule` elige la de mayor `effectiveFrom` ≤ fecha
+- [X] T057 [P] [US1] Escribir prueba que falle en `tests/unit/domain/funded-period.test.ts`: `fundedPeriodFor` — día 15 → día 16 del mismo mes; último día de mes (28/29/30/31) → día 1 del mes siguiente; 31 de diciembre → 1 de enero del año siguiente (US1-5/6)
+- [X] T058 [P] [US1] Escribir prueba de validación en `tests/unit/features/rule-schema.test.ts`: el esquema Zod rechaza porcentajes que no suman exactamente 100% (con mensaje que indica el faltante o excedente) y sub-reglas que no suman 100% cuando inversión > 0 (US1-3)
 
 ### Implementation for User Story 1
 
-- [ ] T059 [US1] Implementar `fundedPeriodFor` en `src/domain/periods.ts` para pasar T057
-- [ ] T060 [US1] Implementar `effectiveRule` y `splitIncome` en `src/domain/splitter.ts` (primero Needs/Wants/Inversión con `allocateByWeights`, luego el rubro de inversión entre sub-reglas; residuo a la bolsa de mayor porcentaje) para pasar T056
-- [ ] T061 [P] [US1] Crear esquemas Zod en `src/features/income/schemas.ts` (ingreso: `label` 1–80 caracteres, `amount` > 0, fecha válida) y `src/features/settings/rules/schema.ts` (Σ bps = 10000; sub-reglas Σ = 10000 si inversión > 0) para pasar T058
-- [ ] T062 [P] [US1] Crear hooks de TanStack Query en `src/features/income/hooks.ts` (`useIncomes`, `useRegisterIncome`, `useReplaceIncome`, `useDeleteIncome`; lecturas como selectores de `useFinanceSnapshot` y mutaciones con `updateSnapshot`) y en `src/features/settings/rules/hooks.ts` (`useRules`, `useSaveRule`)
-- [ ] T063 [US1] Crear la vista de reglas en `src/app/(app)/settings/rules/page.tsx` y `src/features/settings/rules/RuleForm.tsx`: porcentajes Needs/Wants/Inversión, sub-reglas por vehículo, indicador de suma y mensaje de diferencia; el guardado crea una regla nueva con `effective_from` de hoy, o de mañana si ya hay ingresos asociados a la regla vigente de hoy (la regla de ese día no se modifica) (no altera asignaciones previas, FR-005)
-- [ ] T064 [US1] Crear `src/features/income/RegisterIncomeDialog.tsx`: monto, fecha de recepción, quincena sugerida por `fundedPeriodFor` (editable), tipo recurrente/no recurrente con la opción "repartir por reglas" o "registrar sin repartir", vista previa del reparto y envío a `useRegisterIncome`; si no hay regla, ofrece configurarla o registrar sin repartir
-- [ ] T065 [US1] Crear `src/app/(app)/income/page.tsx` con la lista de ingresos y sus asignaciones por bolsa/vehículo (montos con `<Money>`), edición (recalcula con la regla original guardada en `rule_id`) y eliminación
-- [ ] T066 [P] [US1] Añadir las cadenas EN/ES del namespace `income` y `rules` en `src/i18n/messages/en.json` y `src/i18n/messages/es.json`
-- [ ] T067 [US1] Escribir prueba e2e en `tests/e2e/us1-income-split.spec.ts` (proyecto `live`): configura reglas, registra $20,000 el día 15 y verifica las asignaciones y que guardar 50/30/30 se rechaza
+- [X] T059 [US1] Implementar `fundedPeriodFor` en `src/domain/periods.ts` para pasar T057
+- [X] T060 [US1] Implementar `effectiveRule` y `splitIncome` en `src/domain/splitter.ts` (primero Needs/Wants/Inversión con `allocateByWeights`, luego el rubro de inversión entre sub-reglas; residuo a la bolsa de mayor porcentaje) para pasar T056
+- [X] T061 [P] [US1] Crear esquemas Zod en `src/features/income/schemas.ts` (ingreso: `label` 1–80 caracteres, `amount` > 0, fecha válida) y `src/features/settings/rules/schema.ts` (Σ bps = 10000; sub-reglas Σ = 10000 si inversión > 0) para pasar T058
+- [X] T062 [P] [US1] Crear hooks de TanStack Query en `src/features/income/hooks.ts` (`useIncomes`, `useRegisterIncome`, `useReplaceIncome`, `useDeleteIncome`; lecturas como selectores de `useFinanceSnapshot` y mutaciones con `updateSnapshot`) y en `src/features/settings/rules/hooks.ts` (`useRules`, `useSaveRule`)
+- [X] T063 [US1] Crear la vista de reglas en `src/app/(app)/settings/rules/page.tsx` y `src/features/settings/rules/RuleForm.tsx`: porcentajes Needs/Wants/Inversión, sub-reglas por vehículo, indicador de suma y mensaje de diferencia; el guardado crea una regla nueva con `effective_from` de hoy, o de mañana si ya hay ingresos asociados a la regla vigente de hoy (la regla de ese día no se modifica) (no altera asignaciones previas, FR-005)
+- [X] T064 [US1] Crear `src/features/income/RegisterIncomeDialog.tsx`: monto, fecha de recepción, quincena sugerida por `fundedPeriodFor` (editable), tipo recurrente/no recurrente con la opción "repartir por reglas" o "registrar sin repartir", vista previa del reparto y envío a `useRegisterIncome`; si no hay regla, ofrece configurarla o registrar sin repartir
+- [X] T065 [US1] Crear `src/app/(app)/income/page.tsx` con la lista de ingresos y sus asignaciones por bolsa/vehículo (montos con `<Money>`), edición (recalcula con la regla original guardada en `rule_id`) y eliminación
+- [X] T066 [P] [US1] Añadir las cadenas EN/ES del namespace `income` y `rules` en `src/i18n/messages/en.json` y `src/i18n/messages/es.json`
+- [X] T067 [US1] Escribir prueba e2e en `tests/e2e/us1-income-split.spec.ts` (proyecto `live`): configura reglas, registra $20,000 el día 15 y verifica las asignaciones y que guardar 50/30/30 se rechaza
 
 **Checkpoint**: US1 funcional y comprobable de forma independiente
 

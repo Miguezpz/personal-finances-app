@@ -72,3 +72,18 @@ export function todayIn(timezone: string, now: Date): IsoDate {
     Number(parts.find((p) => p.type === type)?.value);
   return isoDate(get("year"), get("month"), get("day"));
 }
+
+/**
+ * Quincena funded by an income received on `receivedOn` (clarification 3, research.md R3): the
+ * first period that starts strictly after the date — the 15th funds the 16th–end, the last day
+ * funds the 1st–15th of the next month. The user may override it when registering.
+ */
+export function fundedPeriodFor(receivedOn: IsoDate): Period {
+  return nextPeriod(periodOf(receivedOn));
+}
+
+/** True if `date` is the first day of a quincena (day 1 or 16). */
+export function isPeriodStart(date: IsoDate): boolean {
+  const { day } = parseIsoDate(date);
+  return day === 1 || day === 16;
+}
