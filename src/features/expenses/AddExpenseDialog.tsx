@@ -21,15 +21,11 @@ import {
 } from "@/components/ui/dialog";
 import { Field, FieldDescription, FieldError, FieldGroup, FieldLabel } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
-import {
-  NativeSelect,
-  NativeSelectOptGroup,
-  NativeSelectOption,
-} from "@/components/ui/native-select";
+import { NativeSelect, NativeSelectOption } from "@/components/ui/native-select";
 import { isDemoReadOnlyError } from "@/data/errors";
 import { useFinanceSnapshot } from "@/data/useFinanceSnapshot";
 import type { FinanceSnapshot, Uuid } from "@/domain/types";
-import { useTaxonomyName } from "@/features/settings/taxonomy/useTaxonomyName";
+import { SubcategoryOptions } from "@/features/settings/taxonomy/SubcategoryOptions";
 import { useToday } from "@/lib/use-today";
 import { bucketOfSubcategory, useCreateExpense } from "./hooks";
 import { expenseFormSchema, type ExpenseFormInput, type ExpenseFormOutput } from "./schemas";
@@ -37,7 +33,7 @@ import { expenseFormSchema, type ExpenseFormInput, type ExpenseFormOutput } from
 type ExpensesMessageKey = Parameters<ReturnType<typeof useTranslations<"expenses">>>[0];
 
 const selectFormData = (s: FinanceSnapshot) => ({
-  categories: s.categories.filter((c) => !c.archived),
+  categories: s.categories,
   subcategories: s.subcategories.filter((x) => !x.archived),
   accounts: s.accounts.filter((a) => !a.archived),
 });
@@ -52,7 +48,6 @@ export function AddExpenseDialog({ open, onOpenChange }: Props) {
   const tb = useTranslations("buckets");
   const tc = useTranslations("common");
   const today = useToday();
-  const nameOf = useTaxonomyName();
   const { data } = useFinanceSnapshot(selectFormData);
   const createExpense = useCreateExpense();
 
@@ -126,18 +121,7 @@ export function AddExpenseDialog({ open, onOpenChange }: Props) {
             <Field data-invalid={Boolean(errors.subcategoryId)}>
               <FieldLabel htmlFor="expense-subcategory">{t("subcategory")}</FieldLabel>
               <NativeSelect id="expense-subcategory" {...form.register("subcategoryId")}>
-                <NativeSelectOption value="">{t("chooseSubcategory")}</NativeSelectOption>
-                {(data?.categories ?? []).map((c) => (
-                  <NativeSelectOptGroup key={c.id} label={`${tb(c.macro)} · ${nameOf(c)}`}>
-                    {data?.subcategories
-                      .filter((x) => x.categoryId === c.id)
-                      .map((x) => (
-                        <NativeSelectOption key={x.id} value={x.id}>
-                          {nameOf(x)}
-                        </NativeSelectOption>
-                      ))}
-                  </NativeSelectOptGroup>
-                ))}
+                <SubcategoryOptions placeholder={t("chooseSubcategory")} />
               </NativeSelect>
               {!hasCategories && <FieldDescription>{t("noCategoriesYet")}</FieldDescription>}
               {bucket && (

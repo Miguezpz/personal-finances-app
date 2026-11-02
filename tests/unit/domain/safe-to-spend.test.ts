@@ -14,7 +14,14 @@ import {
   type SafeToSpendInput,
 } from "@/domain/safe-to-spend";
 import type { IsoDate, PeriodKey } from "@/domain/types";
-import { d, makeAllocation, makeExpense, makeGoal, testId } from "../../utils/fixtures";
+import {
+  d,
+  makeAllocation,
+  makeExpense,
+  makeGoal,
+  makeRecurring,
+  testId,
+} from "../../utils/fixtures";
 
 const NOV_2 = periodFromKey("2026-11-2" as PeriodKey); // Nov 16–30
 const settings = DEFAULT_USER_SETTINGS;
@@ -238,5 +245,63 @@ describe("computeCarryChain", () => {
       "2026-11-2" as PeriodKey,
     );
     expect(chain.size).toBe(0);
+  });
+});
+
+describe("recurring charges in the Safe-to-Spend (T083, FR-008a, US3-1)", () => {
+  const rent = makeRecurring({
+    chargeDay: 20,
+    amount: cents(80_000),
+    bucket: "needs",
+    startsOn: d("2026-01-01"),
+  });
+  const base = { allocations: [alloc("needs", 300_000, "2026-11-16")], recurring: [rent] };
+
+  it("reserves a charge from the first day of its quincena as pending", () => {
+    const r = computeSafeToSpend(input({ ...base, today: d("2026-11-16") }));
+    expect(r.needs.fixedPending).toBe(80_000);
+    expect(r.needs.fixedApplied).toBe(0);
+    expect(r.needs.available).toBe(220_000);
+  });
+
+  it("the balance doesn't change when the charge becomes applied", () => {
+    const pending = computeSafeToSpend(input({ ...base, today: d("2026-11-19") }));
+    const applied = computeSafeToSpend(
+      input({
+        ...base,
+        today: d("2026-11-20"),
+        expenses: [
+          makeExpense({
+            amount: rent.amount,
+            spentOn: d("2026-11-20"),
+            bucket: "needs",
+            origin: "recurring",
+            recurringExpenseId: rent.id,
+            occurrenceDate: d("2026-11-20"),
+          }),
+        ],
+      }),
+    );
+    expect(applied.needs).toMatchObject({ fixedPending: 0, fixedApplied: 80_000 });
+    expect(applied.needs.available).toBe(pending.needs.available);
+  });
+
+  it("still reserves a past-due charge that hasn't been materialized yet", () => {
+    const r = computeSafeToSpend(input({ ...base, today: d("2026-11-25") }));
+    expect(r.needs.fixedPending).toBe(80_000);
+  });
+
+  it("doesn't reserve charges of other quincenas or of paused recurring expenses", () => {
+    const firstHalf = makeRecurring({
+      chargeDay: 3,
+      amount: cents(10_000),
+      bucket: "needs",
+      startsOn: d("2026-01-01"),
+    });
+    const paused = { ...rent, id: testId(), endedOn: d("2026-11-10") };
+    const r = computeSafeToSpend(
+      input({ ...base, recurring: [firstHalf, paused], today: d("2026-11-16") }),
+    );
+    expect(r.needs.fixedPending).toBe(0);
   });
 });

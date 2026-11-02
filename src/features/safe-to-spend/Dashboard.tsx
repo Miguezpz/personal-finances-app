@@ -23,7 +23,7 @@ export function Dashboard() {
   const tb = useTranslations("buckets");
   const tc = useTranslations("common");
   const locale = usePreferences(selectLocale);
-  const { data, hasAllocations, isPending, isError, refetch } = useSafeToSpend();
+  const { data, recurringItems, hasAllocations, isPending, isError, refetch } = useSafeToSpend();
   const [adding, setAdding] = useState(false);
 
   const overspent = data ? [data.needs, data.wants].filter((b) => b.available < 0) : [];
@@ -88,8 +88,14 @@ export function Dashboard() {
           )}
 
           <div className="grid gap-4 md:grid-cols-2" aria-live="polite">
-            <BucketCard data={data.needs} />
-            <BucketCard data={data.wants} />
+            <BucketCard
+              data={data.needs}
+              recurring={recurringItems.filter((i) => i.bucket === "needs")}
+            />
+            <BucketCard
+              data={data.wants}
+              recurring={recurringItems.filter((i) => i.bucket === "wants")}
+            />
           </div>
         </>
       )}

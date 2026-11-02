@@ -12,6 +12,7 @@
  */
 import { BPS_TOTAL, ZERO_CENTS } from "./money";
 import { daysUntilNextPayday, nextPeriod, periodFromKey, periodOf } from "./periods";
+import { unappliedOccurrences } from "./recurring";
 import type {
   BasisPoints,
   Cents,
@@ -158,12 +159,16 @@ function ratioOf(available: number, base: number): BasisPoints | null {
 }
 
 /**
- * Recurring charges of the period that are not applied yet, by bucket (reserved from the first
- * day, FR-008a). US3 (T083) computes them from `input.recurring` with pendingOccurrences; until
- * then nothing is pending.
+ * Recurring charges of the period not applied yet, by bucket: reserved from the first day of the
+ * quincena (FR-008a). When one is materialized it moves from pending to applied and the
+ * available balance stays the same.
  */
-function pendingFixedOf(): Record<SpendBucket, Cents> {
-  return { needs: ZERO_CENTS, wants: ZERO_CENTS };
+function pendingFixedOf(input: SafeToSpendInput): Record<SpendBucket, Cents> {
+  const pending = { needs: 0, wants: 0 };
+  for (const o of unappliedOccurrences(input.recurring, input.expenses, input.period)) {
+    pending[o.bucket] += o.amount;
+  }
+  return { needs: pending.needs as Cents, wants: pending.wants as Cents };
 }
 
 export function computeSafeToSpend(input: SafeToSpendInput): SafeToSpend {
@@ -171,7 +176,7 @@ export function computeSafeToSpend(input: SafeToSpendInput): SafeToSpend {
   const chain = computeCarryChain(input, period.key);
   const { byPeriod } = groupByPeriod(input, period);
   const current = byPeriod.get(period.key);
-  const pending = pendingFixedOf();
+  const pending = pendingFixedOf(input);
 
   // Closing of the target period includes its own movements; carryIn is that minus them.
   const closing = chain.get(period.key) ?? { needs: ZERO_CENTS, wants: ZERO_CENTS };

@@ -178,18 +178,18 @@ Proyecto único Next.js (App Router), según plan.md: `src/app`, `src/domain`, `
 
 ### Tests for User Story 3 ⚠️
 
-- [ ] T078 [P] [US3] Escribir prueba que falle en `tests/unit/domain/recurring.test.ts`: `dueOccurrences` (todas las vencidas desde `starts_on`, respeta `ended_on`, idempotente al llamarse dos veces con el estado actualizado), día 31 en meses cortos → último día (FR-009), días 15/16 caen en su única quincena, `pendingOccurrences` solo fechas futuras de la quincena, pausado no genera ocurrencias, y editar el monto o el día de un fijo no modifica ni duplica las ocurrencias ya materializadas, solo las futuras (FR-011)
-- [ ] T079 [P] [US3] Escribir prueba que falle en `tests/unit/features/materialize.test.tsx`: `useMaterializeRecurring` inserta solo ocurrencias faltantes, no se ejecuta dos veces concurrentemente y el reintento no duplica (usa el índice único simulado en el proveedor de pruebas)
+- [X] T078 [P] [US3] Escribir prueba que falle en `tests/unit/domain/recurring.test.ts`: `dueOccurrences` (todas las vencidas desde `starts_on`, respeta `ended_on`, idempotente al llamarse dos veces con el estado actualizado), día 31 en meses cortos → último día (FR-009), días 15/16 caen en su única quincena, `pendingOccurrences` solo fechas futuras de la quincena, pausado no genera ocurrencias, y editar el monto o el día de un fijo no modifica ni duplica las ocurrencias ya materializadas, solo las futuras (FR-011)
+- [X] T079 [P] [US3] Escribir prueba que falle en `tests/unit/features/materialize.test.tsx`: `useMaterializeRecurring` inserta solo ocurrencias faltantes, no se ejecuta dos veces concurrentemente y el reintento no duplica (usa el índice único simulado en el proveedor de pruebas)
 
 ### Implementation for User Story 3
 
-- [ ] T080 [US3] Implementar `src/domain/recurring.ts` con `dueOccurrences` y `pendingOccurrences` (usa `clampChargeDay`) para pasar T078
-- [ ] T081 [P] [US3] Crear `src/features/recurring/schemas.ts` (Zod: `name` 1–80 caracteres, `amount` > 0, `chargeDay` 1–31, subcategoría obligatoria) y `src/features/recurring/hooks.ts` (`useRecurring`, `useCreateRecurring`, `useUpdateRecurring`, `useEndRecurring`, `useDeleteRecurring`; selectores de `useFinanceSnapshot` y mutaciones con `updateSnapshot`); `bucket` se copia de la categoría padre al guardar
-- [ ] T082 [US3] Crear `src/features/recurring/useMaterializeRecurring.ts`: efecto que, al cargar datos y solo si `provider.capabilities.canWrite` (FR-047a: en demo no hace nada ni muestra avisos), calcula `dueOccurrences`, inserta con `expenses.materializeRecurring` (origen `recurring`) y refresca la caché; con bloqueo para evitar ejecuciones simultáneas; montarlo en `src/app/(app)/layout.tsx`
-- [ ] T083 [US3] Integrar `pendingOccurrences` en `computeSafeToSpend` (`src/domain/safe-to-spend.ts`) como `fixedPending` y mostrar en el `BucketCard` los fijos "pendientes" y "aplicados" con estilos distintos (FR-008a)
-- [ ] T084 [US3] Crear `src/app/(app)/recurring/page.tsx` y `src/features/recurring/RecurringForm.tsx`: lista, alta, edición (solo afecta ocurrencias futuras), pausa/reanudación y eliminación; los cargos aplicados quedan marcados como "automático" en la bitácora
-- [ ] T085 [P] [US3] Añadir las cadenas EN/ES del namespace `recurring` en `src/i18n/messages/en.json` y `src/i18n/messages/es.json`
-- [ ] T086 [US3] Escribir prueba e2e en `tests/e2e/us3-recurring.spec.ts` (proyecto `live`): crear la renta, recargar dos veces y comprobar una sola ocurrencia aplicada; pausar y verificar que ya no se deduce
+- [X] T080 [US3] Implementar `src/domain/recurring.ts` con `dueOccurrences` y `pendingOccurrences` (usa `clampChargeDay`) para pasar T078
+- [X] T081 [P] [US3] Crear `src/features/recurring/schemas.ts` (Zod: `name` 1–80 caracteres, `amount` > 0, `chargeDay` 1–31, subcategoría obligatoria) y `src/features/recurring/hooks.ts` (`useRecurring`, `useCreateRecurring`, `useUpdateRecurring`, `useEndRecurring`, `useDeleteRecurring`; selectores de `useFinanceSnapshot` y mutaciones con `updateSnapshot`); `bucket` se copia de la categoría padre al guardar
+- [X] T082 [US3] Crear `src/features/recurring/useMaterializeRecurring.ts`: efecto que, al cargar datos y solo si `provider.capabilities.canWrite` (FR-047a: en demo no hace nada ni muestra avisos), calcula `dueOccurrences`, inserta con `expenses.materializeRecurring` (origen `recurring`) y refresca la caché; con bloqueo para evitar ejecuciones simultáneas; montarlo en `src/app/(app)/layout.tsx`
+- [X] T083 [US3] Integrar `pendingOccurrences` en `computeSafeToSpend` (`src/domain/safe-to-spend.ts`) como `fixedPending` y mostrar en el `BucketCard` los fijos "pendientes" y "aplicados" con estilos distintos (FR-008a)
+- [X] T084 [US3] Crear `src/app/(app)/recurring/page.tsx` y `src/features/recurring/RecurringForm.tsx`: lista, alta, edición (solo afecta ocurrencias futuras), pausa/reanudación y eliminación; los cargos aplicados quedan marcados como "automático" en la bitácora
+- [X] T085 [P] [US3] Añadir las cadenas EN/ES del namespace `recurring` en `src/i18n/messages/en.json` y `src/i18n/messages/es.json`
+- [X] T086 [US3] Escribir prueba e2e en `tests/e2e/us3-recurring.spec.ts` (proyecto `live`): crear la renta, recargar dos veces y comprobar una sola ocurrencia aplicada; pausar y verificar que ya no se deduce
 
 **Checkpoint**: US1–US3 completas (todas las historias P1)
 

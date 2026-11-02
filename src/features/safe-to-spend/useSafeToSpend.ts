@@ -7,11 +7,14 @@
 import { useMemo } from "react";
 import { useFinanceSnapshot } from "@/data/useFinanceSnapshot";
 import { periodOf } from "@/domain/periods";
+import { recurringStatusForPeriod, type RecurringStatusItem } from "@/domain/recurring";
 import { computeSafeToSpend, type SafeToSpend } from "@/domain/safe-to-spend";
 import { useToday } from "@/lib/use-today";
 
 export function useSafeToSpend(): {
   data: SafeToSpend | undefined;
+  /** Recurring charges of the current quincena, applied or pending (FR-008a). */
+  recurringItems: readonly RecurringStatusItem[];
   /** True when no income has ever been split (empty state). */
   hasAllocations: boolean;
   isPending: boolean;
@@ -20,6 +23,10 @@ export function useSafeToSpend(): {
 } {
   const today = useToday();
   const snapshot = useFinanceSnapshot();
+  const recurringItems = useMemo(() => {
+    const s = snapshot.data;
+    return s ? recurringStatusForPeriod(s.recurring, s.expenses, periodOf(today)) : [];
+  }, [snapshot.data, today]);
   const data = useMemo(() => {
     const s = snapshot.data;
     if (!s) return undefined;
@@ -37,6 +44,7 @@ export function useSafeToSpend(): {
 
   return {
     data,
+    recurringItems,
     hasAllocations: (snapshot.data?.allocations.length ?? 0) > 0,
     isPending: snapshot.isPending,
     isError: snapshot.isError,

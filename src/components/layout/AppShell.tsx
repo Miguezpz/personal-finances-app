@@ -14,6 +14,7 @@ import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
 import { useDataProvider } from "@/data/context";
 import { useAuthSync, useSession } from "@/features/auth/useSession";
+import { useMaterializeRecurring } from "@/features/recurring/useMaterializeRecurring";
 import { useOnboarding } from "@/features/settings/onboarding";
 import { cn } from "@/lib/utils";
 import { useUi } from "@/store/ui";
@@ -71,6 +72,7 @@ function StatusBanners() {
 function BackgroundProcesses() {
   useAuthSync();
   useOnboarding();
+  useMaterializeRecurring();
   return null;
 }
 
