@@ -67,7 +67,11 @@ export default defineConfig({
   ...(isCI ? { workers: 1 } : {}),
   reporter: isCI ? [["github"], ["html", { open: "never" }]] : "list",
   use: {
-    trace: "on-first-retry",
+    // Keep evidence of every failure (also locally, where there are no retries): an intermittent
+    // failure must be diagnosable from its trace instead of guessed at.
+    trace: "retain-on-failure",
+    screenshot: "only-on-failure",
+    video: "retain-on-failure",
   },
   projects,
   webServer: MODES.map((mode) => ({

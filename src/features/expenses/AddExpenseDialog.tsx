@@ -1,7 +1,7 @@
 "use client";
 
 /**
- * Add an expense (brought forward from T091 for US2; US4 completes card payments).
+ * Add or edit an expense (T091).
  * Amount, date (today by default; a past date affects that quincena, US4-2), subcategory grouped by
  * category, payment method and note. The bucket is inherited from the category and only shown.
  * Optimistic: the Safe-to-Spend updates before the server answers (FR-018).
@@ -24,10 +24,11 @@ import { Input } from "@/components/ui/input";
 import { NativeSelect, NativeSelectOption } from "@/components/ui/native-select";
 import { isDemoReadOnlyError } from "@/data/errors";
 import { useFinanceSnapshot } from "@/data/useFinanceSnapshot";
-import type { FinanceSnapshot, Uuid } from "@/domain/types";
+import { formatCentsAsInput } from "@/domain/parse";
+import type { Expense, FinanceSnapshot, Uuid } from "@/domain/types";
 import { SubcategoryOptions } from "@/features/settings/taxonomy/SubcategoryOptions";
 import { useToday } from "@/lib/use-today";
-import { bucketOfSubcategory, useCreateExpense } from "./hooks";
+import { bucketOfSubcategory, useCreateExpense, useUpdateExpense } from "./hooks";
 import { expenseFormSchema, type ExpenseFormInput, type ExpenseFormOutput } from "./schemas";
 
 type ExpensesMessageKey = Parameters<ReturnType<typeof useTranslations<"expenses">>>[0];
@@ -41,25 +42,30 @@ const selectFormData = (s: FinanceSnapshot) => ({
 interface Props {
   open: boolean;
   onOpenChange: (open: boolean) => void;
+  /** Present when editing; the bucket is re-inherited from the (possibly new) subcategory. */
+  expense?: Expense | null;
 }
 
-export function AddExpenseDialog({ open, onOpenChange }: Props) {
+export function AddExpenseDialog({ open, onOpenChange, expense }: Props) {
   const t = useTranslations("expenses");
   const tb = useTranslations("buckets");
   const tc = useTranslations("common");
   const today = useToday();
   const { data } = useFinanceSnapshot(selectFormData);
   const createExpense = useCreateExpense();
+  const updateExpense = useUpdateExpense();
 
   const form = useForm<ExpenseFormInput, unknown, ExpenseFormOutput>({
     resolver: zodResolver(expenseFormSchema),
-    defaultValues: {
-      amount: "",
-      spentOn: today,
-      subcategoryId: "",
-      paymentAccountId: "",
-      note: "",
-    },
+    defaultValues: expense
+      ? {
+          amount: formatCentsAsInput(expense.amount),
+          spentOn: expense.spentOn,
+          subcategoryId: expense.subcategoryId,
+          paymentAccountId: expense.paymentAccountId ?? "",
+          note: expense.note ?? "",
+        }
+      : { amount: "", spentOn: today, subcategoryId: "", paymentAccountId: "", note: "" },
   });
   const subcategoryId = useWatch({ control: form.control, name: "subcategoryId" });
   const bucket = data && subcategoryId ? bucketOfSubcategory(data, subcategoryId as Uuid) : null;
@@ -71,21 +77,26 @@ export function AddExpenseDialog({ open, onOpenChange }: Props) {
     if (!data) return;
     const inherited = bucketOfSubcategory(data, values.subcategoryId);
     if (!inherited) return;
-    createExpense.mutate(
-      {
-        ...values,
-        bucket: inherited,
-        origin: "manual",
-        recurringExpenseId: null,
-        occurrenceDate: null,
+    const callbacks = {
+      onSuccess: () => toast.success(t("saved")),
+      onError: (e: Error) => {
+        if (!isDemoReadOnlyError(e)) toast.error(t("saveFailed"));
       },
-      {
-        onSuccess: () => toast.success(t("saved")),
-        onError: (e) => {
-          if (!isDemoReadOnlyError(e)) toast.error(t("saveFailed"));
+    };
+    if (expense) {
+      updateExpense.mutate({ id: expense.id, patch: { ...values, bucket: inherited } }, callbacks);
+    } else {
+      createExpense.mutate(
+        {
+          ...values,
+          bucket: inherited,
+          origin: "manual",
+          recurringExpenseId: null,
+          occurrenceDate: null,
         },
-      },
-    );
+        callbacks,
+      );
+    }
     onOpenChange(false);
   }
 
@@ -93,7 +104,7 @@ export function AddExpenseDialog({ open, onOpenChange }: Props) {
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-h-[90dvh] overflow-y-auto sm:max-w-md">
         <DialogHeader>
-          <DialogTitle>{t("addTitle")}</DialogTitle>
+          <DialogTitle>{expense ? t("editTitle") : t("addTitle")}</DialogTitle>
           <DialogDescription>{t("addDescription")}</DialogDescription>
         </DialogHeader>
 
