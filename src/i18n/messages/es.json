@@ -160,5 +160,53 @@
     "invalidDate": "Escribe una fecha válida.",
     "invalidPeriod": "Elige una quincena.",
     "saveFailed": "No se pudo guardar el ingreso. Inténtalo de nuevo."
+  },
+  "dashboard": {
+    "title": "Inicio",
+    "period": "Quincena {start} – {end}",
+    "paydayToday": "Hoy es día de pago",
+    "paydayIn": "{days, plural, one {Falta # día} other {Faltan # días}} para el pago",
+    "addExpense": "Registrar gasto",
+    "safeToSpend": "Disponible para gastar",
+    "ofBasePrefix": "de",
+    "progressLabel": "Presupuesto restante de {bucket}",
+    "carryIn": "Arrastre anterior",
+    "allocated": "Asignado esta quincena",
+    "fixedApplied": "Fijos cobrados",
+    "fixedPending": "Fijos pendientes",
+    "manual": "Gastos",
+    "goalContributions": "Apartado para metas",
+    "light": {
+      "green": "Saludable",
+      "yellow": "Con cuidado",
+      "red": "Bajo",
+      "neutral": "Sin presupuesto"
+    },
+    "overspentTitle": "Presupuesto excedido",
+    "overspentHint": "{buckets} se excedió. Puedes seguir registrando gastos; el déficit pasa a la siguiente quincena.",
+    "emptyTitle": "Aún no hay ingresos",
+    "emptyHint": "Registra tus ingresos para ver cuánto puedes gastar esta quincena.",
+    "registerIncome": "Registrar ingreso",
+    "loadError": "No se pudieron cargar tus saldos."
+  },
+  "expenses": {
+    "addTitle": "Registrar gasto",
+    "addDescription": "Se descuenta de Necesidades o Gustos según su categoría.",
+    "amount": "Monto (MXN)",
+    "spentOn": "Fecha",
+    "subcategory": "Categoría",
+    "chooseSubcategory": "Elige una categoría",
+    "bucketHint": "Se descuenta de {bucket}.",
+    "noCategoriesYet": "Estamos preparando tus categorías; inténtalo en un momento.",
+    "paymentMethod": "Pagado con",
+    "noPaymentMethod": "Sin especificar",
+    "note": "Nota (opcional)",
+    "save": "Guardar gasto",
+    "saved": "Gasto guardado.",
+    "saveFailed": "No se pudo guardar el gasto. Inténtalo de nuevo.",
+    "invalidAmount": "Escribe un monto mayor a 0 (p. ej. 250.00).",
+    "invalidDate": "Escribe una fecha válida.",
+    "subcategoryRequired": "Elige una categoría.",
+    "noteTooLong": "Usa 200 caracteres o menos."
   }
 }

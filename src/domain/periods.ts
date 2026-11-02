@@ -4,9 +4,9 @@
  *   half 2 = day 16–end → key `YYYY-MM-2`
  * Pure: "today" is always injected (see todayIn).
  */
-import { daysInMonth, isoDate, parseIsoDate } from "./dates";
+import { daysBetween, daysInMonth, isoDate, parseIsoDate } from "./dates";
 import { InvalidDateError } from "./errors";
-import type { IsoDate, Period, PeriodKey } from "./types";
+import type { IsoDate, Period, PeriodKey, UserSettings } from "./types";
 
 const KEY_RE = /^(\d{4})-(\d{2})-([12])$/;
 
@@ -86,4 +86,24 @@ export function fundedPeriodFor(receivedOn: IsoDate): Period {
 export function isPeriodStart(date: IsoDate): boolean {
   const { day } = parseIsoDate(date);
   return day === 1 || day === 16;
+}
+
+/**
+ * Days from `today` to the next payday (FR-019); 0 when today is a payday. Paydays are days of
+ * the month (31 = last day, clamped in short months).
+ */
+export function daysUntilNextPayday(
+  today: IsoDate,
+  settings: Pick<UserSettings, "firstPayday" | "secondPayday">,
+): number {
+  const { year, month } = parseIsoDate(today);
+  const next = month === 12 ? { year: year + 1, month: 1 } : { year, month: month + 1 };
+  let best = Number.POSITIVE_INFINITY;
+  for (const m of [{ year, month }, next]) {
+    for (const day of [settings.firstPayday, settings.secondPayday]) {
+      const diff = daysBetween(today, clampChargeDay(m.year, m.month, day));
+      if (diff >= 0 && diff < best) best = diff;
+    }
+  }
+  return best;
 }

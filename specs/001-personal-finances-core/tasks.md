@@ -152,19 +152,19 @@ Proyecto único Next.js (App Router), según plan.md: `src/app`, `src/domain`, `
 
 ### Tests for User Story 2 ⚠️
 
-- [ ] T068 [P] [US2] Escribir prueba que falle en `tests/unit/domain/safe-to-spend.test.ts`: US2-1 ($1,800), US2-6 (arrastre ±$400 solo en Wants), cadena de varias quincenas, edición de un gasto pasado recalcula la cadena, gastos de terceros no entran, y `computeCarryChain` devuelve el cierre por quincena
-- [ ] T069 [P] [US2] Escribir prueba que falle en `tests/unit/domain/traffic-light.test.ts`: verde ≥ 50% de la base (`allocated + max(carryIn, 0)`), amarillo 20–49%, rojo < 20% o negativo, caso US2-7 (asignación $3,000 con arrastre +$1,000 y disponible $1,800 → amarillo), un arrastre negativo no aumenta la base, `neutral` si `base ≤ 0` y `available = 0`, rojo si `base ≤ 0` y `available < 0`, y umbrales configurables
-- [ ] T070 [P] [US2] Escribir prueba que falle en `tests/unit/domain/payday.test.ts`: `daysUntilNextPayday` con paydays 15 y 31 (fin de mes ajustado en meses cortos) y "hoy" siendo día de pago
+- [X] T068 [P] [US2] Escribir prueba que falle en `tests/unit/domain/safe-to-spend.test.ts`: US2-1 ($1,800), US2-6 (arrastre ±$400 solo en Wants), cadena de varias quincenas, edición de un gasto pasado recalcula la cadena, gastos de terceros no entran, y `computeCarryChain` devuelve el cierre por quincena
+- [X] T069 [P] [US2] Escribir prueba que falle en `tests/unit/domain/traffic-light.test.ts`: verde ≥ 50% de la base (`allocated + max(carryIn, 0)`), amarillo 20–49%, rojo < 20% o negativo, caso US2-7 (asignación $3,000 con arrastre +$1,000 y disponible $1,800 → amarillo), un arrastre negativo no aumenta la base, `neutral` si `base ≤ 0` y `available = 0`, rojo si `base ≤ 0` y `available < 0`, y umbrales configurables
+- [X] T070 [P] [US2] Escribir prueba que falle en `tests/unit/domain/payday.test.ts`: `daysUntilNextPayday` con paydays 15 y 31 (fin de mes ajustado en meses cortos) y "hoy" siendo día de pago
 
 ### Implementation for User Story 2
 
-- [ ] T071 [US2] Implementar `src/domain/safe-to-spend.ts` con `trafficLight`, `computeCarryChain` y `computeSafeToSpend` según las fórmulas de `data-model.md` (arrastre derivado, `base = allocated + max(carryIn, 0)`, cargos de terceros excluidos) para pasar T068 y T069
-- [ ] T072 [US2] Implementar `daysUntilNextPayday` en `src/domain/periods.ts` para pasar T070
-- [ ] T073 [US2] Crear `src/features/safe-to-spend/useSafeToSpend.ts`: selector derivado sobre `useFinanceSnapshot()` (T158) (hoy en la zona horaria del usuario) que se recalcula al mutar cualquier gasto, ingreso o fijo, con `useMemo`
-- [ ] T074 [P] [US2] Crear `src/features/safe-to-spend/BucketCard.tsx` (saldo disponible con `<Money>`, barra de progreso, desglose arrastre/asignado/fijos pendientes y aplicados/manuales/aportaciones) y `TrafficLightBadge.tsx` (color + texto accesible, no solo color)
-- [ ] T075 [US2] Crear `src/app/(app)/dashboard/page.tsx`: tarjetas Needs y Wants, indicador de quincena actual, días al próximo pago, estados de carga (skeleton) y vacío (sin ingresos todavía), aviso de saldo negativo sin bloquear el registro (FR-021)
-- [ ] T076 [P] [US2] Añadir las cadenas EN/ES del namespace `dashboard` en `src/i18n/messages/en.json` y `src/i18n/messages/es.json`
-- [ ] T077 [US2] Escribir prueba e2e en `tests/e2e/us2-safe-to-spend.spec.ts`: en los proyectos `demo` el dashboard muestra saldos y color por bolsa con los datos ficticios (solo lectura; un intento de registrar un gasto muestra el toast sin cambiar nada); en los proyectos `live` registrar un gasto actualiza el saldo y el color sin recargar la página (FR-018)
+- [X] T071 [US2] Implementar `src/domain/safe-to-spend.ts` con `trafficLight`, `computeCarryChain` y `computeSafeToSpend` según las fórmulas de `data-model.md` (arrastre derivado, `base = allocated + max(carryIn, 0)`, cargos de terceros excluidos) para pasar T068 y T069
+- [X] T072 [US2] Implementar `daysUntilNextPayday` en `src/domain/periods.ts` para pasar T070
+- [X] T073 [US2] Crear `src/features/safe-to-spend/useSafeToSpend.ts`: selector derivado sobre `useFinanceSnapshot()` (T158) (hoy en la zona horaria del usuario) que se recalcula al mutar cualquier gasto, ingreso o fijo, con `useMemo`
+- [X] T074 [P] [US2] Crear `src/features/safe-to-spend/BucketCard.tsx` (saldo disponible con `<Money>`, barra de progreso, desglose arrastre/asignado/fijos pendientes y aplicados/manuales/aportaciones) y `TrafficLightBadge.tsx` (color + texto accesible, no solo color)
+- [X] T075 [US2] Crear `src/app/(app)/dashboard/page.tsx`: tarjetas Needs y Wants, indicador de quincena actual, días al próximo pago, estados de carga (skeleton) y vacío (sin ingresos todavía), aviso de saldo negativo sin bloquear el registro (FR-021)
+- [X] T076 [P] [US2] Añadir las cadenas EN/ES del namespace `dashboard` en `src/i18n/messages/en.json` y `src/i18n/messages/es.json`
+- [X] T077 [US2] Escribir prueba e2e en `tests/e2e/us2-safe-to-spend.spec.ts`: en los proyectos `demo` el dashboard muestra saldos y color por bolsa con los datos ficticios (solo lectura; un intento de registrar un gasto muestra el toast sin cambiar nada); en los proyectos `live` registrar un gasto actualiza el saldo y el color sin recargar la página (FR-018)
 
 **Checkpoint**: US1 + US2 funcionan; el dashboard refleja las asignaciones
 
@@ -209,8 +209,8 @@ Proyecto único Next.js (App Router), según plan.md: `src/app`, `src/domain`, `
 ### Implementation for User Story 4
 
 - [ ] T089 [US4] Implementar `cardStatus` en `src/domain/credit.ts` (`lastCutOff`, `nextPaymentDue`, `totalDebt` con el saldo completo de los MSI y `payToAvoidInterest` solo con las mensualidades del estado vigente, según FR-029) para pasar T087
-- [ ] T090 [P] [US4] Crear `src/features/expenses/schemas.ts` (Zod para T088) y `src/features/expenses/hooks.ts` (`useExpenses(range)`, `useCreateExpense`, `useUpdateExpense`, `useDeleteExpense`, `useCardPayments`, `useCreateCardPayment`) como selectores de `useFinanceSnapshot` y mutaciones con `updateSnapshot` (optimista); `bucket` hereda de la categoría de la subcategoría
-- [ ] T091 [US4] Crear `src/features/expenses/AddExpenseDialog.tsx`: monto, fecha (por defecto hoy), subcategoría agrupada por categoría, método de pago (cuentas del catálogo), nota; muestra la bolsa heredada como texto informativo; un gasto con fecha en una quincena anterior afecta a esa quincena (US4-2)
+- [ ] T090 [P] [US4] Crear `src/features/expenses/schemas.ts` (Zod para T088) y `src/features/expenses/hooks.ts` (`useExpenses(range)`, `useCreateExpense`, `useUpdateExpense`, `useDeleteExpense`, `useCardPayments`, `useCreateCardPayment`) como selectores de `useFinanceSnapshot` y mutaciones con `updateSnapshot` (optimista); `bucket` hereda de la categoría de la subcategoría — nota: adelantado parcialmente en la Fase 4 (esquema, hooks y `AddExpenseDialog` para el e2e T077); se cierra en esta fase junto con T088
+- [ ] T091 [US4] Crear `src/features/expenses/AddExpenseDialog.tsx`: monto, fecha (por defecto hoy), subcategoría agrupada por categoría, método de pago (cuentas del catálogo), nota; muestra la bolsa heredada como texto informativo; un gasto con fecha en una quincena anterior afecta a esa quincena (US4-2) — nota: adelantado parcialmente en la Fase 4 (esquema, hooks y `AddExpenseDialog` para el e2e T077); se cierra en esta fase junto con T088
 - [ ] T092 [US4] Crear `src/features/expenses/CardPaymentDialog.tsx` (liquidación de deuda con tarjeta, cuenta de origen opcional, fecha) y `src/app/(app)/expenses/page.tsx` con la lista de gastos y pagos, edición y eliminación
 - [ ] T164 [US4] Crear `src/features/expenses/CardDebtSummary.tsx` (por tarjeta: deuda total, pago para no generar intereses y fecha límite, vía `cardStatus`) y montarlo en `src/app/(app)/expenses/page.tsx` para que la deuda suba con una compra con tarjeta y baje con su pago (US4-4/5)
 - [ ] T093 [P] [US4] Añadir las cadenas EN/ES del namespace `expenses` en `src/i18n/messages/en.json` y `src/i18n/messages/es.json`

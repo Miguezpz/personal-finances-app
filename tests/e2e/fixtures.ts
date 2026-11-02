@@ -5,6 +5,8 @@
  * the real login form, deleted afterwards (all rows cascade). Needs the local credentials in the
  * environment — CI exports them; locally run `pnpm test:e2e:local`. Refuses any non-local URL.
  * `admin` lets a test assert what was persisted, independent of the UI language.
+ * `userClient` acts AS the owner (publishable key + password, RLS applies) to seed data the same
+ * way the app would.
  */
 import { createClient, type SupabaseClient } from "@supabase/supabase-js";
 import { test as base, expect, type Page } from "@playwright/test";
@@ -12,6 +14,7 @@ import type { Database } from "../../src/data/supabase/database.types";
 
 const url = process.env.NEXT_PUBLIC_SUPABASE_URL ?? "";
 const secretKey = process.env.SUPABASE_TEST_SECRET_KEY ?? "";
+const publishableKey = process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY ?? "";
 const isLocal = /^https?:\/\/(127\.0\.0\.1|localhost)(:\d+)?\/?$/.test(url);
 
 export interface Owner {
@@ -23,6 +26,7 @@ export interface Owner {
 type Fixtures = {
   admin: SupabaseClient<Database>;
   owner: Owner;
+  userClient: SupabaseClient<Database>;
   ownerPage: Page;
 };
 
@@ -51,6 +55,19 @@ export const test = base.extend<Fixtures>({
     if (error) throw error;
     await use({ id: data.user.id, email, password });
     await admin.auth.admin.deleteUser(data.user.id);
+  },
+
+  userClient: async ({ owner }, use) => {
+    const client = createClient<Database>(url, publishableKey, {
+      auth: { persistSession: false, autoRefreshToken: false },
+    });
+    const { error } = await client.auth.signInWithPassword({
+      email: owner.email,
+      password: owner.password,
+    });
+    if (error) throw error;
+    await use(client);
+    await client.auth.signOut();
   },
 
   ownerPage: async ({ page, owner }, use) => {

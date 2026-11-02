@@ -66,12 +66,16 @@ export interface SeedOptions {
   today: IsoDate;
   /** Months of history including the current one (demo: 6). */
   months?: number;
-  /** Average manual expenses per day (demo ≈ 1.2; perf tests use more). */
+  /**
+   * Average manual expenses per day (demo 1.55, calibrated so Needs and Wants hover around their
+   * allocation and the semáforo shows every color over time; perf tests use more).
+   */
   expensesPerDay?: number;
   seed?: number;
 }
 
 const DEFAULT_SEED = 20_261_101;
+const EPOCH = "2000-01-01" as IsoDate;
 const SALARY = cents(2_250_000); // $22,500.00 MXN per payday
 
 // ---------------------------------------------------------------------------
@@ -168,15 +172,15 @@ const PROFILES: readonly SpendProfile[] = [
   {
     nameKey: "taxonomy.restaurants",
     bucket: "wants",
-    weight: 3,
+    weight: 5.8,
     min: 250,
     max: 900,
     notes: ["Dinner with friends"],
   },
-  { nameKey: "taxonomy.coffee", bucket: "wants", weight: 4, min: 50, max: 150 },
-  { nameKey: "taxonomy.events", bucket: "wants", weight: 0.5, min: 400, max: 1500 },
-  { nameKey: "taxonomy.clothing", bucket: "wants", weight: 0.7, min: 400, max: 1800 },
-  { nameKey: "taxonomy.electronics", bucket: "wants", weight: 0.2, min: 800, max: 3500 },
+  { nameKey: "taxonomy.coffee", bucket: "wants", weight: 5.8, min: 50, max: 150 },
+  { nameKey: "taxonomy.events", bucket: "wants", weight: 1.2, min: 400, max: 1500 },
+  { nameKey: "taxonomy.clothing", bucket: "wants", weight: 1.4, min: 400, max: 1800 },
+  { nameKey: "taxonomy.electronics", bucket: "wants", weight: 0.45, min: 800, max: 3500 },
 ];
 
 const PAYMENT_METHODS = [
@@ -242,8 +246,7 @@ const RECURRING: readonly RecurringSpec[] = [
 // Generator
 // ---------------------------------------------------------------------------
 export function generateDemoSnapshot(options: SeedOptions): FinanceSnapshot {
-  const { today, months = 6, expensesPerDay = 1.2, seed = DEFAULT_SEED } = options;
-  const rng = mulberry32(seed);
+  const { today, months = 6, expensesPerDay = 1.55, seed = DEFAULT_SEED } = options;
   let counter = 0x10000;
   const nextId = () =>
     `00000000-0000-4000-8000-${(counter++).toString(16).padStart(12, "0")}` as Uuid;
@@ -349,10 +352,13 @@ export function generateDemoSnapshot(options: SeedOptions): FinanceSnapshot {
     }
   }
 
-  // --- Manual expenses: a binomial number per day with mean `expensesPerDay`
+  // --- Manual expenses: a binomial number per day with mean `expensesPerDay`. Each calendar day
+  // has its OWN generator (seeded by the date), so a given past day always shows the same
+  // expenses no matter which "today" the demo is generated for.
   const trials = Math.max(1, Math.ceil(expensesPerDay * 2));
   const p = expensesPerDay / trials;
   for (let d = rangeStart; d <= today; d = addDays(d, 1)) {
+    const rng = mulberry32(seed ^ Math.imul(daysBetween(EPOCH, d) + 1, 0x9e3779b1));
     for (let t = 0; t < trials; t++) {
       if (rng() >= p) continue;
       const profile = weightedPick(rng, PROFILES);

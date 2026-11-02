@@ -160,5 +160,53 @@
     "invalidDate": "Enter a valid date.",
     "invalidPeriod": "Choose a quincena.",
     "saveFailed": "The income couldn't be saved. Try again."
+  },
+  "dashboard": {
+    "title": "Dashboard",
+    "period": "Quincena {start} – {end}",
+    "paydayToday": "Payday is today",
+    "paydayIn": "{days, plural, one {# day} other {# days}} to payday",
+    "addExpense": "Add expense",
+    "safeToSpend": "Safe to spend",
+    "ofBasePrefix": "of",
+    "progressLabel": "{bucket} budget left",
+    "carryIn": "Carried over",
+    "allocated": "Allocated this quincena",
+    "fixedApplied": "Recurring charged",
+    "fixedPending": "Recurring pending",
+    "manual": "Expenses",
+    "goalContributions": "Set aside for goals",
+    "light": {
+      "green": "Healthy",
+      "yellow": "Watch it",
+      "red": "Low",
+      "neutral": "No budget"
+    },
+    "overspentTitle": "Over budget",
+    "overspentHint": "{buckets} went over budget. You can keep recording expenses; the deficit carries over to the next quincena.",
+    "emptyTitle": "No income yet",
+    "emptyHint": "Register your income to see how much is safe to spend this quincena.",
+    "registerIncome": "Register income",
+    "loadError": "Your balances couldn't be loaded."
+  },
+  "expenses": {
+    "addTitle": "Add expense",
+    "addDescription": "It's taken from Needs or Wants depending on its category.",
+    "amount": "Amount (MXN)",
+    "spentOn": "Date",
+    "subcategory": "Category",
+    "chooseSubcategory": "Choose a category",
+    "bucketHint": "Counts against {bucket}.",
+    "noCategoriesYet": "Your categories are being prepared — try again in a moment.",
+    "paymentMethod": "Paid with",
+    "noPaymentMethod": "Not specified",
+    "note": "Note (optional)",
+    "save": "Save expense",
+    "saved": "Expense saved.",
+    "saveFailed": "The expense couldn't be saved. Try again.",
+    "invalidAmount": "Enter an amount greater than 0 (e.g. 250.00).",
+    "invalidDate": "Enter a valid date.",
+    "subcategoryRequired": "Choose a category.",
+    "noteTooLong": "Use 200 characters or fewer."
   }
 }
