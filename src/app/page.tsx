@@ -1,8 +1,13 @@
-// Placeholder landing page. The real landing (login + "Explore Demo") is built in T052.
+import { redirect } from "next/navigation";
+import { Landing } from "@/features/auth/Landing";
+import { env } from "@/lib/env";
+
+/**
+ * Landing (T052): sign-in form + "Explore Demo / Recruiters". The demo deployment has no
+ * sign-in at all and goes straight to the dashboard (NEXT_PUBLIC_DEMO_MODE is a build-time
+ * constant, so this redirect is static).
+ */
 export default function Home() {
-  return (
-    <main className="flex flex-1 items-center justify-center p-4">
-      <h1 className="text-2xl font-semibold">Personal Finances</h1>
-    </main>
-  );
+  if (env.isDemo) redirect("/dashboard");
+  return <Landing demoUrl={env.demoUrl} />;
 }

@@ -13,7 +13,12 @@
     "test": "vitest run tests/unit --passWithNoTests",
     "test:watch": "vitest tests/unit",
     "test:contract": "vitest run tests/contract --passWithNoTests",
-    "test:e2e": "playwright test --pass-with-no-tests"
+    "test:contract:local": "node scripts/with-local-supabase.mjs pnpm test:contract",
+    "test:e2e": "playwright test --pass-with-no-tests",
+    "db:start": "supabase start -x realtime,storage-api,imgproxy,mailpit,edge-runtime,logflare,vector,supavisor",
+    "db:reset": "supabase db reset",
+    "db:test": "supabase test db",
+    "db:types": "supabase gen types typescript --local --schema public > src/data/supabase/database.types.ts && prettier --write src/data/supabase/database.types.ts"
   },
   "engines": {
     "node": ">=22"

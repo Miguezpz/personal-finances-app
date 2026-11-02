@@ -7,7 +7,7 @@
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
-  --font-sans: var(--font-sans);
+  --font-sans: var(--font-geist-sans);
   --font-mono: var(--font-geist-mono);
   --font-heading: var(--font-sans);
   --color-sidebar-ring: var(--sidebar-ring);
@@ -126,5 +126,16 @@
   }
   html {
     @apply font-sans;
+  }
+}
+
+/*
+ * Privacy mode (Principle V, FR-045). <Money> already renders "••••" when masked; the blur is a
+ * second line of defense for any amount-bearing element marked `.money` (chart labels, etc.).
+ */
+@layer base {
+  html[data-privacy="on"] .money {
+    filter: blur(6px);
+    user-select: none;
   }
 }
