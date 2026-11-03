@@ -202,6 +202,7 @@ export function RegisterIncomeDialog({ open, onOpenChange, income }: Props) {
               <FieldLabel htmlFor="income-amount">{t("amount")}</FieldLabel>
               <Input
                 id="income-amount"
+                data-money
                 inputMode="decimal"
                 autoComplete="off"
                 placeholder={t("amountPlaceholder")}

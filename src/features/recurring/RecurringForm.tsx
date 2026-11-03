@@ -141,6 +141,7 @@ export function RecurringForm({ open, onOpenChange, recurring }: Props) {
                 <FieldLabel htmlFor="recurring-amount">{t("amount")}</FieldLabel>
                 <Input
                   id="recurring-amount"
+                  data-money
                   inputMode="decimal"
                   autoComplete="off"
                   className="tabular-nums"

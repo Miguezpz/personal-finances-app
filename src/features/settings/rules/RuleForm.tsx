@@ -131,7 +131,11 @@ export function RuleForm({ current, rules, incomes, vehicles, today }: RuleFormP
               : t("effectiveTomorrow", { date: formatDate(effectiveFrom, locale) }),
           ),
         onError: (e) => {
-          if (isDemoReadOnlyError(e)) return; // global read-only toast
+          if (isDemoReadOnlyError(e)) {
+            // The global read-only toast explains it; show the stored values again.
+            form.reset();
+            return;
+          }
           toast.error(isProviderError(e, "CONFLICT") ? t("conflict") : tc("unexpectedError"));
         },
       },

@@ -116,12 +116,18 @@ export function parseEnv(raw: RawEnv): Env {
 }
 
 function readRawEnv(): RawEnv {
-  // Static references so Next can inline them into the client bundle.
+  // Static references so Next can inline them into the client bundle. In a demo build
+  // NEXT_PUBLIC_DEMO_MODE is the constant "true", so the minifier drops the Supabase branches:
+  // even if those variables are set on the demo deployment, they never reach its bundle
+  // (Principle IV, checked by scripts/check-demo-bundle.mjs).
+  const demo = process.env.NEXT_PUBLIC_DEMO_MODE === "true";
   return {
     NEXT_PUBLIC_DEMO_MODE: process.env.NEXT_PUBLIC_DEMO_MODE,
     NEXT_PUBLIC_DEMO_URL: process.env.NEXT_PUBLIC_DEMO_URL,
-    NEXT_PUBLIC_SUPABASE_URL: process.env.NEXT_PUBLIC_SUPABASE_URL,
-    NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY: process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY,
+    NEXT_PUBLIC_SUPABASE_URL: demo ? undefined : process.env.NEXT_PUBLIC_SUPABASE_URL,
+    NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY: demo
+      ? undefined
+      : process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY,
   };
 }
 

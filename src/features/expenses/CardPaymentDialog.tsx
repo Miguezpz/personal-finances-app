@@ -112,6 +112,7 @@ export function CardPaymentDialog({ open, onOpenChange, cardId, suggestedAmount 
                 <FieldLabel htmlFor="payment-amount">{t("amount")}</FieldLabel>
                 <Input
                   id="payment-amount"
+                  data-money
                   inputMode="decimal"
                   autoComplete="off"
                   className="tabular-nums"

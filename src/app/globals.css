@@ -138,4 +138,9 @@
     filter: blur(6px);
     user-select: none;
   }
+  /* Amount fields (prefilled when editing or suggested, e.g. a card's debt): hidden with privacy
+     on until focused, so they can still be edited (FR-045). */
+  html[data-privacy="on"] input[data-money]:not(:focus) {
+    filter: blur(5px);
+  }
 }

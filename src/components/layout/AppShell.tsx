@@ -20,8 +20,10 @@ import { useOnboarding } from "@/features/settings/onboarding";
 import { cn } from "@/lib/utils";
 import { useUi } from "@/store/ui";
 import { CurrencyToggle } from "./CurrencyToggle";
+import { DemoBanner } from "./DemoBanner";
 import { LanguageToggle } from "./LanguageToggle";
 import { NAV_ITEMS } from "./nav-items";
+import { PrivacyToggle } from "./PrivacyToggle";
 
 function NavLinks({ onNavigate }: { onNavigate?: () => void }) {
   const t = useTranslations("nav");
@@ -132,6 +134,7 @@ export function AppShell({ children, toolbar }: { children: ReactNode; toolbar?:
         <div className="ml-auto flex items-center gap-2">
           <LanguageToggle />
           <CurrencyToggle />
+          <PrivacyToggle />
           {toolbar}
           {canSignOut && (
             <Button variant="ghost" size="sm" onClick={() => void signOut()}>
@@ -142,6 +145,7 @@ export function AppShell({ children, toolbar }: { children: ReactNode; toolbar?:
         </div>
       </header>
 
+      <DemoBanner />
       <StatusBanners />
       <FxStatus />
       <BackgroundProcesses />

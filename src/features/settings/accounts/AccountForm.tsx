@@ -182,6 +182,7 @@ export function AccountForm({ open, onOpenChange, account, takenNames }: Props) 
               <FieldLabel htmlFor="account-opening">{t("openingBalance")}</FieldLabel>
               <Input
                 id="account-opening"
+                data-money
                 inputMode="decimal"
                 autoComplete="off"
                 className="tabular-nums"

@@ -74,7 +74,9 @@ function PreferencesForm({ settings }: { settings: UserSettings }) {
     update.mutate(values, {
       onSuccess: () => toast.success(t("preferencesSaved")),
       onError: (e) => {
-        if (!isDemoReadOnlyError(e)) toast.error(t("saveFailed"));
+        // In the demo the global toast explains it; show the stored values again.
+        if (isDemoReadOnlyError(e)) form.reset();
+        else toast.error(t("saveFailed"));
       },
     });
   }

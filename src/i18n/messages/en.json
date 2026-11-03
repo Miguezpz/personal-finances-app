@@ -522,5 +522,16 @@
     "exportFilteredCsv": "Filtered ledger (CSV)",
     "exportBackupZip": "Full backup (ZIP)",
     "exported": "Download started."
+  },
+  "privacy": {
+    "toggle": "Privacy mode",
+    "on": "Amounts hidden — click to show them",
+    "off": "Hide all amounts on this device"
+  },
+  "demo": {
+    "label": "Demo notice",
+    "banner": "You're exploring a read-only demo with fictitious data. Nothing you change is saved.",
+    "sourceCode": "View the source code",
+    "opensInNewTab": "(opens in a new tab)"
   }
 }

@@ -326,19 +326,19 @@ Proyecto único Next.js (App Router), según plan.md: `src/app`, `src/domain`, `
 
 ### Tests for User Story 9 ⚠️
 
-- [ ] T129 [P] [US9] Escribir prueba que falle en `tests/unit/components/money.test.tsx`: `<Money>` enmascara cuando `privacyMode` es true o cuando no está hidratado fuera de demo, no enmascara en demo sin privacidad, y el texto accesible es "••••"
-- [ ] T130 [P] [US9] Escribir prueba e2e en `tests/e2e/us9-demo.spec.ts` (proyecto `demo`): el botón de entrada lleva al dashboard, toda acción de crear/editar/eliminar muestra el toast de solo lectura sin cambiar datos, y un listener de red falla la prueba ante cualquier petición a `supabase.co`
-- [ ] T131 [P] [US9] Escribir prueba e2e en `tests/e2e/us9-privacy.spec.ts` (proyecto `demo`): con privacidad activa recorre todas las rutas de `(app)` y verifica que ningún texto con patrón de importe es legible (incluidos ejes y tooltips de gráficas) y que la preferencia persiste al recargar
-- [ ] T163 [P] [US9] Escribir prueba e2e en `tests/e2e/us9-demo-background.spec.ts` (proyectos `demo-en` y `demo-es`): al cargar cada ruta de `(app)` existente hasta ese momento (la cobertura completa llega con T162 y T161 en Polish) no aparece ningún toast ni error y no hay intentos de escritura automáticos; solo las acciones del usuario producen el toast de solo lectura
+- [X] T129 [P] [US9] Escribir prueba que falle en `tests/unit/components/money.test.tsx`: `<Money>` enmascara cuando `privacyMode` es true o cuando no está hidratado fuera de demo, no enmascara en demo sin privacidad, y el texto accesible es "••••"
+- [X] T130 [P] [US9] Escribir prueba e2e en `tests/e2e/us9-demo.spec.ts` (proyecto `demo`): el botón de entrada lleva al dashboard, toda acción de crear/editar/eliminar muestra el toast de solo lectura sin cambiar datos, y un listener de red falla la prueba ante cualquier petición a `supabase.co`
+- [X] T131 [P] [US9] Escribir prueba e2e en `tests/e2e/us9-privacy.spec.ts` (proyecto `demo`): con privacidad activa recorre todas las rutas de `(app)` y verifica que ningún texto con patrón de importe es legible (incluidos ejes y tooltips de gráficas) y que la preferencia persiste al recargar
+- [X] T163 [P] [US9] Escribir prueba e2e en `tests/e2e/us9-demo-background.spec.ts` (proyectos `demo-en` y `demo-es`): al cargar cada ruta de `(app)` existente hasta ese momento (la cobertura completa llega con T162 y T161 en Polish) no aparece ningún toast ni error y no hay intentos de escritura automáticos; solo las acciones del usuario producen el toast de solo lectura
 
 ### Implementation for User Story 9
 
-- [ ] T132 [US9] Crear `src/components/layout/PrivacyToggle.tsx` (control accesible con `aria-pressed` montado en el `AppShell`) y verificar que `<PreferencesEffects />` aplica `data-privacy`
-- [ ] T133 [US9] Crear `src/components/charts/MaskedAxis.tsx` y el hook de formateo de ejes y tooltips basado en `useMoneyFormatter` para que las gráficas (Recharts) muestren "••••" con privacidad activa; documentar en `src/components/charts/README.md` que los importes de gráficas deben pasar por él
-- [ ] T134 [US9] Crear `src/components/layout/DemoBanner.tsx` (aviso persistente de "demo de solo lectura" con enlace al repositorio) y comportamiento de entrada del demo: en `src/app/page.tsx` el botón "Explorar Demo / Reclutadores" apunta a `NEXT_PUBLIC_DEMO_URL` en el despliegue personal y a `/dashboard` en el demo
-- [ ] T135 [US9] Verificar el manejo global de escrituras en demo: añadir en `src/lib/query-client.ts` una prueba de que un `DemoReadOnlyError` en cualquier mutación produce un único toast, y bloquear en los formularios el envío visual (estado de envío se restablece sin error)
-- [ ] T136 [US9] Crear `scripts/check-demo-bundle.mjs` que tras `next build` con `NEXT_PUBLIC_DEMO_MODE=true` falla si el bundle del cliente contiene `supabase.co`, `@supabase` o claves; añadirlo a `package.json` como `check:demo-bundle` y al CI
-- [ ] T137 [P] [US9] Añadir las cadenas EN/ES del namespace `privacy` y `demo` en `src/i18n/messages/en.json` y `src/i18n/messages/es.json`
+- [X] T132 [US9] Crear `src/components/layout/PrivacyToggle.tsx` (control accesible con `aria-pressed` montado en el `AppShell`) y verificar que `<PreferencesEffects />` aplica `data-privacy`
+- [X] T133 [US9] Crear `src/components/charts/MaskedAxis.tsx` y el hook de formateo de ejes y tooltips basado en `useMoneyFormatter` para que las gráficas (Recharts) muestren "••••" con privacidad activa; documentar en `src/components/charts/README.md` que los importes de gráficas deben pasar por él
+- [X] T134 [US9] Crear `src/components/layout/DemoBanner.tsx` (aviso persistente de "demo de solo lectura" con enlace al repositorio) y comportamiento de entrada del demo: en `src/app/page.tsx` el botón "Explorar Demo / Reclutadores" apunta a `NEXT_PUBLIC_DEMO_URL` en el despliegue personal y a `/dashboard` en el demo
+- [X] T135 [US9] Verificar el manejo global de escrituras en demo: añadir en `src/lib/query-client.ts` una prueba de que un `DemoReadOnlyError` en cualquier mutación produce un único toast, y bloquear en los formularios el envío visual (estado de envío se restablece sin error)
+- [X] T136 [US9] Crear `scripts/check-demo-bundle.mjs` que tras `next build` con `NEXT_PUBLIC_DEMO_MODE=true` falla si el bundle del cliente contiene `supabase.co`, `@supabase` o claves; añadirlo a `package.json` como `check:demo-bundle` y al CI
+- [X] T137 [P] [US9] Añadir las cadenas EN/ES del namespace `privacy` y `demo` en `src/i18n/messages/en.json` y `src/i18n/messages/es.json`
 
 **Checkpoint**: privacidad y demo verificados con pruebas automáticas
 

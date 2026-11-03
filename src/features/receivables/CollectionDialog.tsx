@@ -135,6 +135,7 @@ export function CollectionDialog({ open, onOpenChange, installment, debtorName, 
                 <FieldLabel htmlFor="collection-amount">{t("collectedAmount")}</FieldLabel>
                 <Input
                   id="collection-amount"
+                  data-money
                   inputMode="decimal"
                   autoComplete="off"
                   className="tabular-nums"

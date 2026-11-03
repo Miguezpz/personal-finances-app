@@ -200,6 +200,7 @@ export function AddReceivableDialog({ open, onOpenChange }: Props) {
                 <FieldLabel htmlFor="receivable-total">{t("total")}</FieldLabel>
                 <Input
                   id="receivable-total"
+                  data-money
                   inputMode="decimal"
                   autoComplete="off"
                   className="tabular-nums"

@@ -522,5 +522,16 @@
     "exportFilteredCsv": "Bitácora filtrada (CSV)",
     "exportBackupZip": "Respaldo completo (ZIP)",
     "exported": "Descarga iniciada."
+  },
+  "privacy": {
+    "toggle": "Modo privacidad",
+    "on": "Montos ocultos — haz clic para mostrarlos",
+    "off": "Ocultar todos los montos en este dispositivo"
+  },
+  "demo": {
+    "label": "Aviso del demo",
+    "banner": "Estás explorando un demo de solo lectura con datos ficticios. Nada de lo que cambies se guarda.",
+    "sourceCode": "Ver el código fuente",
+    "opensInNewTab": "(se abre en una pestaña nueva)"
   }
 }

@@ -119,6 +119,7 @@ export function AddExpenseDialog({ open, onOpenChange, expense }: Props) {
               <FieldLabel htmlFor="expense-amount">{t("amount")}</FieldLabel>
               <Input
                 id="expense-amount"
+                data-money
                 inputMode="decimal"
                 autoComplete="off"
                 autoFocus

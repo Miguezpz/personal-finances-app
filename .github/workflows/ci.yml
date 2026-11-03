@@ -66,9 +66,11 @@ jobs:
         run: pnpm build
         env:
           NEXT_PUBLIC_DEMO_MODE: "true"
-      - name: Check demo bundle
-        # Script is added in T136; until then this step is a no-op.
-        run: pnpm run --if-present check:demo-bundle
+          # Canaries: even with Supabase variables set on the deployment, none may reach the bundle.
+          NEXT_PUBLIC_SUPABASE_URL: https://ci-canary-project.supabase.co
+          NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY: sb_publishable_ci-canary-not-a-real-key
+      - name: Check demo bundle (T136)
+        run: pnpm check:demo-bundle
 
   # ---------------------------------------------------------------------------
   # Everything that needs local Supabase: pgTAP, DataProvider contract, e2e matrix
