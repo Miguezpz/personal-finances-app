@@ -58,7 +58,7 @@ Requirements: Node.js 22, pnpm, and Docker for the local database.
 pnpm install
 
 # Demo mode — no database needed
-NEXT_PUBLIC_DEMO_MODE=true pnpm dev            # http://localhost:3000
+pnpm dev:demo                                  # http://localhost:3000
 
 # Personal mode against a LOCAL Supabase
 pnpm db:start                                  # prints the local URL and publishable key

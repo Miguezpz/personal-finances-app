@@ -24,7 +24,7 @@ Copiar `.env.example` a `.env.local` (ignorado por git). Variables:
 
 ```bash
 pnpm install
-NEXT_PUBLIC_DEMO_MODE=true pnpm dev        # http://localhost:3000
+pnpm dev:demo                              # http://localhost:3000
 ```
 
 Verificar:
