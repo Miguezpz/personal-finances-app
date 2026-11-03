@@ -20,6 +20,7 @@ import { useOnboarding } from "@/features/settings/onboarding";
 import { cn } from "@/lib/utils";
 import { useUi } from "@/store/ui";
 import { CurrencyToggle } from "./CurrencyToggle";
+import { LanguageToggle } from "./LanguageToggle";
 import { NAV_ITEMS } from "./nav-items";
 
 function NavLinks({ onNavigate }: { onNavigate?: () => void }) {
@@ -125,10 +126,11 @@ export function AppShell({ children, toolbar }: { children: ReactNode; toolbar?:
 
         <Link href="/dashboard" className="flex items-center gap-2 font-semibold">
           <Wallet aria-hidden="true" className="size-5" />
-          <span className="truncate">{tc("appName")}</span>
+          <span className="hidden truncate sm:inline">{tc("appName")}</span>
         </Link>
 
         <div className="ml-auto flex items-center gap-2">
+          <LanguageToggle />
           <CurrencyToggle />
           {toolbar}
           {canSignOut && (

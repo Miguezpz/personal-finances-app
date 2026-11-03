@@ -4,6 +4,7 @@ import { ArrowRight, Wallet } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { LanguageToggle } from "@/components/layout/LanguageToggle";
 import { LoginForm } from "./LoginForm";
 
 interface LandingProps {
@@ -16,7 +17,8 @@ export function Landing({ demoUrl }: LandingProps) {
   const tc = useTranslations("common");
 
   return (
-    <main className="flex flex-1 items-center justify-center px-4 py-10">
+    <main className="relative flex flex-1 items-center justify-center px-4 py-10">
+      <LanguageToggle className="absolute top-4 right-4" />
       <div className="flex w-full max-w-md flex-col gap-6">
         <header className="flex flex-col items-center gap-3 text-center">
           <span className="flex size-12 items-center justify-center rounded-xl bg-primary text-primary-foreground">

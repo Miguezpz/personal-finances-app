@@ -15,8 +15,9 @@ const geistMono = Geist_Mono({
   subsets: ["latin"],
 });
 
+// No static `title`: it follows the language (DocumentTitle in providers.tsx; the inline boot
+// script sets it before the first paint).
 export const metadata: Metadata = {
-  title: "Personal Finances",
   description:
     "Zero-cost personal finance tracker with automatic income splitting and a semi-monthly Safe-to-Spend.",
 };

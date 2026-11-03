@@ -278,15 +278,15 @@ Proyecto único Next.js (App Router), según plan.md: `src/app`, `src/domain`, `
 
 ### Tests for User Story 7 ⚠️
 
-- [ ] T113 [P] [US7] Escribir prueba que falle en `tests/unit/i18n/parity.test.ts`: `en.json` y `es.json` tienen exactamente las mismas claves, ninguna cadena vacía y los mismos marcadores de interpolación
-- [ ] T114 [P] [US7] Escribir prueba que falle en `tests/unit/i18n/format.test.ts`: `formatMoney`, `formatDate` y `formatPercent` siguen las convenciones de `en-US` y `es-MX`
+- [X] T113 [P] [US7] Escribir prueba que falle en `tests/unit/i18n/parity.test.ts`: `en.json` y `es.json` tienen exactamente las mismas claves, ninguna cadena vacía y los mismos marcadores de interpolación
+- [X] T114 [P] [US7] Escribir prueba que falle en `tests/unit/i18n/format.test.ts`: `formatMoney`, `formatDate` y `formatPercent` siguen las convenciones de `en-US` y `es-MX`
 
 ### Implementation for User Story 7
 
-- [ ] T115 [US7] Completar `src/i18n/messages/en.json` y `src/i18n/messages/es.json` con todos los namespaces restantes (navegación, errores de validación, toasts, estados vacíos, nombres de categorías por defecto vía `name_key`) hasta que T113 pase
-- [ ] T116 [US7] Crear `src/components/layout/LanguageToggle.tsx` (interruptor EN/ES en el `AppShell` que llama `setLocale`) y asegurar que `NextIntlClientProvider` en `src/app/providers.tsx` reacciona al locale del store sin remontar las páginas
-- [ ] T117 [US7] Verificar y completar el formato por idioma en `src/i18n/format.ts` (números, divisa, fechas) y reemplazar cualquier cadena literal restante en `src/**/*.tsx` por claves de traducción; añadir en `eslint.config.mjs` una regla contra texto literal en JSX
-- [ ] T118 [US7] Escribir prueba e2e en `tests/e2e/us7-language.spec.ts` (proyecto `demo`): inicia en EN, cambia a ES sin recarga, un formulario a medias conserva su contenido (también al cambiar la divisa de visualización con el formulario abierto), persiste tras recargar y las cookies hacen que el HTML inicial salga en ES
+- [X] T115 [US7] Completar `src/i18n/messages/en.json` y `src/i18n/messages/es.json` con todos los namespaces restantes (navegación, errores de validación, toasts, estados vacíos, nombres de categorías por defecto vía `name_key`) hasta que T113 pase — nota: completo para todas las pantallas existentes; las historias pendientes (US8–US10) añaden su namespace y la regla `react/jsx-no-literals` impide texto sin traducir
+- [X] T116 [US7] Crear `src/components/layout/LanguageToggle.tsx` (interruptor EN/ES en el `AppShell` que llama `setLocale`) y asegurar que `NextIntlClientProvider` en `src/app/providers.tsx` reacciona al locale del store sin remontar las páginas
+- [X] T117 [US7] Verificar y completar el formato por idioma en `src/i18n/format.ts` (números, divisa, fechas) y reemplazar cualquier cadena literal restante en `src/**/*.tsx` por claves de traducción; añadir en `eslint.config.mjs` una regla contra texto literal en JSX
+- [X] T118 [US7] Escribir prueba e2e en `tests/e2e/us7-language.spec.ts` (proyecto `demo`): inicia en EN, cambia a ES sin recarga, un formulario a medias conserva su contenido (también al cambiar la divisa de visualización con el formulario abierto), persiste tras recargar y las cookies hacen que el HTML inicial salga en ES
 
 **Checkpoint**: bilingüismo completo
 

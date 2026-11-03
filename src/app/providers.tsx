@@ -27,6 +27,14 @@ import { useUi } from "@/store/ui";
 
 const DEMO_TOAST_ID = "demo-read-only";
 
+/**
+ * Browser tab title in the active language. Rendered as a React 19 <title> (hoisted to <head>);
+ * the root layout has no static title because Next streams metadata and would overwrite it.
+ */
+function DocumentTitle() {
+  return <title>{useTranslations("common")("appName")}</title>;
+}
+
 function PreferencesGate({ children }: { children: ReactNode }) {
   const hydrated = usePreferences(selectHydrated);
   return hydrated ? children : <BootSkeleton />;
@@ -65,6 +73,7 @@ export function Providers({ children }: { children: ReactNode }) {
       <PreferencesGate>
         <IntlProvider>
           <DemoToastBridge />
+          <DocumentTitle />
           <DataProviderProvider fallback={<BootSkeleton />}>{children}</DataProviderProvider>
           <Toaster position="top-center" />
         </IntlProvider>

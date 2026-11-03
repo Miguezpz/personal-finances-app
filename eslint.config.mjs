@@ -119,6 +119,21 @@ const eslintConfig = defineConfig([
     },
   },
   {
+    // Principle VI / FR-039: every visible text comes from the EN/ES dictionaries (T117).
+    // Only punctuation and symbols may be written literally in JSX.
+    files: ["src/**/*.tsx"],
+    rules: {
+      "react/jsx-no-literals": [
+        "error",
+        {
+          noStrings: true,
+          ignoreProps: true,
+          allowedStrings: ["·", " · ", "%", "#", "—", "–", "…", ":", "•", "+", "-", "/", "(", ")"],
+        },
+      ],
+    },
+  },
+  {
     files: ["src/data/supabase/**/*.{ts,tsx}"],
     rules: { "no-restricted-imports": "off" },
   },

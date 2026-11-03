@@ -16,7 +16,13 @@
     "notFoundTitle": "Page not found",
     "notFoundHint": "The page you're looking for doesn't exist or was moved.",
     "goHome": "Go to the start",
-    "comingSoon": "This section is on its way."
+    "comingSoon": "This section is on its way.",
+    "close": "Close",
+    "language": "Language",
+    "languageName": {
+      "en": "English",
+      "es": "Español"
+    }
   },
   "nav": {
     "label": "Main navigation",
