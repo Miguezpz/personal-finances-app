@@ -26,15 +26,9 @@ export function bps(value: number): BasisPoints {
   return value as BasisPoints;
 }
 
-export function isCents(value: unknown): value is Cents {
-  return typeof value === "number" && Number.isSafeInteger(value);
-}
-
 export const addCents = (a: Cents, b: Cents): Cents => cents(a + b);
 export const subCents = (a: Cents, b: Cents): Cents => cents(a - b);
 export const negateCents = (a: Cents): Cents => cents(a === 0 ? 0 : -a);
-export const maxCents = (a: Cents, b: Cents): Cents => (a >= b ? a : b);
-export const minCents = (a: Cents, b: Cents): Cents => (a <= b ? a : b);
 
 export function sumCents(values: Iterable<Cents>): Cents {
   let total = 0;

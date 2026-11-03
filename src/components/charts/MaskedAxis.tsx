@@ -8,7 +8,7 @@
  * Chart values are MXN cents (the source of truth), like everywhere else.
  */
 import { type ComponentProps, useCallback } from "react";
-import { Tooltip, XAxis, type XAxisProps, YAxis, type YAxisProps } from "recharts";
+import { Tooltip, YAxis, type YAxisProps } from "recharts";
 import { useMoneyFormatter } from "@/components/money/Money";
 import type { Cents } from "@/domain/types";
 
@@ -33,12 +33,6 @@ export function useChartMoney(): ChartMoney {
 export function MaskedYAxis(props: Omit<YAxisProps, "tickFormatter">) {
   const { tick } = useChartMoney();
   return <YAxis {...props} tickFormatter={(v: number) => tick(v)} />;
-}
-
-/** X axis whose ticks are money (e.g. horizontal bar charts). */
-export function MaskedXAxis(props: Omit<XAxisProps, "tickFormatter">) {
-  const { tick } = useChartMoney();
-  return <XAxis {...props} tickFormatter={(v: number) => tick(v)} />;
 }
 
 /** Tooltip whose values are money; series names pass through unchanged. */

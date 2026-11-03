@@ -29,16 +29,6 @@ export function useFinanceSnapshot<T>(select?: (snapshot: FinanceSnapshot) => T)
 export const selectSettings = (s: FinanceSnapshot) => s.settings;
 export const selectAccounts = (s: FinanceSnapshot) => s.accounts;
 export const selectRules = (s: FinanceSnapshot) => s.rules;
-export const selectCategories = (s: FinanceSnapshot) => s.categories;
-export const selectSubcategories = (s: FinanceSnapshot) => s.subcategories;
-export const selectIncomes = (s: FinanceSnapshot) => s.incomes;
-export const selectAllocations = (s: FinanceSnapshot) => s.allocations;
 export const selectRecurring = (s: FinanceSnapshot) => s.recurring;
 export const selectExpenses = (s: FinanceSnapshot) => s.expenses;
 export const selectCardPayments = (s: FinanceSnapshot) => s.cardPayments;
-export const selectDebtors = (s: FinanceSnapshot) => s.debtors;
-export const selectReceivables = (s: FinanceSnapshot) => s.receivables;
-export const selectInstallments = (s: FinanceSnapshot) => s.installments;
-export const selectGoals = (s: FinanceSnapshot) => s.goals;
-export const selectContributions = (s: FinanceSnapshot) => s.contributions;
-export const selectNetWorthSnapshots = (s: FinanceSnapshot) => s.netWorthSnapshots;

@@ -38,7 +38,7 @@ import { NativeSelect, NativeSelectOption } from "@/components/ui/native-select"
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Label } from "@/components/ui/label";
 import { useFinanceSnapshot } from "@/data/useFinanceSnapshot";
-import { isDemoReadOnlyError } from "@/data/errors";
+import { isNotifiedGlobally } from "@/data/errors";
 import { isIsoDate } from "@/domain/dates";
 import { formatCentsAsInput, parseMoneyInput } from "@/domain/parse";
 import { fundedPeriodFor, nextPeriod, previousPeriod, periodOf } from "@/domain/periods";
@@ -163,7 +163,7 @@ export function RegisterIncomeDialog({ open, onOpenChange, income }: Props) {
     const callbacks = {
       onSuccess: () => toast.success(t("saved")),
       onError: (e: Error) => {
-        if (!isDemoReadOnlyError(e)) toast.error(t("saveFailed"));
+        if (!isNotifiedGlobally(e)) toast.error(t("saveFailed"));
       },
     };
     if (income) replace.mutate({ id: income.id, input }, callbacks);

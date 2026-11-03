@@ -14,11 +14,13 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
-import { isDemoReadOnlyError } from "@/data/errors";
+import { isNotifiedGlobally } from "@/data/errors";
 import { parseIsoDate } from "@/domain/dates";
 import { emergencyFundProgress } from "@/domain/goals";
 import type { Cents, Goal, GoalContribution } from "@/domain/types";
+import { formatNumber } from "@/i18n/format";
 import { useToday } from "@/lib/use-today";
+import { selectLocale, usePreferences } from "@/store/preferences";
 import { GoalForm } from "./GoalForm";
 import { useGoalData, useUpdateGoal } from "./hooks";
 
@@ -42,6 +44,7 @@ export function GoalsPage() {
   const t = useTranslations("goals");
   const tb = useTranslations("buckets");
   const tc = useTranslations("common");
+  const locale = usePreferences(selectLocale);
   const today = useToday();
   const { data } = useGoalData();
   const update = useUpdateGoal();
@@ -51,7 +54,7 @@ export function GoalsPage() {
   });
 
   const onError = (e: Error) => {
-    if (!isDemoReadOnlyError(e)) toast.error(tc("unexpectedError"));
+    if (!isNotifiedGlobally(e)) toast.error(tc("unexpectedError"));
   };
   const toggleArchived = (g: Goal) =>
     update.mutate(
@@ -156,7 +159,7 @@ export function GoalsPage() {
                       />
                       <p className="text-sm font-medium" data-testid="months-covered">
                         {t("monthsCovered", {
-                          covered: p.monthsCovered,
+                          covered: formatNumber(p.monthsCovered, locale),
                           target: g.targetMonths ?? 0,
                         })}
                       </p>

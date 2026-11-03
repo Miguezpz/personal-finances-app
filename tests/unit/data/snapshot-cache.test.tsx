@@ -9,7 +9,7 @@ import type { ReactNode } from "react";
 import { describe, expect, it, vi } from "vitest";
 import { DataProviderProvider } from "@/data/context";
 import { createMockProvider } from "@/data/mock/provider";
-import { DemoReadOnlyError, type DataProvider } from "@/data/provider";
+import { DemoReadOnlyError, ProviderError, type DataProvider } from "@/data/provider";
 import { queryKeys } from "@/data/query-keys";
 import { useSnapshotMutation } from "@/data/snapshot-cache";
 import { selectExpenses, useFinanceSnapshot } from "@/data/useFinanceSnapshot";
@@ -118,6 +118,26 @@ describe("useSnapshotMutation / updateSnapshot", () => {
     await waitFor(() => expect(result.current.add.isError).toBe(true));
     expect(result.current.add.error).toBeInstanceOf(DemoReadOnlyError);
     expect(result.current.expenses.data).toEqual([existing]);
+  });
+
+  it("offline: fails at once with OFFLINE, sends nothing and shows nothing optimistic", async () => {
+    const existing = makeExpense();
+    const { wrapper } = setup(emptySnapshot({ expenses: [existing] }));
+    const write = vi.fn(async (e: Expense) => e);
+    const { result } = renderHook(() => useHarness(write), { wrapper });
+    await waitFor(() => expect(result.current.expenses.data).toEqual([existing]));
+
+    const onLine = vi.spyOn(navigator, "onLine", "get").mockReturnValue(false);
+    try {
+      act(() => result.current.add.mutate(makeExpense()));
+      await waitFor(() => expect(result.current.add.isError).toBe(true));
+      expect(result.current.add.error).toBeInstanceOf(ProviderError);
+      expect((result.current.add.error as ProviderError).code).toBe("OFFLINE");
+      expect(write).not.toHaveBeenCalled();
+      expect(result.current.expenses.data).toEqual([existing]);
+    } finally {
+      onLine.mockRestore();
+    }
   });
 
   it("does nothing optimistic before the snapshot has loaded", async () => {

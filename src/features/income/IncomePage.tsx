@@ -22,7 +22,7 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { Skeleton } from "@/components/ui/skeleton";
-import { isDemoReadOnlyError } from "@/data/errors";
+import { isNotifiedGlobally } from "@/data/errors";
 import { useFinanceSnapshot } from "@/data/useFinanceSnapshot";
 import type { FinanceSnapshot, Income, IncomeAllocation } from "@/domain/types";
 import { formatDate } from "@/i18n/format";
@@ -128,7 +128,7 @@ export function IncomePage() {
     deleteIncome.mutate(toDelete.id, {
       onSuccess: () => toast.success(t("deleted")),
       onError: (e) => {
-        if (!isDemoReadOnlyError(e)) toast.error(tc("unexpectedError"));
+        if (!isNotifiedGlobally(e)) toast.error(tc("unexpectedError"));
       },
     });
     setToDelete(null);

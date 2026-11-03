@@ -20,7 +20,7 @@ import {
 import { Field, FieldDescription, FieldError, FieldGroup, FieldLabel } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
 import { NativeSelect, NativeSelectOption } from "@/components/ui/native-select";
-import { isDemoReadOnlyError } from "@/data/errors";
+import { isNotifiedGlobally } from "@/data/errors";
 import { useFinanceSnapshot } from "@/data/useFinanceSnapshot";
 import { formatCentsAsInput } from "@/domain/parse";
 import type { FinanceSnapshot, RecurringExpense, Uuid } from "@/domain/types";
@@ -90,7 +90,7 @@ export function RecurringForm({ open, onOpenChange, recurring }: Props) {
     const callbacks = {
       onSuccess: () => toast.success(t("saved")),
       onError: (e: Error) => {
-        if (!isDemoReadOnlyError(e)) toast.error(t("saveFailed"));
+        if (!isNotifiedGlobally(e)) toast.error(t("saveFailed"));
       },
     };
     if (recurring) {

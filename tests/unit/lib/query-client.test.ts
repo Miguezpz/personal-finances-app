@@ -34,4 +34,13 @@ describe("createQueryClient · demo read-only writes", () => {
     await run(client, () => Promise.resolve("ok"));
     expect(onDemoReadOnly).not.toHaveBeenCalled();
   });
+
+  it("an OFFLINE write notifies the offline notice once (not the demo one)", async () => {
+    const onDemoReadOnly = vi.fn();
+    const onOffline = vi.fn();
+    const client = createQueryClient({ onDemoReadOnly, onOffline });
+    await run(client, () => Promise.reject(new ProviderError("OFFLINE", "no connection")));
+    expect(onOffline).toHaveBeenCalledTimes(1);
+    expect(onDemoReadOnly).not.toHaveBeenCalled();
+  });
 });

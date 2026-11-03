@@ -43,9 +43,8 @@ jobs:
         run: pnpm format:check
       - name: Unit tests (Vitest)
         run: pnpm test
-      - name: No file uploads (FR-044)
-        # Script is added in T160; until then this step is a no-op.
-        run: pnpm run --if-present check:no-uploads
+      - name: No file uploads (FR-044, T160)
+        run: pnpm check:no-uploads
 
   # ---------------------------------------------------------------------------
   # Demo build must not contain Supabase code or keys (Principle IV)

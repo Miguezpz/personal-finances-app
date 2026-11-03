@@ -7,8 +7,6 @@ import type { Locale } from "@/domain/types";
 import en from "./messages/en.json";
 import es from "./messages/es.json";
 
-export const DEFAULT_LOCALE: Locale = "en";
-
 export type Messages = typeof en;
 
 export const MESSAGES: Record<Locale, Messages> = { en, es };

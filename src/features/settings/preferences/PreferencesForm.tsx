@@ -16,7 +16,7 @@ import { Field, FieldDescription, FieldError, FieldGroup, FieldLabel } from "@/c
 import { Input } from "@/components/ui/input";
 import { NativeSelect, NativeSelectOption } from "@/components/ui/native-select";
 import { Skeleton } from "@/components/ui/skeleton";
-import { isDemoReadOnlyError } from "@/data/errors";
+import { isNotifiedGlobally } from "@/data/errors";
 import { formatBpsAsPercentInput } from "@/domain/parse";
 import type { UserSettings } from "@/domain/types";
 import { SettingsHeader } from "../SettingsHeader";
@@ -75,7 +75,7 @@ function PreferencesForm({ settings }: { settings: UserSettings }) {
       onSuccess: () => toast.success(t("preferencesSaved")),
       onError: (e) => {
         // In the demo the global toast explains it; show the stored values again.
-        if (isDemoReadOnlyError(e)) form.reset();
+        if (isNotifiedGlobally(e)) form.reset();
         else toast.error(t("saveFailed"));
       },
     });

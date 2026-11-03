@@ -2,8 +2,8 @@
 
 Every chart amount must go through this folder (FR-045, Principle V):
 
-- Axis ticks: `<MaskedYAxis />` / `<MaskedXAxis />` instead of Recharts' `YAxis` / `XAxis` when the
-  axis shows money.
+- Axis ticks: `<MaskedYAxis />` instead of Recharts' `YAxis` when the axis shows money (a money X
+  axis would wrap `XAxis` the same way).
 - Tooltips: `<MaskedTooltip />` instead of `Tooltip`.
 - Anything else (labels, legends, custom tooltip content): `useChartMoney()` → `tick(cents)` or
   `tooltip(cents)`.

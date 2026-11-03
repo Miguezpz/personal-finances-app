@@ -1,13 +1,23 @@
 /**
- * Bridge between the QueryClient (created outside React) and the translated toast shown when the
- * read-only demo rejects a write (FR-047). The UI registers the notifier; the MutationCache calls it.
+ * Bridge between the QueryClient (created outside React) and the translated toasts shown when a
+ * write can't happen: the read-only demo (FR-047) or no connection. The UI registers the
+ * notifiers; the MutationCache calls them.
  */
-let notifier: (() => void) | null = null;
+let demoNotifier: (() => void) | null = null;
+let offlineNotifier: (() => void) | null = null;
 
 export function setDemoReadOnlyNotifier(fn: (() => void) | null): void {
-  notifier = fn;
+  demoNotifier = fn;
 }
 
 export function notifyDemoReadOnly(): void {
-  notifier?.();
+  demoNotifier?.();
+}
+
+export function setOfflineNotifier(fn: (() => void) | null): void {
+  offlineNotifier = fn;
+}
+
+export function notifyOffline(): void {
+  offlineNotifier?.();
 }

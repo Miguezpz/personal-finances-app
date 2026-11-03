@@ -19,13 +19,19 @@ import { Toaster } from "@/components/ui/sonner";
 import { DataProviderProvider } from "@/data/context";
 import { DEFAULT_TIMEZONE } from "@/domain/settings";
 import { MESSAGES } from "@/i18n/config";
-import { notifyDemoReadOnly, setDemoReadOnlyNotifier } from "@/lib/demo-notice";
+import {
+  notifyDemoReadOnly,
+  notifyOffline,
+  setDemoReadOnlyNotifier,
+  setOfflineNotifier,
+} from "@/lib/demo-notice";
 import { createQueryClient } from "@/lib/query-client";
 import { PreferencesEffects } from "@/store/effects";
 import { selectHydrated, selectLocale, usePreferences } from "@/store/preferences";
 import { useUi } from "@/store/ui";
 
 const DEMO_TOAST_ID = "demo-read-only";
+const OFFLINE_TOAST_ID = "offline";
 
 /**
  * Browser tab title in the active language. Rendered as a React 19 <title> (hoisted to <head>);
@@ -49,12 +55,16 @@ function IntlProvider({ children }: { children: ReactNode }) {
   );
 }
 
-/** Lets the QueryClient (created outside React) show a translated, de-duplicated toast. */
+/** Lets the QueryClient (created outside React) show translated, de-duplicated toasts. */
 function DemoToastBridge() {
   const t = useTranslations("common");
   useEffect(() => {
     setDemoReadOnlyNotifier(() => toast.info(t("demoReadOnly"), { id: DEMO_TOAST_ID }));
-    return () => setDemoReadOnlyNotifier(null);
+    setOfflineNotifier(() => toast.warning(t("offline"), { id: OFFLINE_TOAST_ID }));
+    return () => {
+      setDemoReadOnlyNotifier(null);
+      setOfflineNotifier(null);
+    };
   }, [t]);
   return null;
 }
@@ -63,6 +73,7 @@ export function Providers({ children }: { children: ReactNode }) {
   const [queryClient] = useState(() =>
     createQueryClient({
       onDemoReadOnly: notifyDemoReadOnly,
+      onOffline: notifyOffline,
       onWakingChange: (waking) => useUi.getState().setWaking(waking),
     }),
   );

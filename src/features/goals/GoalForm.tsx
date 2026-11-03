@@ -20,7 +20,7 @@ import {
 import { Field, FieldDescription, FieldError, FieldGroup, FieldLabel } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
 import { NativeSelect, NativeSelectOption } from "@/components/ui/native-select";
-import { isDemoReadOnlyError } from "@/data/errors";
+import { isNotifiedGlobally } from "@/data/errors";
 import { suggestedMonthly } from "@/domain/goals";
 import { formatCentsAsInput, parseMoneyInput } from "@/domain/parse";
 import type { Goal, GoalKind } from "@/domain/types";
@@ -87,7 +87,7 @@ export function GoalForm({ open, onOpenChange, goal }: Props) {
     const callbacks = {
       onSuccess: () => toast.success(t("saved")),
       onError: (e: Error) => {
-        if (!isDemoReadOnlyError(e)) toast.error(t("saveFailed"));
+        if (!isNotifiedGlobally(e)) toast.error(t("saveFailed"));
       },
     };
     if (goal) {

@@ -21,7 +21,7 @@ import {
 import { Field, FieldError, FieldGroup, FieldLabel } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
 import { NativeSelect, NativeSelectOption } from "@/components/ui/native-select";
-import { isDemoReadOnlyError } from "@/data/errors";
+import { isNotifiedGlobally } from "@/data/errors";
 import { useFinanceSnapshot } from "@/data/useFinanceSnapshot";
 import { formatCentsAsInput } from "@/domain/parse";
 import type { Cents, FinanceSnapshot, Uuid } from "@/domain/types";
@@ -71,7 +71,7 @@ export function CardPaymentDialog({ open, onOpenChange, cardId, suggestedAmount 
     createPayment.mutate(values, {
       onSuccess: () => toast.success(t("paymentSaved")),
       onError: (e) => {
-        if (!isDemoReadOnlyError(e)) toast.error(t("saveFailed"));
+        if (!isNotifiedGlobally(e)) toast.error(t("saveFailed"));
       },
     });
     onOpenChange(false);

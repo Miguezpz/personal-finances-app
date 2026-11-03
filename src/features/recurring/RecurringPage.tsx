@@ -21,7 +21,7 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { Skeleton } from "@/components/ui/skeleton";
-import { isDemoReadOnlyError } from "@/data/errors";
+import { isNotifiedGlobally } from "@/data/errors";
 import { useFinanceSnapshot } from "@/data/useFinanceSnapshot";
 import { maxIsoDate } from "@/domain/dates";
 import { nextChargeDate } from "@/domain/recurring";
@@ -57,7 +57,7 @@ export function RecurringPage() {
   const [toDelete, setToDelete] = useState<RecurringExpense | null>(null);
 
   const onError = (e: Error) => {
-    if (!isDemoReadOnlyError(e)) toast.error(tc("unexpectedError"));
+    if (!isNotifiedGlobally(e)) toast.error(tc("unexpectedError"));
   };
   const isPaused = (r: RecurringExpense) => r.endedOn !== null;
   const sorted = [...(recurring ?? [])].sort((a, b) =>

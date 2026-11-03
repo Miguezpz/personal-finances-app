@@ -31,7 +31,7 @@ import {
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
-import { isDemoReadOnlyError } from "@/data/errors";
+import { isNotifiedGlobally } from "@/data/errors";
 import { formatCentsAsInput, parseMoneyInput } from "@/domain/parse";
 import type { Cents, Installment, IsoDate } from "@/domain/types";
 import { useToday } from "@/lib/use-today";
@@ -82,7 +82,7 @@ export function CollectionDialog({ open, onOpenChange, installment, debtorName, 
       {
         onSuccess: () => toast.success(t("collectionSaved")),
         onError: (e) => {
-          if (!isDemoReadOnlyError(e)) toast.error(t("saveFailed"));
+          if (!isNotifiedGlobally(e)) toast.error(t("saveFailed"));
         },
       },
     );

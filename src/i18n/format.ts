@@ -91,6 +91,14 @@ export function formatMonth(
   return f.format(new Date(Date.UTC(year, month - 1, 1)));
 }
 
+/** Plain decimal number in the app's regional format (es → es-MX: "0.6", like amounts). */
+export function formatNumber(value: number, locale: Locale, maximumFractionDigits = 1): string {
+  return cached(
+    `number:${locale}:${maximumFractionDigits}`,
+    () => new Intl.NumberFormat(INTL_LOCALE[locale], { maximumFractionDigits }),
+  ).format(value);
+}
+
 export function formatPercent(value: BasisPoints, locale: Locale): string {
   const f = cached(
     `pct:${locale}`,

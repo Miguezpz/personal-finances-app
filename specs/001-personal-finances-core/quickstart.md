@@ -71,9 +71,9 @@ Verificar el flujo P1 con datos nuevos:
 pnpm typecheck                 # tsc --noEmit (strict)
 pnpm lint                      # incluye no-explicit-any y restricción de imports de @supabase
 pnpm test                      # Vitest: dominio (propiedades), i18n (paridad EN/ES), CSV
-pnpm test:contract             # suite del DataProvider contra Mock y contra Supabase local
+pnpm test:contract:local       # suite del DataProvider contra Mock y contra Supabase local
 supabase test db               # pgTAP: RLS, aislamiento entre usuarios, sumas exactas
-pnpm test:e2e                  # Playwright, matriz modo × idioma (demo-en, demo-es, live-en, live-es): flujos P1, toggles,
+pnpm test:e2e:local            # Playwright, matriz modo × idioma (demo-en, demo-es, live-en, live-es): flujos P1, toggles,
                                #   demo de solo lectura y 0 peticiones a Supabase
 pnpm check:demo-bundle         # el bundle de la demo no contiene Supabase ni claves
 pnpm check:no-uploads          # FR-044: sin <input type="file"> ni uso de Storage
@@ -89,7 +89,30 @@ Casos mínimos que deben fallar antes de implementar (Test-First del dominio):
 
 ## 6. Criterios de salida del plan
 
-- [ ] Los escenarios A–H pasan manualmente en demo y en modo personal.
-- [ ] CI en verde (typecheck, lint, unit, contrato, pgTAP, e2e demo).
-- [ ] El bundle de la demo no contiene `@supabase/*` ni claves (inspección del build).
-- [ ] Ninguna RPC ni consulta de la BD contiene lógica de negocio (revisión de migraciones).
+- [x] Los escenarios A–H pasan en demo y en modo personal, en EN y ES (ver *Verificación* abajo).
+- [x] Verde en local: typecheck, lint, formato, unit, contrato, pgTAP y e2e (demo y live × EN/ES).
+      CI ejecuta las mismas puertas.
+- [x] El bundle de la demo no contiene `@supabase/*` ni claves (`pnpm check:demo-bundle`, con variables canario).
+- [x] Ninguna RPC ni consulta de la BD contiene lógica de negocio (revisión de migraciones; los cálculos viven en `src/domain`).
+
+### Verificación (T155, 2026-11-03)
+
+Cada escenario quedó como prueba e2e automatizada que corre en ambos idiomas (`*-en`, `*-es`), así que
+la verificación se repite en cada ejecución en lugar de depender de una revisión manual única:
+
+| Escenario | Modo | Prueba |
+|-----------|------|--------|
+| A — Demo: entrada directa, solo lectura, 0 peticiones a Supabase, sin procesos en segundo plano | demo | `us9-demo`, `us9-demo-background`, `matrix` |
+| B1–B2 — Reglas (suma ≠ 100 % rechazada) e ingreso de $20,000 con asignaciones exactas | live | `us1-income-split`, `matrix` |
+| B3 — Fijo pendiente → aplicado sin cambiar el saldo | live | `us3-recurring`, `matrix` |
+| B4–B5 — Gasto manual, semáforo y arrastre | live / demo | `us2-safe-to-spend`, `us4-expenses` |
+| B6 — Tarjeta: la compra baja el Safe-to-Spend, el pago no | live | `us4-expenses` |
+| B7 — MSI a terceros: calendario y cobro fuera del Safe-to-Spend | live | `us5-receivables` |
+| D / D2 — Divisa de visualización y degradación a MXN sin tasa | demo | `us6-currency`, `matrix` |
+| E — Primera visita en EN, cambio en sitio, persistencia | demo | `us7-language`, `matrix` |
+| F — Privacidad en todas las rutas, ejes y tooltips incluidos | demo / live | `us9-privacy`, `matrix` |
+| G — Exportar datos (CSV y respaldo ZIP) | live | `us8-settings-ledger` |
+| H — Cold start (503 y latencia simulados) y sin conexión | live | `cold-start` |
+
+Diferencia con la guía: el escenario H se simula interceptando las respuestas de la API (503 + latencia)
+en lugar de pausar el contenedor de Postgres, para que sea reproducible en CI.

@@ -13,7 +13,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
-import { isDemoReadOnlyError, isProviderError } from "@/data/errors";
+import { isNotifiedGlobally, isProviderError } from "@/data/errors";
 import { useFinanceSnapshot } from "@/data/useFinanceSnapshot";
 import type { Account, FinanceSnapshot } from "@/domain/types";
 import { SettingsHeader } from "../SettingsHeader";
@@ -39,7 +39,7 @@ export function AccountsSettings() {
   });
 
   const onError = (e: Error) => {
-    if (isDemoReadOnlyError(e)) return;
+    if (isNotifiedGlobally(e)) return;
     toast.error(isProviderError(e, "CONFLICT") ? t("archiveBlocked") : tc("unexpectedError"));
   };
 

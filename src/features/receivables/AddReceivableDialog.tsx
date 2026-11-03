@@ -24,7 +24,7 @@ import {
 import { Field, FieldDescription, FieldError, FieldGroup, FieldLabel } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
 import { NativeSelect, NativeSelectOption } from "@/components/ui/native-select";
-import { isDemoReadOnlyError } from "@/data/errors";
+import { isNotifiedGlobally } from "@/data/errors";
 import { useFinanceSnapshot } from "@/data/useFinanceSnapshot";
 import { isIsoDate } from "@/domain/dates";
 import {
@@ -135,7 +135,7 @@ export function AddReceivableDialog({ open, onOpenChange }: Props) {
       });
       toast.success(t("saved"));
     } catch (e) {
-      if (!isDemoReadOnlyError(e)) toast.error(t("saveFailed"));
+      if (!isNotifiedGlobally(e)) toast.error(t("saveFailed"));
     }
   }
 

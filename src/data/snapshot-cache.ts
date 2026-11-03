@@ -5,6 +5,8 @@
  *   onMutate  → optimistic change applied to queryKeys.snapshot (the UI updates at once, SC-004)
  *   onError   → rollback to the exact previous snapshot (also for DemoReadOnlyError)
  *   onSettled → invalidate queryKeys.snapshot to reconcile with the provider's truth
+ * Offline, a write fails at once with ProviderError('OFFLINE') and changes nothing (no optimistic
+ * row that looks saved but isn't); the global offline toast explains it.
  */
 import {
   useMutation,
@@ -13,8 +15,9 @@ import {
   type UseMutationResult,
 } from "@tanstack/react-query";
 import type { FinanceSnapshot } from "@/domain/types";
+import { isBrowserOffline } from "@/lib/network";
 import { useDataProvider } from "./context";
-import type { DataProvider } from "./provider";
+import { ProviderError, type DataProvider } from "./provider";
 import { queryKeys } from "./query-keys";
 
 export type Rollback = () => void;
@@ -53,11 +56,15 @@ export function useSnapshotMutation<TVariables, TData = unknown>(
   const { mutationFn, optimistic } = options;
 
   return useMutation<TData, Error, TVariables, MutationContext>({
-    mutationFn: (variables) => mutationFn(provider, variables),
+    mutationFn: (variables) =>
+      isBrowserOffline()
+        ? Promise.reject(new ProviderError("OFFLINE", "No connection: the write was not sent"))
+        : mutationFn(provider, variables),
     onMutate: async (variables) => ({
-      rollback: optimistic
-        ? await updateSnapshot(queryClient, (s) => optimistic(s, variables))
-        : () => {},
+      rollback:
+        optimistic && !isBrowserOffline()
+          ? await updateSnapshot(queryClient, (s) => optimistic(s, variables))
+          : () => {},
     }),
     onError: (_error, _variables, context) => {
       context?.rollback();

@@ -25,7 +25,7 @@ import { useReceivables } from "./hooks";
 const STATUS_STYLE: Record<Installment["status"], string> = {
   collected: "bg-emerald-50 text-emerald-800 dark:bg-emerald-950 dark:text-emerald-300",
   partial: "bg-amber-50 text-amber-900 dark:bg-amber-950 dark:text-amber-300",
-  pending: "bg-muted text-muted-foreground",
+  pending: "bg-muted text-foreground",
 };
 
 export function ReceivablesPage() {

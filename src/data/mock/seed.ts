@@ -607,7 +607,3 @@ export function generateHistory(years: number, today: IsoDate = HISTORY_TODAY): 
     expensesPerDay: 5,
   });
 }
-
-/** Days covered by a snapshot generated for `today` (exposed for tests). */
-export const demoRangeDays = (today: IsoDate, months = 6) =>
-  daysBetween(addMonthsToMonthStart(monthStart(today), -(months - 1)), today) + 1;

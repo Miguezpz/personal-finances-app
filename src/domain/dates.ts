@@ -97,12 +97,5 @@ export function monthStart(date: IsoDate): IsoDate {
   return isoDate(year, month, 1);
 }
 
-export function monthEnd(date: IsoDate): IsoDate {
-  const { year, month } = parseIsoDate(date);
-  return isoDate(year, month, daysInMonth(year, month));
-}
-
 /** IsoDate strings sort lexicographically in calendar order. */
-export const compareIsoDates = (a: IsoDate, b: IsoDate): number => (a < b ? -1 : a > b ? 1 : 0);
-export const minIsoDate = (a: IsoDate, b: IsoDate): IsoDate => (a <= b ? a : b);
 export const maxIsoDate = (a: IsoDate, b: IsoDate): IsoDate => (a >= b ? a : b);

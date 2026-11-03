@@ -21,7 +21,7 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { Skeleton } from "@/components/ui/skeleton";
-import { isDemoReadOnlyError } from "@/data/errors";
+import { isNotifiedGlobally } from "@/data/errors";
 import { useFinanceSnapshot } from "@/data/useFinanceSnapshot";
 import { negateCents } from "@/domain/money";
 import type { CardPayment, Cents, Expense, FinanceSnapshot, IsoDate, Uuid } from "@/domain/types";
@@ -80,7 +80,7 @@ export function ExpensesPage() {
   };
   const accountName = (id: string | null) => data?.accounts.find((a) => a.id === id)?.name ?? null;
   const onError = (e: Error) => {
-    if (!isDemoReadOnlyError(e)) toast.error(tc("unexpectedError"));
+    if (!isNotifiedGlobally(e)) toast.error(tc("unexpectedError"));
   };
 
   function confirmDelete() {

@@ -6,14 +6,7 @@
  */
 import type { NewEntity, Patch } from "@/data/provider";
 import { useSnapshotMutation } from "@/data/snapshot-cache";
-import { useFinanceSnapshot } from "@/data/useFinanceSnapshot";
 import type { CardPayment, Expense, FinanceSnapshot, SpendBucket, Uuid } from "@/domain/types";
-
-const selectExpenses = (s: FinanceSnapshot) => s.expenses;
-
-export function useExpenses() {
-  return useFinanceSnapshot(selectExpenses);
-}
 
 /** Bucket inherited from the subcategory's parent category (FR-014). */
 export function bucketOfSubcategory(
@@ -54,12 +47,6 @@ export function useDeleteExpense() {
 // ---------------------------------------------------------------------------
 // Card payments: debt settlements that never touch Needs/Wants (FR-013b)
 // ---------------------------------------------------------------------------
-const selectCardPayments = (s: FinanceSnapshot) => s.cardPayments;
-
-export function useCardPayments() {
-  return useFinanceSnapshot(selectCardPayments);
-}
-
 export function useCreateCardPayment() {
   return useSnapshotMutation<NewEntity<CardPayment>, CardPayment>({
     mutationFn: (provider, input) => provider.cardPayments.create(input),

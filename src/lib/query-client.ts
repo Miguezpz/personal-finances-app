@@ -2,12 +2,14 @@
  * QueryClient factory (T048, research.md R12):
  *  - transient errors (COLD_START / OFFLINE) retry with exponential backoff, up to 4 times;
  *  - any other error fails fast (no retry loops on validation or auth errors);
- *  - mutations never retry (a duplicate write is worse than a visible error);
- *  - a DemoReadOnlyError from ANY mutation calls `onDemoReadOnly` (→ one toast, FR-047);
+ *  - mutations never retry (a duplicate write is worse than a visible error) and are never queued
+ *    offline: they fail at once with OFFLINE (networkMode 'always' + the guard in snapshot-cache);
+ *  - a DemoReadOnlyError from ANY mutation calls `onDemoReadOnly` (→ one toast, FR-047), and an
+ *    OFFLINE error calls `onOffline` (→ one toast);
  *  - a fetch that runs longer than 3 s calls `onWakingChange(true)` ("waking up the database").
  */
 import { MutationCache, QueryClient } from "@tanstack/react-query";
-import { isDemoReadOnlyError, isTransientError } from "@/data/errors";
+import { isDemoReadOnlyError, isProviderError, isTransientError } from "@/data/errors";
 
 export const MAX_TRANSIENT_RETRIES = 4;
 export const COLD_START_THRESHOLD_MS = 3_000;
@@ -20,6 +22,7 @@ export function shouldRetry(failureCount: number, error: unknown): boolean {
 
 export interface QueryClientCallbacks {
   onDemoReadOnly?: () => void;
+  onOffline?: () => void;
   onWakingChange?: (waking: boolean) => void;
 }
 
@@ -33,11 +36,13 @@ export function createQueryClient(callbacks: QueryClientCallbacks = {}): QueryCl
         refetchOnWindowFocus: false,
         staleTime: 60_000,
       },
-      mutations: { retry: false },
+      // 'always': an offline write must fail visibly, not wait in a queue looking saved.
+      mutations: { retry: false, networkMode: "always" },
     },
     mutationCache: new MutationCache({
       onError: (error) => {
         if (isDemoReadOnlyError(error)) callbacks.onDemoReadOnly?.();
+        else if (isProviderError(error, "OFFLINE")) callbacks.onOffline?.();
       },
     }),
   });

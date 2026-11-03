@@ -20,7 +20,7 @@ import {
 import { Field, FieldDescription, FieldError, FieldGroup, FieldLabel } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
 import { NativeSelect, NativeSelectOption } from "@/components/ui/native-select";
-import { isDemoReadOnlyError, isProviderError } from "@/data/errors";
+import { isNotifiedGlobally, isProviderError } from "@/data/errors";
 import { formatCentsAsInput } from "@/domain/parse";
 import type { Account } from "@/domain/types";
 import { useCreateAccount, useUpdateAccount } from "./hooks";
@@ -82,7 +82,7 @@ export function AccountForm({ open, onOpenChange, account, takenNames }: Props) 
     const callbacks = {
       onSuccess: () => toast.success(t("accountSaved")),
       onError: (e: Error) => {
-        if (isDemoReadOnlyError(e)) return;
+        if (isNotifiedGlobally(e)) return;
         toast.error(isProviderError(e, "CONFLICT") ? t("nameTaken") : t("saveFailed"));
       },
     };

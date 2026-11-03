@@ -23,7 +23,7 @@ import {
 } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
 import { NativeSelect, NativeSelectOption } from "@/components/ui/native-select";
-import { isDemoReadOnlyError, isProviderError } from "@/data/errors";
+import { isNotifiedGlobally, isProviderError } from "@/data/errors";
 import { BPS_TOTAL } from "@/domain/money";
 import { formatBpsAsPercentInput, parsePercentInput } from "@/domain/parse";
 import { nextRuleEffectiveDate } from "@/domain/splitter";
@@ -131,7 +131,7 @@ export function RuleForm({ current, rules, incomes, vehicles, today }: RuleFormP
               : t("effectiveTomorrow", { date: formatDate(effectiveFrom, locale) }),
           ),
         onError: (e) => {
-          if (isDemoReadOnlyError(e)) {
+          if (isNotifiedGlobally(e)) {
             // The global read-only toast explains it; show the stored values again.
             form.reset();
             return;

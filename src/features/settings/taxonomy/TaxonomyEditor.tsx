@@ -27,7 +27,7 @@ import { Field, FieldError, FieldGroup, FieldLabel } from "@/components/ui/field
 import { Input } from "@/components/ui/input";
 import { NativeSelect, NativeSelectOption } from "@/components/ui/native-select";
 import { Skeleton } from "@/components/ui/skeleton";
-import { isDemoReadOnlyError, isProviderError } from "@/data/errors";
+import { isNotifiedGlobally, isProviderError } from "@/data/errors";
 import type { Category, SpendBucket, Subcategory } from "@/domain/types";
 import { SettingsHeader } from "../SettingsHeader";
 import {
@@ -72,7 +72,7 @@ export function TaxonomyEditor() {
   const [toDelete, setToDelete] = useState<DeleteTarget | null>(null);
 
   const onError = (e: Error) => {
-    if (isDemoReadOnlyError(e)) return;
+    if (isNotifiedGlobally(e)) return;
     toast.error(isProviderError(e, "CONFLICT") ? t("deleteBlockedToast") : tc("unexpectedError"));
   };
   const saved = { onSuccess: () => toast.success(t("taxonomySaved")), onError };

@@ -31,7 +31,7 @@ export const LIGHT_STYLES: Record<TrafficLight, { badge: string; bar: string; ic
       icon: OctagonAlert,
     },
     neutral: {
-      badge: "bg-muted text-muted-foreground ring-border",
+      badge: "bg-muted text-foreground ring-border",
       bar: "bg-muted-foreground/40",
       icon: CircleDashed,
     },

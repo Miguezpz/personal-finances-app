@@ -113,6 +113,14 @@ export function AppShell({ children, toolbar }: { children: ReactNode; toolbar?:
 
   return (
     <div className="flex min-h-dvh flex-col">
+      {/* First stop for keyboard users: jump over the header and navigation (WCAG 2.4.1). */}
+      <a
+        href="#main"
+        className="sr-only z-50 rounded-md bg-background px-3 py-2 text-sm font-medium shadow focus:not-sr-only focus:fixed focus:top-2 focus:left-2 focus:ring-2 focus:ring-ring"
+        data-testid="skip-link"
+      >
+        {tc("skipToContent")}
+      </a>
       <header className="sticky top-0 z-30 flex h-14 items-center gap-2 border-b bg-background/95 px-4 backdrop-blur">
         <Sheet open={sidebarOpen} onOpenChange={setSidebarOpen}>
           <SheetTrigger asChild>
@@ -160,7 +168,9 @@ export function AppShell({ children, toolbar }: { children: ReactNode; toolbar?:
             <NavLinks />
           </nav>
         </aside>
-        <main className="min-w-0 flex-1 p-4 md:p-6">{children}</main>
+        <main id="main" tabIndex={-1} className="min-w-0 flex-1 p-4 outline-none md:p-6">
+          {children}
+        </main>
       </div>
     </div>
   );

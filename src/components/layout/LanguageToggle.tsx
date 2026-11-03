@@ -28,7 +28,6 @@ export function LanguageToggle({ className }: { className?: string }) {
           type="button"
           lang={locale}
           aria-pressed={current === locale}
-          aria-label={t(`languageName.${locale}`)}
           onClick={() => setLocale(locale)}
           className={cn(
             "rounded px-2 py-1 text-xs font-medium uppercase transition-colors",
@@ -38,7 +37,9 @@ export function LanguageToggle({ className }: { className?: string }) {
               : "text-muted-foreground hover:bg-muted",
           )}
         >
+          {/* Visible code + spoken name: the accessible name contains the visible text (WCAG 2.5.3). */}
           {locale}
+          <span className="sr-only"> {t(`languageName.${locale}`)}</span>
         </button>
       ))}
     </div>

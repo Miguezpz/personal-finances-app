@@ -5,7 +5,7 @@
  */
 import { describe, expect, it } from "vitest";
 import type { BasisPoints, Cents, IsoDate } from "@/domain/types";
-import { formatDate, formatMoney, formatPercent, formatRate } from "@/i18n/format";
+import { formatDate, formatMoney, formatNumber, formatPercent, formatRate } from "@/i18n/format";
 
 const c = (n: number) => n as Cents;
 const d = (s: string) => s as IsoDate;
@@ -55,5 +55,13 @@ describe("formatPercent and formatRate", () => {
   it("exchange rates with up to four decimals", () => {
     expect(formatRate(18.5974, "en")).toBe("18.5974");
     expect(formatRate(20, "es")).toBe("20.00");
+  });
+});
+
+describe("formatNumber", () => {
+  it("uses the same regional format as amounts (es-MX: decimal point)", () => {
+    expect(formatNumber(0.6, "en")).toBe("0.6");
+    expect(formatNumber(0.6, "es")).toBe("0.6");
+    expect(formatNumber(1234.56, "es")).toBe("1,234.6");
   });
 });

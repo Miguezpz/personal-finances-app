@@ -219,3 +219,35 @@ específicas de cada historia declaran en qué proyectos corren. CI falla si cua
 | RPC `register_income`, `create_receivable`, `save_distribution_rule` | Insertar cabecera + detalle de forma atómica (sin ingresos huérfanos ni sumas descuadradas) en el plan gratuito, sin servidor propio. No contienen lógica de negocio. | Inserciones múltiples desde el cliente pueden dejar datos a medias si falla la red a mitad de camino. |
 | Claves foráneas compuestas `(user_id, id)` | Garantiza a nivel de BD que ninguna fila referencia datos de otro usuario aunque falle una política. | Claves simples dependen solo de RLS; un error de política permitiría referencias cruzadas. |
 | Dos implementaciones de `DataProvider` con suite de contrato compartida | Es el mecanismo exigido por el Principio IV; la suite evita que Mock y Supabase diverjan. | Mockear solo en pruebas dejaría la demo sin garantía de paridad con producción. |
+
+## Verificación final de la constitución (T154, 2026-11-03)
+
+Revisión del código terminado contra el *Constitution Check*. Las comprobaciones mecánicas quedaron como puertas
+automáticas (ESLint, scripts y pruebas que CI ejecuta), no como revisiones manuales de una sola vez.
+
+| Principio | Evidencia en el código final | Estado |
+|-----------|------------------------------|--------|
+| I. Zero-Cost | Sin cron, colas ni storage: los procesos (fijos, aportaciones, instantánea de patrimonio) corren al abrir la app (`useBackgroundSync`); `pnpm check:no-uploads` (T160) falla ante `type="file"`, `FileReader`, Storage o `bytea`. Exportación CSV/ZIP en el navegador sin dependencias. | ✅ |
+| II. TS estricto | 0 `any` y 0 `@ts-ignore`/`@ts-expect-error` en `src/` (ESLint). Montos en `Cents` enteros; sin `toFixed`/`parseFloat` sobre dinero. | ✅ |
+| III. Supabase + RLS | La clave `service_role`/secreta solo aparece en pruebas locales y scripts (`tests/`, `scripts/`), nunca en `src/`; `env.ts` rechaza una clave secreta como publicable. `[auth] enable_signup = false`. Solo `.env.example` versionado. `supabase db lint` sin errores; `supabase db advisors --local` sin avisos ≥ warn tras la migración 0007 (índices de las FK compuestas). | ✅ |
+| IV. Aislamiento del demo | `@supabase/*` solo se importa en `src/data/supabase/**` (ESLint). `provider.mode`/`env.isDemo` solo en la raíz de composición; la UI usa `capabilities.canWrite`. `pnpm check:demo-bundle` (T136) verifica el bundle con variables canario; e2e: 0 peticiones a Supabase en el demo y ninguna escritura en segundo plano (T130, T162, T163). | ✅ |
+| V. Privacidad | Todo importe pasa por `<Money>` o por `useMoneyFormatter` (gráficas: `MaskedYAxis`/`MaskedTooltip`); `Intl.NumberFormat` solo en `src/i18n/format.ts` (ESLint). Sin SDK de analítica/telemetría; 0 `console.*` en `src/` (ESLint). Única llamada externa: FX, sin datos del usuario. e2e de privacidad en las 14 rutas, tooltips incluidos. | ✅ |
+| VI. i18n y multi-divisa | Paridad EN/ES por prueba unitaria; `react/jsx-no-literals` impide texto fijo; la matriz e2e (T161) busca claves sin traducir en todas las rutas. Datos solo en MXN; conversión de presentación con degradación a MXN. | ✅ |
+
+### Desviaciones registradas durante la implementación
+
+Ninguna viola un principio; todas quedaron documentadas en el código y cubiertas por pruebas.
+
+- **Esquema**: índices UNIQUE completos (no parciales) para las llaves de idempotencia, compatibles con `upsert` de PostgREST;
+  `on delete set null (recurring_expense_id)` de columna; `subcategories → categories` con `NO ACTION` en vez de `RESTRICT`;
+  funciones de trigger `SECURITY DEFINER` (las `check_*` sin `grant` público) para que el borrado de cuenta en cascada funcione;
+  RPC adicional `replace_income`; trigger extra `trg_rule_investment`. Migraciones 0006 (`subcategory_id` en `ledger_entries`)
+  y 0007 (índices de FK compuestas, asesor de Supabase).
+- **Dominio**: `payToAvoidInterest` acumulativo (el contrato restaba solo los pagos posteriores al corte y recontaba estados ya
+  pagados); `creditTimeline` muestra el primer estado de cuenta acumulado y los siguientes solo con lo que agregan;
+  `dueContributions` solo propone el mes en curso (sin cobros retroactivos al restaurar una meta archivada).
+- **Contratos**: `LedgerEntry.subcategoryId` (filtro por categoría, FR-042) y `TimelineEvent.refId` (enlaces y llaves).
+- **Sin conexión**: las mutaciones usan `networkMode: 'always'` y fallan de inmediato con `OFFLINE` (un aviso global) en lugar
+  de quedar en cola aparentando estar guardadas.
+- **Herramientas**: la auditoría de interfaz (T151) se hizo con capturas y un barrido automático de desbordes a 375 px, porque las
+  skills `ui-ux-pro-max`/`impeccable` no estaban disponibles; la de accesibilidad (T152) quedó como prueba e2e con axe-core.
