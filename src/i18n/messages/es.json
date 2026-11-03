@@ -349,5 +349,15 @@
       "collected": "Cobrada"
     },
     "itemDescription": "Qué se compró"
+  },
+  "fx": {
+    "currencyLabel": "Divisa de visualización",
+    "loading": "Obteniendo el tipo de cambio de hoy…",
+    "rate": "1 {currency} = {rate} MXN",
+    "rateOf": "tasa del {date} ({source})",
+    "fetchedAt": "actualizada {time}",
+    "staleSince": "no se pudo actualizar; última consulta {time}",
+    "unavailable": "El tipo de cambio no está disponible por ahora, así que los montos se muestran en MXN en lugar de {currency}.",
+    "retry": "Reintentar"
   }
 }

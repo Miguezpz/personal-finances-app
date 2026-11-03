@@ -80,3 +80,32 @@ export function formatPercent(value: BasisPoints, locale: Locale): string {
   );
   return f.format(value / 10_000);
 }
+
+/** An exchange rate such as 18.7196 (MXN per unit of the foreign currency). */
+export function formatRate(value: number, locale: Locale): string {
+  const f = cached(
+    `rate:${locale}`,
+    () =>
+      new Intl.NumberFormat(INTL_LOCALE[locale], {
+        minimumFractionDigits: 2,
+        maximumFractionDigits: 4,
+      }),
+  );
+  return f.format(value);
+}
+
+/** A moment in time (e.g. when a rate was fetched), in the user's time zone. */
+export function formatDateTime(iso: string, locale: Locale, timeZone: string): string {
+  const f = cached(
+    `datetime:${locale}:${timeZone}`,
+    () =>
+      new Intl.DateTimeFormat(INTL_LOCALE[locale], {
+        timeZone,
+        day: "numeric",
+        month: "short",
+        hour: "numeric",
+        minute: "2-digit",
+      }),
+  );
+  return f.format(new Date(iso));
+}

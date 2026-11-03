@@ -42,40 +42,56 @@ export async function runOnboarding(provider: DataProvider): Promise<boolean> {
   ]);
   if (!needsOnboarding({ categories })) return false;
 
-  // Persist the settings row with the defaults (upsert; harmless if it already exists).
-  await provider.settings.update(DEFAULT_USER_SETTINGS);
-
+  // Two parallel rounds (settings + categories, then subcategories) instead of one request per row:
+  // first use is fast even when the free-tier database is waking up.
   const byKey = new Map(categories.filter((c) => c.nameKey).map((c) => [c.nameKey, c]));
-  for (const def of DEFAULT_TAXONOMY) {
-    let category: Category | null | undefined = byKey.get(def.nameKey);
-    category ??= await ignoreConflict(
-      provider.taxonomy.createCategory({
-        name: def.name,
-        nameKey: def.nameKey,
-        macro: def.macro,
-        archived: false,
-      }),
+  const [, ...created] = await Promise.all([
+    // Persist the settings row with the defaults (upsert; harmless if it already exists).
+    provider.settings.update(DEFAULT_USER_SETTINGS),
+    ...DEFAULT_TAXONOMY.map((def): Promise<Category | null> =>
+      byKey.has(def.nameKey)
+        ? Promise.resolve(byKey.get(def.nameKey) ?? null)
+        : ignoreConflict(
+            provider.taxonomy.createCategory({
+              name: def.name,
+              nameKey: def.nameKey,
+              macro: def.macro,
+              archived: false,
+            }),
+          ),
+    ),
+  ]);
+
+  // A null means another tab created that category first: read the one that won.
+  let resolved = created as (Category | null)[];
+  if (resolved.some((c) => c === null)) {
+    const latest = await provider.taxonomy.listCategories();
+    resolved = DEFAULT_TAXONOMY.map(
+      (def, i) => resolved[i] ?? latest.find((c) => c.nameKey === def.nameKey) ?? null,
     );
-    if (!category) {
-      // Lost the race: read the one the other tab created.
-      category = (await provider.taxonomy.listCategories()).find((c) => c.nameKey === def.nameKey);
-      if (!category) continue;
-    }
-    const existing = new Set(
-      subcategories.filter((s) => s.categoryId === category.id).map((s) => s.nameKey),
-    );
-    for (const sub of def.subcategories) {
-      if (existing.has(sub.nameKey)) continue;
-      await ignoreConflict(
-        provider.taxonomy.createSubcategory({
-          categoryId: category.id,
-          name: sub.name,
-          nameKey: sub.nameKey,
-          archived: false,
-        }),
-      );
-    }
   }
+
+  await Promise.all(
+    DEFAULT_TAXONOMY.flatMap((def, i) => {
+      const category = resolved[i];
+      if (!category) return [];
+      const existing = new Set(
+        subcategories.filter((s) => s.categoryId === category.id).map((s) => s.nameKey),
+      );
+      return def.subcategories
+        .filter((sub) => !existing.has(sub.nameKey))
+        .map((sub) =>
+          ignoreConflict(
+            provider.taxonomy.createSubcategory({
+              categoryId: category.id,
+              name: sub.name,
+              nameKey: sub.nameKey,
+              archived: false,
+            }),
+          ),
+        );
+    }),
+  );
   return true;
 }
 

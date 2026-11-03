@@ -9,6 +9,7 @@ import { createMockProvider } from "@/data/mock/provider";
 import { queryKeys } from "@/data/query-keys";
 import { cents } from "@/domain/money";
 import type { Expense, FinanceSnapshot } from "@/domain/types";
+import { useCreateRecurring } from "@/features/recurring/hooks";
 import {
   materializationBatch,
   useMaterializeRecurring,
@@ -145,5 +146,44 @@ describe("useMaterializeRecurring", () => {
     const { queryClient } = renderHookWithProviders(() => useMaterializeRecurring(), { provider });
     await waitFor(() => expect(queryClient.getQueryData(queryKeys.snapshot)).toBeDefined());
     expect(spy).not.toHaveBeenCalled();
+  });
+
+  it("regression: never materializes an optimistic (unsaved) recurring expense, and applies it once saved", async () => {
+    // Found by the e2e suite: the optimistic row has a temporary id; inserting its occurrence fails
+    // on the foreign key, and the confirmed data that arrived meanwhile was dropped by the
+    // single-flight guard — the charge only appeared on the next app load.
+    const provider = createMemoryProvider(emptySnapshot());
+    const release = provider.holdRecurringCreate();
+    const { result } = renderHookWithProviders(
+      () => {
+        useMaterializeRecurring();
+        return useCreateRecurring();
+      },
+      { provider },
+    );
+    await waitFor(() => expect(provider.loadSnapshot).toHaveBeenCalled());
+
+    act(() =>
+      result.current.mutate({
+        name: "Gym",
+        amount: cents(70_000),
+        chargeDay: 10, // due today (Nov 10)
+        subcategoryId: rent.subcategoryId,
+        bucket: "wants",
+        paymentAccountId: null,
+        startsOn: d("2026-11-01"),
+        endedOn: null,
+      }),
+    );
+    // While the create is in flight the optimistic row exists, but nothing may be materialized.
+    await new Promise((r) => setTimeout(r, 50));
+    expect(provider.expenses.materializeRecurring).not.toHaveBeenCalled();
+
+    await act(async () => release());
+    const saved = () => provider.state.snapshot.recurring[0]?.id;
+    await waitFor(() =>
+      expect(provider.state.snapshot.expenses.map((e) => e.recurringExpenseId)).toEqual([saved()]),
+    );
+    expect(provider.state.snapshot.expenses[0]?.occurrenceDate).toBe("2026-11-10");
   });
 });

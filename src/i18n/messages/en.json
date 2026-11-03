@@ -349,5 +349,15 @@
       "collected": "Collected"
     },
     "itemDescription": "What was bought"
+  },
+  "fx": {
+    "currencyLabel": "Display currency",
+    "loading": "Getting today's exchange rate…",
+    "rate": "1 {currency} = {rate} MXN",
+    "rateOf": "rate of {date} ({source})",
+    "fetchedAt": "updated {time}",
+    "staleSince": "couldn't update; last fetched {time}",
+    "unavailable": "The exchange rate isn't available right now, so amounts are shown in MXN instead of {currency}.",
+    "retry": "Retry"
   }
 }

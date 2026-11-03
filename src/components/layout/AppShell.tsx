@@ -14,10 +14,12 @@ import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
 import { useDataProvider } from "@/data/context";
 import { useAuthSync, useSession } from "@/features/auth/useSession";
+import { FxStatus } from "@/features/fx/FxStatus";
 import { useMaterializeRecurring } from "@/features/recurring/useMaterializeRecurring";
 import { useOnboarding } from "@/features/settings/onboarding";
 import { cn } from "@/lib/utils";
 import { useUi } from "@/store/ui";
+import { CurrencyToggle } from "./CurrencyToggle";
 import { NAV_ITEMS } from "./nav-items";
 
 function NavLinks({ onNavigate }: { onNavigate?: () => void }) {
@@ -126,7 +128,8 @@ export function AppShell({ children, toolbar }: { children: ReactNode; toolbar?:
           <span className="truncate">{tc("appName")}</span>
         </Link>
 
-        <div className="ml-auto flex items-center gap-1">
+        <div className="ml-auto flex items-center gap-2">
+          <CurrencyToggle />
           {toolbar}
           {canSignOut && (
             <Button variant="ghost" size="sm" onClick={() => void signOut()}>
@@ -138,6 +141,7 @@ export function AppShell({ children, toolbar }: { children: ReactNode; toolbar?:
       </header>
 
       <StatusBanners />
+      <FxStatus />
       <BackgroundProcesses />
 
       <div className="mx-auto flex w-full max-w-6xl flex-1">

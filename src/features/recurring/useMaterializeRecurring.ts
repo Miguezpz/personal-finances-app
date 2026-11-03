@@ -7,12 +7,14 @@
  * `expenses` (origin 'recurring'). No server cron (Principle I): it runs when the app opens.
  *  - Idempotent: the domain only proposes missing months, and the DB's unique key turns a
  *    concurrent insert from another tab into a no-op.
- *  - One run at a time per tab; a failure (offline / cold start) is retried on the next load.
+ *  - Never runs while writes are in flight (the cache may hold optimistic rows with temporary
+ *    ids); one run at a time per tab, and data that arrives during a run triggers another run.
+ *  - A failure (offline / cold start) is retried on the next load.
  *  - A background process: it only runs when `provider.capabilities.canWrite` — in the demo it
  *    does nothing and shows nothing (FR-047a).
  */
-import { useQueryClient } from "@tanstack/react-query";
-import { useEffect, useRef } from "react";
+import { useIsMutating, useQueryClient } from "@tanstack/react-query";
+import { useEffect, useRef, useState } from "react";
 import { useDataProvider } from "@/data/context";
 import type { NewEntity } from "@/data/provider";
 import { queryKeys } from "@/data/query-keys";
@@ -52,11 +54,21 @@ export function useMaterializeRecurring(): void {
   const queryClient = useQueryClient();
   const today = useToday();
   const { data: snapshot, dataUpdatedAt } = useFinanceSnapshot();
+  // Writes in flight mean the cache may hold OPTIMISTIC rows (temporary ids that don't exist in the
+  // database): materializing them would fail on the foreign key. Wait until everything settles.
+  const mutating = useIsMutating();
   const running = useRef(false);
+  // Set when new data arrives during a run; the run then re-triggers itself instead of dropping it.
+  const rerun = useRef(false);
+  const [tick, setTick] = useState(0);
   const canWrite = provider.capabilities.canWrite;
 
   useEffect(() => {
-    if (!canWrite || !snapshot || running.current) return;
+    if (!canWrite || !snapshot || mutating > 0) return;
+    if (running.current) {
+      rerun.current = true;
+      return;
+    }
     const batch = materializationBatch(snapshot, today);
     if (batch.length === 0) return;
 
@@ -80,7 +92,11 @@ export function useMaterializeRecurring(): void {
       })
       .finally(() => {
         running.current = false;
+        if (rerun.current) {
+          rerun.current = false;
+          setTick((t) => t + 1);
+        }
       });
     // dataUpdatedAt: a refetch that returns identical data still deserves a retry after a failure.
-  }, [canWrite, provider, queryClient, snapshot, dataUpdatedAt, today]);
+  }, [canWrite, provider, queryClient, snapshot, dataUpdatedAt, today, mutating, tick]);
 }

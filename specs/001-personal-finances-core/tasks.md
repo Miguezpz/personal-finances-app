@@ -253,18 +253,18 @@ Proyecto único Next.js (App Router), según plan.md: `src/app`, `src/domain`, `
 
 ### Tests for User Story 6 ⚠️
 
-- [ ] T104 [P] [US6] Escribir prueba que falle en `tests/unit/domain/fx.test.ts`: `convert` con redondeo half-up ($100,000 MXN a tasa USD 1/17 → 588,235 centavos), MXN devuelve el mismo valor, `fx = null` devuelve MXN, e `isPlausibleRate` rechaza tasas ≤ 0, no finitas y variaciones > 20% vs la previa
-- [ ] T105 [P] [US6] Escribir prueba que falle en `tests/unit/features/fx-hook.test.tsx`: `useFxRates` consulta una vez por carga, guarda la última tasa válida en `localStorage` con fecha, ante fallo devuelve la tasa previa con `stale: true`, y ante fallo sin tasa previa devuelve `null` sin lanzar error
+- [X] T104 [P] [US6] Escribir prueba que falle en `tests/unit/domain/fx.test.ts`: `convert` con redondeo half-up ($100,000 MXN a tasa USD 1/17 → 588,235 centavos), MXN devuelve el mismo valor, `fx = null` devuelve MXN, e `isPlausibleRate` rechaza tasas ≤ 0, no finitas y variaciones > 20% vs la previa
+- [X] T105 [P] [US6] Escribir prueba que falle en `tests/unit/features/fx-hook.test.tsx`: `useFxRates` consulta una vez por carga, guarda la última tasa válida en `localStorage` con fecha, ante fallo devuelve la tasa previa con `stale: true`, y ante fallo sin tasa previa devuelve `null` sin lanzar error
 
 ### Implementation for User Story 6
 
-- [ ] T106 [US6] Implementar `src/domain/fx.ts` (`convert`, `isPlausibleRate`) para pasar T104
-- [ ] T107 [US6] Crear `src/features/fx/api.ts` (cliente de Frankfurter como fuente primaria con `open.er-api.com` de respaldo; solo base MXN y símbolos USD/EUR; sin enviar datos del usuario) y `src/features/fx/storage.ts` (persistencia segura en `localStorage` con `try/catch`)
-- [ ] T108 [US6] Implementar `src/features/fx/useFxRates.ts` (TanStack Query con `staleTime` largo y reintentos, validación con `isPlausibleRate`, estado `stale`) para pasar T105; mismo comportamiento en demo y live (no ramifica por modo; la demo también consulta la API pública, sin datos del usuario)
-- [ ] T109 [US6] Integrar la conversión en `src/components/money/Money.tsx` y `useMoneyFormatter` (usa `displayCurrency` del store y `convert`; los datos originales no cambian) y crear `src/components/layout/CurrencyToggle.tsx` montado en el `AppShell`
-- [ ] T110 [US6] Crear `src/features/fx/FxStatus.tsx`: muestra la tasa vigente usada (publicada por la fuente, normalmente diaria) y su fecha/hora de actualización, aviso de "tasa no disponible/no actualizada" con botón de reintento, y vuelve a MXN si no hay tasa (FR-036)
-- [ ] T111 [P] [US6] Añadir las cadenas EN/ES del namespace `fx` en `src/i18n/messages/en.json` y `src/i18n/messages/es.json`
-- [ ] T112 [US6] Escribir prueba e2e en `tests/e2e/us6-currency.spec.ts` (proyecto `demo`): alternar MXN/USD/EUR con tasas interceptadas, ver tasa y fecha, simular fallo de la API y comprobar que el aviso aparece en menos de 10 s (SC-009); la preferencia persiste al recargar
+- [X] T106 [US6] Implementar `src/domain/fx.ts` (`convert`, `isPlausibleRate`) para pasar T104
+- [X] T107 [US6] Crear `src/features/fx/api.ts` (cliente de Frankfurter como fuente primaria con `open.er-api.com` de respaldo; solo base MXN y símbolos USD/EUR; sin enviar datos del usuario) y `src/features/fx/storage.ts` (persistencia segura en `localStorage` con `try/catch`)
+- [X] T108 [US6] Implementar `src/features/fx/useFxRates.ts` (TanStack Query con `staleTime` largo y reintentos, validación con `isPlausibleRate`, estado `stale`) para pasar T105; mismo comportamiento en demo y live (no ramifica por modo; la demo también consulta la API pública, sin datos del usuario)
+- [X] T109 [US6] Integrar la conversión en `src/components/money/Money.tsx` y `useMoneyFormatter` (usa `displayCurrency` del store y `convert`; los datos originales no cambian) y crear `src/components/layout/CurrencyToggle.tsx` montado en el `AppShell`
+- [X] T110 [US6] Crear `src/features/fx/FxStatus.tsx`: muestra la tasa vigente usada (publicada por la fuente, normalmente diaria) y su fecha/hora de actualización, aviso de "tasa no disponible/no actualizada" con botón de reintento, y vuelve a MXN si no hay tasa (FR-036)
+- [X] T111 [P] [US6] Añadir las cadenas EN/ES del namespace `fx` en `src/i18n/messages/en.json` y `src/i18n/messages/es.json`
+- [X] T112 [US6] Escribir prueba e2e en `tests/e2e/us6-currency.spec.ts` (proyecto `demo`): alternar MXN/USD/EUR con tasas interceptadas, ver tasa y fecha, simular fallo de la API y comprobar que el aviso aparece en menos de 10 s (SC-009); la preferencia persiste al recargar
 
 **Checkpoint**: multi-divisa funcional en todas las pantallas que usan `<Money>`
 
