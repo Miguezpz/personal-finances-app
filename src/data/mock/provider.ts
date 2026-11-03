@@ -5,7 +5,8 @@
  */
 import { todayIn } from "@/domain/periods";
 import { DEFAULT_TIMEZONE } from "@/domain/settings";
-import type { FinanceSnapshot, IsoDate, LedgerEntry, Uuid } from "@/domain/types";
+import { buildLedger } from "@/domain/ledger";
+import type { FinanceSnapshot, IsoDate, Uuid } from "@/domain/types";
 import type { AuthSession, DataProvider } from "../provider";
 import { denyWrite } from "./read-only";
 import { generateDemoSnapshot } from "./seed";
@@ -26,58 +27,6 @@ const DEMO_SESSION: AuthSession = {
 
 type Range = { from: IsoDate; to: IsoDate } | undefined;
 const inRange = (d: IsoDate, range: Range) => !range || (d >= range.from && d <= range.to);
-
-/** Same shape as the SQL view `ledger_entries` (0004): data shaping only, no business rules. */
-function ledgerOf(s: FinanceSnapshot): LedgerEntry[] {
-  const receivableById = new Map(s.receivables.map((r) => [r.id, r]));
-  return [
-    ...s.incomes.map((i): LedgerEntry => ({
-      id: i.id,
-      type: "income",
-      occurredOn: i.receivedOn,
-      amount: i.amount,
-      description: i.label,
-      accountId: i.depositAccountId,
-      bucket: null,
-      isThirdParty: false,
-    })),
-    ...s.expenses.map((e): LedgerEntry => ({
-      id: e.id,
-      type: e.origin === "recurring" ? "recurring_expense" : "expense",
-      occurredOn: e.spentOn,
-      amount: -e.amount as LedgerEntry["amount"],
-      description: e.note ?? "",
-      accountId: e.paymentAccountId,
-      bucket: e.bucket,
-      isThirdParty: false,
-    })),
-    ...s.cardPayments.map((p): LedgerEntry => ({
-      id: p.id,
-      type: "card_payment",
-      occurredOn: p.paidOn,
-      amount: -p.amount as LedgerEntry["amount"],
-      description: p.note ?? "",
-      accountId: p.cardAccountId,
-      bucket: null,
-      isThirdParty: false,
-    })),
-    ...s.installments
-      .filter((n) => n.collected > 0)
-      .map((n): LedgerEntry => {
-        const r = receivableById.get(n.receivableId);
-        return {
-          id: n.id,
-          type: "installment_collection",
-          occurredOn: n.collectedOn ?? n.dueOn,
-          amount: n.collected,
-          description: r?.description ?? "",
-          accountId: r?.cardAccountId ?? null,
-          bucket: null,
-          isThirdParty: true,
-        };
-      }),
-  ].sort((a, b) => (a.occurredOn < b.occurredOn ? 1 : a.occurredOn > b.occurredOn ? -1 : 0));
-}
 
 export function createMockProvider(options: MockProviderOptions = {}): DataProvider {
   const store: MockStore = createMockStore(
@@ -186,7 +135,7 @@ export function createMockProvider(options: MockProviderOptions = {}): DataProvi
     },
 
     ledger: {
-      list: (range) => list(ledgerOf(s()).filter((e) => inRange(e.occurredOn, range))),
+      list: (range) => list(buildLedger(s()).filter((e) => inRange(e.occurredOn, range))),
     },
 
     loadSnapshot: () => Promise.resolve(s()),

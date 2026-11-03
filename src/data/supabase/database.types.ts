@@ -356,7 +356,7 @@ isOneToOne: false
           Views: {
             "ledger_entries": {
                   Row: {
-                    "account_id": string | null,"amount_cents": number | null,"bucket": Database["public"]['Enums']["spend_bucket"] | null,"description": string | null,"entry_type": string | null,"id": string | null,"is_third_party": boolean | null,"occurred_on": string | null
+                    "account_id": string | null,"amount_cents": number | null,"bucket": Database["public"]['Enums']["spend_bucket"] | null,"description": string | null,"entry_type": string | null,"id": string | null,"is_third_party": boolean | null,"occurred_on": string | null,"subcategory_id": string | null
                   }
                   ComputedFields: never
                   Relationships: [

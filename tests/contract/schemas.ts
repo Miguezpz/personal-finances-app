@@ -220,6 +220,7 @@ export const ledgerEntrySchema = z.strictObject({
   description: z.string(),
   accountId: uuid.nullable(),
   bucket: spendBucket.nullable(),
+  subcategoryId: uuid.nullable(),
   isThirdParty: z.boolean(),
 });
 

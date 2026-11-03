@@ -117,6 +117,7 @@ export interface TaxonomyRepository {
   listSubcategories(): Promise<Subcategory[]>;
   createCategory(input: NewEntity<Category>): Promise<Category>;
   createSubcategory(input: NewEntity<Subcategory>): Promise<Subcategory>;
+  /** Renombrar limpia `nameKey`: el nombre escrito por el usuario reemplaza la traducción. */
   update(
     kind: "category" | "subcategory",
     id: Uuid,

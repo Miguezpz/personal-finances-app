@@ -225,6 +225,8 @@ export interface LedgerEntry {
   description: string;
   accountId: Uuid | null;
   bucket: SpendBucket | null;
+  /** Subcategoría del gasto (filtro por categoría, FR-042); null para otros movimientos. */
+  subcategoryId: Uuid | null;
   /** true = movimiento de terceros (excluido de métricas personales). */
   isThirdParty: boolean;
 }

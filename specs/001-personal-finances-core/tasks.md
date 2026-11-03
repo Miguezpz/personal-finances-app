@@ -300,19 +300,19 @@ Proyecto único Next.js (App Router), según plan.md: `src/app`, `src/domain`, `
 
 ### Tests for User Story 8 ⚠️
 
-- [ ] T119 [P] [US8] Escribir prueba que falle en `tests/unit/domain/ledger.test.ts`: `buildLedger` unifica ingresos (+), gastos y fijos (−), pagos de tarjeta (−) y cobros de terceros (+, `isThirdParty`), `filterLedger` por fecha, tipo, cuenta, bolsa y terceros
-- [ ] T120 [P] [US8] Escribir prueba que falle en `tests/unit/domain/csv.test.ts`: `toCsv` con BOM UTF-8, escape RFC 4180 (comas, comillas y saltos de línea), montos en MXN con dos decimales sin conversión, y `snapshotToCsvBundle` incluye todas las entidades
+- [X] T119 [P] [US8] Escribir prueba que falle en `tests/unit/domain/ledger.test.ts`: `buildLedger` unifica ingresos (+), gastos y fijos (−), pagos de tarjeta (−) y cobros de terceros (+, `isThirdParty`), `filterLedger` por fecha, tipo, cuenta, bolsa y terceros
+- [X] T120 [P] [US8] Escribir prueba que falle en `tests/unit/domain/csv.test.ts`: `toCsv` con BOM UTF-8, escape RFC 4180 (comas, comillas y saltos de línea), montos en MXN con dos decimales sin conversión, y `snapshotToCsvBundle` incluye todas las entidades
 
 ### Implementation for User Story 8
 
-- [ ] T121 [US8] Implementar `src/domain/ledger.ts` (`buildLedger`, `filterLedger`) y `src/domain/csv.ts` (`toCsv`, `snapshotToCsvBundle`) para pasar T119 y T120
-- [ ] T122 [P] [US8] Crear `src/features/settings/accounts/schema.ts` (Zod: `name` 1–60 caracteres, tarjeta de crédito exige `cutOffDay` 1–31 y `paymentDueOffsetDays` 1–60), `hooks.ts` (selectores y mutaciones sobre `useFinanceSnapshot`/`updateSnapshot`) y `AccountForm.tsx`, y la página `src/app/(app)/settings/accounts/page.tsx` (alta, edición y archivo; el archivo de una tarjeta con MSI pendientes muestra el error `CONFLICT`)
-- [ ] T123 [P] [US8] Crear `src/features/settings/taxonomy/schema.ts` (Zod: `name` 1–60 caracteres), `hooks.ts` (selectores y mutaciones sobre `useFinanceSnapshot`/`updateSnapshot`) y `TaxonomyEditor.tsx`, y la página `src/app/(app)/settings/categories/page.tsx` (crear categorías y subcategorías vinculadas a un padre; eliminar una subcategoría con movimientos exige reasignar o se bloquea, US8-4)
-- [ ] T124 [P] [US8] Crear `src/features/settings/preferences/PreferencesForm.tsx` y la página `src/app/(app)/settings/preferences/page.tsx` (umbrales del semáforo con `yellow_min_bps < green_min_bps`, días de anticipación de cobro 0–15, meses del fondo de emergencia 1–36, días de pago, zona horaria)
-- [ ] T125 [US8] Crear `src/app/(app)/ledger/page.tsx` y `src/features/ledger/LedgerTable.tsx` y `LedgerFilters.tsx`: bitácora filtrable por fecha, categoría, cuenta, tipo y "terceros", con paginación en cliente
-- [ ] T126 [US8] Crear `src/features/ledger/ExportButton.tsx` ("Exportar datos") que genera el CSV en el navegador desde el snapshot en caché de `useFinanceSnapshot()` (T158; sin una segunda descarga) con `Blob` y descarga; montarlo en la bitácora y en `src/app/(app)/settings/page.tsx` (índice de configuración con enlaces a reglas, cuentas, categorías, preferencias y exportación)
-- [ ] T127 [P] [US8] Añadir las cadenas EN/ES de los namespaces `settings` y `ledger` en `src/i18n/messages/en.json` y `src/i18n/messages/es.json`
-- [ ] T128 [US8] Escribir prueba e2e en `tests/e2e/us8-settings-ledger.spec.ts` (proyecto `live`): alta de tarjeta y subcategoría, filtros de la bitácora y descarga del CSV con el número esperado de filas
+- [X] T121 [US8] Implementar `src/domain/ledger.ts` (`buildLedger`, `filterLedger`) y `src/domain/csv.ts` (`toCsv`, `snapshotToCsvBundle`) para pasar T119 y T120
+- [X] T122 [P] [US8] Crear `src/features/settings/accounts/schema.ts` (Zod: `name` 1–60 caracteres, tarjeta de crédito exige `cutOffDay` 1–31 y `paymentDueOffsetDays` 1–60), `hooks.ts` (selectores y mutaciones sobre `useFinanceSnapshot`/`updateSnapshot`) y `AccountForm.tsx`, y la página `src/app/(app)/settings/accounts/page.tsx` (alta, edición y archivo; el archivo de una tarjeta con MSI pendientes muestra el error `CONFLICT`)
+- [X] T123 [P] [US8] Crear `src/features/settings/taxonomy/schema.ts` (Zod: `name` 1–60 caracteres), `hooks.ts` (selectores y mutaciones sobre `useFinanceSnapshot`/`updateSnapshot`) y `TaxonomyEditor.tsx`, y la página `src/app/(app)/settings/categories/page.tsx` (crear categorías y subcategorías vinculadas a un padre; eliminar una subcategoría con movimientos exige reasignar o se bloquea, US8-4)
+- [X] T124 [P] [US8] Crear `src/features/settings/preferences/PreferencesForm.tsx` y la página `src/app/(app)/settings/preferences/page.tsx` (umbrales del semáforo con `yellow_min_bps < green_min_bps`, días de anticipación de cobro 0–15, meses del fondo de emergencia 1–36, días de pago, zona horaria)
+- [X] T125 [US8] Crear `src/app/(app)/ledger/page.tsx` y `src/features/ledger/LedgerTable.tsx` y `LedgerFilters.tsx`: bitácora filtrable por fecha, categoría, cuenta, tipo y "terceros", con paginación en cliente
+- [X] T126 [US8] Crear `src/features/ledger/ExportButton.tsx` ("Exportar datos") que genera el CSV en el navegador desde el snapshot en caché de `useFinanceSnapshot()` (T158; sin una segunda descarga) con `Blob` y descarga; montarlo en la bitácora y en `src/app/(app)/settings/page.tsx` (índice de configuración con enlaces a reglas, cuentas, categorías, preferencias y exportación)
+- [X] T127 [P] [US8] Añadir las cadenas EN/ES de los namespaces `settings` y `ledger` en `src/i18n/messages/en.json` y `src/i18n/messages/es.json`
+- [X] T128 [US8] Escribir prueba e2e en `tests/e2e/us8-settings-ledger.spec.ts` (proyecto `live`): alta de tarjeta y subcategoría, filtros de la bitácora y descarga del CSV con el número esperado de filas
 
 **Checkpoint**: configuración, bitácora y respaldo completos
 

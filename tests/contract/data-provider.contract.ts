@@ -10,6 +10,7 @@
  *  - read-only providers: EVERY write rejects with DemoReadOnlyError and the data is unchanged.
  */
 import { afterAll, beforeAll, describe, expect, it } from "vitest";
+import { buildLedger } from "@/domain/ledger";
 import { bps, cents } from "@/domain/money";
 import type { FinanceSnapshot, IsoDate, Uuid } from "@/domain/types";
 import {
@@ -364,6 +365,11 @@ export function runDataProviderContract(
       }
     });
 
+    it("the ledger read matches buildLedger() over the snapshot (view and domain agree)", async () => {
+      const [entries, s] = await Promise.all([provider.ledger.list(), provider.loadSnapshot()]);
+      expect(sortById(entries)).toEqual(sortById(buildLedger(s)));
+    });
+
     if (options.canWrite) {
       it("rejects allocations that don't sum to the income with VALIDATION", async () => {
         await expectProviderError(
@@ -448,6 +454,19 @@ export function runDataProviderContract(
         const sub = (await provider.taxonomy.listSubcategories())[0];
         if (!sub) throw new Error("seed missing");
         await expectProviderError(provider.taxonomy.remove("subcategory", sub.id), "CONFLICT");
+      });
+
+      it("renaming a default category drops its i18n key (the typed name wins)", async () => {
+        const created = await provider.taxonomy.createCategory({
+          name: "Groceries",
+          nameKey: "taxonomy.groceries",
+          macro: "needs",
+          archived: false,
+        });
+        await provider.taxonomy.update("category", created.id, { name: "Super" });
+        const renamed = (await provider.taxonomy.listCategories()).find((c) => c.id === created.id);
+        expect(renamed).toMatchObject({ name: "Super", nameKey: null });
+        await provider.taxonomy.remove("category", created.id);
       });
 
       it("records a partial collection and derives its status", async () => {

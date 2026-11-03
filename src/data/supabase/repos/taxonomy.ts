@@ -53,7 +53,8 @@ export function createTaxonomyRepository(db: AppSupabaseClient): TaxonomyReposit
 
     async update(kind, id, patch) {
       const values = {
-        ...(patch.name !== undefined && { name: patch.name }),
+        // Renaming makes the name the user's own: drop the i18n key so the typed name is shown.
+        ...(patch.name !== undefined && { name: patch.name, name_key: null }),
         ...(patch.archived !== undefined && { archived_at: archivedAt(patch.archived) }),
       };
       const table = kind === "category" ? "categories" : "subcategories";

@@ -230,6 +230,7 @@ export function toLedgerEntry(r: LedgerRow): LedgerEntry {
     description: r.description ?? "",
     accountId: uuidOrNull(r.account_id),
     bucket: r.bucket,
+    subcategoryId: uuidOrNull(r.subcategory_id),
     isThirdParty: r.is_third_party ?? false,
   };
 }

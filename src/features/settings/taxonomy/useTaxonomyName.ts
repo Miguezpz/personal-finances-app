@@ -15,7 +15,7 @@ export function useTaxonomyName(): (
   return useCallback(
     (item) => {
       if (!item.nameKey) return item.name;
-      // Unknown keys (e.g. renamed defaults) fall back to the stored name.
+      // Renamed defaults have no key (the repository clears it); unknown keys use the stored name.
       return t.has(item.nameKey as Parameters<typeof t>[0])
         ? t(item.nameKey as Parameters<typeof t>[0])
         : item.name;
