@@ -352,20 +352,20 @@ Proyecto único Next.js (App Router), según plan.md: `src/app`, `src/domain`, `
 
 ### Tests for User Story 10 ⚠️
 
-- [ ] T138 [P] [US10] Escribir prueba que falle en `tests/unit/domain/credit-timeline.test.ts`: `creditTimeline` mezcla días de pago, límites de pago de tarjeta y cobros a deudores ordenados por fecha en un rango, con el monto "totalero" en los eventos de tarjeta
-- [ ] T139 [P] [US10] Escribir prueba que falle en `tests/unit/domain/goals.test.ts`: `dueContributions` (apartado $12,000 anual → $1,000 mensual, idempotente por `(goal_id, periodo)`, respeta archivo), `emergencyFundProgress` (meses cubiertos = ahorrado / gastos vitales, donde gastos vitales = promedio mensual de gastos aplicados en Needs de los últimos 3 meses completos; con menos historial usa los meses disponibles)
-- [ ] T140 [P] [US10] Escribir prueba que falle en `tests/unit/domain/net-worth.test.ts`: `computeNetWorth` — activos = saldos iniciales de cuentas que no son tarjeta + asignaciones acumuladas a Inversión + aportaciones a metas desde Needs/Wants + mensualidades de terceros pendientes + saldo disponible actual de Needs y Wants (con signo); pasivos = deuda total de tarjetas (con saldo completo de MSI); y la instantánea mensual es idempotente
+- [X] T138 [P] [US10] Escribir prueba que falle en `tests/unit/domain/credit-timeline.test.ts`: `creditTimeline` mezcla días de pago, límites de pago de tarjeta y cobros a deudores ordenados por fecha en un rango, con el monto "totalero" en los eventos de tarjeta
+- [X] T139 [P] [US10] Escribir prueba que falle en `tests/unit/domain/goals.test.ts`: `dueContributions` (apartado $12,000 anual → $1,000 mensual, idempotente por `(goal_id, periodo)`, respeta archivo), `emergencyFundProgress` (meses cubiertos = ahorrado / gastos vitales, donde gastos vitales = promedio mensual de gastos aplicados en Needs de los últimos 3 meses completos; con menos historial usa los meses disponibles)
+- [X] T140 [P] [US10] Escribir prueba que falle en `tests/unit/domain/net-worth.test.ts`: `computeNetWorth` — activos = saldos iniciales de cuentas que no son tarjeta + asignaciones acumuladas a Inversión + aportaciones a metas desde Needs/Wants + mensualidades de terceros pendientes + saldo disponible actual de Needs y Wants (con signo); pasivos = deuda total de tarjetas (con saldo completo de MSI); y la instantánea mensual es idempotente
 
 ### Implementation for User Story 10
 
-- [ ] T141 [US10] Implementar `creditTimeline` en `src/domain/credit.ts` para pasar T138
-- [ ] T142 [US10] Implementar `src/domain/goals.ts` (`dueContributions`, `emergencyFundProgress`) para pasar T139 e integrar `goalContributions` por `source_bucket` en `src/domain/safe-to-spend.ts` (solo Needs/Wants afectan el Safe-to-Spend)
-- [ ] T143 [US10] Implementar `src/domain/net-worth.ts` (`computeNetWorth`) para pasar T140
-- [ ] T144 [P] [US10] Crear `src/features/credit/CreditTimeline.tsx` y la página `src/app/(app)/credit/page.tsx`: línea de tiempo visual con el "Pago para no generar intereses" destacado como monto principal y sin promover el pago mínimo
-- [ ] T145 [P] [US10] Crear `src/features/goals/schemas.ts` (Zod: `name` 1–80 caracteres, `targetMonths` 1–36, `annual` y `monthly` > 0 para apartados), `hooks.ts`, `useMaterializeContributions.ts` (idempotente, mismo mecanismo que los fijos; solo si `provider.capabilities.canWrite`) y la página `src/app/(app)/goals/page.tsx` con fondo de emergencia, apartados y su bolsa de origen configurable (por defecto: apartados → Needs, fondo de emergencia → Inversión)
-- [ ] T146 [P] [US10] Crear `src/features/net-worth/useNetWorthSnapshot.ts` (instantánea mensual al abrir la app, solo si `provider.capabilities.canWrite`) y `src/features/net-worth/NetWorthChart.tsx` con la página `src/app/(app)/net-worth/page.tsx` (activos, deudas y patrimonio neto históricos con ejes enmascarables)
-- [ ] T147 [P] [US10] Añadir las cadenas EN/ES de los namespaces `credit`, `goals` y `netWorth` en `src/i18n/messages/en.json` y `src/i18n/messages/es.json`
-- [ ] T148 [US10] Escribir prueba e2e en `tests/e2e/us10-credit-goals.spec.ts` (proyecto `demo`): la línea de tiempo muestra el pago sin intereses, el apartado y la gráfica de patrimonio cargan con los datos ficticios
+- [X] T141 [US10] Implementar `creditTimeline` en `src/domain/credit.ts` para pasar T138
+- [X] T142 [US10] Implementar `src/domain/goals.ts` (`dueContributions`, `emergencyFundProgress`) para pasar T139 e integrar `goalContributions` por `source_bucket` en `src/domain/safe-to-spend.ts` (solo Needs/Wants afectan el Safe-to-Spend)
+- [X] T143 [US10] Implementar `src/domain/net-worth.ts` (`computeNetWorth`) para pasar T140
+- [X] T144 [P] [US10] Crear `src/features/credit/CreditTimeline.tsx` y la página `src/app/(app)/credit/page.tsx`: línea de tiempo visual con el "Pago para no generar intereses" destacado como monto principal y sin promover el pago mínimo
+- [X] T145 [P] [US10] Crear `src/features/goals/schemas.ts` (Zod: `name` 1–80 caracteres, `targetMonths` 1–36, `annual` y `monthly` > 0 para apartados), `hooks.ts`, `useMaterializeContributions.ts` (idempotente, mismo mecanismo que los fijos; solo si `provider.capabilities.canWrite`) y la página `src/app/(app)/goals/page.tsx` con fondo de emergencia, apartados y su bolsa de origen configurable (por defecto: apartados → Needs, fondo de emergencia → Inversión)
+- [X] T146 [P] [US10] Crear `src/features/net-worth/useNetWorthSnapshot.ts` (instantánea mensual al abrir la app, solo si `provider.capabilities.canWrite`) y `src/features/net-worth/NetWorthChart.tsx` con la página `src/app/(app)/net-worth/page.tsx` (activos, deudas y patrimonio neto históricos con ejes enmascarables)
+- [X] T147 [P] [US10] Añadir las cadenas EN/ES de los namespaces `credit`, `goals` y `netWorth` en `src/i18n/messages/en.json` y `src/i18n/messages/es.json`
+- [X] T148 [US10] Escribir prueba e2e en `tests/e2e/us10-credit-goals.spec.ts` (proyecto `demo`): la línea de tiempo muestra el pago sin intereses, el apartado y la gráfica de patrimonio cargan con los datos ficticios
 
 **Checkpoint**: todas las historias funcionan de forma independiente
 

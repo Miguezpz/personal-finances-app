@@ -444,6 +444,22 @@ export function runDataProviderContract(
         expect(again).toEqual(first);
       });
 
+      it("goal contributions are idempotent per (goal, period)", async () => {
+        const { contributions } = await provider.goals.list();
+        const first = contributions[0];
+        if (!first) throw new Error("seed missing");
+        const again = await provider.goals.addContributions([
+          {
+            goalId: first.goalId,
+            periodStart: first.periodStart,
+            amount: cents(1),
+            sourceBucket: first.sourceBucket,
+          },
+        ]);
+        expect(again).toEqual([]);
+        expect((await provider.goals.list()).contributions).toHaveLength(contributions.length);
+      });
+
       it("refuses to archive a card with pending installments (CONFLICT)", async () => {
         const card = (await provider.accounts.list()).find((a) => a.kind === "credit_card");
         if (!card) throw new Error("seed missing");

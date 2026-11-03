@@ -533,5 +533,94 @@
     "banner": "You're exploring a read-only demo with fictitious data. Nothing you change is saved.",
     "sourceCode": "View the source code",
     "opensInNewTab": "(opens in a new tab)"
+  },
+  "credit": {
+    "title": "Credit",
+    "description": "What to pay on each card to avoid interest, and when — next to your paydays.",
+    "noCards": "You have no credit cards yet. <link>Add one in Accounts</link> to see its statements here.",
+    "overdue": "Overdue",
+    "statementDue": "Statement due {date}",
+    "payToAvoidInterest": "Pay to avoid interest",
+    "totalDebt": "Total debt, including future MSI installments: <amount></amount>",
+    "timelineTitle": "Timeline",
+    "timelineHint": "Paydays, card due dates and collections for the next {days} days.",
+    "timelineEmpty": "Nothing scheduled in the coming weeks.",
+    "today": "Today",
+    "inDays": "{days, plural, one {in # day} other {in # days}}",
+    "payday": "Payday",
+    "paydayHint": "Money comes in",
+    "cardDue": "{card} due",
+    "nothingToPay": "Nothing to pay on this statement",
+    "collectFrom": "Collect from {name}",
+    "collectHint": "Third-party installment — earmarked for the card"
+  },
+  "goals": {
+    "title": "Goals",
+    "description": "Your emergency fund and sinking funds. Each month they hold back an amount from the bucket you choose.",
+    "addTitle": "Add goal",
+    "editTitle": "Edit goal",
+    "formHint": "Changes apply from the next contribution; past ones stay as they were.",
+    "kind": "Type",
+    "kinds": {
+      "emergency_fund": "Emergency fund",
+      "sinking_fund": "Sinking fund"
+    },
+    "kindHints": {
+      "emergency_fund": "A cushion measured in months of your vital (Needs) expenses.",
+      "sinking_fund": "A yearly expense saved little by little, e.g. insurance or property tax."
+    },
+    "name": "Name",
+    "namePlaceholders": {
+      "emergency_fund": "e.g. Emergency fund",
+      "sinking_fund": "e.g. Car insurance"
+    },
+    "targetMonths": "Target (months)",
+    "targetMonthsHint": "How many months of vital expenses it should cover (1–36).",
+    "annual": "Yearly amount (MXN)",
+    "monthly": "Monthly hold-back (MXN)",
+    "monthlyOptional": "Monthly contribution (MXN, optional)",
+    "monthlyHints": {
+      "emergency_fund": "Leave it empty to only track the fund.",
+      "sinking_fund": "Empty = the yearly amount divided by 12."
+    },
+    "sourceBucket": "Taken from",
+    "sourceBucketHint": "Contributions from Needs or Wants lower that bucket's Safe-to-Spend; from Investment they don't.",
+    "saved": "Goal saved.",
+    "saveFailed": "Couldn't save the goal. Try again.",
+    "nameRequired": "Enter a name.",
+    "nameTooLong": "Use 80 characters or fewer.",
+    "invalidAmount": "Enter an amount greater than 0, e.g. 12000",
+    "invalidTargetMonths": "Use between 1 and 36 months.",
+    "empty": "No goals yet. Start with an emergency fund or a sinking fund for a yearly expense.",
+    "edit": "Edit",
+    "archive": "Archive",
+    "restore": "Restore",
+    "archived": "Goal archived — its contributions are paused.",
+    "restored": "Goal restored.",
+    "archivedBadge": "Archived",
+    "monthlyFrom": "Holds back <amount></amount> a month from {bucket}",
+    "vitalExpenses": "Vital expenses: <amount></amount> a month (average Needs spending, last 3 months)",
+    "noVitalHistory": "The target appears after a full month of Needs expenses.",
+    "ofTarget": "of <amount></amount>",
+    "progressLabel": "Progress of {name}",
+    "monthsCovered": "{covered, number} of {target} months covered",
+    "annualTarget": "Yearly amount: <amount></amount>",
+    "savedThisYear": "saved in {year}"
+  },
+  "netWorth": {
+    "title": "Net worth",
+    "description": "What you own minus what you owe, today and month by month.",
+    "series": {
+      "netWorth": "Net worth",
+      "assets": "Assets",
+      "liabilities": "Liabilities"
+    },
+    "legend": "Chart legend",
+    "chartLabel": "Monthly assets, liabilities and net worth",
+    "showTable": "Show as a table",
+    "month": "Month",
+    "historyTitle": "History",
+    "noHistory": "The first monthly snapshot is taken the next time you open the app.",
+    "formulaHint": "Assets: opening balances, investments, goal savings, money third parties owe you and what's left in Needs and Wants. Liabilities: total card debt."
   }
 }

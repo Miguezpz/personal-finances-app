@@ -15,6 +15,8 @@ import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/co
 import { useDataProvider } from "@/data/context";
 import { useAuthSync, useSession } from "@/features/auth/useSession";
 import { FxStatus } from "@/features/fx/FxStatus";
+import { useMaterializeContributions } from "@/features/goals/useMaterializeContributions";
+import { useNetWorthSnapshot } from "@/features/net-worth/useNetWorthSnapshot";
 import { useMaterializeRecurring } from "@/features/recurring/useMaterializeRecurring";
 import { useOnboarding } from "@/features/settings/onboarding";
 import { cn } from "@/lib/utils";
@@ -78,6 +80,8 @@ function BackgroundProcesses() {
   useAuthSync();
   useOnboarding();
   useMaterializeRecurring();
+  useMaterializeContributions();
+  useNetWorthSnapshot();
   return null;
 }
 

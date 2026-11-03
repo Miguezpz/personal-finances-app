@@ -1,7 +1,5 @@
 /**
- * Every route of the (app) area that exists so far, for the privacy and demo sweeps (T131, T163).
- * Credit, goals and net worth join this list when Phase 12 creates them (T162/T161 complete the
- * coverage in Polish).
+ * Every route of the (app) area, for the privacy and demo sweeps (T131, T163).
  */
 export const APP_ROUTES = [
   "/dashboard",
@@ -9,6 +7,9 @@ export const APP_ROUTES = [
   "/expenses",
   "/recurring",
   "/receivables",
+  "/credit",
+  "/goals",
+  "/net-worth",
   "/ledger",
   "/settings",
   "/settings/rules",

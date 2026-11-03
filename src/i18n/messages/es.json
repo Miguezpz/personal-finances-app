@@ -533,5 +533,94 @@
     "banner": "Estás explorando un demo de solo lectura con datos ficticios. Nada de lo que cambies se guarda.",
     "sourceCode": "Ver el código fuente",
     "opensInNewTab": "(se abre en una pestaña nueva)"
+  },
+  "credit": {
+    "title": "Crédito",
+    "description": "Cuánto pagar en cada tarjeta para no generar intereses, y cuándo — junto a tus días de pago.",
+    "noCards": "Aún no tienes tarjetas de crédito. <link>Agrega una en Cuentas</link> para ver aquí sus estados de cuenta.",
+    "overdue": "Vencido",
+    "statementDue": "Límite de pago: {date}",
+    "payToAvoidInterest": "Pago para no generar intereses",
+    "totalDebt": "Deuda total, incluidas mensualidades MSI futuras: <amount></amount>",
+    "timelineTitle": "Línea de tiempo",
+    "timelineHint": "Días de pago, límites de tarjetas y cobros de los próximos {days} días.",
+    "timelineEmpty": "Nada programado en las próximas semanas.",
+    "today": "Hoy",
+    "inDays": "{days, plural, one {en # día} other {en # días}}",
+    "payday": "Día de pago",
+    "paydayHint": "Entra dinero",
+    "cardDue": "Vence {card}",
+    "nothingToPay": "Nada que pagar en este estado de cuenta",
+    "collectFrom": "Cobrar a {name}",
+    "collectHint": "Mensualidad de terceros — destinada a la tarjeta"
+  },
+  "goals": {
+    "title": "Metas",
+    "description": "Tu fondo de emergencia y tus apartados. Cada mes retienen un monto de la bolsa que elijas.",
+    "addTitle": "Agregar meta",
+    "editTitle": "Editar meta",
+    "formHint": "Los cambios aplican desde la próxima aportación; las anteriores se quedan como estaban.",
+    "kind": "Tipo",
+    "kinds": {
+      "emergency_fund": "Fondo de emergencia",
+      "sinking_fund": "Apartado"
+    },
+    "kindHints": {
+      "emergency_fund": "Un colchón medido en meses de tus gastos vitales (Necesidades).",
+      "sinking_fund": "Un gasto anual que se ahorra poco a poco, p. ej. seguro o predial."
+    },
+    "name": "Nombre",
+    "namePlaceholders": {
+      "emergency_fund": "p. ej. Fondo de emergencia",
+      "sinking_fund": "p. ej. Seguro del auto"
+    },
+    "targetMonths": "Meta (meses)",
+    "targetMonthsHint": "Cuántos meses de gastos vitales debe cubrir (1–36).",
+    "annual": "Monto anual (MXN)",
+    "monthly": "Retención mensual (MXN)",
+    "monthlyOptional": "Aportación mensual (MXN, opcional)",
+    "monthlyHints": {
+      "emergency_fund": "Déjalo vacío para solo darle seguimiento.",
+      "sinking_fund": "Vacío = el monto anual entre 12."
+    },
+    "sourceBucket": "Se toma de",
+    "sourceBucketHint": "Las aportaciones desde Necesidades o Deseos reducen el Safe-to-Spend de esa bolsa; desde Inversión no.",
+    "saved": "Meta guardada.",
+    "saveFailed": "No se pudo guardar la meta. Inténtalo de nuevo.",
+    "nameRequired": "Escribe un nombre.",
+    "nameTooLong": "Usa 80 caracteres o menos.",
+    "invalidAmount": "Escribe un monto mayor a 0, p. ej. 12000",
+    "invalidTargetMonths": "Usa entre 1 y 36 meses.",
+    "empty": "Aún no hay metas. Empieza con un fondo de emergencia o un apartado para un gasto anual.",
+    "edit": "Editar",
+    "archive": "Archivar",
+    "restore": "Restaurar",
+    "archived": "Meta archivada — sus aportaciones quedan en pausa.",
+    "restored": "Meta restaurada.",
+    "archivedBadge": "Archivada",
+    "monthlyFrom": "Retiene <amount></amount> al mes de {bucket}",
+    "vitalExpenses": "Gastos vitales: <amount></amount> al mes (promedio de Necesidades, últimos 3 meses)",
+    "noVitalHistory": "La meta aparece después de un mes completo de gastos en Necesidades.",
+    "ofTarget": "de <amount></amount>",
+    "progressLabel": "Avance de {name}",
+    "monthsCovered": "{covered, number} de {target} meses cubiertos",
+    "annualTarget": "Monto anual: <amount></amount>",
+    "savedThisYear": "ahorrado en {year}"
+  },
+  "netWorth": {
+    "title": "Patrimonio",
+    "description": "Lo que tienes menos lo que debes, hoy y mes a mes.",
+    "series": {
+      "netWorth": "Patrimonio neto",
+      "assets": "Activos",
+      "liabilities": "Deudas"
+    },
+    "legend": "Leyenda de la gráfica",
+    "chartLabel": "Activos, deudas y patrimonio neto por mes",
+    "showTable": "Ver como tabla",
+    "month": "Mes",
+    "historyTitle": "Historial",
+    "noHistory": "La primera instantánea mensual se toma la próxima vez que abras la app.",
+    "formulaHint": "Activos: saldos iniciales, inversiones, ahorro en metas, lo que te deben terceros y lo que queda en Necesidades y Deseos. Deudas: deuda total de tarjetas."
   }
 }

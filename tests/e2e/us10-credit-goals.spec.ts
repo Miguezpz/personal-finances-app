@@ -1,0 +1,60 @@
+/**
+ * T148 · US10 with the demo's fictitious data (demo-en, demo-es): the credit page headlines the
+ * amount to pay to avoid interest (never a minimum payment) and lines up due dates with paydays;
+ * goals show the sinking fund's monthly hold-back and the emergency fund's progress; the net-worth
+ * chart draws its three series and has a table view.
+ */
+import en from "../../src/i18n/messages/en.json";
+import es from "../../src/i18n/messages/es.json";
+import type { Locale } from "../../src/domain/types";
+import { expect, test } from "./fixtures";
+
+const MESSAGES = { en, es } as const;
+
+test.describe("US10 · credit, goals and net worth", { tag: "@demo" }, () => {
+  test("timeline, goals and net-worth history load with the demo data", async ({
+    page,
+  }, testInfo) => {
+    const locale = (testInfo.project.metadata as { locale: Locale }).locale;
+    const m = MESSAGES[locale];
+
+    // --- Credit: pay-to-avoid-interest headline + the timeline -----------------------------
+    await page.goto("/credit");
+    const cards = page.getByTestId("credit-card");
+    await expect(cards.first()).toBeVisible();
+    await expect(cards.first()).toContainText(m.credit.payToAvoidInterest);
+    const timeline = page.getByTestId("credit-timeline");
+    await expect(timeline.locator('[data-kind="payday"]').first()).toBeVisible();
+    const due = timeline.locator('[data-kind="card_due"]');
+    await expect(due.first()).toBeVisible();
+    await expect(timeline.locator('[data-kind="collection_due"]').first()).toBeVisible();
+    // Each card's headline is its next statement on the timeline.
+    const cardName = (await cards.first().locator("[data-slot=card-title]").innerText()).trim();
+    const firstDue = due.filter({ hasText: cardName }).first();
+    expect(await cards.first().locator(".money").first().innerText()).toBe(
+      await firstDue.locator(".money").innerText(),
+    );
+    expect((await page.locator("main").innerText()).toLowerCase()).not.toMatch(
+      locale === "en" ? /minimum payment/ : /pago mínimo/,
+    );
+
+    // --- Goals: sinking fund hold-back and emergency fund progress --------------------------
+    await page.goto("/goals");
+    const sinking = page.locator('[data-testid="goal-card"][data-kind="sinking_fund"]').first();
+    await expect(sinking).toBeVisible();
+    await expect(sinking.getByRole("progressbar")).toBeVisible();
+    await expect(sinking.locator(".money")).not.toHaveCount(0);
+    const fund = page.locator('[data-testid="goal-card"][data-kind="emergency_fund"]').first();
+    await expect(fund.getByTestId("months-covered")).toBeVisible();
+
+    // --- Net worth: three series over several months, plus a table view ---------------------
+    await page.goto("/net-worth");
+    const chart = page.getByTestId("net-worth-chart");
+    await expect(chart.locator(".recharts-line")).toHaveCount(3);
+    expect(
+      await chart.locator(".recharts-xAxis-tick-labels .recharts-text").count(),
+    ).toBeGreaterThan(1);
+    await chart.getByText(m.netWorth.showTable).click();
+    expect(await chart.locator("tbody tr").count()).toBeGreaterThan(1);
+  });
+});

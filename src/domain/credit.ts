@@ -95,3 +95,114 @@ export function cardStatus(card: Account, data: CardData, today: IsoDate): CardS
     overdue: today > nextPaymentDue && payToAvoidInterest > 0,
   };
 }
+
+// ---------------------------------------------------------------------------
+// Timeline (FR-028): paydays × card due dates × suggested collections
+// ---------------------------------------------------------------------------
+export type TimelineEventKind = "payday" | "card_due" | "collection_due";
+
+export interface TimelineEvent {
+  date: IsoDate;
+  kind: TimelineEventKind;
+  /** Card name / debtor name; "" for paydays (the UI names them). */
+  label: string;
+  /** card_due: pay-to-avoid-interest of that statement; collection_due: still owed; payday: null. */
+  amount: Cents | null;
+  /** Card id or installment id (null for paydays). Extension of the contract, for links/keys. */
+  refId: Account["id"] | null;
+}
+
+const KIND_ORDER: Record<TimelineEventKind, number> = { payday: 0, collection_due: 1, card_due: 2 };
+
+/** Months (first day) overlapping [from, to], plus `before` earlier ones. */
+function monthsBetween(
+  from: IsoDate,
+  to: IsoDate,
+  before = 0,
+): Array<{ year: number; month: number }> {
+  const out: Array<{ year: number; month: number }> = [];
+  let { year, month } = parseIsoDate(from);
+  for (let i = 0; i < before; i++) [year, month] = month === 1 ? [year - 1, 12] : [year, month - 1];
+  const end = parseIsoDate(to);
+  while (year < end.year || (year === end.year && month <= end.month)) {
+    out.push({ year, month });
+    [year, month] = month === 12 ? [year + 1, 1] : [year, month + 1];
+  }
+  return out;
+}
+
+/**
+ * Events between `from` and `to` (inclusive), by date. A card's future statements are projected
+ * with what is known today: purchases up to that cut-off and its MSI installments. The first one
+ * includes anything unpaid; later ones only their own new charges.
+ */
+export function creditTimeline(
+  s: Pick<
+    FinanceSnapshot,
+    | "settings"
+    | "accounts"
+    | "expenses"
+    | "cardPayments"
+    | "debtors"
+    | "receivables"
+    | "installments"
+  >,
+  from: IsoDate,
+  to: IsoDate,
+): TimelineEvent[] {
+  if (from > to) return [];
+  const inRange = (date: IsoDate) => date >= from && date <= to;
+  const events: TimelineEvent[] = [];
+
+  for (const { year, month } of monthsBetween(from, to)) {
+    for (const day of new Set([s.settings.firstPayday, s.settings.secondPayday])) {
+      const date = clampChargeDay(year, month, day);
+      if (inRange(date))
+        events.push({ date, kind: "payday", label: "", amount: null, refId: null });
+    }
+  }
+
+  // Due dates fall up to 60 days after the cut-off: start two months earlier. The first statement
+  // in range carries everything still unpaid (its cumulative pay-to-avoid-interest); each later
+  // one only what it adds, assuming the previous one is paid on time — otherwise the same debt
+  // would be listed twice.
+  for (const card of s.accounts) {
+    if (card.kind !== "credit_card" || card.archived) continue;
+    const { cutOffDay, offset } = requireCard(card);
+    let previous: number | null = null;
+    for (const { year, month } of monthsBetween(from, to, 2)) {
+      const cutOff = clampChargeDay(year, month, cutOffDay);
+      const due = addDays(cutOff, offset);
+      if (due < from) continue;
+      if (due > to) break;
+      const cumulative = cardStatus(card, s, cutOff).payToAvoidInterest;
+      events.push({
+        date: due,
+        kind: "card_due",
+        label: card.name,
+        amount: Math.max(0, cumulative - (previous ?? 0)) as Cents,
+        refId: card.id,
+      });
+      previous = cumulative;
+    }
+  }
+
+  const receivables = new Map(s.receivables.map((r) => [r.id, r]));
+  const debtors = new Map(s.debtors.map((x) => [x.id, x.name]));
+  for (const n of s.installments) {
+    if (n.collected >= n.amount || !inRange(n.dueOn)) continue;
+    const debtorId = receivables.get(n.receivableId)?.debtorId;
+    events.push({
+      date: n.dueOn,
+      kind: "collection_due",
+      label: (debtorId && debtors.get(debtorId)) || "",
+      amount: (n.amount - n.collected) as Cents,
+      refId: n.id,
+    });
+  }
+
+  return events.sort(
+    (a, b) =>
+      (a.date < b.date ? -1 : a.date > b.date ? 1 : 0) || KIND_ORDER[a.kind] - KIND_ORDER[b.kind],
+  );
+}

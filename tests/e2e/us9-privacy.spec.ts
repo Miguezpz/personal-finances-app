@@ -33,11 +33,19 @@ test.describe("US9 · privacy mode", { tag: "@demo" }, () => {
       // Chart axes and tooltips are SVG/portal text: check them explicitly too.
       for (const t of await page
         .locator(".recharts-wrapper text, .recharts-tooltip-wrapper")
-        .allInnerTexts()) {
+        .allTextContents()) {
         expect(t, `chart text on ${route}`).not.toMatch(READABLE_AMOUNT);
       }
       await expect(page.locator('.money[data-masked="false"]')).toHaveCount(0);
     }
+
+    // The net-worth tooltip (only rendered on hover) is masked too.
+    await page.goto("/net-worth");
+    const surface = page.locator(".recharts-surface").first();
+    await surface.hover({ position: { x: 200, y: 100 } });
+    const tooltip = page.locator(".recharts-tooltip-wrapper");
+    await expect(tooltip).toContainText("••••");
+    expect(await tooltip.textContent()).not.toMatch(READABLE_AMOUNT);
 
     // Amount fields (prefilled when editing, or a suggested card payment) are hidden unless focused.
     await page.goto("/expenses");

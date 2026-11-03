@@ -72,6 +72,25 @@ export function formatDate(date: IsoDate, locale: Locale, style: DateStyle = "me
   return f.format(new Date(Date.UTC(year, month - 1, day)));
 }
 
+/** "Nov 2026" (short, chart axes) or "November 2026" (long, tooltips and tables). */
+export function formatMonth(
+  date: IsoDate,
+  locale: Locale,
+  style: "short" | "long" = "short",
+): string {
+  const { year, month } = parseIsoDate(date);
+  const f = cached(
+    `month:${locale}:${style}`,
+    () =>
+      new Intl.DateTimeFormat(INTL_LOCALE[locale], {
+        timeZone: "UTC",
+        month: style,
+        year: "numeric",
+      }),
+  );
+  return f.format(new Date(Date.UTC(year, month - 1, 1)));
+}
+
 export function formatPercent(value: BasisPoints, locale: Locale): string {
   const f = cached(
     `pct:${locale}`,
