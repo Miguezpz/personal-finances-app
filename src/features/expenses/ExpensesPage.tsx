@@ -114,6 +114,7 @@ export function ExpensesPage() {
             {t("payCard")}
           </Button>
           <Button
+            variant="cta"
             onClick={() => setExpenseDialog({ open: true, expense: null })}
             data-testid="add-expense"
           >

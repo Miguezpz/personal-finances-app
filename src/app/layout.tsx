@@ -1,6 +1,7 @@
 import type { Metadata, Viewport } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import { InlineScript } from "@/components/layout/InlineScript";
+import en from "@/i18n/messages/en.json";
 import { PREFERENCES_BOOT_SCRIPT } from "@/store/effects";
 import { Providers } from "./providers";
 import "./globals.css";
@@ -18,13 +19,20 @@ const geistMono = Geist_Mono({
 // No static `title`: it follows the language (DocumentTitle in providers.tsx; the inline boot
 // script sets it before the first paint).
 export const metadata: Metadata = {
-  description:
-    "Zero-cost personal finance tracker with automatic income splitting and a semi-monthly Safe-to-Spend.",
+  description: en.common.appDescription,
 };
 
+// Browser UI color follows the OS theme by default; a manual theme choice rewrites both metas
+// (applyTheme in src/store/effects.tsx, FR-011). viewportFit "cover" exposes the safe-area insets.
 export const viewport: Viewport = {
   width: "device-width",
   initialScale: 1,
+  themeColor: [
+    { media: "(prefers-color-scheme: light)", color: "#FFFFFF" },
+    { media: "(prefers-color-scheme: dark)", color: "#031F1D" },
+  ],
+  colorScheme: "light dark",
+  viewportFit: "cover",
 };
 
 export default function RootLayout({ children }: LayoutProps<"/">) {

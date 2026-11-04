@@ -5,11 +5,12 @@
  * currency and privacy toggles (LanguageToggle T116, CurrencyToggle T109, PrivacyToggle T132),
  * cold-start / offline status, and the background processes of the authenticated area.
  */
-import { CloudOff, LogOut, Menu, Wallet } from "lucide-react";
+import { CloudOff, LogOut, Menu } from "lucide-react";
 import { useTranslations } from "next-intl";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { useEffect, type ReactNode } from "react";
+import { BrandMark } from "@/components/brand/BrandMark";
 import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
 import { useDataProvider } from "@/data/context";
@@ -41,9 +42,11 @@ function NavLinks({ onNavigate }: { onNavigate?: () => void }) {
               {...(onNavigate ? { onClick: onNavigate } : {})}
               aria-current={active ? "page" : undefined}
               className={cn(
-                "flex items-center gap-3 rounded-md px-3 py-2 text-sm font-medium transition-colors",
-                "hover:bg-muted focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none",
-                active ? "bg-muted text-foreground" : "text-muted-foreground",
+                "flex items-center gap-3 rounded-md px-3 py-2 text-sm transition-colors duration-fast",
+                "focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none",
+                active
+                  ? "bg-nav-active font-semibold text-nav-active-foreground"
+                  : "font-medium text-muted-foreground hover:bg-muted hover:text-foreground",
               )}
             >
               <Icon aria-hidden="true" className="size-4 shrink-0" />
@@ -139,7 +142,7 @@ export function AppShell({ children, toolbar }: { children: ReactNode; toolbar?:
         </Sheet>
 
         <Link href="/dashboard" className="flex items-center gap-2 font-semibold">
-          <Wallet aria-hidden="true" className="size-5" />
+          <BrandMark className="size-7" />
           <span className="hidden truncate sm:inline">{tc("appName")}</span>
         </Link>
 
@@ -162,13 +165,17 @@ export function AppShell({ children, toolbar }: { children: ReactNode; toolbar?:
       <FxStatus />
       <BackgroundProcesses />
 
-      <div className="mx-auto flex w-full max-w-6xl flex-1">
-        <aside className="hidden w-56 shrink-0 border-r p-4 md:block">
+      <div className="flex w-full flex-1">
+        <aside className="hidden w-60 shrink-0 border-r bg-sidebar p-4 md:block">
           <nav aria-label={t("label")} className="sticky top-18">
             <NavLinks />
           </nav>
         </aside>
-        <main id="main" tabIndex={-1} className="min-w-0 flex-1 p-4 outline-none md:p-6">
+        <main
+          id="main"
+          tabIndex={-1}
+          className="mx-auto w-full max-w-7xl min-w-0 flex-1 p-4 outline-none md:p-6"
+        >
           {children}
         </main>
       </div>

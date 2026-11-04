@@ -43,7 +43,12 @@ export function Dashboard() {
             </p>
           )}
         </div>
-        <Button onClick={() => setAdding(true)} disabled={!data} data-testid="add-expense">
+        <Button
+          variant="cta"
+          onClick={() => setAdding(true)}
+          disabled={!data}
+          data-testid="add-expense"
+        >
           <Plus aria-hidden="true" />
           {t("addExpense")}
         </Button>

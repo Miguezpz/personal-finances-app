@@ -78,10 +78,7 @@ export function LedgerTable({ entries, lookups }: Props) {
                 {account}
               </TableCell>
               <TableCell
-                className={cn(
-                  "text-right align-top font-medium",
-                  e.amount > 0 && "text-emerald-700 dark:text-emerald-400",
-                )}
+                className={cn("text-right align-top font-medium", e.amount > 0 && "text-success")}
               >
                 <Money cents={e.amount} signed={e.amount > 0} />
               </TableCell>

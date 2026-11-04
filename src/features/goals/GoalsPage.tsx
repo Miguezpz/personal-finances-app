@@ -100,7 +100,11 @@ export function GoalsPage() {
           <h1 className="text-2xl font-semibold tracking-tight">{t("title")}</h1>
           <p className="text-sm text-muted-foreground">{t("description")}</p>
         </div>
-        <Button onClick={() => setForm({ open: true, goal: null })} data-testid="add-goal">
+        <Button
+          variant="cta"
+          onClick={() => setForm({ open: true, goal: null })}
+          data-testid="add-goal"
+        >
           <Plus aria-hidden="true" />
           {t("addTitle")}
         </Button>

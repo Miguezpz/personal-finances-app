@@ -24,7 +24,8 @@
       "en": "English",
       "es": "Español"
     },
-    "appShortName": "Finanzas"
+    "appShortName": "Finanzas",
+    "appDescription": "Control de finanzas personales sin costo, con reparto automático de ingresos y un Safe-to-Spend quincenal."
   },
   "nav": {
     "label": "Navegación principal",

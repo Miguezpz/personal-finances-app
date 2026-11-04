@@ -149,6 +149,7 @@ export function IncomePage() {
             </Link>
           </Button>
           <Button
+            variant="cta"
             onClick={() => setDialog({ open: true, income: null })}
             data-testid="register-income"
           >

@@ -24,7 +24,8 @@
       "en": "English",
       "es": "Español"
     },
-    "appShortName": "Finances"
+    "appShortName": "Finances",
+    "appDescription": "Zero-cost personal finance tracker with automatic income splitting and a semi-monthly Safe-to-Spend."
   },
   "nav": {
     "label": "Main navigation",

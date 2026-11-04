@@ -15,9 +15,9 @@ import { cn } from "@/lib/utils";
 export const LIGHT_STYLES: Record<TrafficLight, { badge: string; bar: string; icon: LucideIcon }> =
   {
     green: {
-      badge:
-        "bg-emerald-50 text-emerald-800 ring-emerald-600/20 dark:bg-emerald-950 dark:text-emerald-300",
-      bar: "bg-emerald-500",
+      // Brand green (FR-012); amber and red stay as alerts.
+      badge: "bg-surface-highlight text-success ring-success/25",
+      bar: "bg-primary",
       icon: CircleCheck,
     },
     yellow: {

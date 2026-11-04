@@ -45,7 +45,7 @@ function RecurringRow({ item }: { item: RecurringStatusItem }) {
         {pending ? (
           <Clock aria-hidden="true" className="size-4 shrink-0" />
         ) : (
-          <CircleCheck aria-hidden="true" className="size-4 shrink-0 text-emerald-600" />
+          <CircleCheck aria-hidden="true" className="size-4 shrink-0 text-success" />
         )}
         <span className="truncate">{item.name}</span>
         <span className="shrink-0 text-xs text-muted-foreground">
@@ -75,16 +75,18 @@ export function BucketCard({
   return (
     <Card data-testid={`bucket-${data.bucket}`} data-light={data.light}>
       <CardHeader className="flex flex-row items-start justify-between gap-2">
-        <CardTitle className="text-base">{name}</CardTitle>
+        <CardTitle className="text-xs font-semibold tracking-wide text-primary uppercase">
+          {name}
+        </CardTitle>
         <TrafficLightBadge light={data.light} />
       </CardHeader>
       <CardContent className="flex flex-col gap-4">
-        <div className="flex flex-col gap-1">
+        <div className="flex flex-col gap-1 rounded-lg bg-surface-highlight p-4">
           <span className="text-sm text-muted-foreground">{t("safeToSpend")}</span>
           <Money
             cents={data.available}
             className={cn(
-              "text-3xl font-semibold tracking-tight",
+              "text-[clamp(2rem,6vw,2.75rem)] leading-tight font-semibold tracking-tight",
               data.available < 0 && "text-red-700 dark:text-red-400",
             )}
           />

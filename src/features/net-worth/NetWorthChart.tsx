@@ -6,7 +6,7 @@
  * helpers (privacy, display currency); a legend names every series (identity is never color
  * alone) and a table view carries the same numbers.
  *
- * Colors: validated categorical slots 1–3 (--series-1..3 in globals.css, light and dark).
+ * Colors: validated categorical slots 1–3 (--series-1..3 in src/styles/tokens.css, light and dark; research R15).
  */
 import { useTranslations } from "next-intl";
 import { CartesianGrid, Line, LineChart, ResponsiveContainer, XAxis } from "recharts";
@@ -63,53 +63,61 @@ export function NetWorthChart({ snapshots }: { snapshots: readonly NetWorthSnaps
         ))}
       </ul>
 
-      <div className="h-72 w-full" role="img" aria-label={t("chartLabel")}>
-        <ResponsiveContainer width="100%" height="100%">
-          <LineChart data={data} margin={{ top: 8, right: 12, bottom: 0, left: 0 }}>
-            <CartesianGrid vertical={false} stroke="var(--border)" />
-            <XAxis
-              dataKey="on"
-              tickFormatter={(on: IsoDate) => formatMonth(on, locale)}
-              tick={AXIS_TICK}
-              tickLine={false}
-              axisLine={false}
-              minTickGap={24}
-            />
-            <MaskedYAxis tick={AXIS_TICK} tickLine={false} axisLine={false} width={84} />
-            <MaskedTooltip
-              cursor={{ stroke: "var(--muted-foreground)", strokeDasharray: "3 3" }}
-              labelFormatter={(on) => formatMonth(on as IsoDate, locale, "long")}
-              contentStyle={{
-                background: "var(--popover)",
-                border: "1px solid var(--border)",
-                borderRadius: 8,
-                color: "var(--popover-foreground)",
-                fontSize: 13,
-              }}
-              itemStyle={{ color: "var(--popover-foreground)" }}
-              separator=": "
-              // Same order as the legend.
-              itemSorter={(item) => NET_WORTH_SERIES.findIndex((x) => x.key === item.dataKey)}
-            />
-            {NET_WORTH_SERIES.map(({ key, color }) => (
-              <Line
-                key={key}
-                type="monotone"
-                dataKey={key}
-                name={name(key)}
-                stroke={color}
-                strokeWidth={2}
-                dot={
-                  single
-                    ? { r: 4, fill: color, stroke: "var(--background)", strokeWidth: 2 }
-                    : false
-                }
-                activeDot={{ r: 5, fill: color, stroke: "var(--background)", strokeWidth: 2 }}
-                isAnimationActive={false}
+      {/* Highlight block behind the chart guides the eye (FR-014). */}
+      <div className="rounded-lg bg-surface-highlight p-3">
+        <div className="h-72 w-full" role="img" aria-label={t("chartLabel")}>
+          <ResponsiveContainer width="100%" height="100%">
+            <LineChart data={data} margin={{ top: 8, right: 12, bottom: 0, left: 0 }}>
+              <CartesianGrid vertical={false} stroke="var(--border)" />
+              <XAxis
+                dataKey="on"
+                tickFormatter={(on: IsoDate) => formatMonth(on, locale)}
+                tick={AXIS_TICK}
+                tickLine={false}
+                axisLine={false}
+                minTickGap={24}
               />
-            ))}
-          </LineChart>
-        </ResponsiveContainer>
+              <MaskedYAxis tick={AXIS_TICK} tickLine={false} axisLine={false} width={84} />
+              <MaskedTooltip
+                cursor={{ stroke: "var(--muted-foreground)", strokeDasharray: "3 3" }}
+                labelFormatter={(on) => formatMonth(on as IsoDate, locale, "long")}
+                contentStyle={{
+                  background: "var(--popover)",
+                  border: "1px solid var(--border)",
+                  borderRadius: 8,
+                  color: "var(--popover-foreground)",
+                  fontSize: 13,
+                }}
+                itemStyle={{ color: "var(--popover-foreground)" }}
+                separator=": "
+                // Same order as the legend.
+                itemSorter={(item) => NET_WORTH_SERIES.findIndex((x) => x.key === item.dataKey)}
+              />
+              {NET_WORTH_SERIES.map(({ key, color }) => (
+                <Line
+                  key={key}
+                  type="monotone"
+                  dataKey={key}
+                  name={name(key)}
+                  stroke={color}
+                  strokeWidth={2}
+                  dot={
+                    single
+                      ? { r: 4, fill: color, stroke: "var(--surface-highlight)", strokeWidth: 2 }
+                      : false
+                  }
+                  activeDot={{
+                    r: 5,
+                    fill: color,
+                    stroke: "var(--surface-highlight)",
+                    strokeWidth: 2,
+                  }}
+                  isAnimationActive={false}
+                />
+              ))}
+            </LineChart>
+          </ResponsiveContainer>
+        </div>
       </div>
 
       <details className="text-sm">

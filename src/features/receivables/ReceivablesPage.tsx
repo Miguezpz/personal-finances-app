@@ -23,7 +23,7 @@ import { CollectionDialog } from "./CollectionDialog";
 import { useReceivables } from "./hooks";
 
 const STATUS_STYLE: Record<Installment["status"], string> = {
-  collected: "bg-emerald-50 text-emerald-800 dark:bg-emerald-950 dark:text-emerald-300",
+  collected: "bg-surface-highlight text-success",
   partial: "bg-amber-50 text-amber-900 dark:bg-amber-950 dark:text-amber-300",
   pending: "bg-muted text-foreground",
 };
@@ -51,7 +51,12 @@ export function ReceivablesPage() {
           <h1 className="text-2xl font-semibold tracking-tight">{t("title")}</h1>
           <p className="text-sm text-muted-foreground">{t("description")}</p>
         </div>
-        <Button className="shrink-0" onClick={() => setAdding(true)} data-testid="add-receivable">
+        <Button
+          variant="cta"
+          className="shrink-0"
+          onClick={() => setAdding(true)}
+          data-testid="add-receivable"
+        >
           <Plus aria-hidden="true" />
           {t("addTitle")}
         </Button>

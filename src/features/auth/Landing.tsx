@@ -1,8 +1,9 @@
 "use client";
 
-import { ArrowRight, Wallet } from "lucide-react";
+import { ArrowRight } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { Suspense } from "react";
+import { BrandMark } from "@/components/brand/BrandMark";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
@@ -21,13 +22,11 @@ export function Landing({ demoUrl }: LandingProps) {
   const tc = useTranslations("common");
 
   return (
-    <main className="relative flex flex-1 items-center justify-center px-4 py-10">
+    <main className="relative flex flex-1 items-center justify-center bg-gradient-to-b from-surface-highlight to-background px-4 py-10">
       <LanguageToggle className="absolute top-4 right-4" />
       <div className="flex w-full max-w-md flex-col gap-6">
         <header className="flex flex-col items-center gap-3 text-center">
-          <span className="flex size-12 items-center justify-center rounded-xl bg-primary text-primary-foreground">
-            <Wallet aria-hidden="true" className="size-6" />
-          </span>
+          <BrandMark className="size-12" />
           <h1 className="text-2xl font-semibold tracking-tight">{tc("appName")}</h1>
           <p className="text-sm text-muted-foreground">{t("tagline")}</p>
         </header>
@@ -54,7 +53,7 @@ export function Landing({ demoUrl }: LandingProps) {
 
         {demoUrl && (
           <div className="flex flex-col items-center gap-2 text-center">
-            <Button asChild variant="outline" className="w-full">
+            <Button asChild variant="cta" className="w-full">
               <a href={demoUrl}>
                 {t("exploreDemo")}
                 <ArrowRight aria-hidden="true" />
