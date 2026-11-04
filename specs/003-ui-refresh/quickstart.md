@@ -59,3 +59,34 @@ NEXT_PUBLIC_DEMO_MODE=true pnpm build && pnpm start
 ```
 
 Lighthouse móvil en `/dashboard`: Accesibilidad ≥ 95; Rendimiento sin regresión respecto a la línea base.
+
+## 4. Resultado de la validación (T061, 2026-11-04)
+
+Validado en demo (build de producción y `next dev`), EN y ES. Los escenarios en **live** (#15 y la parte live del
+resto) no se ejecutaron por decisión del usuario: la feature es solo de presentación y no toca la capa de datos;
+la app real sigue contra Supabase en la nube.
+
+| # | Cómo se verificó | Resultado |
+|---|---|---|
+| 1, 3, 4 | `brand.spec.ts`, capturas en 1440 px claro | ✅ |
+| 2, 18 | `icon.svg` con variante oscura, `favicon.ico` 16/32/48, manifiesto validado en `brand.spec.ts`; instalación en un móvil real no probada | ✅ / ⚠ manual pendiente |
+| 5–7 | `theme.spec.ts` | ✅ |
+| 8–11 | `mobile.spec.ts` (incl. 320 px), capturas en 375 px | ✅ |
+| 12 | script: saldo, semáforo y barra de ambos buckets terminan en y = 660 px < 900 | ✅ |
+| 13 | capturas: indicador en sidebar y barra inferior; fundido vía `(app)/template.tsx` | ✅ |
+| 14 | script: `card-in` corre en la primera visita (2 animaciones) y no al volver por navegación cliente (0) | ✅ |
+| 15 | live (no ejecutado, ver arriba); el realce se cubre por código (`key` en el bloque de saldo) | ⚠ no ejecutado |
+| 16 | `us9-privacy.spec.ts` (blur instantáneo de campos al activar, 0.2 s al desactivar) | ✅ |
+| 17 | `motion.spec.ts` con `reducedMotion: "reduce"` en todas las rutas | ✅ |
+| 19 | script ES: barra «Inicio · Gastos · Ingresos · Metas · Más», FAB «Registrar gasto», «Preferencias»; `parity.test.ts` | ✅ |
+| 20 | `a11y.spec.ts` (skip link) + script: anillo `rgb(15,118,110)` en claro y `rgb(52,211,153)` en oscuro | ✅ |
+
+Desviaciones encontradas y corregidas durante la implementación:
+
+- `--series-*` ajustados tras el validador de CVD (research R15).
+- `--surface-highlight` oscuro = `#0A3A36` (no `--brand-ink`): igual a `--card`, el bloque de realce desaparecía dentro
+  de las tarjetas oscuras (FR-014).
+- Shimmer: el gradiente `--muted`→`--surface-highlight` era invisible en claro (mismo color); el tramo central se mezcla
+  con `--nav-active`.
+- Enlace del logo sin nombre accesible en móvil (`hidden` → `sr-only`), detectado por axe móvil.
+- Presupuesto de primera carga excedido y corregido (ver `baseline.md`).

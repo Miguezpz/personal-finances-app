@@ -132,6 +132,18 @@
   animation: balance-highlight var(--duration-slow) var(--ease-out-quint);
 }
 
+/* Staggered entrance of the dashboard cards (FR-029); `both` keeps a delayed card hidden until its turn. */
+@keyframes card-in {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+}
+
+@utility animate-card-in {
+  animation: card-in var(--duration-base) var(--ease-out-quint) both;
+}
+
 /* Content fade when navigating (FR-028), mounted by src/app/(app)/template.tsx. */
 @keyframes content-in {
   from {
@@ -168,7 +180,9 @@ html[data-privacy="off"] input[data-money] {
   ::after {
     animation-duration: 0.01ms !important;
     animation-iteration-count: 1 !important;
+    animation-delay: 0s !important;
     transition-duration: 0.01ms !important;
+    transition-delay: 0s !important;
     scroll-behavior: auto !important;
   }
   .animate-shimmer {

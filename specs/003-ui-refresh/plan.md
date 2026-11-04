@@ -143,4 +143,5 @@ helpers de gráficas enmascaradas).
 
 | Violación | Why Needed | Simpler Alternative Rejected Because |
 |-----------|------------|-------------------------------------|
+| Framer Motion solo en el indicador de navegación, cargado en diferido; sin `MotionProvider` global (T008/T009 revertidos en T060) | SC-006: el proveedor estático y el `m.div` del dashboard sumaban ~20 kB gzip a la primera carga de todas las rutas | Proveedor global con `LazyMotion` asíncrono: el núcleo de `m`/`LazyMotion` igual entra en la primera carga (medido en `baseline.md`) |
 | Auditoría de accesibilidad sin `ui-ux-pro-max`/`impeccable` (Restricciones Técnicas) | Las skills no están disponibles en el entorno (mismo caso documentado en `specs/001-personal-finances-core/plan.md`) | No hay alternativa equivalente instalable; se cubre con el test de contraste automático (T006, FR-039) + axe en claro, oscuro y móvil (T029, T042); T062 usa las skills si llegan a instalarse |

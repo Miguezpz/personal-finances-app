@@ -110,6 +110,21 @@ Decisiones técnicas de la Phase 0. No quedan "NEEDS CLARIFICATION" en el Techni
 - **Alternatives considered**: `motion.*` directo (~35 kB en primera carga); `layoutId` (requiere `domMax`, +10 kB);
   View Transitions API (soporte desigual en Firefox/Safari y choca con el gate de preferencias).
 
+### Revisión T060 (presupuesto de primera carga)
+
+La medición real contradijo la estimación: `LazyMotion` + `MotionConfig` estáticos en `providers.tsx` costaban
+~10 kB gzip en **todas** las rutas y el `m.div` del dashboard otros ~10 kB (más ~16 kB del menú de Radix del
+`ThemeToggle`): +41–45 kB en total, contra un presupuesto de +20 kB (SC-006). Decisión final:
+
+- Sin `MotionProvider` global. Framer Motion se usa solo en el indicador de navegación
+  (`src/components/motion/NavIndicatorMotion.tsx`), que envuelve su `m.span` en `LazyMotion strict` +
+  `MotionConfig reducedMotion="user"` y se carga con `next/dynamic` (`ssr: false`) desde
+  `src/components/layout/NavIndicator.tsx`. Es decorativo: hasta que se mide, el enlace activo pinta su propio fondo.
+- La entrada escalonada del dashboard pasa a CSS (`animate-card-in` con `animation-delay` de 40 ms y `fill-mode: both`):
+  no puede esperar a un chunk asíncrono sin retrasar los saldos (FR-034).
+- `ThemeToggle` carga `ThemeMenu` (Radix) con `next/dynamic`; mientras tanto muestra un disparador idéntico deshabilitado.
+- Resultado: +3.7 kB (`/`) y +5.8 kB (`/dashboard`), ver `baseline.md`.
+
 ## R9. Movimiento reducido
 
 - **Decision**: bloque global en `globals.css`:

@@ -1,8 +1,8 @@
 "use client";
 
 /**
- * Client providers (T050): TanStack Query, preferences (+ effects), motion (spec 003), next-intl with
- * BOTH dictionaries, the DataProvider and the toaster.
+ * Client providers (T050): TanStack Query, preferences (+ effects), next-intl with BOTH
+ * dictionaries, the DataProvider and the toaster.
  *
  * Rendering is gated on hydrated preferences: the server and the first client render show a
  * text-free skeleton, then the app renders directly in the stored locale. Together with the
@@ -15,7 +15,6 @@ import { NextIntlClientProvider, useTranslations } from "next-intl";
 import { useEffect, useState, type ReactNode } from "react";
 import { toast } from "sonner";
 import { BootSkeleton } from "@/components/layout/BootSkeleton";
-import { MotionProvider } from "@/components/motion/MotionProvider";
 import { Toaster } from "@/components/ui/sonner";
 import { DataProviderProvider } from "@/data/context";
 import { DEFAULT_TIMEZONE } from "@/domain/settings";
@@ -82,16 +81,14 @@ export function Providers({ children }: { children: ReactNode }) {
   return (
     <QueryClientProvider client={queryClient}>
       <PreferencesEffects />
-      <MotionProvider>
-        <PreferencesGate>
-          <IntlProvider>
-            <DemoToastBridge />
-            <DocumentTitle />
-            <DataProviderProvider fallback={<BootSkeleton />}>{children}</DataProviderProvider>
-            <Toaster position="top-center" />
-          </IntlProvider>
-        </PreferencesGate>
-      </MotionProvider>
+      <PreferencesGate>
+        <IntlProvider>
+          <DemoToastBridge />
+          <DocumentTitle />
+          <DataProviderProvider fallback={<BootSkeleton />}>{children}</DataProviderProvider>
+          <Toaster position="top-center" />
+        </IntlProvider>
+      </PreferencesGate>
     </QueryClientProvider>
   );
 }

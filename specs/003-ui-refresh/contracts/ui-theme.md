@@ -59,8 +59,9 @@ size:    "default" | "xs" | "sm" | "lg" | "icon" | "icon-xs" | "icon-sm" | "icon
 - `default`: `bg-primary text-primary-foreground hover:bg-primary-hover`.
 - `cta`: `bg-cta text-cta-foreground shadow-[0_4px_14px_-4px] shadow-cta/50 hover:shadow-cta/70`; máximo uno por
   pantalla (SC-007). En móvil (< `md`) el único `cta` es el CTA flotante: los botones de página usan
-  `variant="cta"` solo desde `md` (`className` con `max-md:` que los devuelve al estilo `default`), y el botón
-  `add-expense` de Dashboard y Gastos lleva `max-md:hidden`.
+  `ResponsiveCtaButton` (`src/components/ui/responsive-cta.tsx`), que resuelve `variant` = `cta` desde `md` y
+  `default` por debajo (así también `data-variant`, que es lo que cuentan los e2e; con clases `max-md:` el atributo
+  seguiría diciendo `cta`), y el botón `add-expense` de Dashboard y Gastos lleva `max-md:hidden`.
 - Todas: `focus-visible:ring-3 ring-ring/60`, `active:scale-[.98]`, `transition-[color,background-color,box-shadow,transform] duration-fast`,
   `pointer-coarse:min-h-11 pointer-coarse:min-w-11`.
 
@@ -102,15 +103,15 @@ abierto.
 | Interacción | Mecanismo | Duración | Con reduced motion |
 |---|---|---|---|
 | Hover/pulsación de botón | CSS | 150 ms | instantáneo |
-| Indicador de nav | Framer `m.span` (`y` en sidebar, `x` en barra inferior) | 250 ms `ease-out-quint` | salta a la posición |
+| Indicador de nav | Framer `m.span` (`y` en sidebar, `x` en barra inferior), cargado en diferido (research R8, revisión T060) | 250 ms `ease-out-quint` | salta a la posición |
 | Fundido de contenido al navegar | CSS `animate-content-in` (opacity + 4 px) en `(app)/template.tsx` | 150 ms | sin animación |
-| Entrada escalonada dashboard | Framer `variants` + `staggerChildren: 0.04` | 200 ms c/u | estado final directo |
+| Entrada escalonada dashboard | CSS `animate-card-in` con `animation-delay` de 40 ms por tarjeta (research R8, revisión T060) | 200 ms c/u | estado final directo |
 | Realce de saldo | CSS `animate-balance-highlight` (solo `background-color`) | 300 ms | sin animación |
 | Barra de progreso | CSS `transform: scaleX` | 300 ms | instantáneo |
 | Color del semáforo | CSS `transition-colors` | 200 ms | instantáneo |
 | Blur de privacidad | CSS: `.money` en los dos sentidos (ya muestra `••••`); `input[data-money]` **solo al desactivar** (al activar, instantáneo) | 200 ms | instantáneo |
 | Diálogos / sheets | `tw-animate-css` | 150–200 ms | sin animación |
-| Skeleton | CSS `animate-shimmer` (gradiente `--muted`→`--surface-highlight`) | 1.5 s en bucle | estático |
+| Skeleton | CSS `animate-shimmer` (gradiente `--muted` → mezcla de `--surface-highlight` con 45 % de `--nav-active` → `--muted`; en claro `--muted` y `--surface-highlight` son iguales) | 1.5 s en bucle | estático |
 | CTA flotante al hacer scroll | CSS `translate-y` | 200 ms | instantáneo |
 
 Garantías: ninguna animación retrasa el renderizado de datos (los datos se pintan en el primer render; las

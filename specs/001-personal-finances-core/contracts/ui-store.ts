@@ -21,6 +21,11 @@ export interface PreferencesState {
   /** Modo Privacidad: enmascara importes, saldos y ejes de gráficas. */
   privacyMode: boolean;
   /**
+   * Tema (añadido en spec 003, ver specs/003-ui-refresh/data-model.md §1). Por defecto 'system';
+   * un valor guardado inválido se ignora en `merge`. Sin cambio de versión de la clave.
+   */
+  theme: ThemePreference;
+  /**
    * false hasta que se rehidrata desde localStorage. Mientras sea false y no sea demo, <Money> debe
    * mostrarse enmascarado (estado seguro por defecto: sin parpadeo de importes).
    */
@@ -32,6 +37,8 @@ export interface PreferencesActions {
   setDisplayCurrency(currency: DisplayCurrency): void;
   togglePrivacy(): void;
   setPrivacy(on: boolean): void;
+  /** Spec 003. */
+  setTheme(theme: ThemePreference): void;
   /** Llamada una sola vez en el cliente (persist con skipHydration). */
   markHydrated(): void;
 }
@@ -39,7 +46,14 @@ export interface PreferencesActions {
 export type PreferencesStore = PreferencesState & PreferencesActions;
 
 /** Parte persistida (partialize): excluye `hydrated` y las acciones. */
-export type PersistedPreferences = Pick<PreferencesState, 'locale' | 'displayCurrency' | 'privacyMode'>;
+export type PersistedPreferences = Pick<
+  PreferencesState,
+  'locale' | 'displayCurrency' | 'privacyMode' | 'theme'
+>;
+
+/** Spec 003 (specs/003-ui-refresh/data-model.md §1). */
+export type ThemePreference = 'system' | 'light' | 'dark';
+export type ResolvedTheme = 'light' | 'dark';
 
 export const PREFERENCES_STORAGE_KEY = 'pfa:prefs:v1' as const;
 
@@ -47,6 +61,7 @@ export const DEFAULT_PREFERENCES: PersistedPreferences = {
   locale: 'en',
   displayCurrency: 'MXN',
   privacyMode: false,
+  theme: 'system',
 };
 
 /**
@@ -80,6 +95,10 @@ export interface UiState {
   waking: boolean;
   /** true si el navegador reporta navigator.onLine === false. */
   offline: boolean;
+  /** Spec 003: la entrada escalonada del dashboard solo se reproduce una vez por sesión. */
+  dashboardIntroPlayed: boolean;
+  /** Spec 003: panel móvil de preferencias. Ver specs/003-ui-refresh/data-model.md §2. */
+  preferencesOpen: boolean;
 }
 
 export interface UiActions {
@@ -88,6 +107,8 @@ export interface UiActions {
   closeDialog(): void;
   setWaking(waking: boolean): void;
   setOffline(offline: boolean): void;
+  markDashboardIntroPlayed(): void;
+  setPreferencesOpen(open: boolean): void;
 }
 
 export type UiStore = UiState & UiActions;
@@ -99,6 +120,7 @@ export type UiStore = UiState & UiActions;
  * - document.documentElement.lang           ← locale
  * - document.documentElement.dataset.privacy ← 'on' | 'off'  (CSS: html[data-privacy="on"] .money { filter: blur(...) })
  * - document.cookie NEXT_LOCALE              ← locale (para que el HTML inicial salga en el idioma elegido)
+ * - <html class="dark">, color-scheme, meta theme-color ← theme (spec 003, contracts/ui-theme.md §4)
  */
 export interface PreferencesEffectsContract {
   apply(state: PersistedPreferences): void;
