@@ -20,12 +20,12 @@ export function BrandMark({ className }: { className?: string }) {
         width="23"
         height="23"
         rx="6"
-        fill="var(--brand-ink)"
-        stroke="var(--border)"
+        fill="var(--brand-ink, #052e2b)"
+        stroke="var(--border, #d1e7e0)"
       />
-      <rect x="5.5" y="13" width="3" height="5.5" rx="1" fill="var(--brand-emerald)" />
-      <rect x="10.5" y="9.5" width="3" height="9" rx="1" fill="var(--brand-emerald)" />
-      <rect x="15.5" y="5.5" width="3" height="13" rx="1" fill="var(--brand-emerald)" />
+      <rect x="5.5" y="13" width="3" height="5.5" rx="1" fill="var(--brand-emerald, #34d399)" />
+      <rect x="10.5" y="9.5" width="3" height="9" rx="1" fill="var(--brand-emerald, #34d399)" />
+      <rect x="15.5" y="5.5" width="3" height="13" rx="1" fill="var(--brand-emerald, #34d399)" />
     </svg>
   );
 }

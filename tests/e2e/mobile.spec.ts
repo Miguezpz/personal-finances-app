@@ -67,6 +67,29 @@ test.describe("US2 · mobile", { tag: "@demo" }, () => {
     await expect(dialog.locator("input[data-money]")).toHaveAttribute("inputmode", "decimal");
   });
 
+  test("the floating CTA ignores small scrolls, hides on a real scroll down, returns on scroll up", async ({
+    page,
+  }) => {
+    await page.goto("/ledger");
+    await settled(page);
+    const fab = page.getByTestId("fab-add-expense");
+    const scrollTo = (y: number) => page.evaluate((top) => window.scrollTo({ top }), y);
+    const hidden = () => fab.getAttribute("aria-hidden").then((v) => v === "true");
+
+    await scrollTo(100); // inside the always-visible top zone…
+    await scrollTo(150); // …then a small nudge down (50 px): stays visible
+    await page.waitForTimeout(100);
+    expect(await hidden()).toBe(false);
+
+    await scrollTo(400); // a deliberate scroll down hides it
+    await expect.poll(hidden).toBe(true);
+    await scrollTo(390); // a tiny scroll back up doesn't bring it back yet
+    await page.waitForTimeout(100);
+    expect(await hidden()).toBe(true);
+    await scrollTo(340); // a real scroll up does
+    await expect.poll(hidden).toBe(false);
+  });
+
   test("the floating CTA is the only highlighted call to action on every route", async ({
     page,
   }) => {

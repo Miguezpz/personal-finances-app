@@ -18,21 +18,37 @@ import { useUi } from "@/store/ui";
 import { NavIndicator } from "./NavIndicator";
 import { PRIMARY_NAV_ITEMS } from "./nav-items";
 
-const SCROLL_THRESHOLD = 8;
+/** Hide after a deliberate scroll down, show again after a short scroll up; always visible near the top. */
+const HIDE_AFTER_PX = 64;
+const SHOW_AFTER_PX = 24;
+const ALWAYS_VISIBLE_TOP_PX = 120;
 const FIELD_SELECTOR = "input, select, textarea, [contenteditable='true']";
 
-/** Hidden while scrolling down (beyond the threshold) or while a form field has focus. */
+/**
+ * Hidden while scrolling down (once the scroll in that direction exceeds HIDE_AFTER_PX) or while a form field has
+ * focus. Distances accumulate per direction, so small jitters (or iOS bounce) don't make it flicker.
+ */
 function useFabHidden(): boolean {
   const [scrolledDown, setScrolledDown] = useState(false);
   const [editing, setEditing] = useState(false);
 
   useEffect(() => {
     let last = window.scrollY;
+    let travelled = 0; // > 0: down, < 0: up, since the last change of direction
     const onScroll = () => {
       const y = window.scrollY;
-      if (Math.abs(y - last) < SCROLL_THRESHOLD) return;
-      setScrolledDown(y > last && y > 0);
+      const delta = y - last;
       last = y;
+      if (y <= ALWAYS_VISIBLE_TOP_PX) {
+        travelled = 0;
+        setScrolledDown(false);
+        return;
+      }
+      if (delta === 0) return;
+      if (Math.sign(delta) !== Math.sign(travelled)) travelled = 0;
+      travelled += delta;
+      if (travelled > HIDE_AFTER_PX) setScrolledDown(true);
+      else if (travelled < -SHOW_AFTER_PX) setScrolledDown(false);
     };
     const onFocusIn = (e: FocusEvent) =>
       setEditing(e.target instanceof Element && e.target.matches(FIELD_SELECTOR));
