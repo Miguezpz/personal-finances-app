@@ -10,11 +10,12 @@ import { Ellipsis, Plus } from "lucide-react";
 import { useTranslations } from "next-intl";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { AddExpenseDialog } from "@/features/expenses/AddExpenseDialog";
 import { cn } from "@/lib/utils";
 import { useUi } from "@/store/ui";
+import { NavIndicator } from "./NavIndicator";
 import { PRIMARY_NAV_ITEMS } from "./nav-items";
 
 const SCROLL_THRESHOLD = 8;
@@ -57,6 +58,7 @@ export function MobileNav() {
   const setSidebarOpen = useUi((s) => s.setSidebarOpen);
   const [adding, setAdding] = useState(false);
   const fabHidden = useFabHidden();
+  const listRef = useRef<HTMLDivElement>(null);
 
   return (
     <>
@@ -81,56 +83,60 @@ export function MobileNav() {
         data-testid="mobile-nav"
         className="fixed inset-x-0 bottom-0 z-30 border-t bg-background/95 pb-[env(safe-area-inset-bottom)] backdrop-blur md:hidden"
       >
-        <ul className="relative grid grid-cols-5">
-          {PRIMARY_NAV_ITEMS.map(({ href, labelKey, icon: Icon }) => {
-            const active = pathname === href || pathname.startsWith(`${href}/`);
-            return (
-              <li key={href} className="min-w-0">
-                <Link
-                  href={href}
-                  aria-current={active ? "page" : undefined}
-                  data-testid={`mobile-nav-${href.slice(1)}`}
-                  className={cn(
-                    "flex min-h-14 flex-col items-center justify-center gap-0.5 px-1 text-[0.6875rem] leading-tight transition-colors duration-fast",
-                    "focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none focus-visible:ring-inset",
-                    active
-                      ? "font-semibold text-foreground"
-                      : "font-medium text-muted-foreground hover:text-foreground",
-                  )}
-                >
-                  <span
-                    data-nav-anchor
+        <div ref={listRef} className="group/nav relative">
+          <NavIndicator listRef={listRef} className="rounded-full" />
+          <ul className="grid grid-cols-5">
+            {PRIMARY_NAV_ITEMS.map(({ href, labelKey, icon: Icon }) => {
+              const active = pathname === href || pathname.startsWith(`${href}/`);
+              return (
+                <li key={href} className="min-w-0">
+                  <Link
+                    href={href}
+                    aria-current={active ? "page" : undefined}
+                    data-testid={`mobile-nav-${href.slice(1)}`}
                     className={cn(
-                      "relative z-10 flex h-7 w-12 items-center justify-center rounded-full transition-colors duration-fast",
-                      active && "bg-nav-active text-nav-active-foreground",
+                      "flex min-h-14 flex-col items-center justify-center gap-0.5 px-1 text-[0.6875rem] leading-tight transition-colors duration-fast",
+                      "focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none focus-visible:ring-inset",
+                      active
+                        ? "font-semibold text-foreground"
+                        : "font-medium text-muted-foreground hover:text-foreground",
                     )}
                   >
-                    <Icon aria-hidden="true" className="size-5" />
-                  </span>
-                  <span className="relative z-10 max-w-full truncate">{t(labelKey)}</span>
-                </Link>
-              </li>
-            );
-          })}
-          <li className="min-w-0">
-            <button
-              type="button"
-              data-testid="mobile-nav-more"
-              aria-haspopup="dialog"
-              aria-expanded={sidebarOpen}
-              onClick={() => setSidebarOpen(true)}
-              className={cn(
-                "flex min-h-14 w-full flex-col items-center justify-center gap-0.5 px-1 text-[0.6875rem] leading-tight font-medium text-muted-foreground transition-colors duration-fast hover:text-foreground",
-                "focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none focus-visible:ring-inset",
-              )}
-            >
-              <span className="flex h-7 w-12 items-center justify-center">
-                <Ellipsis aria-hidden="true" className="size-5" />
-              </span>
-              <span className="max-w-full truncate">{t("more")}</span>
-            </button>
-          </li>
-        </ul>
+                    <span
+                      data-nav-anchor
+                      className={cn(
+                        "relative z-10 flex h-7 w-12 items-center justify-center rounded-full transition-colors duration-fast",
+                        active &&
+                          "bg-nav-active text-nav-active-foreground group-data-[indicator=ready]/nav:bg-transparent",
+                      )}
+                    >
+                      <Icon aria-hidden="true" className="size-5" />
+                    </span>
+                    <span className="relative z-10 max-w-full truncate">{t(labelKey)}</span>
+                  </Link>
+                </li>
+              );
+            })}
+            <li className="min-w-0">
+              <button
+                type="button"
+                data-testid="mobile-nav-more"
+                aria-haspopup="dialog"
+                aria-expanded={sidebarOpen}
+                onClick={() => setSidebarOpen(true)}
+                className={cn(
+                  "flex min-h-14 w-full flex-col items-center justify-center gap-0.5 px-1 text-[0.6875rem] leading-tight font-medium text-muted-foreground transition-colors duration-fast hover:text-foreground",
+                  "focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none focus-visible:ring-inset",
+                )}
+              >
+                <span className="flex h-7 w-12 items-center justify-center">
+                  <Ellipsis aria-hidden="true" className="size-5" />
+                </span>
+                <span className="max-w-full truncate">{t("more")}</span>
+              </button>
+            </li>
+          </ul>
+        </div>
       </nav>
 
       {adding && <AddExpenseDialog open={adding} onOpenChange={setAdding} />}

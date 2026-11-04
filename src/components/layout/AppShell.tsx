@@ -9,7 +9,7 @@ import { CloudOff, LogOut } from "lucide-react";
 import { useTranslations } from "next-intl";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
-import { useEffect, type ReactNode } from "react";
+import { useEffect, useRef, type ReactNode } from "react";
 import { BrandMark } from "@/components/brand/BrandMark";
 import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sheet";
@@ -27,6 +27,7 @@ import { DemoBanner } from "./DemoBanner";
 import { LanguageToggle } from "./LanguageToggle";
 import { MobileNav } from "./MobileNav";
 import { NAV_ITEMS, SECONDARY_NAV_ITEMS, type NavItem } from "./nav-items";
+import { NavIndicator } from "./NavIndicator";
 import { PreferencesSheet } from "./PreferencesSheet";
 import { PrivacyToggle } from "./PrivacyToggle";
 import { ThemeToggle } from "./ThemeToggle";
@@ -40,31 +41,36 @@ function NavLinks({
 }) {
   const t = useTranslations("nav");
   const pathname = usePathname();
+  const listRef = useRef<HTMLDivElement>(null);
   return (
-    <ul className="flex flex-col gap-1">
-      {items.map(({ href, labelKey, icon: Icon }) => {
-        const active = pathname === href || pathname.startsWith(`${href}/`);
-        return (
-          <li key={href}>
-            <Link
-              href={href}
-              {...(onNavigate ? { onClick: onNavigate } : {})}
-              aria-current={active ? "page" : undefined}
-              className={cn(
-                "flex items-center gap-3 rounded-md px-3 py-2 text-sm transition-colors duration-fast pointer-coarse:min-h-11",
-                "focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none",
-                active
-                  ? "bg-nav-active font-semibold text-nav-active-foreground"
-                  : "font-medium text-muted-foreground hover:bg-muted hover:text-foreground",
-              )}
-            >
-              <Icon aria-hidden="true" className="size-4 shrink-0" />
-              {t(labelKey)}
-            </Link>
-          </li>
-        );
-      })}
-    </ul>
+    <div ref={listRef} className="group/nav relative">
+      <NavIndicator listRef={listRef} className="rounded-md" />
+      <ul className="flex flex-col gap-1">
+        {items.map(({ href, labelKey, icon: Icon }) => {
+          const active = pathname === href || pathname.startsWith(`${href}/`);
+          return (
+            <li key={href}>
+              <Link
+                href={href}
+                {...(onNavigate ? { onClick: onNavigate } : {})}
+                aria-current={active ? "page" : undefined}
+                className={cn(
+                  "relative z-10 flex items-center gap-3 rounded-md px-3 py-2 text-sm transition-colors duration-fast pointer-coarse:min-h-11",
+                  "focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none",
+                  active
+                    ? // The sliding indicator paints the background once measured (NavIndicator).
+                      "bg-nav-active font-semibold text-nav-active-foreground group-data-[indicator=ready]/nav:bg-transparent"
+                    : "font-medium text-muted-foreground hover:bg-muted hover:text-foreground",
+                )}
+              >
+                <Icon aria-hidden="true" className="size-4 shrink-0" />
+                {t(labelKey)}
+              </Link>
+            </li>
+          );
+        })}
+      </ul>
+    </div>
   );
 }
 

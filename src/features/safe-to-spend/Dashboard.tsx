@@ -5,6 +5,7 @@
  * their semáforo, the quincena dates and the days to the next payday. Loading, empty and error
  * states; a clear warning when a bucket is overspent that never blocks recording (FR-021).
  */
+import { m, useReducedMotion, type Variants } from "framer-motion";
 import { Plus, TriangleAlert } from "lucide-react";
 import { useTranslations } from "next-intl";
 import Link from "next/link";
@@ -16,8 +17,19 @@ import { AddExpenseDialog } from "@/features/expenses/AddExpenseDialog";
 import { formatPeriodRange } from "@/features/income/format";
 import { CollectionAlerts } from "@/features/receivables/CollectionAlerts";
 import { selectLocale, usePreferences } from "@/store/preferences";
+import { useUi } from "@/store/ui";
 import { BucketCard } from "./BucketCard";
 import { useSafeToSpend } from "./useSafeToSpend";
+
+/**
+ * Staggered entrance of the bucket cards (FR-029): once per session, never under reduced motion. Only opacity and
+ * transform move — the balances are in the DOM from the first render (FR-034).
+ */
+const GRID: Variants = { hidden: {}, show: { transition: { staggerChildren: 0.04 } } };
+const CARD: Variants = {
+  hidden: { opacity: 0, y: 8 },
+  show: { opacity: 1, y: 0, transition: { duration: 0.2, ease: [0.22, 1, 0.36, 1] } },
+};
 
 export function Dashboard() {
   const t = useTranslations("dashboard");
@@ -26,6 +38,10 @@ export function Dashboard() {
   const locale = usePreferences(selectLocale);
   const { data, recurringItems, hasAllocations, isPending, isError, refetch } = useSafeToSpend();
   const [adding, setAdding] = useState(false);
+  const introPlayed = useUi((s) => s.dashboardIntroPlayed);
+  const markIntroPlayed = useUi((s) => s.markDashboardIntroPlayed);
+  const reduced = useReducedMotion();
+  const playIntro = !introPlayed && !reduced;
 
   const overspent = data ? [data.needs, data.wants].filter((b) => b.available < 0) : [];
 
@@ -100,16 +116,29 @@ export function Dashboard() {
             )}
           </div>
 
-          <div className="grid gap-4 md:grid-cols-2" aria-live="polite">
-            <BucketCard
-              data={data.needs}
-              recurring={recurringItems.filter((i) => i.bucket === "needs")}
-            />
-            <BucketCard
-              data={data.wants}
-              recurring={recurringItems.filter((i) => i.bucket === "wants")}
-            />
-          </div>
+          <m.div
+            className="grid gap-4 md:grid-cols-2"
+            aria-live="polite"
+            variants={GRID}
+            initial={playIntro ? "hidden" : false}
+            animate="show"
+            onAnimationComplete={() => {
+              if (!introPlayed) markIntroPlayed();
+            }}
+          >
+            <m.div variants={CARD} className="min-w-0">
+              <BucketCard
+                data={data.needs}
+                recurring={recurringItems.filter((i) => i.bucket === "needs")}
+              />
+            </m.div>
+            <m.div variants={CARD} className="min-w-0">
+              <BucketCard
+                data={data.wants}
+                recurring={recurringItems.filter((i) => i.bucket === "wants")}
+              />
+            </m.div>
+          </m.div>
         </div>
       )}
 

@@ -69,4 +69,41 @@ test.describe("US9 · privacy mode", { tag: "@demo" }, () => {
     await expect(page.locator("html")).toHaveAttribute("data-privacy", "off");
     expect(await settledText(page)).toMatch(READABLE_AMOUNT);
   });
+
+  // Spec 003 · FR-032: amount fields are only protected by the blur, so turning privacy on must blur them in the
+  // very same frame (no transition); turning it off may clear them smoothly.
+  test("amount fields blur instantly when privacy turns on", async ({ page }) => {
+    await page.goto("/expenses");
+    await page.getByTestId("pay-card").first().click();
+    const amount = page.locator("#payment-amount");
+    await amount.fill("1234.56");
+    await page.locator("#payment-note").focus();
+    await expect(amount).toHaveCSS("filter", "none");
+
+    // The header toggle sits behind the modal: flip the same <html> attribute <PreferencesEffects /> writes, and
+    // read the computed filter synchronously — any transition would still report an intermediate value here.
+    const onFrame = await amount.evaluate((input) => {
+      document.documentElement.dataset.privacy = "on";
+      const style = getComputedStyle(input);
+      const props = style.transitionProperty.split(",").map((p) => p.trim());
+      const durations = style.transitionDuration.split(",").map((d) => d.trim());
+      const i = props.findIndex((p) => p === "filter" || p === "all");
+      return {
+        filter: style.filter,
+        filterTransition: i === -1 ? "0s" : durations[i % durations.length],
+      };
+    });
+    expect(onFrame).toEqual({ filter: "blur(5px)", filterTransition: "0s" });
+
+    // Turning it off fades the blur out.
+    const offTransition = await amount.evaluate((input) => {
+      document.documentElement.dataset.privacy = "off";
+      const style = getComputedStyle(input);
+      const props = style.transitionProperty.split(",").map((p) => p.trim());
+      const durations = style.transitionDuration.split(",").map((d) => d.trim());
+      const i = props.indexOf("filter");
+      return i === -1 ? "0s" : durations[i % durations.length];
+    });
+    expect(offTransition).toBe("0.2s");
+  });
 });

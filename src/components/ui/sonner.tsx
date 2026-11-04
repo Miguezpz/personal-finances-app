@@ -21,7 +21,8 @@ const Toaster = ({ ...props }: ToasterProps) => {
       theme={theme}
       className="toaster group"
       icons={{
-        success: <CircleCheckIcon className="size-4" />,
+        // The check pops in (FR-033); collapsed by the reduced-motion rule in globals.css.
+        success: <CircleCheckIcon className="size-4 animate-in duration-base zoom-in-50" />,
         info: <InfoIcon className="size-4" />,
         warning: <TriangleAlertIcon className="size-4" />,
         error: <OctagonXIcon className="size-4" />,

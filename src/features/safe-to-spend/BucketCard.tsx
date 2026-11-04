@@ -3,9 +3,13 @@
 /**
  * Safe-to-Spend of one bucket (T074): available balance, semáforo, a progress bar against the base
  * and the full breakdown (carry, allocated, recurring applied/pending, expenses, goals).
+ *
+ * Motion (spec 003, FR-030/031): when the available balance changes the block flashes its background (never the
+ * figure, which always shows its final value); the bar grows from zero with a transform; the semáforo color fades.
  */
 import { CircleCheck, Clock } from "lucide-react";
 import { useTranslations } from "next-intl";
+import { useEffect, useState } from "react";
 import { Money } from "@/components/money/Money";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { negateCents } from "@/domain/money";
@@ -72,6 +76,21 @@ export function BucketCard({
   const percent =
     data.ratio === null ? 0 : Math.max(0, Math.min(100, Math.floor(data.ratio / 100)));
 
+  // Re-key the balance block when the balance changes, to replay the highlight (not on the first render).
+  const [shown, setShown] = useState(data.available);
+  const [flashes, setFlashes] = useState(0);
+  if (shown !== data.available) {
+    setShown(data.available);
+    setFlashes((n) => n + 1);
+  }
+
+  // The bar starts at 0 and grows to its value on the next frame.
+  const [mounted, setMounted] = useState(false);
+  useEffect(() => {
+    const id = requestAnimationFrame(() => setMounted(true));
+    return () => cancelAnimationFrame(id);
+  }, []);
+
   return (
     <Card data-testid={`bucket-${data.bucket}`} data-light={data.light}>
       <CardHeader className="flex flex-row items-start justify-between gap-2">
@@ -81,7 +100,14 @@ export function BucketCard({
         <TrafficLightBadge light={data.light} />
       </CardHeader>
       <CardContent className="flex flex-col gap-4">
-        <div className="flex flex-col gap-1 rounded-lg bg-surface-highlight p-4">
+        <div
+          key={flashes}
+          data-testid={`bucket-${data.bucket}-balance`}
+          className={cn(
+            "flex flex-col gap-1 rounded-lg bg-surface-highlight p-4",
+            flashes > 0 && "animate-balance-highlight",
+          )}
+        >
           <span className="text-sm text-muted-foreground">{t("safeToSpend")}</span>
           <Money
             cents={data.available}
@@ -108,10 +134,11 @@ export function BucketCard({
         >
           <div
             className={cn(
-              "h-full rounded-full transition-[width] duration-500",
+              "h-full w-full origin-left rounded-full",
+              "[transition:transform_var(--duration-slow)_var(--ease-out-quint),background-color_var(--duration-base)]",
               LIGHT_STYLES[data.light].bar,
             )}
-            style={{ width: `${percent}%` }}
+            style={{ transform: `scaleX(${mounted ? percent / 100 : 0})` }}
           />
         </div>
 

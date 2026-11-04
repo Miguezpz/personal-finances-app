@@ -93,3 +93,85 @@
     filter: blur(5px);
   }
 }
+
+/*
+ * Motion (spec 003, contracts/ui-theme.md §6). Only opacity / transform / background-color are animated; no amount
+ * text is ever animated. Everything collapses to instant under prefers-reduced-motion (block at the end).
+ */
+@keyframes shimmer {
+  from {
+    background-position: 100% 0;
+  }
+  to {
+    background-position: -100% 0;
+  }
+}
+
+/* Skeleton sweep. The middle stop leans toward --nav-active: in light, --muted and --surface-highlight are the same
+   mist, so a muted → surface-highlight gradient would be invisible. */
+@utility animate-shimmer {
+  background-color: var(--muted);
+  background-image: linear-gradient(
+    90deg,
+    var(--muted) 0%,
+    color-mix(in oklch, var(--surface-highlight), var(--nav-active) 45%) 50%,
+    var(--muted) 100%
+  );
+  background-size: 200% 100%;
+  animation: shimmer 1.5s linear infinite;
+}
+
+/* Brief highlight when a balance changes (FR-030): from the nav-active tint back to the block's own background. */
+@keyframes balance-highlight {
+  from {
+    background-color: var(--nav-active);
+  }
+}
+
+@utility animate-balance-highlight {
+  animation: balance-highlight var(--duration-slow) var(--ease-out-quint);
+}
+
+/* Content fade when navigating (FR-028), mounted by src/app/(app)/template.tsx. */
+@keyframes content-in {
+  from {
+    opacity: 0;
+    transform: translateY(4px);
+  }
+}
+
+@utility animate-content-in {
+  animation: content-in var(--duration-fast) var(--ease-out-quint);
+}
+
+/*
+ * Privacy transition (FR-032, research R10). <Money> already renders "••••" in the same render that turns privacy
+ * on, so `.money` can blur in and out smoothly. Amount INPUTS are only protected by the blur: their transition is
+ * declared only in the "off" state — CSS uses the destination state's transition, so turning privacy on blurs them
+ * instantly and turning it off clears them smoothly.
+ */
+@layer base {
+  .money {
+    transition: filter var(--duration-base);
+  }
+}
+/* Unlayered on purpose: it must win over the input's `transition-colors` utility (so it keeps those properties). */
+html[data-privacy="off"] input[data-money] {
+  transition-property: color, background-color, border-color, outline-color, box-shadow, filter;
+  transition-duration: var(--duration-base);
+}
+
+/* Reduced motion (FR-035, research R9): no slides, scales, sweeps, staggers or highlights; state changes are instant. */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  ::before,
+  ::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+  .animate-shimmer {
+    animation: none !important;
+  }
+}
