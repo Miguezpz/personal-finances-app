@@ -1,6 +1,5 @@
 "use client";
 
-import { useTheme } from "next-themes";
 import { Toaster as Sonner, type ToasterProps } from "sonner";
 import {
   CircleCheckIcon,
@@ -9,13 +8,17 @@ import {
   OctagonXIcon,
   Loader2Icon,
 } from "lucide-react";
+import { useMediaQuery } from "@/lib/use-media-query";
+import { resolveTheme, selectTheme, usePreferences } from "@/store/preferences";
 
 const Toaster = ({ ...props }: ToasterProps) => {
-  const { theme = "system" } = useTheme();
+  // Same theme as the app (spec 003, research R4): the stored preference, "system" resolved live.
+  const prefersDark = useMediaQuery("(prefers-color-scheme: dark)");
+  const theme = resolveTheme(usePreferences(selectTheme), prefersDark);
 
   return (
     <Sonner
-      theme={theme as NonNullable<ToasterProps["theme"]>}
+      theme={theme}
       className="toaster group"
       icons={{
         success: <CircleCheckIcon className="size-4" />,

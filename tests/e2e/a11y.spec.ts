@@ -109,3 +109,42 @@ test.describe("Accessibility · mobile", { tag: "@demo" }, () => {
     }
   });
 });
+
+// Spec 003 · FR-038 / SC-002: the same audit in the dark theme (desktop).
+test.describe("Accessibility · dark theme", { tag: "@demo" }, () => {
+  test.beforeEach(async ({ page }) => {
+    await page.addInitScript(() => {
+      localStorage.setItem(
+        "pfa:prefs:v1",
+        JSON.stringify({ state: { theme: "dark" }, version: 1 }),
+      );
+    });
+  });
+
+  test("every route has no serious or critical axe violations", async ({ page }) => {
+    test.setTimeout(120_000);
+    for (const route of APP_ROUTES) {
+      await page.goto(route);
+      await expect(page.locator("main [aria-busy='true']")).toHaveCount(0);
+      expect(await page.evaluate(() => document.documentElement.classList.contains("dark"))).toBe(
+        true,
+      );
+      await audit(page, `${route} (dark)`);
+    }
+  });
+
+  test("main dialogs are accessible too", async ({ page }) => {
+    test.setTimeout(60_000);
+    for (const [route, open] of [
+      ["/dashboard", "add-expense"],
+      ["/income", "register-income"],
+      ["/recurring", "add-recurring"],
+      ["/goals", "add-goal"],
+    ] as const) {
+      await page.goto(route);
+      await page.getByTestId(open).click();
+      await expect(page.getByRole("dialog")).toBeVisible();
+      await audit(page, `${route} dialog (dark)`);
+    }
+  });
+});

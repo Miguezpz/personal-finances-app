@@ -13,6 +13,7 @@ import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/co
 import { useUi } from "@/store/ui";
 import { CurrencyToggle } from "./CurrencyToggle";
 import { LanguageToggle } from "./LanguageToggle";
+import { ThemeToggle } from "./ThemeToggle";
 
 function Row({ label, children }: { label: string; children: ReactNode }) {
   return (
@@ -34,6 +35,7 @@ export function PreferencesSheet({
   const t = useTranslations("nav");
   const tc = useTranslations("common");
   const tfx = useTranslations("fx");
+  const tTheme = useTranslations("theme");
   const open = useUi((s) => s.preferencesOpen);
   const setOpen = useUi((s) => s.setPreferencesOpen);
 
@@ -64,6 +66,9 @@ export function PreferencesSheet({
           </Row>
           <Row label={tfx("currencyLabel")}>
             <CurrencyToggle />
+          </Row>
+          <Row label={tTheme("toggle")}>
+            <ThemeToggle className="border" />
           </Row>
           {extra}
         </div>

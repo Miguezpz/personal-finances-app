@@ -98,7 +98,8 @@
   --cta: var(--brand-emerald);
   --cta-foreground: var(--brand-deep);
   --success: var(--brand-emerald);
-  --surface-highlight: var(--brand-ink);
+  /* Lighter than --card (ink) so the highlight block stays visible inside dark cards (FR-014). */
+  --surface-highlight: #0a3a36;
   --nav-active: var(--brand-teal);
   --nav-active-foreground: var(--brand-mist);
   --ring: var(--brand-emerald);

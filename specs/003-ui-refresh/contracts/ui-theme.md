@@ -20,7 +20,7 @@ reflejarse en `tests/unit/theme-contrast.test.ts` y en los e2e.
 | `--cta` | `--brand-emerald` | `--brand-emerald` | Llamada a la acción destacada |
 | `--cta-foreground` | `--brand-ink` | `--brand-deep` | |
 | `--success` | `--brand-teal` | `--brand-emerald` | Texto/ícono positivo, semáforo verde |
-| `--surface-highlight` | `--brand-mist` | `--brand-ink` | Bloque detrás de gráficas y saldos |
+| `--surface-highlight` | `--brand-mist` | `#0A3A36` | Bloque detrás de gráficas y saldos (en oscuro, más claro que `--card` para que el bloque se vea dentro de las tarjetas) |
 | `--nav-active` / `--nav-active-foreground` | `--brand-mint` / `--brand-ink` | `--brand-teal` / `--brand-mist` | Indicador de navegación |
 | `--ring` | `--brand-teal` | `--brand-emerald` | Anillo de foco |
 | `--border` / `--input` | `#D1E7E0` / `#6B958A` | `#1A4541` / `#5B867C` | Bordes decorativos / borde de campo (≥ 3:1: 3.34 sobre blanco; 4.23 sobre deep y 3.59 sobre ink) |
@@ -36,7 +36,7 @@ azul 4.19, naranja 3.04 (todas ≥ 3).
 ### Pares verificados por el test de contraste
 
 Texto (≥ 4.5): `foreground/background`, `foreground/muted`, `card-foreground/card`, `muted-foreground/background`,
-`muted-foreground/muted`, `muted-foreground/card`, `primary-foreground/primary`, `cta-foreground/cta`,
+`muted-foreground/muted`, `muted-foreground/card`, `muted-foreground/surface-highlight`, `primary-foreground/primary`, `cta-foreground/cta`,
 `success/surface-highlight`, `success/background`, `destructive/background`, `nav-active-foreground/nav-active`,
 `primary/background` (enlaces).
 

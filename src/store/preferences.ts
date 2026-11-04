@@ -1,5 +1,6 @@
 /**
- * Device preferences (T045, contracts/ui-store.ts): locale, display currency, privacy mode.
+ * Device preferences (T045, contracts/ui-store.ts): locale, display currency, privacy mode and theme
+ * (spec 003, data-model.md §1).
  * Client state only — server data and FX rates live in TanStack Query.
  *
  * Persistence: localStorage key `pfa:prefs:v1`, `skipHydration` + manual rehydration in
@@ -10,6 +11,11 @@ import { create } from "zustand";
 import { createJSONStorage, persist, type StateStorage } from "zustand/middleware";
 import type { DisplayCurrency, Locale } from "@/domain/types";
 
+/** Theme choice (spec 003). "system" follows the OS `prefers-color-scheme`. */
+export type ThemePreference = "system" | "light" | "dark";
+/** The theme actually applied. */
+export type ResolvedTheme = "light" | "dark";
+
 export interface PreferencesState {
   /** UI language. Default 'en' (Principle VI). */
   locale: Locale;
@@ -17,6 +23,8 @@ export interface PreferencesState {
   displayCurrency: DisplayCurrency;
   /** Masks amounts, balances and chart axes. */
   privacyMode: boolean;
+  /** Light / dark / follow the OS. Default "system" (FR-015). */
+  theme: ThemePreference;
   /** false until rehydrated from storage; <Money> masks meanwhile outside the demo. */
   hydrated: boolean;
 }
@@ -26,13 +34,14 @@ export interface PreferencesActions {
   setDisplayCurrency(currency: DisplayCurrency): void;
   togglePrivacy(): void;
   setPrivacy(on: boolean): void;
+  setTheme(theme: ThemePreference): void;
   markHydrated(): void;
 }
 
 export type PreferencesStore = PreferencesState & PreferencesActions;
 export type PersistedPreferences = Pick<
   PreferencesState,
-  "locale" | "displayCurrency" | "privacyMode"
+  "locale" | "displayCurrency" | "privacyMode" | "theme"
 >;
 
 export const PREFERENCES_STORAGE_KEY = "pfa:prefs:v1" as const;
@@ -42,6 +51,7 @@ export const DEFAULT_PREFERENCES: PersistedPreferences = {
   locale: "en",
   displayCurrency: "MXN",
   privacyMode: false,
+  theme: "system",
 };
 
 export const LOCALES: readonly Locale[] = ["en", "es"];
@@ -49,6 +59,9 @@ export const DISPLAY_CURRENCIES: readonly DisplayCurrency[] = ["MXN", "USD", "EU
 export const isLocale = (v: unknown): v is Locale => LOCALES.includes(v as Locale);
 const isCurrency = (v: unknown): v is DisplayCurrency =>
   DISPLAY_CURRENCIES.includes(v as DisplayCurrency);
+export const THEME_PREFERENCES: readonly ThemePreference[] = ["system", "light", "dark"];
+export const isThemePreference = (v: unknown): v is ThemePreference =>
+  THEME_PREFERENCES.includes(v as ThemePreference);
 
 /** localStorage that never throws (returns null / ignores writes when unavailable). */
 export const safeLocalStorage: StateStorage = {
@@ -84,6 +97,7 @@ export const usePreferences = create<PreferencesStore>()(
       setDisplayCurrency: (displayCurrency) => set({ displayCurrency }),
       togglePrivacy: () => set((s) => ({ privacyMode: !s.privacyMode })),
       setPrivacy: (privacyMode) => set({ privacyMode }),
+      setTheme: (theme) => set({ theme }),
       markHydrated: () => set({ hydrated: true }),
     }),
     {
@@ -95,6 +109,7 @@ export const usePreferences = create<PreferencesStore>()(
         locale: s.locale,
         displayCurrency: s.displayCurrency,
         privacyMode: s.privacyMode,
+        theme: s.theme,
       }),
       // Never trust stored values blindly (tampering, older versions).
       merge: (persisted, current) => {
@@ -104,6 +119,8 @@ export const usePreferences = create<PreferencesStore>()(
           ...(isLocale(p.locale) && { locale: p.locale }),
           ...(isCurrency(p.displayCurrency) && { displayCurrency: p.displayCurrency }),
           ...(typeof p.privacyMode === "boolean" && { privacyMode: p.privacyMode }),
+          // An unknown stored theme is ignored: the default ("system") stays (data-model.md §1).
+          ...(isThemePreference(p.theme) && { theme: p.theme }),
         };
       },
     },
@@ -138,6 +155,12 @@ export const selectLocale = (s: PreferencesStore): Locale => s.locale;
 export const selectDisplayCurrency = (s: PreferencesStore): DisplayCurrency => s.displayCurrency;
 export const selectPrivacyMode = (s: PreferencesStore): boolean => s.privacyMode;
 export const selectHydrated = (s: PreferencesStore): boolean => s.hydrated;
+export const selectTheme = (s: PreferencesStore): ThemePreference => s.theme;
+
+/** The theme to apply: "system" follows the OS (no OS preference → light). */
+export function resolveTheme(theme: ThemePreference, prefersDark: boolean): ResolvedTheme {
+  return theme === "system" ? (prefersDark ? "dark" : "light") : theme;
+}
 /**
  * true if <Money> must mask: privacy on, or not yet hydrated while the data is real.
  * `holdsRealData` = provider.capabilities.canWrite (the read-only demo serves fictitious data).

@@ -64,6 +64,7 @@ const TEXT_PAIRS: [string, string][] = [
   ["muted-foreground", "background"],
   ["muted-foreground", "muted"],
   ["muted-foreground", "card"],
+  ["muted-foreground", "surface-highlight"],
   ["primary-foreground", "primary"],
   ["cta-foreground", "cta"],
   ["success", "surface-highlight"],

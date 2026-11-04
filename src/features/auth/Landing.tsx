@@ -8,6 +8,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
 import { LanguageToggle } from "@/components/layout/LanguageToggle";
+import { ThemeToggle } from "@/components/layout/ThemeToggle";
 import { GoogleSignInButton } from "./GoogleSignInButton";
 import { OAuthErrorAlert } from "./OAuthErrorAlert";
 import { LoginForm } from "./LoginForm";
@@ -23,7 +24,10 @@ export function Landing({ demoUrl }: LandingProps) {
 
   return (
     <main className="relative flex flex-1 items-center justify-center bg-gradient-to-b from-surface-highlight to-background px-4 py-10">
-      <LanguageToggle className="absolute top-4 right-4" />
+      <div className="absolute top-4 right-4 flex items-center gap-2">
+        <ThemeToggle />
+        <LanguageToggle />
+      </div>
       <div className="flex w-full max-w-md flex-col gap-6">
         <header className="flex flex-col items-center gap-3 text-center">
           <BrandMark className="size-12" />

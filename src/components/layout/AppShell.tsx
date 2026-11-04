@@ -29,6 +29,7 @@ import { MobileNav } from "./MobileNav";
 import { NAV_ITEMS, SECONDARY_NAV_ITEMS, type NavItem } from "./nav-items";
 import { PreferencesSheet } from "./PreferencesSheet";
 import { PrivacyToggle } from "./PrivacyToggle";
+import { ThemeToggle } from "./ThemeToggle";
 
 function NavLinks({
   items = NAV_ITEMS,
@@ -158,6 +159,7 @@ export function AppShell({ children, toolbar }: { children: ReactNode; toolbar?:
           <div className="hidden items-center gap-2 md:flex">
             <LanguageToggle />
             <CurrencyToggle />
+            <ThemeToggle />
           </div>
           <PrivacyToggle />
           {toolbar}
