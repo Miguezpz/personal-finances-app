@@ -23,7 +23,8 @@
     "languageName": {
       "en": "English",
       "es": "Español"
-    }
+    },
+    "appShortName": "Finanzas"
   },
   "nav": {
     "label": "Navegación principal",
@@ -39,7 +40,16 @@
     "netWorth": "Patrimonio",
     "ledger": "Bitácora",
     "settings": "Configuración",
-    "signOut": "Cerrar sesión"
+    "signOut": "Cerrar sesión",
+    "more": "Más",
+    "preferences": "Preferencias",
+    "mobileLabel": "Navegación rápida"
+  },
+  "theme": {
+    "toggle": "Tema",
+    "light": "Claro",
+    "dark": "Oscuro",
+    "system": "Sistema"
   },
   "auth": {
     "tagline": "Reparte cada quincena automáticamente y sabe siempre cuánto puedes gastar hasta tu próximo día de pago.",

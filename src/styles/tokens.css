@@ -1,0 +1,124 @@
+/*
+ * Design tokens — "Fresh & Growth" (spec 003, FR-039: the single place where colors are defined).
+ *
+ * Three layers:
+ *   1. Brand primitives (--brand-*): raw HEX, theme-independent.
+ *   2. Semantic tokens (:root = light, .dark = dark): each one is a single var(--brand-*) or a single HEX,
+ *      so tests/unit/theme-contrast.test.ts can resolve and check them (contracts/ui-theme.md §1).
+ *   3. Tailwind utilities: exposed from @theme inline in src/app/globals.css.
+ *
+ * Changing a value here? Run `pnpm test` — the contrast test fails if a pair drops below WCAG AA.
+ */
+
+:root {
+  /* 1. Brand primitives (data-model.md §3) */
+  --brand-ink: #052e2b;
+  --brand-teal: #0f766e;
+  --brand-emerald: #34d399;
+  --brand-mint: #a7f3d0;
+  --brand-mist: #ecfdf5;
+  --brand-ink-soft: #4b635f;
+  --brand-teal-strong: #115e59;
+  --brand-deep: #031f1d;
+  --brand-sage: #8fb8ae;
+  --brand-white: #ffffff;
+
+  /* Motion */
+  --duration-fast: 150ms;
+  --duration-base: 200ms;
+  --duration-slow: 300ms;
+  --ease-out-quint: cubic-bezier(0.22, 1, 0.36, 1);
+  --ease-in-out: cubic-bezier(0.65, 0, 0.35, 1);
+
+  --radius: 0.625rem;
+
+  /* 2. Semantic tokens — light theme */
+  --background: var(--brand-white);
+  --foreground: var(--brand-ink);
+  --card: var(--brand-white);
+  --card-foreground: var(--brand-ink);
+  --popover: var(--brand-white);
+  --popover-foreground: var(--brand-ink);
+  --muted: var(--brand-mist);
+  --muted-foreground: var(--brand-ink-soft);
+  --secondary: var(--brand-mist);
+  --secondary-foreground: var(--brand-ink);
+  --accent: var(--brand-mist);
+  --accent-foreground: var(--brand-ink);
+  --primary: var(--brand-teal);
+  --primary-foreground: var(--brand-white);
+  --primary-hover: var(--brand-teal-strong);
+  --cta: var(--brand-emerald);
+  --cta-foreground: var(--brand-ink);
+  --success: var(--brand-teal);
+  --surface-highlight: var(--brand-mist);
+  --nav-active: var(--brand-mint);
+  --nav-active-foreground: var(--brand-ink);
+  --ring: var(--brand-teal);
+  --border: #d1e7e0;
+  --input: #6b958a;
+  --destructive: #b91c1c;
+  /* Chart series (validated with the dataviz CVD validator, research.md R15) */
+  --series-1: #048e84;
+  --series-2: #eb6834;
+  --series-3: #2a78d6;
+  /* shadcn chart scale, light → dark on the brand ramp */
+  --chart-1: var(--brand-mint);
+  --chart-2: var(--brand-emerald);
+  --chart-3: var(--brand-teal);
+  --chart-4: var(--brand-teal-strong);
+  --chart-5: var(--brand-ink);
+  --sidebar: var(--brand-mist);
+  --sidebar-foreground: var(--brand-ink);
+  --sidebar-primary: var(--brand-teal);
+  --sidebar-primary-foreground: var(--brand-white);
+  --sidebar-accent: var(--brand-mint);
+  --sidebar-accent-foreground: var(--brand-ink);
+  --sidebar-border: #d1e7e0;
+  --sidebar-ring: var(--brand-teal);
+}
+
+.dark {
+  /* 2. Semantic tokens — dark theme */
+  --background: var(--brand-deep);
+  --foreground: var(--brand-mist);
+  --card: var(--brand-ink);
+  --card-foreground: var(--brand-mist);
+  --popover: var(--brand-ink);
+  --popover-foreground: var(--brand-mist);
+  --muted: var(--brand-ink);
+  --muted-foreground: var(--brand-sage);
+  --secondary: var(--brand-ink);
+  --secondary-foreground: var(--brand-mist);
+  --accent: var(--brand-ink);
+  --accent-foreground: var(--brand-mist);
+  --primary: var(--brand-emerald);
+  --primary-foreground: var(--brand-deep);
+  --primary-hover: color-mix(in oklch, var(--brand-emerald) 85%, var(--brand-white));
+  --cta: var(--brand-emerald);
+  --cta-foreground: var(--brand-deep);
+  --success: var(--brand-emerald);
+  --surface-highlight: var(--brand-ink);
+  --nav-active: var(--brand-teal);
+  --nav-active-foreground: var(--brand-mist);
+  --ring: var(--brand-emerald);
+  --border: #1a4541;
+  --input: #5b867c;
+  --destructive: #f87171;
+  --series-1: #17ad7b;
+  --series-2: #dc7611;
+  --series-3: #5195e9;
+  --chart-1: var(--brand-teal-strong);
+  --chart-2: var(--brand-teal);
+  --chart-3: var(--brand-emerald);
+  --chart-4: var(--brand-mint);
+  --chart-5: var(--brand-mist);
+  --sidebar: var(--brand-ink);
+  --sidebar-foreground: var(--brand-mist);
+  --sidebar-primary: var(--brand-emerald);
+  --sidebar-primary-foreground: var(--brand-deep);
+  --sidebar-accent: var(--brand-teal);
+  --sidebar-accent-foreground: var(--brand-mist);
+  --sidebar-border: #1a4541;
+  --sidebar-ring: var(--brand-emerald);
+}

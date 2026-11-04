@@ -183,14 +183,26 @@ Decisiones técnicas de la Phase 0. No quedan "NEEDS CLARIFICATION" en el Techni
 
 ## R15. Gráficas
 
-- **Decision**: `--series-1` (patrimonio neto) = `#0F766E` / `#34D399`; `--series-2` (pasivos) = `#EB6834` /
-  `#FB923C`; `--series-3` (activos) = `#2A78D6` / `#60A5FA`. Los tres ≥ 3:1 sobre blanco y sobre `#031F1D`.
-  Antes de fijarlos, se validan con el validador de CVD de la skill `dataviz`; si teal y azul no se distinguen en
-  deuteranopía, `--series-3` pasa a un azul más claro/saturado o se añade trazo discontinuo a activos. La
-  leyenda con nombres existente se mantiene (la identidad nunca depende solo del color). El contenedor de la gráfica
-  usa `bg-surface-highlight`.
-- **Note**: el orden actual del código es `netWorth → series-1`, `liabilities → series-2`, `assets → series-3`; no
-  cambia, solo los valores de los tokens.
+- **Decision**: `--series-1` (patrimonio neto) = `#048E84` / `#17AD7B`; `--series-2` (pasivos) = `#EB6834` /
+  `#DC7611`; `--series-3` (activos) = `#2A78D6` / `#5195E9`. Todos ≥ 3:1 sobre su superficie (claro: 4.03 / 3.20 /
+  4.42 sobre blanco y 3.83 / 3.04 / 4.19 sobre `#ECFDF5`; oscuro: 6.00 / 5.46 / 5.61 sobre `#031F1D` y
+  5.10 / 4.64 / 4.77 sobre `#052E2B`). La leyenda con nombres existente se mantiene (la identidad nunca depende solo
+  del color). El contenedor de la gráfica usa `bg-surface-highlight`.
+- **Validación (T003, `dataviz/scripts/validate_palette.js --pairs all`)**: los valores propuestos al principio
+  (`#0F766E`, `#EB6834`, `#2A78D6` / `#34D399`, `#FB923C`, `#60A5FA`) **sí** separaban teal y azul en deuteranopía
+  (todos los pares ≥ 8 en protan/deutan), pero fallaban dos gates duros del validador: en claro, `#0F766E` está por
+  debajo del piso de croma (C 0.086 < 0.10, se lee grisáceo como marca de serie); en oscuro, los tres quedaban por
+  encima de la banda de luminosidad (L 0.71–0.77 > 0.67). Se buscaron los valores más cercanos (mismo tono OKLCH) que
+  pasan los cinco gates en las dos superficies de cada tema:
+  - Claro `#048E84, #EB6834, #2A78D6`: banda, croma, CVD (peor par naranja↔teal ΔE 10.3 protan), visión normal
+    (peor par azul↔teal ΔE 15.9) y contraste → PASS.
+  - Oscuro `#17AD7B, #DC7611, #5195E9`: banda, croma, CVD (peor par naranja↔verde ΔE 11.0 deutan), visión normal
+    (peor par azul↔verde ΔE 20.2) y contraste → PASS.
+  - Tritanopía (solo informativa en el validador): teal↔azul ΔE ≈ 3 en ambos temas; cubierto por la leyenda con
+    nombres (codificación secundaria).
+- **Note**: `--series-1` ya no es exactamente `--brand-teal`/`--brand-emerald` (siguen siendo los colores de marca
+  para UI): es su variante de gráfica en el mismo tono. El orden del código es `netWorth → series-1`,
+  `liabilities → series-2`, `assets → series-3`; no cambia, solo los valores de los tokens.
 
 ## R16. Objetivos táctiles e inputs
 

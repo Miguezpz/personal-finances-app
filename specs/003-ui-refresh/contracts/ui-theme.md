@@ -25,12 +25,12 @@ reflejarse en `tests/unit/theme-contrast.test.ts` y en los e2e.
 | `--ring` | `--brand-teal` | `--brand-emerald` | Anillo de foco |
 | `--border` / `--input` | `#D1E7E0` / `#6B958A` | `#1A4541` / `#5B867C` | Bordes decorativos / borde de campo (≥ 3:1: 3.34 sobre blanco; 4.23 sobre deep y 3.59 sobre ink) |
 | `--destructive` | `#B91C1C` | `#F87171` | |
-| `--series-1` / `-2` / `-3` | `#0F766E` / `#EB6834` / `#2A78D6` | `#34D399` / `#FB923C` / `#60A5FA` | Patrimonio / pasivos / activos |
+| `--series-1` / `-2` / `-3` | `#048E84` / `#EB6834` / `#2A78D6` | `#17AD7B` / `#DC7611` / `#5195E9` | Patrimonio / pasivos / activos (validados con el validador de CVD, research R15) |
 | `--sidebar` | `--brand-mist` | `--brand-ink` | Barra lateral |
 
 Nota `--input`: WCAG 1.4.11 exige 3:1 para el borde que identifica un campo; un verde pálido tipo `#B5D3CA`
 (1.60:1) no lo cumple, por eso `--input` es más oscuro que `--border`. El semáforo ámbar/rojo conserva sus clases
-Tailwind actuales (excepción documentada). Ratios de las series sobre `--surface-highlight` claro: teal 5.20,
+Tailwind actuales (excepción documentada). Ratios de las series sobre `--surface-highlight` claro: teal 3.83,
 azul 4.19, naranja 3.04 (todas ≥ 3).
 
 ### Pares verificados por el test de contraste

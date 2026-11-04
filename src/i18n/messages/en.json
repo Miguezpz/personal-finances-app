@@ -23,7 +23,8 @@
     "languageName": {
       "en": "English",
       "es": "Español"
-    }
+    },
+    "appShortName": "Finances"
   },
   "nav": {
     "label": "Main navigation",
@@ -39,7 +40,16 @@
     "netWorth": "Net worth",
     "ledger": "Ledger",
     "settings": "Settings",
-    "signOut": "Sign out"
+    "signOut": "Sign out",
+    "more": "More",
+    "preferences": "Preferences",
+    "mobileLabel": "Quick navigation"
+  },
+  "theme": {
+    "toggle": "Theme",
+    "light": "Light",
+    "dark": "Dark",
+    "system": "System"
   },
   "auth": {
     "tagline": "Split every paycheck automatically and always know what's safe to spend until your next payday.",
