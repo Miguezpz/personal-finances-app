@@ -35,6 +35,35 @@ pruebas, semillas ni `db reset` contra la nube.
    En local el resultado esperado es "No issues found" (la migración 0007 agrega los índices de las
    llaves foráneas compuestas).
 
+### Inicio de sesión con Google (solo app personal)
+
+El dueño puede entrar con su cuenta de Google además de su contraseña
+([spec 002](../specs/002-google-sign-in/spec.md)). La identidad de Google se vincula sola a la cuenta
+existente porque comparte el correo verificado; con el registro desactivado, cualquier otra cuenta de
+Google es rechazada ("Esta cuenta de Google no tiene acceso a esta app") sin crear usuario.
+
+1. **Google Auth Platform** ([console.cloud.google.com/auth](https://console.cloud.google.com/auth)):
+   - _Audience_: **External**, en modo **Testing**, con tu Gmail como único _test user_ (así nadie más
+     pasa la pantalla de Google y no hace falta la verificación de Google).
+   - _Data Access_: solo `openid`, `email` y `profile`.
+   - _Clients → Create client → Web application_:
+     - Authorized JavaScript origins: `https://miguezpz-personal-finances.vercel.app` y
+       `http://localhost:3000`.
+     - Authorized redirect URIs: `https://<project-ref>.supabase.co/auth/v1/callback` (el _Callback URL_
+       que muestra Supabase en el paso siguiente).
+2. **Supabase** → _Authentication → Sign In / Providers → Google_: activarlo y pegar el **Client ID** y
+   el **Client Secret**. El secreto vive **solo** aquí: nunca en `.env*`, en Vercel ni en el repositorio.
+3. **Supabase** → _Authentication → URL Configuration_:
+   - Site URL: `https://miguezpz-personal-finances.vercel.app`.
+   - Redirect URLs: `https://miguezpz-personal-finances.vercel.app/auth/callback` y
+     `http://localhost:3000/auth/callback`.
+   - "Allow new users to sign up" **sigue desactivado** (paso 1.3).
+4. Primera vez: en la app, _Continuar con Google_ con tu cuenta. Comprueba en _Authentication → Users_
+   que sigue habiendo **un** usuario y que ahora tiene los proveedores `email` y `google`.
+
+No hay variables de entorno nuevas: el botón usa el mismo cliente de Supabase y la ruta
+`/auth/callback` canjea el código PKCE en el servidor. En el demo no existe ni el botón ni el canje.
+
 ## 2. Vercel: dos proyectos del mismo repositorio
 
 En Vercel, _Add New → Project_ e importar `personal-finances-app` **dos veces** (dos proyectos).
@@ -94,3 +123,5 @@ legible para consultar o reconstruir datos manualmente.
 - [ ] El proyecto demo no tiene variables de Supabase.
 - [ ] `supabase db advisors --linked` sin avisos de nivel `warn` o superior.
 - [ ] `.env.local` nunca se versiona (solo `.env.example`).
+- [ ] La app de Google está en modo **Testing** con un único _test user_ (el dueño) y su Client Secret
+      solo existe en el panel de Supabase.

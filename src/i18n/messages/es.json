@@ -53,7 +53,12 @@
     "invalidCredentials": "Correo o contraseña incorrectos.",
     "exploreDemo": "Explorar Demo / Reclutadores",
     "exploreDemoHint": "Un recorrido de solo lectura con datos ficticios, sin registrarte.",
-    "privateApp": "App privada: el registro está deshabilitado."
+    "privateApp": "App privada: el registro está deshabilitado.",
+    "continueWithGoogle": "Continuar con Google",
+    "redirectingToGoogle": "Redirigiendo a Google…",
+    "or": "o",
+    "googleNotAuthorized": "Esta cuenta de Google no tiene acceso a esta app.",
+    "googleFailed": "No se pudo iniciar sesión con Google. Inténtalo de nuevo."
   },
   "taxonomy": {
     "housing": "Vivienda",

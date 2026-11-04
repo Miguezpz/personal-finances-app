@@ -203,10 +203,23 @@ export interface AuthSession {
   email: string | null;
 }
 
+/**
+ * Códigos públicos que la ruta de retorno de OAuth pone en `/?authError=` (002-google-sign-in).
+ * `not_authorized`: la cuenta de Google no está asociada al dueño (registro desactivado).
+ * `failed`: cualquier otro fallo (cancelación, código ausente/inválido/caducado, red, proveedor).
+ */
+export type OAuthErrorCode = "not_authorized" | "failed";
+
 export interface AuthPort {
   /** Demo: devuelve siempre una sesión sintética de solo lectura. */
   getSession(): Promise<AuthSession | null>;
   signIn(email: string, password: string): Promise<AuthSession>;
+  /**
+   * Inicia el flujo OAuth (PKCE) con Google y NAVEGA fuera de la app: la promesa solo se resuelve si el
+   * navegador no llega a salir. `redirectTo` MUST ser `${window.location.origin}/auth/callback`.
+   * Demo: rechaza con DemoReadOnlyError("auth.signInWithGoogle").
+   */
+  signInWithGoogle(redirectTo: string): Promise<void>;
   signOut(): Promise<void>;
   onChange(cb: (session: AuthSession | null) => void): () => void;
 }

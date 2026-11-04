@@ -504,6 +504,10 @@ export function runDataProviderContract(
         const p = provider;
         const writes: Array<[string, () => Promise<unknown>]> = [
           ["auth.signIn", () => p.auth.signIn("x@example.com", "secret")],
+          [
+            "auth.signInWithGoogle",
+            () => p.auth.signInWithGoogle("http://localhost/auth/callback"),
+          ],
           ["settings.update", () => p.settings.update({ collectionLeadDays: 5 })],
           ["accounts.create", () => p.accounts.create(before.accounts[0] as never)],
           ["accounts.update", () => p.accounts.update(anyId, { name: "x" })],

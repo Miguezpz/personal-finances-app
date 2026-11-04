@@ -53,7 +53,12 @@
     "invalidCredentials": "Incorrect email or password.",
     "exploreDemo": "Explore Demo / Recruiters",
     "exploreDemoHint": "A read-only tour with fictitious data — no sign-up needed.",
-    "privateApp": "Private app: sign-ups are disabled."
+    "privateApp": "Private app: sign-ups are disabled.",
+    "continueWithGoogle": "Continue with Google",
+    "redirectingToGoogle": "Redirecting to Google…",
+    "or": "or",
+    "googleNotAuthorized": "This Google account doesn't have access to this app.",
+    "googleFailed": "Couldn't sign in with Google. Please try again."
   },
   "taxonomy": {
     "housing": "Housing",

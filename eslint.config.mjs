@@ -40,6 +40,9 @@ const PROVIDER_MODE_ALLOWED = [
   "src/lib/env.ts",
   "src/middleware.ts",
   "src/proxy.ts", // Next >= 16 name for middleware
+  // Server route without a DataProvider: decides demo/live at build time like proxy.ts
+  // (specs/002-google-sign-in/plan.md, Complexity Tracking).
+  "src/app/auth/callback/route.ts",
   "src/app/page.tsx",
   "src/components/layout/DemoBanner.tsx",
 ];

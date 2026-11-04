@@ -44,6 +44,7 @@ export function createMockProvider(options: MockProviderOptions = {}): DataProvi
     auth: {
       getSession: () => Promise.resolve(DEMO_SESSION),
       signIn: () => denyWrite("auth.signIn"),
+      signInWithGoogle: () => denyWrite("auth.signInWithGoogle"),
       signOut: () => Promise.resolve(),
       onChange: () => () => {},
     },

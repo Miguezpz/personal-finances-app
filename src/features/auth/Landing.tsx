@@ -2,9 +2,13 @@
 
 import { ArrowRight, Wallet } from "lucide-react";
 import { useTranslations } from "next-intl";
+import { Suspense } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Separator } from "@/components/ui/separator";
 import { LanguageToggle } from "@/components/layout/LanguageToggle";
+import { GoogleSignInButton } from "./GoogleSignInButton";
+import { OAuthErrorAlert } from "./OAuthErrorAlert";
 import { LoginForm } from "./LoginForm";
 
 interface LandingProps {
@@ -33,7 +37,17 @@ export function Landing({ demoUrl }: LandingProps) {
             <CardTitle>{t("signInTitle")}</CardTitle>
             <CardDescription>{t("privateApp")}</CardDescription>
           </CardHeader>
-          <CardContent>
+          <CardContent className="flex flex-col gap-4">
+            <Suspense fallback={null}>
+              <OAuthErrorAlert />
+            </Suspense>
+            <GoogleSignInButton />
+            {/* Password sign-in stays as the fallback (002-google-sign-in, FR-001). */}
+            <div className="flex items-center gap-3 text-xs text-muted-foreground uppercase">
+              <Separator className="flex-1" />
+              <span>{t("or")}</span>
+              <Separator className="flex-1" />
+            </div>
             <LoginForm />
           </CardContent>
         </Card>

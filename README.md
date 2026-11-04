@@ -41,6 +41,9 @@ Browser (Next.js App Router, all derived values computed client-side)
   contributions and the monthly net-worth snapshot are written idempotently when the app opens.
 - **Security.** Row Level Security on every table, composite foreign keys `(user_id, id)` so no row
   can reference another user's data, sign-ups disabled, only the publishable key in the client.
+- **Sign-in.** Password, or the owner's Google account (OAuth + PKCE, code exchanged on the server,
+  linked to the existing user by verified email). Any other Google account is rejected because
+  sign-ups stay disabled — see [`specs/002-google-sign-in`](specs/002-google-sign-in/spec.md).
 - **Privacy.** No analytics or telemetry. The only external call is the public FX rate API, with
   no user data.
 
