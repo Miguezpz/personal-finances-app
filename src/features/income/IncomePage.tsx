@@ -12,6 +12,7 @@ import { toast } from "sonner";
 import { Money } from "@/components/money/Money";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { ResponsiveCtaButton } from "@/components/ui/responsive-cta";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import {
   Dialog,
@@ -148,14 +149,13 @@ export function IncomePage() {
               {tr("title")}
             </Link>
           </Button>
-          <Button
-            variant="cta"
+          <ResponsiveCtaButton
             onClick={() => setDialog({ open: true, income: null })}
             data-testid="register-income"
           >
             <Plus aria-hidden="true" />
             {t("register")}
-          </Button>
+          </ResponsiveCtaButton>
         </div>
       </header>
 

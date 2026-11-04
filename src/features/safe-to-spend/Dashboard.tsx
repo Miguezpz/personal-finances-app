@@ -45,6 +45,8 @@ export function Dashboard() {
         </div>
         <Button
           variant="cta"
+          // Mobile: the floating CTA replaces it (FR-006).
+          className="max-md:hidden"
           onClick={() => setAdding(true)}
           disabled={!data}
           data-testid="add-expense"
@@ -70,7 +72,7 @@ export function Dashboard() {
           </AlertDescription>
         </Alert>
       ) : (
-        <>
+        <div className="flex flex-col gap-6">
           {!hasAllocations && (
             <Alert>
               <AlertTitle>{t("emptyTitle")}</AlertTitle>
@@ -83,17 +85,20 @@ export function Dashboard() {
             </Alert>
           )}
 
-          <CollectionAlerts />
+          {/* Mobile: balances first, alerts after (FR-027); desktop keeps alerts on top. */}
+          <div className="flex flex-col gap-6 empty:hidden max-md:order-last">
+            <CollectionAlerts />
 
-          {overspent.length > 0 && (
-            <Alert variant="destructive" role="status">
-              <TriangleAlert aria-hidden="true" />
-              <AlertTitle>{t("overspentTitle")}</AlertTitle>
-              <AlertDescription>
-                {t("overspentHint", { buckets: overspent.map((b) => tb(b.bucket)).join(", ") })}
-              </AlertDescription>
-            </Alert>
-          )}
+            {overspent.length > 0 && (
+              <Alert variant="destructive" role="status">
+                <TriangleAlert aria-hidden="true" />
+                <AlertTitle>{t("overspentTitle")}</AlertTitle>
+                <AlertDescription>
+                  {t("overspentHint", { buckets: overspent.map((b) => tb(b.bucket)).join(", ") })}
+                </AlertDescription>
+              </Alert>
+            )}
+          </div>
 
           <div className="grid gap-4 md:grid-cols-2" aria-live="polite">
             <BucketCard
@@ -105,7 +110,7 @@ export function Dashboard() {
               recurring={recurringItems.filter((i) => i.bucket === "wants")}
             />
           </div>
-        </>
+        </div>
       )}
 
       {adding && <AddExpenseDialog open={adding} onOpenChange={setAdding} />}

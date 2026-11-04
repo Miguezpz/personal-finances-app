@@ -5,14 +5,14 @@
  * currency and privacy toggles (LanguageToggle T116, CurrencyToggle T109, PrivacyToggle T132),
  * cold-start / offline status, and the background processes of the authenticated area.
  */
-import { CloudOff, LogOut, Menu } from "lucide-react";
+import { CloudOff, LogOut } from "lucide-react";
 import { useTranslations } from "next-intl";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { useEffect, type ReactNode } from "react";
 import { BrandMark } from "@/components/brand/BrandMark";
 import { Button } from "@/components/ui/button";
-import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
+import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sheet";
 import { useDataProvider } from "@/data/context";
 import { useAuthSync, useSession } from "@/features/auth/useSession";
 import { FxStatus } from "@/features/fx/FxStatus";
@@ -25,15 +25,23 @@ import { useUi } from "@/store/ui";
 import { CurrencyToggle } from "./CurrencyToggle";
 import { DemoBanner } from "./DemoBanner";
 import { LanguageToggle } from "./LanguageToggle";
-import { NAV_ITEMS } from "./nav-items";
+import { MobileNav } from "./MobileNav";
+import { NAV_ITEMS, SECONDARY_NAV_ITEMS, type NavItem } from "./nav-items";
+import { PreferencesSheet } from "./PreferencesSheet";
 import { PrivacyToggle } from "./PrivacyToggle";
 
-function NavLinks({ onNavigate }: { onNavigate?: () => void }) {
+function NavLinks({
+  items = NAV_ITEMS,
+  onNavigate,
+}: {
+  items?: readonly NavItem[];
+  onNavigate?: () => void;
+}) {
   const t = useTranslations("nav");
   const pathname = usePathname();
   return (
     <ul className="flex flex-col gap-1">
-      {NAV_ITEMS.map(({ href, labelKey, icon: Icon }) => {
+      {items.map(({ href, labelKey, icon: Icon }) => {
         const active = pathname === href || pathname.startsWith(`${href}/`);
         return (
           <li key={href}>
@@ -42,7 +50,7 @@ function NavLinks({ onNavigate }: { onNavigate?: () => void }) {
               {...(onNavigate ? { onClick: onNavigate } : {})}
               aria-current={active ? "page" : undefined}
               className={cn(
-                "flex items-center gap-3 rounded-md px-3 py-2 text-sm transition-colors duration-fast",
+                "flex items-center gap-3 rounded-md px-3 py-2 text-sm transition-colors duration-fast pointer-coarse:min-h-11",
                 "focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none",
                 active
                   ? "bg-nav-active font-semibold text-nav-active-foreground"
@@ -125,38 +133,46 @@ export function AppShell({ children, toolbar }: { children: ReactNode; toolbar?:
         {tc("skipToContent")}
       </a>
       <header className="sticky top-0 z-30 flex h-14 items-center gap-2 border-b bg-background/95 px-4 backdrop-blur">
+        {/* Mobile "More" sheet (opened from the bottom bar): the sections the bar doesn't show. */}
         <Sheet open={sidebarOpen} onOpenChange={setSidebarOpen}>
-          <SheetTrigger asChild>
-            <Button variant="ghost" size="icon" className="md:hidden" aria-label={t("openMenu")}>
-              <Menu aria-hidden="true" />
-            </Button>
-          </SheetTrigger>
           <SheetContent side="left" className="w-72 p-4">
             <SheetHeader className="p-0 pb-4">
               <SheetTitle>{tc("appName")}</SheetTitle>
             </SheetHeader>
             <nav aria-label={t("label")}>
-              <NavLinks onNavigate={() => setSidebarOpen(false)} />
+              <NavLinks items={SECONDARY_NAV_ITEMS} onNavigate={() => setSidebarOpen(false)} />
             </nav>
           </SheetContent>
         </Sheet>
 
-        <Link href="/dashboard" className="flex items-center gap-2 font-semibold">
+        <Link
+          href="/dashboard"
+          className="flex items-center gap-2 rounded-md font-semibold focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none pointer-coarse:min-h-11 pointer-coarse:min-w-11"
+        >
           <BrandMark className="size-7" />
-          <span className="hidden truncate sm:inline">{tc("appName")}</span>
+          <span className="sr-only truncate sm:not-sr-only">{tc("appName")}</span>
         </Link>
 
         <div className="ml-auto flex items-center gap-2">
-          <LanguageToggle />
-          <CurrencyToggle />
+          {/* Desktop: inline toggles. Mobile: logo, privacy and the preferences panel only (FR-021). */}
+          <div className="hidden items-center gap-2 md:flex">
+            <LanguageToggle />
+            <CurrencyToggle />
+          </div>
           <PrivacyToggle />
           {toolbar}
           {canSignOut && (
-            <Button variant="ghost" size="sm" onClick={() => void signOut()}>
+            <Button
+              variant="ghost"
+              size="sm"
+              className="hidden md:inline-flex"
+              onClick={() => void signOut()}
+            >
               <LogOut aria-hidden="true" />
-              <span className="sr-only sm:not-sr-only">{t("signOut")}</span>
+              {t("signOut")}
             </Button>
           )}
+          <PreferencesSheet {...(canSignOut ? { onSignOut: () => void signOut() } : {})} />
         </div>
       </header>
 
@@ -174,11 +190,12 @@ export function AppShell({ children, toolbar }: { children: ReactNode; toolbar?:
         <main
           id="main"
           tabIndex={-1}
-          className="mx-auto w-full max-w-7xl min-w-0 flex-1 p-4 outline-none md:p-6"
+          className="mx-auto w-full max-w-7xl min-w-0 flex-1 p-4 pb-[calc(5rem+env(safe-area-inset-bottom))] outline-none md:p-6"
         >
           {children}
         </main>
       </div>
+      <MobileNav />
     </div>
   );
 }

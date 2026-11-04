@@ -115,6 +115,8 @@ export function ExpensesPage() {
           </Button>
           <Button
             variant="cta"
+            // Mobile: the floating CTA replaces it (FR-006).
+            className="max-md:hidden"
             onClick={() => setExpenseDialog({ open: true, expense: null })}
             data-testid="add-expense"
           >

@@ -9,6 +9,12 @@ import { APP_ROUTES } from "./app-routes";
 import { expect, test } from "./fixtures";
 
 async function audit(page: Page, where: string) {
+  // Let enter transitions (dialogs, sheets) finish: axe would sample half-faded colors.
+  await page.waitForFunction(() =>
+    document
+      .getAnimations()
+      .every((a) => a.playState !== "running" || a.effect?.getTiming().iterations === Infinity),
+  );
   const { violations } = await new AxeBuilder({ page })
     .withTags(["wcag2a", "wcag2aa", "wcag21a", "wcag21aa"])
     // The Next.js dev-tools badge is not part of the app.
@@ -69,5 +75,37 @@ test.describe("Accessibility", { tag: "@demo" }, () => {
     // The next Tab lands inside the page content, not back in the header.
     await page.keyboard.press("Tab");
     expect(await page.evaluate(() => document.activeElement?.closest("main") !== null)).toBe(true);
+  });
+});
+
+// Spec 003 · FR-038 / SC-002: the same audit on a phone viewport (bottom bar, floating CTA, bottom sheets).
+test.describe("Accessibility · mobile", { tag: "@demo" }, () => {
+  test.use({ viewport: { width: 375, height: 812 }, hasTouch: true, isMobile: true });
+
+  test("every route has no serious or critical axe violations", async ({ page }) => {
+    test.setTimeout(120_000);
+    for (const route of APP_ROUTES) {
+      await page.goto(route);
+      await expect(page.locator("main [aria-busy='true']")).toHaveCount(0);
+      await audit(page, `${route} (mobile)`);
+    }
+  });
+
+  test("main dialogs and panels are accessible too", async ({ page }) => {
+    test.setTimeout(60_000);
+    for (const [route, open] of [
+      ["/dashboard", "fab-add-expense"],
+      ["/dashboard", "preferences-open"],
+      ["/dashboard", "mobile-nav-more"],
+      ["/income", "register-income"],
+      ["/recurring", "add-recurring"],
+      ["/goals", "add-goal"],
+    ] as const) {
+      await page.goto(route);
+      await expect(page.locator("main [aria-busy='true']")).toHaveCount(0);
+      await page.getByTestId(open).click();
+      await expect(page.getByRole("dialog")).toBeVisible();
+      await audit(page, `${route} ${open} (mobile)`);
+    }
   });
 });
