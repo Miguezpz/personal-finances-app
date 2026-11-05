@@ -21,6 +21,13 @@ async function isNeon(page: Page) {
   return page.evaluate(() => document.documentElement.classList.contains("neon"));
 }
 
+/** href of every tab icon (<link rel="icon">), in document order: the browser uses the last one. */
+async function tabIcons(page: Page) {
+  return page.evaluate(() =>
+    [...document.querySelectorAll('head link[rel~="icon"]')].map((l) => l.getAttribute("href")),
+  );
+}
+
 async function pickTheme(page: Page, option: "light" | "dark" | "neon" | "system") {
   await page.getByTestId("theme-toggle").click();
   const item = page.getByTestId(`theme-option-${option}`);
@@ -75,14 +82,23 @@ test.describe("US3 · theme", () => {
       "#0A0A0A",
     );
 
+    // The tab icon follows the theme too.
+    await expect.poll(async () => (await tabIcons(page)).at(-1)).toBe("/icons/icon-neon.svg");
+    expect((await page.request.get("/icons/icon-neon.svg")).ok()).toBe(true);
+
     // No flash on reload: the inline script applies it before hydration.
     await page.reload({ waitUntil: "domcontentloaded" });
     expect(await isNeon(page)).toBe(true);
     await expect(page.locator("body")).toHaveCSS("background-color", ABYSS);
 
+    await expect.poll(async () => (await tabIcons(page)).at(-1)).toBe("/icons/icon-neon.svg");
+
     await pickTheme(page, "dark");
     await expect.poll(() => isNeon(page)).toBe(false);
     await expect(page.locator("body")).toHaveCSS("background-color", DEEP);
+    await expect
+      .poll(async () => (await tabIcons(page)).some((href) => href === "/icons/icon-neon.svg"))
+      .toBe(false);
   });
 
   test("System follows OS changes live, without reloading", async ({ page }, testInfo) => {

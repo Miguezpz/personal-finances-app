@@ -5,7 +5,7 @@
  *   <html lang>            ← locale
  *   <html data-privacy>    ← 'on' | 'off'  (CSS blurs .money when on)
  *   cookie NEXT_LOCALE     ← locale (first-visit fallback for the inline pre-paint script)
- *   <html class="dark [neon]">, color-scheme, <meta name="theme-color"> ← theme (spec 003, contracts/ui-theme.md §4)
+ *   <html class="dark [neon]">, color-scheme, <meta name="theme-color">, tab icon ← theme (spec 003, contracts/ui-theme.md §4)
  * Plus connectivity → ui.offline.
  */
 import { useEffect } from "react";
@@ -35,11 +35,14 @@ export const THEME_COLORS: Record<ResolvedTheme, string> = {
   neon: "#0A0A0A",
 };
 const DARK_QUERY = "(prefers-color-scheme: dark)";
+/** Tab icon of the neon theme; light/dark keep the app's own icons (src/app/icon.svg adapts to the OS scheme). */
+export const NEON_FAVICON = "/icons/icon-neon.svg";
 
 /**
  * Applies a resolved theme to <html>. `explicit` (the user picked light/dark): both theme-color metas take that
  * theme's color; otherwise ("system") each meta gets back its original, media-dependent content (FR-011).
- * Neon is a dark theme: it keeps `.dark` (so every `dark:` variant applies) and adds `.neon` for its tokens.
+ * Neon is a dark theme: it keeps `.dark` (so every `dark:` variant applies) and adds `.neon` for its tokens; it also
+ * gets its own tab icon (setNeonFavicon).
  */
 export function applyTheme(resolved: ResolvedTheme, explicit: boolean) {
   const root = document.documentElement;
@@ -49,6 +52,44 @@ export function applyTheme(resolved: ResolvedTheme, explicit: boolean) {
   for (const meta of document.querySelectorAll<HTMLMetaElement>('meta[name="theme-color"]')) {
     if (meta.dataset.originalContent === undefined) meta.dataset.originalContent = meta.content;
     meta.content = explicit ? THEME_COLORS[resolved] : meta.dataset.originalContent;
+  }
+  setNeonFavicon(resolved === "neon");
+}
+
+// rel~="icon" matches "icon" and "shortcut icon", not "apple-touch-icon".
+const ICON_LINKS = 'link[rel~="icon"]';
+let neonIconObserver: MutationObserver | null = null;
+
+/**
+ * The neon tab icon is an extra <link rel="icon"> of our own, kept as the LAST icon link (browsers use the last one).
+ * Next's icon links are left untouched: they're React-owned hoistables, and changing their href before the metadata
+ * hydrates makes React insert fresh copies after them. A MutationObserver re-appends ours if anything lands later.
+ */
+export function setNeonFavicon(on: boolean) {
+  const head = document.head;
+  let link = head.querySelector<HTMLLinkElement>("link[data-neon-icon]");
+  if (!on) {
+    neonIconObserver?.disconnect();
+    neonIconObserver = null;
+    link?.remove();
+    return;
+  }
+  if (!link) {
+    link = document.createElement("link");
+    link.rel = "icon";
+    link.type = "image/svg+xml";
+    link.setAttribute("sizes", "any");
+    link.href = NEON_FAVICON;
+    link.dataset.neonIcon = "";
+  }
+  const keepLast = () => {
+    const icons = head.querySelectorAll(ICON_LINKS);
+    if (icons[icons.length - 1] !== link) head.appendChild(link);
+  };
+  keepLast();
+  if (!neonIconObserver && typeof MutationObserver !== "undefined") {
+    neonIconObserver = new MutationObserver(keepLast);
+    neonIconObserver.observe(head, { childList: true });
   }
 }
 

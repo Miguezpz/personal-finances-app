@@ -3,7 +3,7 @@
  * resolved theme, the DOM effects of applyTheme and the pre-paint boot script (FR-015…017, SC-004).
  */
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
-import { applyTheme, PREFERENCES_BOOT_SCRIPT } from "@/store/effects";
+import { applyTheme, NEON_FAVICON, PREFERENCES_BOOT_SCRIPT } from "@/store/effects";
 import {
   DEFAULT_PREFERENCES,
   PREFERENCES_STORAGE_KEY,
@@ -132,6 +132,33 @@ describe("applyTheme", () => {
     applyTheme(next, true);
     expect(root().classList.contains("neon")).toBe(false);
     expect(root().classList.contains("dark")).toBe(next === "dark");
+  });
+
+  it("neon adds its tab icon as the last icon link, keeps it last, and removes it when leaving", async () => {
+    document.head.innerHTML = `
+      <link rel="icon" href="/favicon.ico?x" sizes="any">
+      <link rel="icon" href="/icon.svg?y" type="image/svg+xml">
+      <link rel="apple-touch-icon" href="/apple-icon.png">`;
+    const icons = () =>
+      [...document.querySelectorAll<HTMLLinkElement>('link[rel~="icon"]')].map((l) =>
+        l.getAttribute("href"),
+      );
+    applyTheme("neon", true);
+    expect(icons()).toEqual(["/favicon.ico?x", "/icon.svg?y", NEON_FAVICON]);
+
+    // Next/React inserting icon links later (metadata hydration) doesn't push it out of last place.
+    const late = document.createElement("link");
+    late.rel = "icon";
+    late.href = "/icon.svg?late";
+    document.head.appendChild(late);
+    await new Promise((r) => setTimeout(r, 0));
+    expect(icons().at(-1)).toBe(NEON_FAVICON);
+
+    applyTheme("neon", true); // idempotent
+    expect(icons().filter((h) => h === NEON_FAVICON)).toHaveLength(1);
+
+    applyTheme("dark", true);
+    expect(icons()).toEqual(["/favicon.ico?x", "/icon.svg?y", "/icon.svg?late"]);
   });
 
   it("system: restores the original, media-dependent contents", () => {
