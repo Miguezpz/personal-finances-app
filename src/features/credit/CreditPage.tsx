@@ -5,7 +5,7 @@
  * avoid interest as the headline, its due date and the total debt (with the full MSI balance) —
  * and the timeline of paydays, due dates and collections.
  */
-import { CreditCard, TriangleAlert } from "lucide-react";
+import { CalendarClock, CreditCard, TriangleAlert } from "lucide-react";
 import Link from "next/link";
 import { useTranslations } from "next-intl";
 import { Money } from "@/components/money/Money";
@@ -18,6 +18,9 @@ import { formatDate } from "@/i18n/format";
 import { useToday } from "@/lib/use-today";
 import { selectLocale, usePreferences } from "@/store/preferences";
 import { CreditTimeline, TIMELINE_DAYS, useCreditTimeline } from "./CreditTimeline";
+import { PageHeader } from "@/components/layout/PageHeader";
+import { navIcon } from "@/components/layout/nav-items";
+import { EmptyState } from "@/components/ui/empty-state";
 
 export function CreditPage() {
   const t = useTranslations("credit");
@@ -28,10 +31,7 @@ export function CreditPage() {
 
   return (
     <section className="flex flex-col gap-6">
-      <header className="flex flex-col gap-1">
-        <h1 className="text-2xl font-semibold tracking-tight">{t("title")}</h1>
-        <p className="text-sm text-muted-foreground">{t("description")}</p>
-      </header>
+      <PageHeader icon={navIcon("/credit")} title={t("title")} description={t("description")} />
 
       {!cards || !events ? (
         <div className="flex flex-col gap-4" aria-busy="true">
@@ -41,7 +41,7 @@ export function CreditPage() {
       ) : (
         <>
           {cards.length === 0 ? (
-            <p className="rounded-lg border border-dashed p-6 text-center text-muted-foreground">
+            <EmptyState icon={navIcon("/credit")} className="p-6">
               {t.rich("noCards", {
                 link: (chunks) => (
                   <Link
@@ -52,7 +52,7 @@ export function CreditPage() {
                   </Link>
                 ),
               })}
-            </p>
+            </EmptyState>
           ) : (
             <ul className="grid gap-4 md:grid-cols-2">
               {cards.map(({ card, status }) => {
@@ -77,7 +77,8 @@ export function CreditPage() {
                             </Badge>
                           )}
                         </CardTitle>
-                        <CardDescription>
+                        <CardDescription className="flex items-center gap-1.5">
+                          <CalendarClock aria-hidden="true" focusable="false" className="size-4" />
                           {t("statementDue", { date: formatDate(statement.due, locale) })}
                         </CardDescription>
                       </CardHeader>

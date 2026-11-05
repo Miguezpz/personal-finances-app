@@ -92,6 +92,7 @@ export const toCategory = (r: Row<"categories">): Category => ({
   nameKey: r.name_key,
   macro: r.macro,
   archived: r.archived_at !== null,
+  icon: r.icon,
 });
 
 export const toSubcategory = (r: Row<"subcategories">): Subcategory => ({
@@ -100,6 +101,7 @@ export const toSubcategory = (r: Row<"subcategories">): Subcategory => ({
   name: r.name,
   nameKey: r.name_key,
   archived: r.archived_at !== null,
+  icon: r.icon,
 });
 
 export const toIncome = (r: Row<"incomes">): Income => ({
@@ -112,6 +114,7 @@ export const toIncome = (r: Row<"incomes">): Income => ({
   distributed: r.distributed,
   ruleId: uuidOrNull(r.rule_id),
   depositAccountId: uuidOrNull(r.deposit_account_id),
+  incomeType: r.income_type,
 });
 
 export const toAllocation = (r: Row<"income_allocations">): IncomeAllocation => ({
@@ -267,6 +270,7 @@ export const fromIncome = (i: Omit<Income, "id">) => ({
   distributed: i.distributed,
   rule_id: i.ruleId,
   deposit_account_id: i.depositAccountId,
+  income_type: i.incomeType,
 });
 
 export const fromAllocation = (a: Omit<IncomeAllocation, "id" | "incomeId">) => ({

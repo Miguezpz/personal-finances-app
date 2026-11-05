@@ -136,12 +136,12 @@ export function snapshotToCsvBundle(
       ]),
     ),
     "categories.csv": toCsv(
-      ["id", "name", "name_key", "macro", "archived"],
-      s.categories.map((c) => [c.id, c.name, c.nameKey, c.macro, c.archived]),
+      ["id", "name", "name_key", "macro", "archived", "icon"],
+      s.categories.map((c) => [c.id, c.name, c.nameKey, c.macro, c.archived, c.icon]),
     ),
     "subcategories.csv": toCsv(
-      ["id", "category_id", "name", "name_key", "archived"],
-      s.subcategories.map((x) => [x.id, x.categoryId, x.name, x.nameKey, x.archived]),
+      ["id", "category_id", "name", "name_key", "archived", "icon"],
+      s.subcategories.map((x) => [x.id, x.categoryId, x.name, x.nameKey, x.archived, x.icon]),
     ),
     "incomes.csv": toCsv(
       [
@@ -154,6 +154,8 @@ export function snapshotToCsvBundle(
         "distributed",
         "rule_id",
         "deposit_account_id",
+        // Stable enum value, the same in every language (spec 004, FR-010).
+        "income_type",
       ],
       s.incomes.map((i) => [
         i.id,
@@ -165,6 +167,7 @@ export function snapshotToCsvBundle(
         i.distributed,
         i.ruleId,
         i.depositAccountId,
+        i.incomeType,
       ]),
     ),
     "income_allocations.csv": toCsv(

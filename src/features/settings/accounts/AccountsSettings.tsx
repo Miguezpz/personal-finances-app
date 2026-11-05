@@ -4,7 +4,7 @@
  * Account catalog (T122, FR-039): create, edit, archive and restore accounts and cards. Archiving
  * keeps the history; a card with pending third-party installments can't be archived (CONFLICT).
  */
-import { Archive, ArchiveRestore, Pencil, Plus } from "lucide-react";
+import { Archive, ArchiveRestore, Landmark, Pencil, Plus } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { useState } from "react";
 import { toast } from "sonner";
@@ -20,6 +20,8 @@ import { SettingsHeader } from "../SettingsHeader";
 import { AccountForm } from "./AccountForm";
 import { hasPendingInstallments, useAccounts, useArchiveAccount, useRestoreAccount } from "./hooks";
 import { ACCOUNT_KINDS } from "./schema";
+import { EmptyState } from "@/components/ui/empty-state";
+import { ACCOUNT_KIND_ICONS } from "@/components/icons/domain-icons";
 
 const selectMsi = (s: FinanceSnapshot) => ({
   receivables: s.receivables,
@@ -78,9 +80,7 @@ export function AccountsSettings() {
           <Skeleton className="h-28" />
         </div>
       ) : sorted.length === 0 ? (
-        <p className="rounded-lg border border-dashed p-8 text-center text-muted-foreground">
-          {t("noAccounts")}
-        </p>
+        <EmptyState icon={Landmark}>{t("noAccounts")}</EmptyState>
       ) : (
         <ul className="grid gap-4 md:grid-cols-2">
           {sorted.map((a) => (
@@ -95,7 +95,7 @@ export function AccountsSettings() {
                   <div className="flex min-w-0 flex-col gap-1">
                     <CardTitle className="flex flex-wrap items-center gap-2 text-base">
                       <span className="truncate">{a.name}</span>
-                      <Badge variant="outline">{t(`kinds.${a.kind}`)}</Badge>
+                      <AccountKindBadge kind={a.kind} label={t(`kinds.${a.kind}`)} />
                       {a.archived && <Badge variant="secondary">{t("archivedBadge")}</Badge>}
                     </CardTitle>
                     {a.institution && (
@@ -164,5 +164,15 @@ export function AccountsSettings() {
         />
       )}
     </section>
+  );
+}
+
+function AccountKindBadge({ kind, label }: { kind: Account["kind"]; label: string }) {
+  const Icon = ACCOUNT_KIND_ICONS[kind];
+  return (
+    <Badge variant="outline">
+      <Icon aria-hidden="true" focusable="false" />
+      {label}
+    </Badge>
   );
 }

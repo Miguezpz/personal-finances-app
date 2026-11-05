@@ -20,6 +20,7 @@ import { formatDate } from "@/i18n/format";
 import { cn } from "@/lib/utils";
 import { selectLocale, usePreferences } from "@/store/preferences";
 import { LIGHT_STYLES, TrafficLightBadge } from "./TrafficLightBadge";
+import { BUCKET_ICONS } from "@/components/icons/domain-icons";
 
 function Row({ label, cents, muted = false }: { label: string; cents: Cents; muted?: boolean }) {
   return (
@@ -94,7 +95,8 @@ export function BucketCard({
   return (
     <Card data-testid={`bucket-${data.bucket}`} data-light={data.light}>
       <CardHeader className="flex flex-row items-start justify-between gap-2">
-        <CardTitle className="text-xs font-semibold tracking-wide text-primary uppercase">
+        <CardTitle className="flex items-center gap-1.5 text-xs font-semibold tracking-wide text-primary uppercase">
+          <BucketIcon bucket={data.bucket} />
           {name}
         </CardTitle>
         <TrafficLightBadge light={data.light} />
@@ -176,4 +178,9 @@ export function BucketCard({
       </CardContent>
     </Card>
   );
+}
+
+function BucketIcon({ bucket }: { bucket: keyof typeof BUCKET_ICONS }) {
+  const Icon = BUCKET_ICONS[bucket];
+  return <Icon aria-hidden="true" focusable="false" className="size-4 shrink-0" />;
 }

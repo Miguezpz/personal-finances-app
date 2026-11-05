@@ -63,6 +63,8 @@ test.describe("US1 · automatic income split", { tag: "@live" }, () => {
     const { received, fundedStart } = nextFifteenth();
     await page.goto("/income");
     await page.getByTestId("register-income").click();
+    // The income type is mandatory (spec 004).
+    await page.getByTestId("income-type-salary").click();
     await page.locator("#income-label").fill("Salary");
     await page.locator("#income-amount").fill("20,000");
     await page.locator("#income-received").fill(received);

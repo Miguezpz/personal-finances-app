@@ -68,6 +68,7 @@ export const makeCategory = (o: Partial<Category> = {}): Category => ({
   nameKey: null,
   macro: "needs",
   archived: false,
+  icon: null,
   ...o,
 });
 
@@ -77,6 +78,7 @@ export const makeSubcategory = (o: Partial<Subcategory> = {}): Subcategory => ({
   name: "Rent",
   nameKey: null,
   archived: false,
+  icon: null,
   ...o,
 });
 
@@ -100,6 +102,7 @@ export const makeIncome = (o: Partial<Income> = {}): Income => ({
   distributed: true,
   ruleId: null,
   depositAccountId: null,
+  incomeType: "salary",
   ...o,
 });
 

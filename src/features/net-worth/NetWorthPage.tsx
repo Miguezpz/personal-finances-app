@@ -13,6 +13,10 @@ import { useFinanceSnapshot } from "@/data/useFinanceSnapshot";
 import { computeNetWorth } from "@/domain/net-worth";
 import { useToday } from "@/lib/use-today";
 import { NetWorthChart } from "./NetWorthChart";
+import { PageHeader } from "@/components/layout/PageHeader";
+import { navIcon } from "@/components/layout/nav-items";
+import { EmptyState } from "@/components/ui/empty-state";
+import { ArrowDownRight, ArrowUpRight, Scale } from "lucide-react";
 
 export function NetWorthPage() {
   const t = useTranslations("netWorth");
@@ -21,17 +25,32 @@ export function NetWorthPage() {
   const now = useMemo(() => (data ? computeNetWorth(data, today) : undefined), [data, today]);
 
   const tiles = now && [
-    { key: "netWorth", label: t("series.netWorth"), value: now.netWorth, primary: true },
-    { key: "assets", label: t("series.assets"), value: now.assets, primary: false },
-    { key: "liabilities", label: t("series.liabilities"), value: now.liabilities, primary: false },
+    {
+      key: "netWorth",
+      label: t("series.netWorth"),
+      value: now.netWorth,
+      primary: true,
+      icon: Scale,
+    },
+    {
+      key: "assets",
+      label: t("series.assets"),
+      value: now.assets,
+      primary: false,
+      icon: ArrowUpRight,
+    },
+    {
+      key: "liabilities",
+      label: t("series.liabilities"),
+      value: now.liabilities,
+      primary: false,
+      icon: ArrowDownRight,
+    },
   ];
 
   return (
     <section className="flex flex-col gap-6">
-      <header className="flex flex-col gap-1">
-        <h1 className="text-2xl font-semibold tracking-tight">{t("title")}</h1>
-        <p className="text-sm text-muted-foreground">{t("description")}</p>
-      </header>
+      <PageHeader icon={navIcon("/net-worth")} title={t("title")} description={t("description")} />
 
       {!data || !tiles ? (
         <div className="flex flex-col gap-4" aria-busy="true">
@@ -43,7 +62,10 @@ export function NetWorthPage() {
           <dl className="grid gap-3 sm:grid-cols-3" data-testid="net-worth-now">
             {tiles.map((tile) => (
               <div key={tile.key} className="flex flex-col gap-1 rounded-xl border p-4">
-                <dt className="text-sm text-muted-foreground">{tile.label}</dt>
+                <dt className="flex items-center gap-1.5 text-sm text-muted-foreground">
+                  <tile.icon aria-hidden="true" focusable="false" className="size-4 shrink-0" />
+                  {tile.label}
+                </dt>
                 <dd>
                   <Money
                     cents={tile.value}
@@ -61,7 +83,9 @@ export function NetWorthPage() {
             </CardHeader>
             <CardContent>
               {data.netWorthSnapshots.length === 0 ? (
-                <p className="py-8 text-center text-muted-foreground">{t("noHistory")}</p>
+                <EmptyState icon={navIcon("/net-worth")} className="border-0">
+                  {t("noHistory")}
+                </EmptyState>
               ) : (
                 <NetWorthChart snapshots={data.netWorthSnapshots} />
               )}

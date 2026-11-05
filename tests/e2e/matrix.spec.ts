@@ -131,7 +131,8 @@ test.describe("Matrix · P1 flows and global toggles", () => {
             .from("subcategories")
             .select("id")
             .eq("user_id", owner.id)
-            .eq("name_key", "taxonomy.rent");
+            // Default subcategories have no i18n key since spec 004: find "Rent" by name.
+            .eq("name", "Rent");
           rent = data?.[0]?.id;
           return rent;
         })
@@ -167,6 +168,8 @@ test.describe("Matrix · P1 flows and global toggles", () => {
       // P1: register an income through the app and read it back.
       await page.goto("/income");
       await page.getByTestId("register-income").click();
+      // The income type is mandatory (spec 004).
+      await page.getByTestId("income-type-salary").click();
       await page.locator("#income-label").fill("Salary");
       await page.locator("#income-amount").fill("20,000");
       await page.locator("#income-received").fill(addDays(period.start, -1));

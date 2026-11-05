@@ -56,7 +56,7 @@ test.describe("US4 · expenses and card payments", { tag: "@live" }, () => {
           .from("subcategories")
           .select("id")
           .eq("user_id", owner.id)
-          .eq("name_key", "taxonomy.restaurants");
+          .eq("name", "Restaurants"); // Restaurants & Cafes › Restaurants (spec 004 default)
         restaurants = data?.[0]?.id;
         return restaurants;
       })

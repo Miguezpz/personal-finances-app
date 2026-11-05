@@ -5,7 +5,7 @@
  * collection calendar (collect-by date, card due date, amount, status) and a "record collection"
  * action per installment. Nothing here affects the personal budget (FR-020).
  */
-import { Plus } from "lucide-react";
+import { Plus, UserRound } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { useState } from "react";
 import { Money } from "@/components/money/Money";
@@ -22,6 +22,10 @@ import { selectLocale, usePreferences } from "@/store/preferences";
 import { AddReceivableDialog } from "./AddReceivableDialog";
 import { CollectionDialog } from "./CollectionDialog";
 import { useReceivables } from "./hooks";
+import { PageHeader } from "@/components/layout/PageHeader";
+import { navIcon } from "@/components/layout/nav-items";
+import { EmptyState } from "@/components/ui/empty-state";
+import { RECEIVABLE_STATUS_ICONS } from "@/components/icons/domain-icons";
 
 const STATUS_STYLE: Record<Installment["status"], string> = {
   collected: "bg-surface-highlight text-success",
@@ -47,20 +51,23 @@ export function ReceivablesPage() {
 
   return (
     <section className="flex flex-col gap-6">
-      <header className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
-        <div className="flex flex-col gap-1">
-          <h1 className="text-2xl font-semibold tracking-tight">{t("title")}</h1>
-          <p className="text-sm text-muted-foreground">{t("description")}</p>
-        </div>
-        <ResponsiveCtaButton
-          className="shrink-0"
-          onClick={() => setAdding(true)}
-          data-testid="add-receivable"
-        >
-          <Plus aria-hidden="true" />
-          {t("addTitle")}
-        </ResponsiveCtaButton>
-      </header>
+      <PageHeader
+        icon={navIcon("/receivables")}
+        title={t("title")}
+        description={t("description")}
+        actions={
+          <>
+            <ResponsiveCtaButton
+              className="shrink-0"
+              onClick={() => setAdding(true)}
+              data-testid="add-receivable"
+            >
+              <Plus aria-hidden="true" />
+              {t("addTitle")}
+            </ResponsiveCtaButton>
+          </>
+        }
+      />
 
       {!data ? (
         <div className="flex flex-col gap-4" aria-busy="true">
@@ -68,9 +75,7 @@ export function ReceivablesPage() {
           <Skeleton className="h-64" />
         </div>
       ) : receivables.length === 0 ? (
-        <p className="rounded-lg border border-dashed p-8 text-center text-muted-foreground">
-          {t("empty")}
-        </p>
+        <EmptyState icon={navIcon("/receivables")}>{t("empty")}</EmptyState>
       ) : (
         <>
           <section aria-labelledby="debtors" className="flex flex-col gap-3">
@@ -82,7 +87,14 @@ export function ReceivablesPage() {
                 <li key={debtor.id}>
                   <Card data-testid="debtor-card">
                     <CardContent className="flex items-center justify-between gap-4">
-                      <span className="font-medium">{debtor.name}</span>
+                      <span className="flex min-w-0 items-center gap-2 font-medium">
+                        <UserRound
+                          aria-hidden="true"
+                          focusable="false"
+                          className="size-4 shrink-0 text-muted-foreground"
+                        />
+                        <span className="truncate">{debtor.name}</span>
+                      </span>
                       <span className="flex flex-col items-end text-sm">
                         <span className="text-xs text-muted-foreground">{t("owes")}</span>
                         <Money
@@ -159,6 +171,7 @@ export function ReceivablesPage() {
                                 </td>
                                 <td className="py-2 pl-3">
                                   <Badge className={cn("font-normal", STATUS_STYLE[i.status])}>
+                                    <StatusIcon status={i.status} />
                                     {t(`status.${i.status}`)}
                                     {i.status === "partial" && (
                                       <>
@@ -205,4 +218,9 @@ export function ReceivablesPage() {
       )}
     </section>
   );
+}
+
+function StatusIcon({ status }: { status: Installment["status"] }) {
+  const Icon = RECEIVABLE_STATUS_ICONS[status];
+  return <Icon aria-hidden="true" focusable="false" />;
 }

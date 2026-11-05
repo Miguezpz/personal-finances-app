@@ -74,12 +74,14 @@ async function seedThroughProvider(p: DataProvider) {
     nameKey: null,
     macro: "needs",
     archived: false,
+    icon: "house",
   });
   const sub = await p.taxonomy.createSubcategory({
     categoryId: category.id,
     name: "Rent",
     nameKey: null,
     archived: false,
+    icon: null,
   });
   const rule = await p.rules.save({
     rule: {
@@ -100,6 +102,7 @@ async function seedThroughProvider(p: DataProvider) {
       distributed: true,
       ruleId: rule.id,
       depositAccountId: debit.id,
+      incomeType: "salary",
     },
     allocations: [
       { bucket: "needs", accountId: null, amount: cents(1_000_000), periodStart: d("2026-11-16") },
@@ -383,6 +386,7 @@ export function runDataProviderContract(
               distributed: true,
               ruleId: null,
               depositAccountId: null,
+              incomeType: "other",
             },
             allocations: [
               {
@@ -478,11 +482,117 @@ export function runDataProviderContract(
           nameKey: "taxonomy.groceries",
           macro: "needs",
           archived: false,
+          icon: "shopping-cart",
         });
         await provider.taxonomy.update("category", created.id, { name: "Super" });
         const renamed = (await provider.taxonomy.listCategories()).find((c) => c.id === created.id);
-        expect(renamed).toMatchObject({ name: "Super", nameKey: null });
+        // C4: the typed name drops the i18n key but keeps the icon.
+        expect(renamed).toMatchObject({ name: "Super", nameKey: null, icon: "shopping-cart" });
         await provider.taxonomy.remove("category", created.id);
+      });
+
+      // ---------- Spec 004: icons and income types (contracts/data-provider.md) ----------
+      it("C1 · stores a category icon", async () => {
+        const created = await provider.taxonomy.createCategory({
+          name: "Utilities 004",
+          nameKey: null,
+          macro: "needs",
+          archived: false,
+          icon: "plug",
+        });
+        expect(created.icon).toBe("plug");
+        const listed = (await provider.taxonomy.listCategories()).find((c) => c.id === created.id);
+        expect(listed?.icon).toBe("plug");
+        await provider.taxonomy.remove("category", created.id);
+      });
+
+      it("C2 · sets and clears a subcategory's own icon without touching its name or key", async () => {
+        const category = await provider.taxonomy.createCategory({
+          name: "Food 004",
+          nameKey: "taxonomy.categories.restaurants",
+          macro: "wants",
+          archived: false,
+          icon: "utensils",
+        });
+        const sub = await provider.taxonomy.createSubcategory({
+          categoryId: category.id,
+          name: "Coffee",
+          nameKey: null,
+          archived: false,
+          icon: null,
+        });
+        await provider.taxonomy.update("subcategory", sub.id, { icon: "coffee" });
+        const find = async () =>
+          (await provider.taxonomy.listSubcategories()).find((x) => x.id === sub.id);
+        expect(await find()).toMatchObject({ name: "Coffee", nameKey: null, icon: "coffee" });
+        await provider.taxonomy.update("subcategory", sub.id, { icon: null });
+        expect(await find()).toMatchObject({ name: "Coffee", icon: null });
+        await provider.taxonomy.update("category", category.id, { icon: "coffee" });
+        const cat = (await provider.taxonomy.listCategories()).find((c) => c.id === category.id);
+        expect(cat).toMatchObject({ icon: "coffee", nameKey: "taxonomy.categories.restaurants" });
+        await provider.taxonomy.remove("subcategory", sub.id);
+        await provider.taxonomy.remove("category", category.id);
+      });
+
+      it("C3 · rejects an icon with an invalid format with VALIDATION", async () => {
+        const category = (await provider.taxonomy.listCategories())[0];
+        if (!category) throw new Error("seed missing");
+        await expectProviderError(
+          provider.taxonomy.update("category", category.id, { icon: "Not Valid!" }),
+          "VALIDATION",
+        );
+      });
+
+      it("C9 · bulk inserts create the missing rows once and skip existing names", async () => {
+        const defs = [
+          { name: "Bulk A", nameKey: null, macro: "needs" as const, archived: false, icon: "tag" },
+          { name: "Bulk B", nameKey: null, macro: "wants" as const, archived: false, icon: null },
+        ];
+        const first = await provider.taxonomy.insertCategories(defs);
+        expect(first.map((c) => c.name).sort()).toEqual(["Bulk A", "Bulk B"]);
+        expect(await provider.taxonomy.insertCategories(defs)).toEqual([]);
+        const a = first.find((c) => c.name === "Bulk A");
+        if (!a) throw new Error("insert missing");
+        const subs = [
+          { categoryId: a.id, name: "One", nameKey: null, archived: false, icon: null },
+          { categoryId: a.id, name: "Two", nameKey: null, archived: false, icon: "coffee" },
+        ];
+        expect(await provider.taxonomy.insertSubcategories(subs)).toHaveLength(2);
+        expect(await provider.taxonomy.insertSubcategories(subs)).toEqual([]);
+        const listed = (await provider.taxonomy.listSubcategories()).filter(
+          (x) => x.categoryId === a.id,
+        );
+        expect(listed.map((x) => [x.name, x.icon]).sort()).toEqual([
+          ["One", null],
+          ["Two", "coffee"],
+        ]);
+        for (const x of listed) await provider.taxonomy.remove("subcategory", x.id);
+        for (const c of first) await provider.taxonomy.remove("category", c.id);
+      });
+
+      it("C5/C6 · stores the income type and replaces it without changing the split", async () => {
+        const income = {
+          label: "Gift 004",
+          amount: cents(50_000),
+          receivedOn: d("2026-11-20"),
+          fundedPeriodStart: d("2026-12-01"),
+          isRecurring: false,
+          distributed: false,
+          ruleId: null,
+          depositAccountId: null,
+          incomeType: "salary" as const,
+        };
+        const created = await provider.incomes.register({ income, allocations: [] });
+        expect(created.incomeType).toBe("salary");
+        const replaced = await provider.incomes.replace(created.id, {
+          income: { ...income, incomeType: "gift" },
+          allocations: [],
+        });
+        expect(replaced).toMatchObject({ incomeType: "gift", amount: 50_000, distributed: false });
+        const { incomes, allocations } = await provider.incomes.list();
+        expect(incomes.find((i) => i.id === created.id)?.incomeType).toBe("gift");
+        expect(allocations.filter((a) => a.incomeId === created.id)).toEqual([]);
+        await provider.incomes.remove(created.id);
       });
 
       it("records a partial collection and derives its status", async () => {
@@ -498,6 +608,14 @@ export function runDataProviderContract(
         expect(updated.collected).toBe(100_000);
       });
     } else {
+      it("C7 · the demo uses the 26 default categories and typed incomes", async () => {
+        const s = await provider.loadSnapshot();
+        expect(s.categories).toHaveLength(26);
+        expect(s.subcategories).toHaveLength(68);
+        expect(s.categories.every((c) => c.icon !== null)).toBe(true);
+        expect(s.incomes.length).toBeGreaterThan(0);
+      });
+
       it("rejects EVERY write with DemoReadOnlyError and leaves the data unchanged", async () => {
         const before = structuredClone(await provider.loadSnapshot());
         const anyId = "00000000-0000-4000-8000-000000000001" as Uuid;
@@ -522,6 +640,10 @@ export function runDataProviderContract(
             () => p.taxonomy.createSubcategory(before.subcategories[0] as never),
           ],
           ["taxonomy.update", () => p.taxonomy.update("category", anyId, { name: "x" })],
+          ["taxonomy.insertCategories", () => p.taxonomy.insertCategories([])],
+          ["taxonomy.insertSubcategories", () => p.taxonomy.insertSubcategories([])],
+          // C8: changing an icon is a write like any other.
+          ["taxonomy.update", () => p.taxonomy.update("category", anyId, { icon: "plug" })],
           ["taxonomy.remove", () => p.taxonomy.remove("subcategory", anyId)],
           [
             "incomes.register",

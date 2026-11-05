@@ -117,11 +117,22 @@ export interface TaxonomyRepository {
   listSubcategories(): Promise<Subcategory[]>;
   createCategory(input: NewEntity<Category>): Promise<Category>;
   createSubcategory(input: NewEntity<Subcategory>): Promise<Subcategory>;
-  /** Renombrar limpia `nameKey`: el nombre escrito por el usuario reemplaza la traducción. */
+  /**
+   * Inserta varias categorías en una sola petición (onboarding, spec 004). Idempotente: las que ya
+   * existen con el mismo nombre se ignoran sin error; devuelve solo las creadas.
+   */
+  insertCategories(inputs: readonly NewEntity<Category>[]): Promise<Category[]>;
+  /** Igual para subcategorías: se ignoran las que ya existen en su categoría con el mismo nombre. */
+  insertSubcategories(inputs: readonly NewEntity<Subcategory>[]): Promise<Subcategory[]>;
+  /**
+   * Renombrar limpia `nameKey`: el nombre escrito por el usuario reemplaza la traducción.
+   * `icon: null` quita el ícono (una subcategoría vuelve a heredar el de su categoría); cambiar el
+   * ícono no toca `nameKey`. Un ícono con formato inválido → ProviderError('VALIDATION').
+   */
   update(
     kind: "category" | "subcategory",
     id: Uuid,
-    patch: { name?: string; archived?: boolean },
+    patch: { name?: string; archived?: boolean; icon?: string | null },
   ): Promise<void>;
   /** Rechaza (CONFLICT) si tiene movimientos, salvo reasignación previa. */
   remove(kind: "category" | "subcategory", id: Uuid): Promise<void>;

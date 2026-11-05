@@ -4,6 +4,8 @@
  */
 import { z } from "zod";
 import { isIsoDate } from "@/domain/dates";
+import { isValidIconKeyFormat } from "@/domain/icons";
+import { INCOME_TYPES } from "@/domain/income-types";
 
 const cents = z.number().int().refine(Number.isSafeInteger, "safe integer cents");
 const positiveCents = cents.refine((v) => v > 0, "> 0");
@@ -12,6 +14,8 @@ const isoDate = z.string().refine(isIsoDate, "valid YYYY-MM-DD date");
 const uuid = z.uuid();
 const bucket = z.enum(["needs", "wants", "investment"]);
 const spendBucket = z.enum(["needs", "wants"]);
+/** Same format rule as the database check of migration 0008 (spec 004). */
+const iconKey = z.string().refine(isValidIconKeyFormat, "icon key format").nullable();
 
 export const userSettingsSchema = z.strictObject({
   timezone: z.string().min(1),
@@ -65,6 +69,7 @@ export const categorySchema = z.strictObject({
   nameKey: z.string().nullable(),
   macro: spendBucket,
   archived: z.boolean(),
+  icon: iconKey,
 });
 
 export const subcategorySchema = z.strictObject({
@@ -73,6 +78,7 @@ export const subcategorySchema = z.strictObject({
   name: z.string().min(1).max(60),
   nameKey: z.string().nullable(),
   archived: z.boolean(),
+  icon: iconKey,
 });
 
 const periodStart = isoDate.refine(
@@ -90,6 +96,7 @@ export const incomeSchema = z.strictObject({
   distributed: z.boolean(),
   ruleId: uuid.nullable(),
   depositAccountId: uuid.nullable(),
+  incomeType: z.enum(INCOME_TYPES),
 });
 
 export const allocationSchema = z

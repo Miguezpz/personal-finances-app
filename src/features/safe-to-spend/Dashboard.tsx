@@ -5,7 +5,7 @@
  * their semáforo, the quincena dates and the days to the next payday. Loading, empty and error
  * states; a clear warning when a bucket is overspent that never blocks recording (FR-021).
  */
-import { Plus, TriangleAlert } from "lucide-react";
+import { CircleAlert, Plus, TriangleAlert } from "lucide-react";
 import { useTranslations } from "next-intl";
 import Link from "next/link";
 import { useEffect, useState } from "react";
@@ -20,6 +20,8 @@ import { selectLocale, usePreferences } from "@/store/preferences";
 import { useUi } from "@/store/ui";
 import { BucketCard } from "./BucketCard";
 import { useSafeToSpend } from "./useSafeToSpend";
+import { PageHeader } from "@/components/layout/PageHeader";
+import { navIcon } from "@/components/layout/nav-items";
 
 /**
  * Staggered entrance of the bucket cards (FR-029): once per session, never under reduced motion. CSS only (no JS
@@ -55,30 +57,37 @@ export function Dashboard() {
 
   return (
     <section className="flex flex-col gap-6">
-      <header className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
-        <div className="flex flex-col gap-1">
-          <h1 className="text-2xl font-semibold tracking-tight">{t("title")}</h1>
-          {data && (
-            <p className="text-sm text-muted-foreground" data-testid="period-info">
-              {t("period", formatPeriodRange(data.period.start, locale))} ·{" "}
-              {data.daysUntilPayday === 0
-                ? t("paydayToday")
-                : t("paydayIn", { days: data.daysUntilPayday })}
-            </p>
-          )}
-        </div>
-        <Button
-          variant="cta"
-          // Mobile: the floating CTA replaces it (FR-006).
-          className="max-md:hidden"
-          onClick={() => setAdding(true)}
-          disabled={!data}
-          data-testid="add-expense"
-        >
-          <Plus aria-hidden="true" />
-          {t("addExpense")}
-        </Button>
-      </header>
+      <PageHeader
+        icon={navIcon("/dashboard")}
+        title={t("title")}
+        description={
+          <>
+            {data && (
+              <p className="text-sm text-muted-foreground" data-testid="period-info">
+                {t("period", formatPeriodRange(data.period.start, locale))} ·{" "}
+                {data.daysUntilPayday === 0
+                  ? t("paydayToday")
+                  : t("paydayIn", { days: data.daysUntilPayday })}
+              </p>
+            )}
+          </>
+        }
+        actions={
+          <>
+            <Button
+              variant="cta"
+              // Mobile: the floating CTA replaces it (FR-006).
+              className="max-md:hidden"
+              onClick={() => setAdding(true)}
+              disabled={!data}
+              data-testid="add-expense"
+            >
+              <Plus aria-hidden="true" />
+              {t("addExpense")}
+            </Button>
+          </>
+        }
+      />
 
       {isPending ? (
         <div className="grid gap-4 md:grid-cols-2" aria-busy="true">
@@ -87,6 +96,7 @@ export function Dashboard() {
         </div>
       ) : isError || !data ? (
         <Alert variant="destructive">
+          <CircleAlert aria-hidden="true" />
           <AlertTitle>{tc("unexpectedError")}</AlertTitle>
           <AlertDescription className="flex flex-col items-start gap-2">
             {t("loadError")}

@@ -23,6 +23,9 @@ import {
 import { useLedger, useLedgerLookups } from "./hooks";
 import { LedgerFilters } from "./LedgerFilters";
 import { LedgerTable } from "./LedgerTable";
+import { PageHeader } from "@/components/layout/PageHeader";
+import { navIcon } from "@/components/layout/nav-items";
+import { EmptyState } from "@/components/ui/empty-state";
 
 export const LEDGER_PAGE_SIZE = 25;
 
@@ -59,13 +62,16 @@ export function LedgerPage() {
 
   return (
     <section className="flex flex-col gap-6">
-      <header className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
-        <div className="flex flex-col gap-1">
-          <h1 className="text-2xl font-semibold tracking-tight">{t("title")}</h1>
-          <p className="text-sm text-muted-foreground">{t("description")}</p>
-        </div>
-        <ExportButton {...(isFiltering(filters) ? { entries: filtered } : {})} />
-      </header>
+      <PageHeader
+        icon={navIcon("/ledger")}
+        title={t("title")}
+        description={t("description")}
+        actions={
+          <>
+            <ExportButton {...(isFiltering(filters) ? { entries: filtered } : {})} />
+          </>
+        }
+      />
 
       {!ledger || !lookups ? (
         <div className="flex flex-col gap-4" aria-busy="true">
@@ -98,9 +104,9 @@ export function LedgerPage() {
           </dl>
 
           {filtered.length === 0 ? (
-            <p className="rounded-lg border border-dashed p-8 text-center text-muted-foreground">
+            <EmptyState icon={navIcon("/ledger")}>
               {ledger.length === 0 ? t("empty") : t("noMatches")}
-            </p>
+            </EmptyState>
           ) : (
             <>
               <LedgerTable entries={visible} lookups={lookups} />

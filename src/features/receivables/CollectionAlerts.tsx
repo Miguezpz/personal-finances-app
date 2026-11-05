@@ -4,7 +4,7 @@
  * In-app collection alerts (T101, FR-025): overdue collections and those due in the next 7 days
  * (fixed window), computed when the app opens — no push, email or server job (Principle I).
  */
-import { HandCoins } from "lucide-react";
+import { CalendarClock, HandCoins } from "lucide-react";
 import { useTranslations } from "next-intl";
 import Link from "next/link";
 import { useMemo } from "react";
@@ -52,6 +52,11 @@ export function CollectionAlerts() {
             >
               <span>
                 <span className="font-medium text-foreground">{debtorName(a.debtorId)}</span> ·{" "}
+                <CalendarClock
+                  aria-hidden="true"
+                  focusable="false"
+                  className="inline size-3.5 align-[-0.125em]"
+                />{" "}
                 {formatDate(a.dueOn, locale, "short")} ·{" "}
                 <span className={cn(a.daysUntilDue < 0 && "font-medium text-destructive")}>
                   {when(a.daysUntilDue)}

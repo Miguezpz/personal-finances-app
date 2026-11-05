@@ -47,14 +47,14 @@ isOneToOne: false
                   ]
                 },"categories": {
                   Row: {
-                    "archived_at": string | null,"id": string,"macro": Database["public"]['Enums']["spend_bucket"],"name": string,"name_key": string | null,"user_id": string
+                    "archived_at": string | null,"icon": string | null,"id": string,"macro": Database["public"]['Enums']["spend_bucket"],"name": string,"name_key": string | null,"user_id": string
                   }
                   ComputedFields: never
                   Insert: {
-                    "archived_at"?: string | null,"id"?: string,"macro": Database["public"]['Enums']["spend_bucket"],"name": string,"name_key"?: string | null,"user_id"?: string
+                    "archived_at"?: string | null,"icon"?: string | null,"id"?: string,"macro": Database["public"]['Enums']["spend_bucket"],"name": string,"name_key"?: string | null,"user_id"?: string
                   }
                   Update: {
-                    "archived_at"?: string | null,"id"?: string,"macro"?: Database["public"]['Enums']["spend_bucket"],"name"?: string,"name_key"?: string | null,"user_id"?: string
+                    "archived_at"?: string | null,"icon"?: string | null,"id"?: string,"macro"?: Database["public"]['Enums']["spend_bucket"],"name"?: string,"name_key"?: string | null,"user_id"?: string
                   }
                   Relationships: [
                     
@@ -181,14 +181,14 @@ isOneToOne: false
                   ]
                 },"incomes": {
                   Row: {
-                    "amount_cents": number,"created_at": string,"deposit_account_id": string | null,"distributed": boolean,"funded_period_start": string,"id": string,"is_recurring": boolean,"label": string,"received_on": string,"rule_id": string | null,"updated_at": string,"user_id": string
+                    "amount_cents": number,"created_at": string,"deposit_account_id": string | null,"distributed": boolean,"funded_period_start": string,"id": string,"income_type": Database["public"]['Enums']["income_type"],"is_recurring": boolean,"label": string,"received_on": string,"rule_id": string | null,"updated_at": string,"user_id": string
                   }
                   ComputedFields: never
                   Insert: {
-                    "amount_cents": number,"created_at"?: string,"deposit_account_id"?: string | null,"distributed"?: boolean,"funded_period_start": string,"id"?: string,"is_recurring"?: boolean,"label": string,"received_on": string,"rule_id"?: string | null,"updated_at"?: string,"user_id"?: string
+                    "amount_cents": number,"created_at"?: string,"deposit_account_id"?: string | null,"distributed"?: boolean,"funded_period_start": string,"id"?: string,"income_type"?: Database["public"]['Enums']["income_type"],"is_recurring"?: boolean,"label": string,"received_on": string,"rule_id"?: string | null,"updated_at"?: string,"user_id"?: string
                   }
                   Update: {
-                    "amount_cents"?: number,"created_at"?: string,"deposit_account_id"?: string | null,"distributed"?: boolean,"funded_period_start"?: string,"id"?: string,"is_recurring"?: boolean,"label"?: string,"received_on"?: string,"rule_id"?: string | null,"updated_at"?: string,"user_id"?: string
+                    "amount_cents"?: number,"created_at"?: string,"deposit_account_id"?: string | null,"distributed"?: boolean,"funded_period_start"?: string,"id"?: string,"income_type"?: Database["public"]['Enums']["income_type"],"is_recurring"?: boolean,"label"?: string,"received_on"?: string,"rule_id"?: string | null,"updated_at"?: string,"user_id"?: string
                   }
                   Relationships: [
                     {
@@ -319,14 +319,14 @@ isOneToOne: false
                   ]
                 },"subcategories": {
                   Row: {
-                    "archived_at": string | null,"category_id": string,"id": string,"name": string,"name_key": string | null,"user_id": string
+                    "archived_at": string | null,"category_id": string,"icon": string | null,"id": string,"name": string,"name_key": string | null,"user_id": string
                   }
                   ComputedFields: never
                   Insert: {
-                    "archived_at"?: string | null,"category_id": string,"id"?: string,"name": string,"name_key"?: string | null,"user_id"?: string
+                    "archived_at"?: string | null,"category_id": string,"icon"?: string | null,"id"?: string,"name": string,"name_key"?: string | null,"user_id"?: string
                   }
                   Update: {
-                    "archived_at"?: string | null,"category_id"?: string,"id"?: string,"name"?: string,"name_key"?: string | null,"user_id"?: string
+                    "archived_at"?: string | null,"category_id"?: string,"icon"?: string | null,"id"?: string,"name"?: string,"name_key"?: string | null,"user_id"?: string
                   }
                   Relationships: [
                     {
@@ -388,7 +388,7 @@ isOneToOne: false
                            }
           }
           Enums: {
-            "account_kind": "checking"|"savings"|"credit_card"|"investment"|"cash","bucket_kind": "needs"|"wants"|"investment","expense_origin": "manual"|"recurring","goal_kind": "emergency_fund"|"sinking_fund","installment_status": "pending"|"partial"|"collected","spend_bucket": "needs"|"wants"
+            "account_kind": "checking"|"savings"|"credit_card"|"investment"|"cash","bucket_kind": "needs"|"wants"|"investment","expense_origin": "manual"|"recurring","goal_kind": "emergency_fund"|"sinking_fund","income_type": "salary"|"gift"|"debt_repayment"|"cashback"|"extra"|"sales"|"savings"|"investment_returns"|"other","installment_status": "pending"|"partial"|"collected","spend_bucket": "needs"|"wants"
           }
           CompositeTypes: {
             [_ in never]: never
@@ -504,7 +504,7 @@ export type CompositeTypes<
 export const Constants = {
   "public": {
           Enums: {
-            "account_kind": ["checking", "savings", "credit_card", "investment", "cash"],"bucket_kind": ["needs", "wants", "investment"],"expense_origin": ["manual", "recurring"],"goal_kind": ["emergency_fund", "sinking_fund"],"installment_status": ["pending", "partial", "collected"],"spend_bucket": ["needs", "wants"]
+            "account_kind": ["checking", "savings", "credit_card", "investment", "cash"],"bucket_kind": ["needs", "wants", "investment"],"expense_origin": ["manual", "recurring"],"goal_kind": ["emergency_fund", "sinking_fund"],"income_type": ["salary", "gift", "debt_repayment", "cashback", "extra", "sales", "savings", "investment_returns", "other"],"installment_status": ["pending", "partial", "collected"],"spend_bucket": ["needs", "wants"]
           }
         }
 } as const

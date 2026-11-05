@@ -120,4 +120,27 @@ describe("snapshotToCsvBundle", () => {
     expect(rows("settings.csv")).toBe(1);
     expect(bundle["expenses.csv"]).toContain("amount_mxn");
   });
+
+  it("exports the income type as a stable enum value and the taxonomy icons (spec 004)", () => {
+    const snapshot = generateDemoSnapshot({ today: "2026-11-01" as IsoDate });
+    const bundle = snapshotToCsvBundle(snapshot);
+    const table = (name: string) =>
+      (bundle[name] as string)
+        .slice(1)
+        .trimEnd()
+        .split("\r\n")
+        .map((line) => line.split(","));
+    const header = (name: string) => table(name)[0] ?? [];
+
+    const incomes = table("incomes.csv");
+    const typeColumn = header("incomes.csv").indexOf("income_type");
+    expect(typeColumn).toBeGreaterThan(-1);
+    for (const [i, income] of snapshot.incomes.entries()) {
+      expect(incomes[i + 1]?.[typeColumn]).toBe(income.incomeType);
+    }
+    expect(header("categories.csv")).toContain("icon");
+    expect(header("subcategories.csv")).toContain("icon");
+    const iconColumn = header("categories.csv").indexOf("icon");
+    expect(table("categories.csv")[1]?.[iconColumn]).toBe(snapshot.categories[0]?.icon ?? "");
+  });
 });

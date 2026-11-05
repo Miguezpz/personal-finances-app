@@ -8,9 +8,14 @@ import { CalendarClock, Pause, Pencil, Play, Plus, Trash2 } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { useState } from "react";
 import { toast } from "sonner";
+import { CategoryIcon } from "@/components/icons/CategoryIcon";
+import { ACCOUNT_KIND_ICONS, BUCKET_ICONS } from "@/components/icons/domain-icons";
+import { navIcon } from "@/components/layout/nav-items";
+import { PageHeader } from "@/components/layout/PageHeader";
 import { Money } from "@/components/money/Money";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { EmptyState } from "@/components/ui/empty-state";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import {
   Dialog,
@@ -24,6 +29,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { isNotifiedGlobally } from "@/data/errors";
 import { useFinanceSnapshot } from "@/data/useFinanceSnapshot";
 import { maxIsoDate } from "@/domain/dates";
+import { taxonomyIconFor } from "@/domain/icons";
 import { nextChargeDate } from "@/domain/recurring";
 import type { FinanceSnapshot, RecurringExpense } from "@/domain/types";
 import { useTaxonomyName } from "@/features/settings/taxonomy/useTaxonomyName";
@@ -34,6 +40,7 @@ import { useDeleteRecurring, usePauseRecurring, useRecurring, useResumeRecurring
 import { RecurringForm } from "./RecurringForm";
 
 const selectLookups = (s: FinanceSnapshot) => ({
+  categories: s.categories,
   subcategories: s.subcategories,
   accounts: s.accounts,
 });
@@ -84,19 +91,20 @@ export function RecurringPage() {
 
   return (
     <section className="flex flex-col gap-6">
-      <header className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
-        <div className="flex flex-col gap-1">
-          <h1 className="text-2xl font-semibold tracking-tight">{t("title")}</h1>
-          <p className="text-sm text-muted-foreground">{t("description")}</p>
-        </div>
-        <Button
-          onClick={() => setForm({ open: true, recurring: null })}
-          data-testid="add-recurring"
-        >
-          <Plus aria-hidden="true" />
-          {t("addTitle")}
-        </Button>
-      </header>
+      <PageHeader
+        icon={navIcon("/recurring")}
+        title={t("title")}
+        description={t("description")}
+        actions={
+          <Button
+            onClick={() => setForm({ open: true, recurring: null })}
+            data-testid="add-recurring"
+          >
+            <Plus aria-hidden="true" />
+            {t("addTitle")}
+          </Button>
+        }
+      />
 
       {!recurring || !lookups ? (
         <div className="flex flex-col gap-4" aria-busy="true">
@@ -104,9 +112,7 @@ export function RecurringPage() {
           <Skeleton className="h-28" />
         </div>
       ) : sorted.length === 0 ? (
-        <p className="rounded-lg border border-dashed p-8 text-center text-muted-foreground">
-          {t("empty")}
-        </p>
+        <EmptyState icon={navIcon("/recurring")}>{t("empty")}</EmptyState>
       ) : (
         <ul className="grid gap-4 md:grid-cols-2">
           {sorted.map((r) => {
@@ -114,6 +120,8 @@ export function RecurringPage() {
             const next = paused ? null : nextChargeDate(r, today);
             const sub = lookups.subcategories.find((x) => x.id === r.subcategoryId);
             const account = lookups.accounts.find((a) => a.id === r.paymentAccountId);
+            const BucketIcon = BUCKET_ICONS[r.bucket];
+            const AccountIcon = account ? ACCOUNT_KIND_ICONS[account.kind] : null;
             return (
               <li key={r.id}>
                 <Card
@@ -125,15 +133,42 @@ export function RecurringPage() {
                     <div className="flex min-w-0 flex-col gap-1">
                       <CardTitle className="flex flex-wrap items-center gap-2 text-base">
                         <span className="truncate">{r.name}</span>
-                        <Badge variant="outline">{tb(r.bucket)}</Badge>
-                        {paused && <Badge variant="secondary">{t("pausedBadge")}</Badge>}
+                        <Badge variant="outline">
+                          <BucketIcon aria-hidden="true" focusable="false" />
+                          {tb(r.bucket)}
+                        </Badge>
+                        {paused && (
+                          <Badge variant="secondary">
+                            <Pause aria-hidden="true" focusable="false" />
+                            {t("pausedBadge")}
+                          </Badge>
+                        )}
                       </CardTitle>
-                      <p className="text-sm text-muted-foreground">
+                      <p className="flex flex-wrap items-center gap-x-1 text-sm text-muted-foreground">
                         {r.chargeDay >= 29
                           ? t("chargeDayLast", { day: r.chargeDay })
                           : t("chargeDayLabel", { day: r.chargeDay })}
-                        {sub && <> · {nameOf(sub)}</>}
-                        {account && <> · {account.name}</>}
+                        {sub && (
+                          <span className="inline-flex items-center gap-1">
+                            {" "}
+                            · <CategoryIcon icon={taxonomyIconFor(sub.id, lookups)} />
+                            {nameOf(sub)}
+                          </span>
+                        )}
+                        {account && (
+                          <span className="inline-flex items-center gap-1">
+                            {" "}
+                            ·{" "}
+                            {AccountIcon && (
+                              <AccountIcon
+                                aria-hidden="true"
+                                focusable="false"
+                                className="size-4"
+                              />
+                            )}
+                            {account.name}
+                          </span>
+                        )}
                       </p>
                     </div>
                     <Money cents={r.amount} className="text-lg font-semibold" />

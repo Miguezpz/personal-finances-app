@@ -24,6 +24,10 @@ import { useToday } from "@/lib/use-today";
 import { selectLocale, usePreferences } from "@/store/preferences";
 import { GoalForm } from "./GoalForm";
 import { useGoalData, useUpdateGoal } from "./hooks";
+import { PageHeader } from "@/components/layout/PageHeader";
+import { navIcon } from "@/components/layout/nav-items";
+import { EmptyState } from "@/components/ui/empty-state";
+import { GOAL_KIND_ICONS } from "@/components/icons/domain-icons";
 
 function ProgressBar({ value, label }: { value: number; label: string }) {
   const pct = Math.max(0, Math.min(100, Math.round(value * 100)));
@@ -96,19 +100,22 @@ export function GoalsPage() {
 
   return (
     <section className="flex flex-col gap-6">
-      <header className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
-        <div className="flex flex-col gap-1">
-          <h1 className="text-2xl font-semibold tracking-tight">{t("title")}</h1>
-          <p className="text-sm text-muted-foreground">{t("description")}</p>
-        </div>
-        <ResponsiveCtaButton
-          onClick={() => setForm({ open: true, goal: null })}
-          data-testid="add-goal"
-        >
-          <Plus aria-hidden="true" />
-          {t("addTitle")}
-        </ResponsiveCtaButton>
-      </header>
+      <PageHeader
+        icon={navIcon("/goals")}
+        title={t("title")}
+        description={t("description")}
+        actions={
+          <>
+            <ResponsiveCtaButton
+              onClick={() => setForm({ open: true, goal: null })}
+              data-testid="add-goal"
+            >
+              <Plus aria-hidden="true" />
+              {t("addTitle")}
+            </ResponsiveCtaButton>
+          </>
+        }
+      />
 
       {!data ? (
         <div className="grid gap-4 md:grid-cols-2" aria-busy="true">
@@ -116,9 +123,7 @@ export function GoalsPage() {
           <Skeleton className="h-44" />
         </div>
       ) : data.goals.length === 0 ? (
-        <p className="rounded-lg border border-dashed p-8 text-center text-muted-foreground">
-          {t("empty")}
-        </p>
+        <EmptyState icon={navIcon("/goals")}>{t("empty")}</EmptyState>
       ) : (
         <ul className="grid gap-4 md:grid-cols-2">
           {data.goals
@@ -137,7 +142,10 @@ export function GoalsPage() {
                       <CardTitle className="flex flex-wrap items-center gap-2 text-base">
                         <LifeBuoy aria-hidden="true" className="size-4 text-muted-foreground" />
                         {g.name}
-                        <Badge variant="outline">{t("kinds.emergency_fund")}</Badge>
+                        <Badge variant="outline">
+                          <GOAL_KIND_ICONS.emergency_fund aria-hidden="true" focusable="false" />
+                          {t("kinds.emergency_fund")}
+                        </Badge>
                         {g.archived && <Badge variant="secondary">{t("archivedBadge")}</Badge>}
                       </CardTitle>
                       <CardDescription>
@@ -191,7 +199,10 @@ export function GoalsPage() {
                       <CardTitle className="flex flex-wrap items-center gap-2 text-base">
                         <PiggyBank aria-hidden="true" className="size-4 text-muted-foreground" />
                         {g.name}
-                        <Badge variant="outline">{t("kinds.sinking_fund")}</Badge>
+                        <Badge variant="outline">
+                          <GOAL_KIND_ICONS.sinking_fund aria-hidden="true" focusable="false" />
+                          {t("kinds.sinking_fund")}
+                        </Badge>
                         {g.archived && <Badge variant="secondary">{t("archivedBadge")}</Badge>}
                       </CardTitle>
                       <CardDescription>

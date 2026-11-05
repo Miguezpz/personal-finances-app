@@ -139,7 +139,8 @@ const dueFor = (card: Account, cutOff: IsoDate) =>
 // Profiles
 // ---------------------------------------------------------------------------
 interface SpendProfile {
-  nameKey: string;
+  /** [category nameKey, subcategory name] of the default taxonomy. */
+  sub: readonly [string, string];
   bucket: SpendBucket;
   weight: number;
   min: number; // pesos
@@ -149,38 +150,92 @@ interface SpendProfile {
 
 const PROFILES: readonly SpendProfile[] = [
   {
-    nameKey: "taxonomy.groceries",
+    sub: ["taxonomy.categories.groceries", "Pantry"],
     bucket: "needs",
     weight: 5,
     min: 200,
     max: 1400,
     notes: ["Weekly groceries"],
   },
-  { nameKey: "taxonomy.market", bucket: "needs", weight: 3, min: 80, max: 400 },
-  { nameKey: "taxonomy.fuel", bucket: "needs", weight: 2, min: 400, max: 900 },
-  { nameKey: "taxonomy.publicTransport", bucket: "needs", weight: 2, min: 30, max: 120 },
-  { nameKey: "taxonomy.pharmacy", bucket: "needs", weight: 1, min: 80, max: 600 },
   {
-    nameKey: "taxonomy.utilities",
+    sub: ["taxonomy.categories.groceries", "Hygiene"],
+    bucket: "needs",
+    weight: 3,
+    min: 80,
+    max: 400,
+  },
+  {
+    sub: ["taxonomy.categories.transportGas", "Fuel"],
+    bucket: "needs",
+    weight: 2,
+    min: 400,
+    max: 900,
+  },
+  {
+    sub: ["taxonomy.categories.transportGas", "Public transport"],
+    bucket: "needs",
+    weight: 2,
+    min: 30,
+    max: 120,
+  },
+  {
+    sub: ["taxonomy.categories.healthInsurance", "Medicine"],
+    bucket: "needs",
+    weight: 1,
+    min: 80,
+    max: 600,
+  },
+  {
+    sub: ["taxonomy.categories.homeServices", "Electricity"],
     bucket: "needs",
     weight: 0.3,
     min: 300,
     max: 900,
     notes: ["Electricity"],
   },
-  { nameKey: "taxonomy.doctor", bucket: "needs", weight: 0.2, min: 600, max: 1500 },
   {
-    nameKey: "taxonomy.restaurants",
+    sub: ["taxonomy.categories.healthInsurance", "Doctor"],
+    bucket: "needs",
+    weight: 0.2,
+    min: 600,
+    max: 1500,
+  },
+  {
+    sub: ["taxonomy.categories.restaurants", "Restaurants"],
     bucket: "wants",
     weight: 5.8,
     min: 250,
     max: 900,
     notes: ["Dinner with friends"],
   },
-  { nameKey: "taxonomy.coffee", bucket: "wants", weight: 5.8, min: 50, max: 150 },
-  { nameKey: "taxonomy.events", bucket: "wants", weight: 1.2, min: 400, max: 1500 },
-  { nameKey: "taxonomy.clothing", bucket: "wants", weight: 1.4, min: 400, max: 1800 },
-  { nameKey: "taxonomy.electronics", bucket: "wants", weight: 0.45, min: 800, max: 3500 },
+  {
+    sub: ["taxonomy.categories.restaurants", "Coffee"],
+    bucket: "wants",
+    weight: 5.8,
+    min: 50,
+    max: 150,
+  },
+  {
+    sub: ["taxonomy.categories.entertainment", "Concerts"],
+    bucket: "wants",
+    weight: 1.2,
+    min: 400,
+    max: 1500,
+  },
+  {
+    sub: ["taxonomy.categories.clothes", "Clothing"],
+    bucket: "wants",
+    weight: 1.4,
+    min: 400,
+    max: 1800,
+  },
+  {
+    sub: ["taxonomy.categories.tech", "Audio"],
+    bucket: "wants",
+    weight: 0.45,
+    min: 800,
+    max: 3500,
+  },
 ];
 
 const PAYMENT_METHODS = [
@@ -194,7 +249,8 @@ interface RecurringSpec {
   name: string;
   amount: number; // cents
   chargeDay: number;
-  nameKey: string;
+  /** [category nameKey, subcategory name] of the default taxonomy. */
+  sub: readonly [string, string];
   bucket: SpendBucket;
   paymentAccountId: Uuid;
 }
@@ -204,7 +260,7 @@ const RECURRING: readonly RecurringSpec[] = [
     name: "Rent",
     amount: 850_000,
     chargeDay: 1,
-    nameKey: "taxonomy.rent",
+    sub: ["taxonomy.housing", "Rent"],
     bucket: "needs",
     paymentAccountId: ACCOUNT_IDS.debit,
   },
@@ -212,7 +268,7 @@ const RECURRING: readonly RecurringSpec[] = [
     name: "Home internet",
     amount: 64_900,
     chargeDay: 10,
-    nameKey: "taxonomy.internetPhone",
+    sub: ["taxonomy.categories.homeServices", "Internet"],
     bucket: "needs",
     paymentAccountId: ACCOUNT_IDS.goldCard,
   },
@@ -220,7 +276,7 @@ const RECURRING: readonly RecurringSpec[] = [
     name: "Streaming",
     amount: 29_900,
     chargeDay: 18,
-    nameKey: "taxonomy.streaming",
+    sub: ["taxonomy.categories.streaming", "Video streaming"],
     bucket: "wants",
     paymentAccountId: ACCOUNT_IDS.goldCard,
   },
@@ -228,7 +284,7 @@ const RECURRING: readonly RecurringSpec[] = [
     name: "Mobile plan",
     amount: 39_900,
     chargeDay: 22,
-    nameKey: "taxonomy.internetPhone",
+    sub: ["taxonomy.categories.telecom", "Mobile plan"],
     bucket: "needs",
     paymentAccountId: ACCOUNT_IDS.debit,
   },
@@ -236,8 +292,8 @@ const RECURRING: readonly RecurringSpec[] = [
     name: "Gym",
     amount: 74_900,
     chargeDay: 31,
-    nameKey: "taxonomy.gym",
-    bucket: "wants",
+    sub: ["taxonomy.categories.gymWellness", "Gym"],
+    bucket: "needs",
     paymentAccountId: ACCOUNT_IDS.travelCard,
   },
 ];
@@ -280,6 +336,7 @@ export function generateDemoSnapshot(options: SeedOptions): FinanceSnapshot {
       distributed: true,
       ruleId: RULE_ID,
       depositAccountId: ACCOUNT_IDS.debit,
+      incomeType: "salary",
     });
     const [needs, wants, investment] = allocateByWeights(SALARY, [
       distributionRule.needs,
@@ -316,6 +373,7 @@ export function generateDemoSnapshot(options: SeedOptions): FinanceSnapshot {
       distributed: false,
       ruleId: null,
       depositAccountId: ACCOUNT_IDS.debit,
+      incomeType: "extra",
     });
   }
 
@@ -325,7 +383,7 @@ export function generateDemoSnapshot(options: SeedOptions): FinanceSnapshot {
     name: r.name,
     amount: cents(r.amount),
     chargeDay: r.chargeDay,
-    subcategoryId: subcategoryId(r.nameKey),
+    subcategoryId: subcategoryId(...r.sub),
     bucket: r.bucket,
     paymentAccountId: r.paymentAccountId,
     startsOn: rangeStart,
@@ -368,7 +426,7 @@ export function generateDemoSnapshot(options: SeedOptions): FinanceSnapshot {
         id: nextId(),
         amount,
         spentOn: d,
-        subcategoryId: subcategoryId(profile.nameKey),
+        subcategoryId: subcategoryId(...profile.sub),
         bucket: profile.bucket,
         paymentAccountId: weightedPick(rng, PAYMENT_METHODS).id,
         note,

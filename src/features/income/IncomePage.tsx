@@ -9,9 +9,14 @@ import { useTranslations } from "next-intl";
 import Link from "next/link";
 import { useState } from "react";
 import { toast } from "sonner";
+import { ACCOUNT_KIND_ICONS, BUCKET_ICONS } from "@/components/icons/domain-icons";
+import { INCOME_TYPE_ICONS } from "@/components/icons/income-type-icons";
+import { navIcon } from "@/components/layout/nav-items";
+import { PageHeader } from "@/components/layout/PageHeader";
 import { Money } from "@/components/money/Money";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { EmptyState } from "@/components/ui/empty-state";
 import { ResponsiveCtaButton } from "@/components/ui/responsive-cta";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import {
@@ -25,7 +30,7 @@ import {
 import { Skeleton } from "@/components/ui/skeleton";
 import { isNotifiedGlobally } from "@/data/errors";
 import { useFinanceSnapshot } from "@/data/useFinanceSnapshot";
-import type { FinanceSnapshot, Income, IncomeAllocation } from "@/domain/types";
+import type { Account, FinanceSnapshot, Income, IncomeAllocation } from "@/domain/types";
 import { formatDate } from "@/i18n/format";
 import { selectLocale, usePreferences } from "@/store/preferences";
 import { formatPeriodRange } from "./format";
@@ -39,12 +44,14 @@ function IncomeCard({
   income,
   allocations,
   accountName,
+  accountKind,
   onEdit,
   onDelete,
 }: {
   income: Income;
   allocations: readonly IncomeAllocation[];
   accountName: (id: string | null) => string;
+  accountKind: (id: string | null) => Account["kind"] | null;
   onEdit: () => void;
   onDelete: () => void;
 }) {
@@ -52,6 +59,7 @@ function IncomeCard({
   const tb = useTranslations("buckets");
   const locale = usePreferences(selectLocale);
   const sorted = [...allocations].sort((a, b) => BUCKET_ORDER[a.bucket] - BUCKET_ORDER[b.bucket]);
+  const TypeIcon = INCOME_TYPE_ICONS[income.incomeType];
 
   return (
     <Card data-testid="income-card">
@@ -59,6 +67,10 @@ function IncomeCard({
         <div className="flex min-w-0 flex-col gap-1">
           <CardTitle className="flex flex-wrap items-center gap-2 text-base">
             <span className="truncate">{income.label}</span>
+            <Badge variant="outline" data-testid="income-type-badge">
+              <TypeIcon aria-hidden="true" focusable="false" />
+              {t(`type.${income.incomeType}`)}
+            </Badge>
             {!income.isRecurring && <Badge variant="secondary">{t("oneOffBadge")}</Badge>}
           </CardTitle>
           <p className="text-sm text-muted-foreground">
@@ -73,20 +85,36 @@ function IncomeCard({
       <CardContent className="flex flex-col gap-3">
         {income.distributed ? (
           <ul className="grid gap-1 text-sm sm:grid-cols-2" aria-label={t("preview")}>
-            {sorted.map((a) => (
-              <li
-                key={a.id}
-                className="flex justify-between gap-4 rounded-md bg-muted/50 px-3 py-1.5"
-              >
-                <span>
-                  {tb(a.bucket)}
-                  {a.accountId && (
-                    <span className="text-muted-foreground"> · {accountName(a.accountId)}</span>
-                  )}
-                </span>
-                <Money cents={a.amount} />
-              </li>
-            ))}
+            {sorted.map((a) => {
+              const BucketIcon = BUCKET_ICONS[a.bucket];
+              const kind = accountKind(a.accountId);
+              const AccountIcon = kind ? ACCOUNT_KIND_ICONS[kind] : null;
+              return (
+                <li
+                  key={a.id}
+                  className="flex justify-between gap-4 rounded-md bg-muted/50 px-3 py-1.5"
+                >
+                  <span className="flex min-w-0 flex-wrap items-center gap-x-1.5">
+                    <BucketIcon
+                      aria-hidden="true"
+                      focusable="false"
+                      className="size-4 shrink-0 text-muted-foreground"
+                    />
+                    {tb(a.bucket)}
+                    {a.accountId && (
+                      <span className="inline-flex items-center gap-1 text-muted-foreground">
+                        ·
+                        {AccountIcon && (
+                          <AccountIcon aria-hidden="true" focusable="false" className="size-3.5" />
+                        )}
+                        {accountName(a.accountId)}
+                      </span>
+                    )}
+                  </span>
+                  <Money cents={a.amount} />
+                </li>
+              );
+            })}
           </ul>
         ) : (
           <p className="text-sm text-muted-foreground">{t("notSplit")}</p>
@@ -120,6 +148,7 @@ export function IncomePage() {
   const [toDelete, setToDelete] = useState<Income | null>(null);
 
   const accountName = (id: string | null) => accounts?.find((a) => a.id === id)?.name ?? "";
+  const accountKind = (id: string | null) => accounts?.find((a) => a.id === id)?.kind ?? null;
   const incomes = data
     ? [...data.incomes].sort((a, b) => (a.receivedOn < b.receivedOn ? 1 : -1))
     : [];
@@ -137,27 +166,28 @@ export function IncomePage() {
 
   return (
     <section className="flex flex-col gap-6">
-      <header className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
-        <div className="flex flex-col gap-1">
-          <h1 className="text-2xl font-semibold tracking-tight">{t("title")}</h1>
-          <p className="text-sm text-muted-foreground">{t("description")}</p>
-        </div>
-        <div className="flex flex-wrap gap-2">
-          <Button asChild variant="outline">
-            <Link href="/settings/rules">
-              <Settings2 aria-hidden="true" />
-              {tr("title")}
-            </Link>
-          </Button>
-          <ResponsiveCtaButton
-            onClick={() => setDialog({ open: true, income: null })}
-            data-testid="register-income"
-          >
-            <Plus aria-hidden="true" />
-            {t("register")}
-          </ResponsiveCtaButton>
-        </div>
-      </header>
+      <PageHeader
+        icon={navIcon("/income")}
+        title={t("title")}
+        description={t("description")}
+        actions={
+          <>
+            <Button asChild variant="outline">
+              <Link href="/settings/rules">
+                <Settings2 aria-hidden="true" />
+                {tr("title")}
+              </Link>
+            </Button>
+            <ResponsiveCtaButton
+              onClick={() => setDialog({ open: true, income: null })}
+              data-testid="register-income"
+            >
+              <Plus aria-hidden="true" />
+              {t("register")}
+            </ResponsiveCtaButton>
+          </>
+        }
+      />
 
       {!data ? (
         <div className="flex flex-col gap-4" aria-busy="true">
@@ -165,9 +195,7 @@ export function IncomePage() {
           <Skeleton className="h-32" />
         </div>
       ) : incomes.length === 0 ? (
-        <p className="rounded-lg border border-dashed p-8 text-center text-muted-foreground">
-          {t("empty")}
-        </p>
+        <EmptyState icon={navIcon("/income")}>{t("empty")}</EmptyState>
       ) : (
         <ul className="flex flex-col gap-4">
           {incomes.map((income) => (
@@ -176,6 +204,7 @@ export function IncomePage() {
                 income={income}
                 allocations={data.allocations.filter((a) => a.incomeId === income.id)}
                 accountName={accountName}
+                accountKind={accountKind}
                 onEdit={() => setDialog({ open: true, income })}
                 onDelete={() => setToDelete(income)}
               />

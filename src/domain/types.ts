@@ -3,6 +3,9 @@
  * Source of truth for UI, the calculation engine and the data providers.
  * SQL row types (database.types.ts) are mapped to these in src/data/supabase/mappers.ts.
  */
+import type { IncomeType } from "./income-types";
+
+export type { IncomeType } from "./income-types";
 
 // ---------------------------------------------------------------------------
 // Tipos con marca (evitan mezclar centavos, bps, fechas y UUIDs)
@@ -89,6 +92,11 @@ export interface Category extends Owned {
   nameKey: string | null;
   macro: SpendBucket;
   archived: boolean;
+  /**
+   * Clave de ícono (spec 004) o null. Puede traer una clave que esta versión no conoce: se resuelve
+   * con `resolveTaxonomyIcon` (src/domain/icons.ts), que cae al genérico.
+   */
+  icon: string | null;
 }
 
 export interface Subcategory extends Owned {
@@ -96,6 +104,8 @@ export interface Subcategory extends Owned {
   name: string;
   nameKey: string | null;
   archived: boolean;
+  /** Ícono propio (spec 004) o null para heredar el de su categoría. */
+  icon: string | null;
 }
 
 export interface Income extends Owned {
@@ -109,6 +119,8 @@ export interface Income extends Owned {
   distributed: boolean;
   ruleId: Uuid | null;
   depositAccountId: Uuid | null;
+  /** Tipo de ingreso (spec 004); los anteriores a la feature son "other". */
+  incomeType: IncomeType;
 }
 
 export interface IncomeAllocation extends Owned {

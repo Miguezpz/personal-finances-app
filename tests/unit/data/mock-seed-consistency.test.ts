@@ -4,6 +4,8 @@
  */
 import { describe, expect, it } from "vitest";
 import { generateDemoSnapshot } from "@/data/mock/seed";
+import { isCategoryIconKey } from "@/domain/icons";
+import { isIncomeType } from "@/domain/income-types";
 import { installmentStatusFor } from "@/domain/installments";
 import { dueOccurrences } from "@/domain/recurring";
 import type { IsoDate } from "@/domain/types";
@@ -62,5 +64,22 @@ describe.each(TODAYS)("demo snapshot for %s", (today) => {
       expect(n.netWorth).toBe(n.assets - n.liabilities);
       expect(n.snapshotOn.endsWith("-01")).toBe(true);
     }
+  });
+
+  it("uses the owner's default taxonomy, with buckets inherited from each category (spec 004)", () => {
+    expect(s.categories).toHaveLength(26);
+    expect(s.subcategories).toHaveLength(68);
+    expect(s.categories.every((c) => isCategoryIconKey(c.icon))).toBe(true);
+    expect(s.subcategories.every((x) => x.icon === null && x.nameKey === null)).toBe(true);
+    const macroOf = new Map(
+      s.subcategories.map((x) => [x.id, s.categories.find((c) => c.id === x.categoryId)?.macro]),
+    );
+    for (const e of s.expenses) expect(e.bucket, e.id).toBe(macroOf.get(e.subcategoryId));
+    for (const r of s.recurring) expect(r.bucket, r.name).toBe(macroOf.get(r.subcategoryId));
+  });
+
+  it("gives every income a valid type (spec 004)", () => {
+    expect(s.incomes.every((i) => isIncomeType(i.incomeType))).toBe(true);
+    expect(s.incomes.find((i) => i.label === "Salary")?.incomeType).toBe("salary");
   });
 });

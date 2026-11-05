@@ -4,6 +4,7 @@
  * the editor against the loaded catalog.
  */
 import { z } from "zod";
+import { type CategoryIconKey, isCategoryIconKey } from "@/domain/icons";
 
 export const taxonomyNameSchema = z.object({
   name: z.string().trim().min(1, "nameRequired").max(60, "nameTooLong"),
@@ -12,3 +13,15 @@ export const taxonomyNameSchema = z.object({
 
 export type TaxonomyNameInput = z.input<typeof taxonomyNameSchema>;
 export type TaxonomyNameOutput = z.output<typeof taxonomyNameSchema>;
+
+/**
+ * Icon chosen in the picker (spec 004, FR-012): a key of the curated set, or null to clear a
+ * subcategory's own icon (it inherits its category's again).
+ */
+export const taxonomyIconSchema = z.union([
+  z.null(),
+  z
+    .string()
+    .refine(isCategoryIconKey, "invalidIcon")
+    .transform((v) => v as CategoryIconKey),
+]);

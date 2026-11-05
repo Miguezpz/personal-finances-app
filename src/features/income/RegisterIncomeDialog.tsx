@@ -7,11 +7,13 @@
  *    the user choose to split or not (US1-7). Without a rule: configure one or record unsplit.
  *  - Editing recalculates with the income's ORIGINAL rule (rule_id snapshot, FR-005).
  *  - Live preview of the split, computed by the same pure function that is saved.
+ *  - Income type (spec 004): mandatory, nothing preselected when registering. Choosing a type while
+ *    the label is empty (or still holds the previous suggestion) fills in the type's name.
  */
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useTranslations } from "next-intl";
 import Link from "next/link";
-import { useMemo } from "react";
+import { useMemo, useRef } from "react";
 import { Controller, useForm, useWatch } from "react-hook-form";
 import { toast } from "sonner";
 import { Money } from "@/components/money/Money";
@@ -40,6 +42,7 @@ import { Label } from "@/components/ui/label";
 import { useFinanceSnapshot } from "@/data/useFinanceSnapshot";
 import { isNotifiedGlobally } from "@/data/errors";
 import { isIsoDate } from "@/domain/dates";
+import { isIncomeType } from "@/domain/income-types";
 import { formatCentsAsInput, parseMoneyInput } from "@/domain/parse";
 import { fundedPeriodFor, nextPeriod, previousPeriod, periodOf } from "@/domain/periods";
 import { effectiveRule, splitIncome, type SplitResult } from "@/domain/splitter";
@@ -48,6 +51,7 @@ import { useToday } from "@/lib/use-today";
 import { selectLocale, usePreferences } from "@/store/preferences";
 import { formatPeriodRange } from "./format";
 import { useRegisterIncome, useReplaceIncome } from "./hooks";
+import { IncomeTypeField } from "./IncomeTypeField";
 import { incomeFormSchema, type IncomeFormInput, type IncomeFormOutput } from "./schemas";
 
 type IncomeMessageKey = Parameters<ReturnType<typeof useTranslations<"income">>>[0];
@@ -68,6 +72,7 @@ interface Props {
 function defaultsFor(income: Income | null | undefined, today: IsoDate): IncomeFormInput {
   if (income) {
     return {
+      incomeType: income.incomeType,
       label: income.label,
       amount: formatCentsAsInput(income.amount),
       receivedOn: income.receivedOn,
@@ -78,6 +83,7 @@ function defaultsFor(income: Income | null | undefined, today: IsoDate): IncomeF
     };
   }
   return {
+    incomeType: "",
     label: "",
     amount: "",
     receivedOn: today,
@@ -146,6 +152,9 @@ export function RegisterIncomeDialog({ open, onOpenChange, income }: Props) {
     return options.map((p) => ({ start: p.start, suggested: p.key === suggested.key }));
   }, [receivedOn, fundedPeriodStart]);
 
+  /** Label filled in by the last type choice; replaced on the next choice, never typed text. */
+  const suggestedLabel = useRef<string | null>(null);
+
   const showSplitChoice = kind === "oneOff" || !rule || !split;
   const errors = form.formState.errors;
   const errorText = (key: string | undefined) => (key ? t(key as IncomeMessageKey) : null);
@@ -187,6 +196,26 @@ export function RegisterIncomeDialog({ open, onOpenChange, income }: Props) {
           className="flex flex-col gap-5"
         >
           <FieldGroup>
+            <Controller
+              name="incomeType"
+              control={form.control}
+              render={({ field }) => (
+                <IncomeTypeField
+                  value={isIncomeType(field.value) ? field.value : ""}
+                  error={errorText(errors.incomeType?.message)}
+                  onChange={(type) => {
+                    field.onChange(type);
+                    const current = form.getValues("label").trim();
+                    if (current === "" || current === suggestedLabel.current) {
+                      const name = t(`type.${type}`);
+                      suggestedLabel.current = name;
+                      form.setValue("label", name, { shouldValidate: form.formState.isSubmitted });
+                    }
+                  }}
+                />
+              )}
+            />
+
             <Field data-invalid={Boolean(errors.label)}>
               <FieldLabel htmlFor="income-label">{t("label")}</FieldLabel>
               <Input

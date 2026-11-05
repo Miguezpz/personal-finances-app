@@ -22,15 +22,16 @@ end with **Spec-Driven Development** (GitHub Spec Kit + Claude Code), and it run
 
 ## What it does
 
-| Area                     | Highlights                                                                                                                                                                           |
-| ------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| Income & rules           | Versioned distribution rules (e.g. 50/30/20 with Investment sub-rules); exact splits in integer cents, largest-remainder rounding, funded quincena chosen per income.                |
-| Safe-to-Spend            | Per-bucket balance with carry-over between quincenas, a traffic light (never color alone) and days to payday. Recurring charges are reserved from day 1 of the quincena.             |
-| Expenses & cards         | One-tap expenses that inherit the bucket from their subcategory; credit cards in "totalero" mode: the headline is always the **amount to pay to avoid interest**, never the minimum. |
-| Third parties (MSI)      | Interest-free installment purchases made for someone else: collection calendar ahead of the card's due date, kept out of personal metrics.                                           |
-| Credit, goals, net worth | Timeline of paydays × card due dates × collections; emergency fund (months of vital expenses) and sinking funds; monthly net-worth history.                                          |
-| Ledger & export          | Every movement, filterable; CSV of the (filtered) ledger or a full ZIP backup (one CSV per table) generated in the browser.                                                          |
-| Everywhere               | English/Spanish switch in place, MXN/USD/EUR display (data stays in MXN), privacy mode that masks every amount (charts included), cold-start and offline handling.                   |
+| Area                     | Highlights                                                                                                                                                                                                                                           |
+| ------------------------ | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Income & rules           | Versioned distribution rules (e.g. 50/30/20 with Investment sub-rules); exact splits in integer cents, largest-remainder rounding, funded quincena chosen per income. Every income has a type (salary, gift, cashback, sales…), exported in the CSV. |
+| Safe-to-Spend            | Per-bucket balance with carry-over between quincenas, a traffic light (never color alone) and days to payday. Recurring charges are reserved from day 1 of the quincena.                                                                             |
+| Expenses & cards         | One-tap expenses that inherit the bucket from their subcategory; credit cards in "totalero" mode: the headline is always the **amount to pay to avoid interest**, never the minimum.                                                                 |
+| Categories               | A ready-made taxonomy of 26 categories (13 Needs, 13 Wants) with Lucide icons; each category's icon can be changed and subcategories inherit it unless they get their own.                                                                           |
+| Third parties (MSI)      | Interest-free installment purchases made for someone else: collection calendar ahead of the card's due date, kept out of personal metrics.                                                                                                           |
+| Credit, goals, net worth | Timeline of paydays × card due dates × collections; emergency fund (months of vital expenses) and sinking funds; monthly net-worth history.                                                                                                          |
+| Ledger & export          | Every movement, filterable; CSV of the (filtered) ledger or a full ZIP backup (one CSV per table) generated in the browser.                                                                                                                          |
+| Everywhere               | English/Spanish switch in place, MXN/USD/EUR display (data stays in MXN), privacy mode that masks every amount (charts included), cold-start and offline handling.                                                                                   |
 
 ## Architecture
 

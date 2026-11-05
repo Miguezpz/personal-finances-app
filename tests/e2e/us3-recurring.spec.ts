@@ -35,7 +35,7 @@ test.describe("US3 · recurring expenses", { tag: "@live" }, () => {
           .from("subcategories")
           .select("id")
           .eq("user_id", owner.id)
-          .eq("name_key", "taxonomy.rent");
+          .eq("name", "Rent"); // Housing › Rent (spec 004 default, no i18n key)
         rentSub = data?.[0]?.id;
         return rentSub;
       })

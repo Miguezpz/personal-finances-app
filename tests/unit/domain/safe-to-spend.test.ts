@@ -5,6 +5,7 @@
  *   available(b,p) = carry + allocated − fixedApplied − fixedPending − manual − goalContrib
  */
 import { describe, expect, it } from "vitest";
+import { DEFAULT_TAXONOMY } from "@/domain/default-taxonomy";
 import { cents } from "@/domain/money";
 import { periodFromKey } from "@/domain/periods";
 import { DEFAULT_USER_SETTINGS } from "@/domain/settings";
@@ -63,6 +64,21 @@ const spend = (
   });
 
 describe("computeSafeToSpend", () => {
+  it("spec 004 FR-004: an expense in Previous Balances comes out of Needs this quincena", () => {
+    const previous = DEFAULT_TAXONOMY.find((c) => c.name === "Previous Balances");
+    expect(previous?.macro).toBe("needs");
+    const r = computeSafeToSpend(
+      input({
+        allocations: [alloc("needs", 500_000, "2026-11-16"), alloc("wants", 300_000, "2026-11-16")],
+        // The expense inherits the bucket of its category, like any other Needs expense.
+        expenses: [spend(previous?.macro ?? "wants", 120_000, "2026-11-18")],
+      }),
+    );
+    expect(r.needs.manual).toBe(120_000);
+    expect(r.needs.available).toBe(380_000);
+    expect(r.wants.available).toBe(300_000);
+  });
+
   it("US2-1: Wants $3,000 − fixed $500 − manual $700 = $1,800", () => {
     const r = computeSafeToSpend(
       input({

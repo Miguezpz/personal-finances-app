@@ -12,7 +12,7 @@ pruebas, semillas ni `db reset` contra la nube.
 ## 1. Supabase en la nube (una sola vez)
 
 1. Crear el proyecto en [supabase.com](https://supabase.com) (plan Free) y anotar el _Project ref_.
-2. Aplicar las migraciones del repositorio (`supabase/migrations/0001…0007`):
+2. Aplicar las migraciones del repositorio (`supabase/migrations/0001…0008`):
 
    ```bash
    pnpm exec supabase login
@@ -103,6 +103,25 @@ NEXT_PUBLIC_DEMO_MODE=true pnpm build && pnpm check:demo-bundle
   app en varias pestañas no duplica nada.
 - **Nuevas migraciones**: después de agregar un archivo en `supabase/migrations`, probar en local
   (`pnpm db:reset && pnpm db:test && pnpm test:contract:local`) y luego `pnpm exec supabase db push`.
+- **Migración 0008 (spec 004: tipos de ingreso, íconos y taxonomía por defecto)**: además de las
+  columnas nuevas, rellena las cuentas que ya existen. A cada categoría activa cuyo nombre coincide
+  exactamente con una por defecto le asigna su clave de traducción y su ícono, y agrega la categoría
+  _Previous Balances_ (Needs). No toca subcategorías, categorías archivadas o renombradas, movimientos
+  ni reglas; los ingresos existentes quedan con el tipo `other`. Aplicarla y **desplegar el frontend
+  enseguida** (la versión anterior sigue funcionando entre ambos pasos). Verificar con SQL de solo
+  lectura:
+
+  ```sql
+  select count(*) filter (where archived_at is null)                      as activas,
+         count(*) filter (where name = 'Previous Balances')               as previous_balances, -- 1
+         count(*) filter (where archived_at is null and icon is null)     as sin_icono,         -- 0
+         count(*) filter (where archived_at is null and name_key is null) as sin_clave          -- 0
+  from categories;
+  select income_type, count(*) from incomes group by 1;                   -- todo en 'other'
+  ```
+
+  Una categoría propia (no por defecto) aparece en `sin_icono`/`sin_clave`: es lo esperado, se
+  muestra con el ícono genérico y su nombre tal cual.
 
 ## 4. Respaldo
 

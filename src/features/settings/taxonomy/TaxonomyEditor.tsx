@@ -5,6 +5,8 @@
  * their subcategories. Create, rename, archive / restore and delete. Deleting is blocked when it
  * would orphan history (a subcategory with movements, a category with subcategories) and the
  * dialog offers archiving instead; the provider enforces the same rule with CONFLICT.
+ * Each item has an icon picker (spec 004): categories choose theirs, subcategories inherit their
+ * category's unless they get their own.
  */
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Archive, ArchiveRestore, Pencil, Plus, Trash2 } from "lucide-react";
@@ -28,6 +30,7 @@ import { Input } from "@/components/ui/input";
 import { NativeSelect, NativeSelectOption } from "@/components/ui/native-select";
 import { Skeleton } from "@/components/ui/skeleton";
 import { isNotifiedGlobally, isProviderError } from "@/data/errors";
+import { isCategoryIconKey, resolveTaxonomyIcon } from "@/domain/icons";
 import type { Category, SpendBucket, Subcategory } from "@/domain/types";
 import { SettingsHeader } from "../SettingsHeader";
 import {
@@ -37,8 +40,10 @@ import {
   useRemoveTaxonomy,
   useRenameTaxonomy,
   useSetTaxonomyArchived,
+  useSetTaxonomyIcon,
   useTaxonomyCatalog,
 } from "./hooks";
+import { IconPicker } from "./IconPicker";
 import { taxonomyNameSchema, type TaxonomyNameInput, type TaxonomyNameOutput } from "./schema";
 import { useTaxonomyName } from "./useTaxonomyName";
 
@@ -68,6 +73,7 @@ export function TaxonomyEditor() {
   const rename = useRenameTaxonomy();
   const setArchived = useSetTaxonomyArchived();
   const remove = useRemoveTaxonomy();
+  const setIcon = useSetTaxonomyIcon();
   const [nameDialog, setNameDialog] = useState<NameDialogState | null>(null);
   const [toDelete, setToDelete] = useState<DeleteTarget | null>(null);
 
@@ -97,12 +103,18 @@ export function TaxonomyEditor() {
   function onSaveName(state: NameDialogState, values: TaxonomyNameOutput) {
     if (state.mode === "newCategory") {
       create.mutate(
-        { name: values.name, nameKey: null, macro: values.macro, archived: false },
+        { name: values.name, nameKey: null, macro: values.macro, archived: false, icon: null },
         saved,
       );
     } else if (state.mode === "newSubcategory") {
       createSub.mutate(
-        { categoryId: state.category.id, name: values.name, nameKey: null, archived: false },
+        {
+          categoryId: state.category.id,
+          name: values.name,
+          nameKey: null,
+          archived: false,
+          icon: null,
+        },
         saved,
       );
     } else {
@@ -150,6 +162,13 @@ export function TaxonomyEditor() {
       );
     }
     setToDelete(null);
+  }
+
+  function changeIcon(kind: TaxonomyKind, item: Category | Subcategory, icon: string | null) {
+    setIcon.mutate(
+      { kind, id: item.id, icon },
+      { onSuccess: () => toast.success(t("iconSaved")), onError },
+    );
   }
 
   const itemActions = (kind: TaxonomyKind, item: Category | Subcategory, label: string) => (
@@ -232,6 +251,12 @@ export function TaxonomyEditor() {
                         >
                           <CardHeader className="flex flex-row items-center justify-between gap-2">
                             <CardTitle className="flex min-w-0 flex-wrap items-center gap-2 text-base">
+                              <IconPicker
+                                itemName={label}
+                                value={isCategoryIconKey(c.icon) ? c.icon : null}
+                                shown={resolveTaxonomyIcon(null, c)}
+                                onChange={(icon) => changeIcon("category", c, icon)}
+                              />
                               <span className="truncate">{label}</span>
                               {c.archived && (
                                 <Badge variant="secondary">{t("archivedBadge")}</Badge>
@@ -250,7 +275,14 @@ export function TaxonomyEditor() {
                                     data-testid="subcategory-row"
                                     className="flex items-center justify-between gap-2 py-1.5"
                                   >
-                                    <div className="flex min-w-0 flex-col">
+                                    <IconPicker
+                                      itemName={subLabel}
+                                      value={isCategoryIconKey(x.icon) ? x.icon : null}
+                                      shown={resolveTaxonomyIcon(x, c)}
+                                      inherited={resolveTaxonomyIcon(null, c)}
+                                      onChange={(icon) => changeIcon("subcategory", x, icon)}
+                                    />
+                                    <div className="mr-auto flex min-w-0 flex-col">
                                       <span
                                         className={
                                           x.archived

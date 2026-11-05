@@ -1,0 +1,101 @@
+/**
+ * Taxonomy icon key → Lucide component (spec 004, research R6).
+ *
+ * Named imports ONLY: the bundle carries exactly these ~40 icons. Never `import * as icons` or a
+ * lookup by an arbitrary name, which would pull the whole library. `satisfies` makes a key of
+ * `CATEGORY_ICON_KEYS` without a component a compile error.
+ *
+ * Only pages that show categories import this map (taxonomy, expenses, ledger, recurring), so the
+ * dashboard's first load does not pay for it (SC-005).
+ */
+import {
+  Baby,
+  Bike,
+  BookOpen,
+  Briefcase,
+  Bus,
+  Candy,
+  Car,
+  ClockArrowLeft,
+  Coffee,
+  Dumbbell,
+  Ellipsis,
+  Film,
+  Fuel,
+  Gamepad2,
+  Gift,
+  GraduationCap,
+  HandHeart,
+  Headphones,
+  HeartPulse,
+  House,
+  Landmark,
+  type LucideIcon,
+  Music,
+  Palette,
+  PawPrint,
+  PiggyBank,
+  Plane,
+  Plug,
+  ReceiptText,
+  Repeat,
+  Scissors,
+  Shapes,
+  Shirt,
+  ShoppingCart,
+  Smartphone,
+  Sofa,
+  Store,
+  Tag,
+  Ticket,
+  Tv,
+  Utensils,
+  Wrench,
+} from "lucide-react";
+import type { CategoryIconKey } from "@/domain/icons";
+
+export const CATEGORY_ICONS = {
+  house: House,
+  plug: Plug,
+  smartphone: Smartphone,
+  car: Car,
+  "shopping-cart": ShoppingCart,
+  "heart-pulse": HeartPulse,
+  dumbbell: Dumbbell,
+  repeat: Repeat,
+  wrench: Wrench,
+  "graduation-cap": GraduationCap,
+  landmark: Landmark,
+  "paw-print": PawPrint,
+  "clock-arrow-left": ClockArrowLeft,
+  utensils: Utensils,
+  ticket: Ticket,
+  tv: Tv,
+  shirt: Shirt,
+  scissors: Scissors,
+  gift: Gift,
+  candy: Candy,
+  headphones: Headphones,
+  plane: Plane,
+  sofa: Sofa,
+  palette: Palette,
+  "hand-heart": HandHeart,
+  ellipsis: Ellipsis,
+  coffee: Coffee,
+  music: Music,
+  "book-open": BookOpen,
+  baby: Baby,
+  fuel: Fuel,
+  bus: Bus,
+  bike: Bike,
+  "gamepad-2": Gamepad2,
+  film: Film,
+  "receipt-text": ReceiptText,
+  tag: Tag,
+  store: Store,
+  briefcase: Briefcase,
+  "piggy-bank": PiggyBank,
+} as const satisfies Record<CategoryIconKey, LucideIcon>;
+
+/** Fallback for categories without an icon or with a key this version doesn't know. */
+export const GENERIC_CATEGORY_ICON: LucideIcon = Shapes;

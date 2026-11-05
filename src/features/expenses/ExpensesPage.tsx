@@ -5,13 +5,18 @@
  * and delete. Automatic (recurring) charges are labelled; third-party MSI charges never appear
  * here — they aren't personal expenses (FR-020).
  */
-import { CreditCard, Pencil, Plus, Trash2 } from "lucide-react";
+import { CreditCard, Pencil, Plus, Repeat, Trash2 } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { useMemo, useState } from "react";
 import { toast } from "sonner";
+import { CategoryIcon } from "@/components/icons/CategoryIcon";
+import { ACCOUNT_KIND_ICONS, BUCKET_ICONS } from "@/components/icons/domain-icons";
+import { navIcon } from "@/components/layout/nav-items";
+import { PageHeader } from "@/components/layout/PageHeader";
 import { Money } from "@/components/money/Money";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { EmptyState } from "@/components/ui/empty-state";
 import {
   Dialog,
   DialogContent,
@@ -23,6 +28,7 @@ import {
 import { Skeleton } from "@/components/ui/skeleton";
 import { isNotifiedGlobally } from "@/data/errors";
 import { useFinanceSnapshot } from "@/data/useFinanceSnapshot";
+import { taxonomyIconFor } from "@/domain/icons";
 import { negateCents } from "@/domain/money";
 import type { CardPayment, Cents, Expense, FinanceSnapshot, IsoDate, Uuid } from "@/domain/types";
 import { useTaxonomyName } from "@/features/settings/taxonomy/useTaxonomyName";
@@ -79,6 +85,21 @@ export function ExpensesPage() {
     return sub ? nameOf(sub) : "";
   };
   const accountName = (id: string | null) => data?.accounts.find((a) => a.id === id)?.name ?? null;
+  const accountIcon = (id: string | null) => {
+    const kind = data?.accounts.find((a) => a.id === id)?.kind;
+    return kind ? ACCOUNT_KIND_ICONS[kind] : null;
+  };
+  const accountLabel = (id: string | null) => {
+    const name = accountName(id);
+    const Icon = accountIcon(id);
+    if (!name) return null;
+    return (
+      <span className="inline-flex items-center gap-1">
+        {Icon && <Icon aria-hidden="true" focusable="false" className="size-3.5" />}
+        {name}
+      </span>
+    );
+  };
   const onError = (e: Error) => {
     if (!isNotifiedGlobally(e)) toast.error(tc("unexpectedError"));
   };
@@ -100,31 +121,32 @@ export function ExpensesPage() {
 
   return (
     <section className="flex flex-col gap-6">
-      <header className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
-        <div className="flex flex-col gap-1">
-          <h1 className="text-2xl font-semibold tracking-tight">{t("title")}</h1>
-          <p className="text-sm text-muted-foreground">{t("description")}</p>
-        </div>
-        <div className="flex shrink-0 flex-wrap gap-2">
-          <Button
-            variant="outline"
-            onClick={() => setPayDialog({ open: true, cardId: null, amount: null })}
-          >
-            <CreditCard aria-hidden="true" />
-            {t("payCard")}
-          </Button>
-          <Button
-            variant="cta"
-            // Mobile: the floating CTA replaces it (FR-006).
-            className="max-md:hidden"
-            onClick={() => setExpenseDialog({ open: true, expense: null })}
-            data-testid="add-expense"
-          >
-            <Plus aria-hidden="true" />
-            {t("addTitle")}
-          </Button>
-        </div>
-      </header>
+      <PageHeader
+        icon={navIcon("/expenses")}
+        title={t("title")}
+        description={t("description")}
+        actions={
+          <>
+            <Button
+              variant="outline"
+              onClick={() => setPayDialog({ open: true, cardId: null, amount: null })}
+            >
+              <CreditCard aria-hidden="true" />
+              {t("payCard")}
+            </Button>
+            <Button
+              variant="cta"
+              // Mobile: the floating CTA replaces it (FR-006).
+              className="max-md:hidden"
+              onClick={() => setExpenseDialog({ open: true, expense: null })}
+              data-testid="add-expense"
+            >
+              <Plus aria-hidden="true" />
+              {t("addTitle")}
+            </Button>
+          </>
+        }
+      />
 
       <CardDebtSummary onPay={(cardId, amount) => setPayDialog({ open: true, cardId, amount })} />
 
@@ -139,9 +161,7 @@ export function ExpensesPage() {
             ))}
           </div>
         ) : rows.length === 0 ? (
-          <p className="rounded-lg border border-dashed p-8 text-center text-muted-foreground">
-            {t("empty")}
-          </p>
+          <EmptyState icon={navIcon("/expenses")}>{t("empty")}</EmptyState>
         ) : (
           <>
             <ul className="divide-y rounded-lg border">
@@ -161,13 +181,20 @@ export function ExpensesPage() {
                           {row.item.note ?? subName(row.item.subcategoryId)}
                         </span>
                         <span className="flex flex-wrap items-center gap-1 text-xs text-muted-foreground">
+                          <CategoryIcon
+                            icon={taxonomyIconFor(row.item.subcategoryId, data)}
+                            className="size-3.5"
+                          />
                           {subName(row.item.subcategoryId)}
-                          <Badge variant="outline">{tb(row.item.bucket)}</Badge>
+                          <BucketBadge bucket={row.item.bucket} label={tb(row.item.bucket)} />
                           {row.item.origin === "recurring" && (
-                            <Badge variant="secondary">{t("automatic")}</Badge>
+                            <Badge variant="secondary">
+                              <Repeat aria-hidden="true" focusable="false" />
+                              {t("automatic")}
+                            </Badge>
                           )}
                           {accountName(row.item.paymentAccountId) && (
-                            <>· {accountName(row.item.paymentAccountId)}</>
+                            <>· {accountLabel(row.item.paymentAccountId)}</>
                           )}
                         </span>
                       </>
@@ -181,7 +208,7 @@ export function ExpensesPage() {
                         <span className="text-xs text-muted-foreground">
                           {row.item.note ?? t("debtSettlement")}
                           {accountName(row.item.fromAccountId) && (
-                            <> · {accountName(row.item.fromAccountId)}</>
+                            <> · {accountLabel(row.item.fromAccountId)}</>
                           )}
                         </span>
                       </>
@@ -265,5 +292,15 @@ export function ExpensesPage() {
         </DialogContent>
       </Dialog>
     </section>
+  );
+}
+
+function BucketBadge({ bucket, label }: { bucket: Expense["bucket"]; label: string }) {
+  const Icon = BUCKET_ICONS[bucket];
+  return (
+    <Badge variant="outline">
+      <Icon aria-hidden="true" focusable="false" />
+      {label}
+    </Badge>
   );
 }

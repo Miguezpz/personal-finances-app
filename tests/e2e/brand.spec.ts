@@ -8,7 +8,8 @@ import { APP_ROUTES } from "./app-routes";
 import { expect, test } from "./fixtures";
 
 async function expectAtMostOneCta(page: Page, where: string) {
-  await expect(page.locator("main [aria-busy='true']")).toHaveCount(0);
+  // Only the page on screen: Next keeps previously visited pages mounted but hidden.
+  await expect(page.locator("main [aria-busy='true']:visible")).toHaveCount(0);
   const count = await page.locator('[data-variant="cta"]:visible').count();
   expect(count, `highlighted CTAs on ${where}`).toBeLessThanOrEqual(1);
 }
@@ -69,7 +70,11 @@ test.describe("Brand identity · one CTA per screen (desktop)", () => {
     { tag: "@live" },
     async ({ ownerPage }) => {
       test.setTimeout(90_000);
-      await expect(ownerPage.locator("header").getByTestId("brand-mark")).toBeVisible();
+      // After signing in, Next keeps the landing page mounted but hidden (it can come back
+      // instantly), so its header's mark is still in the DOM: look only at the visible one.
+      await expect(
+        ownerPage.locator("header").getByTestId("brand-mark").filter({ visible: true }),
+      ).toBeVisible();
       for (const route of APP_ROUTES) {
         await ownerPage.goto(route);
         await expectAtMostOneCta(ownerPage, route);

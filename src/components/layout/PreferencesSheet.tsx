@@ -5,7 +5,7 @@
  * and this button; language, currency, theme and sign-out live in a bottom sheet. It's a dialog (not a menu), so the
  * toggles keep their button semantics and their data-testids.
  */
-import { LogOut, SlidersHorizontal } from "lucide-react";
+import { Coins, Languages, LogOut, type LucideIcon, SlidersHorizontal } from "lucide-react";
 import { useTranslations } from "next-intl";
 import type { ReactNode } from "react";
 import { Button } from "@/components/ui/button";
@@ -15,10 +15,23 @@ import { CurrencyToggle } from "./CurrencyToggle";
 import { LanguageToggle } from "./LanguageToggle";
 import { ThemeToggle } from "./ThemeToggle";
 
-function Row({ label, children }: { label: string; children: ReactNode }) {
+function Row({
+  label,
+  icon: Icon,
+  children,
+}: {
+  label: string;
+  icon?: LucideIcon;
+  children: ReactNode;
+}) {
   return (
     <div className="flex min-h-11 items-center justify-between gap-4">
-      <span className="text-sm font-medium">{label}</span>
+      <span className="flex items-center gap-2 text-sm font-medium">
+        {Icon && (
+          <Icon aria-hidden="true" focusable="false" className="size-4 text-muted-foreground" />
+        )}
+        {label}
+      </span>
       {children}
     </div>
   );
@@ -61,10 +74,10 @@ export function PreferencesSheet({
           <SheetTitle>{t("preferences")}</SheetTitle>
         </SheetHeader>
         <div className="flex flex-col gap-2">
-          <Row label={tc("language")}>
+          <Row label={tc("language")} icon={Languages}>
             <LanguageToggle />
           </Row>
-          <Row label={tfx("currencyLabel")}>
+          <Row label={tfx("currencyLabel")} icon={Coins}>
             <CurrencyToggle />
           </Row>
           <Row label={tTheme("toggle")}>

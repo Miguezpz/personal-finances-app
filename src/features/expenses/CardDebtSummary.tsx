@@ -5,7 +5,7 @@
  * third parties), the "pay to avoid interest" amount as the headline — never the minimum payment —
  * and its due date. A purchase with the card raises it; a card payment lowers it.
  */
-import { CreditCard, TriangleAlert } from "lucide-react";
+import { CalendarClock, CreditCard, Scissors, TriangleAlert } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { useMemo } from "react";
 import { Money } from "@/components/money/Money";
@@ -65,9 +65,16 @@ export function CardDebtSummary({ onPay }: { onPay: (cardId: Uuid, amount: Cents
                 <div className="flex flex-col gap-1">
                   <span className="text-sm text-muted-foreground">{t("payToAvoidInterest")}</span>
                   <Money cents={status.payToAvoidInterest} className="text-2xl font-semibold" />
-                  <span className="text-sm text-muted-foreground">
-                    {t("dueOn", { date: formatDate(status.nextPaymentDue, locale) })} ·{" "}
-                    {t("cutOffOn", { date: formatDate(status.lastCutOff, locale) })}
+                  <span className="flex flex-wrap items-center gap-x-1.5 text-sm text-muted-foreground">
+                    <span className="inline-flex items-center gap-1">
+                      <CalendarClock aria-hidden="true" focusable="false" className="size-3.5" />
+                      {t("dueOn", { date: formatDate(status.nextPaymentDue, locale) })}
+                    </span>
+                    ·
+                    <span className="inline-flex items-center gap-1">
+                      <Scissors aria-hidden="true" focusable="false" className="size-3.5" />
+                      {t("cutOffOn", { date: formatDate(status.lastCutOff, locale) })}
+                    </span>
                   </span>
                 </div>
                 <div

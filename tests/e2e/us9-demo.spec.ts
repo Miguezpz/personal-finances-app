@@ -49,6 +49,8 @@ test.describe("US9 · read-only demo", { tag: "@demo" }, () => {
     await expect(page.getByTestId("income-card").first()).toBeVisible();
     const incomes = await page.getByTestId("income-card").count();
     await page.getByTestId("register-income").click();
+    // The income type is mandatory (spec 004).
+    await page.getByTestId("income-type-extra").click();
     await page.locator("#income-label").fill("Bonus");
     await page.locator("#income-amount").fill("1000");
     await page.getByTestId("save-income").click();
@@ -87,7 +89,8 @@ test.describe("US9 · read-only demo", { tag: "@demo" }, () => {
     await expect(page.getByTestId("category-card").first()).toBeVisible();
     const categories = await page.getByTestId("category-card").count();
     await page.getByTestId("add-category").click();
-    await page.locator("#taxonomy-name").fill("Pets");
+    // A name that is not already a default category (spec 004 added "Pets").
+    await page.locator("#taxonomy-name").fill("Garden");
     await page.getByTestId("save-taxonomy").click();
     await expectReadOnly(page, locale);
     await expect(page.getByTestId("category-card")).toHaveCount(categories);

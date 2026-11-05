@@ -51,3 +51,10 @@ export const PRIMARY_NAV_ITEMS: readonly NavItem[] = PRIMARY_ORDER.map(
 );
 /** Everything the bottom bar doesn't show: listed by the "More" sheet. */
 export const SECONDARY_NAV_ITEMS: readonly NavItem[] = NAV_ITEMS.filter((item) => !item.primary);
+
+/** Icon of a page, for its title and empty state (spec 004): one source shared with the nav. */
+export function navIcon(href: NavItem["href"]): LucideIcon {
+  const item = NAV_ITEMS.find((i) => i.href === href);
+  if (!item) throw new Error(`No nav item for ${href}`);
+  return item.icon;
+}

@@ -16,6 +16,8 @@ import type { Cents, IsoDate } from "@/domain/types";
 import { formatDate } from "@/i18n/format";
 import { cn } from "@/lib/utils";
 import { selectLocale, usePreferences } from "@/store/preferences";
+import { EmptyState } from "@/components/ui/empty-state";
+import { navIcon } from "@/components/layout/nav-items";
 
 export const TIMELINE_DAYS = 60;
 
@@ -37,11 +39,7 @@ export function CreditTimeline({ events, today }: { events: TimelineEvent[]; tod
   for (const e of events) byDate.set(e.date, [...(byDate.get(e.date) ?? []), e]);
 
   if (events.length === 0) {
-    return (
-      <p className="rounded-lg border border-dashed p-8 text-center text-muted-foreground">
-        {t("timelineEmpty")}
-      </p>
-    );
+    return <EmptyState icon={navIcon("/credit")}>{t("timelineEmpty")}</EmptyState>;
   }
 
   return (

@@ -87,6 +87,7 @@ export const CATEGORIES: readonly Category[] = DEFAULT_TAXONOMY.map((c, i) => ({
   nameKey: c.nameKey,
   macro: c.macro,
   archived: false,
+  icon: c.icon,
 }));
 
 export const SUBCATEGORIES: readonly Subcategory[] = DEFAULT_TAXONOMY.flatMap((c, i) =>
@@ -94,14 +95,18 @@ export const SUBCATEGORIES: readonly Subcategory[] = DEFAULT_TAXONOMY.flatMap((c
     id: id(0x2000 + (i + 1) * 0x100 + j + 1),
     categoryId: id(0x2000 + (i + 1) * 0x100),
     name: s.name,
-    nameKey: s.nameKey,
+    // Default subcategories are not translated and inherit their category's icon (spec 004).
+    nameKey: null,
     archived: false,
+    icon: null,
   })),
 );
 
-export function subcategoryId(nameKey: string): Uuid {
-  const sub = SUBCATEGORIES.find((s) => s.nameKey === nameKey);
-  if (!sub) throw new Error(`Unknown demo subcategory ${nameKey}`);
+/** Demo subcategory by its category's i18n key and its own (untranslated) name. */
+export function subcategoryId(categoryNameKey: string, subName: string): Uuid {
+  const category = CATEGORIES.find((c) => c.nameKey === categoryNameKey);
+  const sub = SUBCATEGORIES.find((s) => s.categoryId === category?.id && s.name === subName);
+  if (!sub) throw new Error(`Unknown demo subcategory ${categoryNameKey} / ${subName}`);
   return sub.id;
 }
 

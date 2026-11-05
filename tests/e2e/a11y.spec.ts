@@ -57,6 +57,33 @@ test.describe("Accessibility", { tag: "@demo" }, () => {
     }
   });
 
+  test("spec 004: icons are decorative and every route passes axe in dark mode too", async ({
+    page,
+  }) => {
+    test.setTimeout(180_000);
+    await page.emulateMedia({ colorScheme: "dark" }); // the default theme follows the system
+    for (const route of APP_ROUTES) {
+      await page.goto(route);
+      await expect(page.locator("main [aria-busy='true']")).toHaveCount(0);
+      await audit(page, `${route} (dark)`);
+      // FR-016: every icon inside the page content is hidden from assistive technology, so it
+      // never changes the accessible name of a button, badge or heading.
+      const exposed = await page
+        .locator("main svg.lucide:not([aria-hidden='true'])")
+        .evaluateAll((svgs) => svgs.map((svg) => svg.outerHTML.slice(0, 120)));
+      expect(exposed, `exposed icons on ${route}`).toEqual([]);
+    }
+    // The icon picker of the taxonomy editor, in both themes.
+    for (const scheme of ["light", "dark"] as const) {
+      await page.emulateMedia({ colorScheme: scheme });
+      await page.goto("/settings/categories");
+      await page.getByTestId("icon-picker").first().click();
+      await expect(page.getByRole("dialog")).toBeVisible();
+      await audit(page, `icon picker (${scheme})`);
+      await page.keyboard.press("Escape");
+    }
+  });
+
   test("keyboard: the first Tab offers to skip to the content, which then gets focus", async ({
     page,
   }) => {

@@ -71,6 +71,8 @@ export function createMockProvider(options: MockProviderOptions = {}): DataProvi
       listSubcategories: () => list(s().subcategories),
       createCategory: () => denyWrite("taxonomy.createCategory"),
       createSubcategory: () => denyWrite("taxonomy.createSubcategory"),
+      insertCategories: () => denyWrite("taxonomy.insertCategories"),
+      insertSubcategories: () => denyWrite("taxonomy.insertSubcategories"),
       update: () => denyWrite("taxonomy.update"),
       remove: () => denyWrite("taxonomy.remove"),
     },

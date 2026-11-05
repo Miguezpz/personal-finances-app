@@ -29,7 +29,7 @@ const patchItem = (
   s: FinanceSnapshot,
   kind: TaxonomyKind,
   id: Uuid,
-  patch: Partial<Pick<Category, "name" | "nameKey" | "archived">>,
+  patch: Partial<Pick<Category, "name" | "nameKey" | "archived" | "icon">>,
 ): FinanceSnapshot =>
   kind === "category"
     ? { ...s, categories: s.categories.map((c) => (c.id === id ? { ...c, ...patch } : c)) }
@@ -68,6 +68,14 @@ export function useSetTaxonomyArchived() {
     mutationFn: (provider, { kind, id, archived }) =>
       provider.taxonomy.update(kind, id, { archived }),
     optimistic: (s, { kind, id, archived }) => patchItem(s, kind, id, { archived }),
+  });
+}
+
+/** Icon of a category or subcategory (spec 004); null clears a subcategory's own icon. */
+export function useSetTaxonomyIcon() {
+  return useSnapshotMutation<{ kind: TaxonomyKind; id: Uuid; icon: string | null }, void>({
+    mutationFn: (provider, { kind, id, icon }) => provider.taxonomy.update(kind, id, { icon }),
+    optimistic: (s, { kind, id, icon }) => patchItem(s, kind, id, { icon }),
   });
 }
 

@@ -49,12 +49,8 @@ test.describe("US8 · settings and ledger", { tag: "@live" }, () => {
             .from("categories")
             .select("id")
             .eq("user_id", owner.id)
-            .eq("name_key", "taxonomy.diningOut"),
-          admin
-            .from("subcategories")
-            .select("id")
-            .eq("user_id", owner.id)
-            .eq("name_key", "taxonomy.groceries"),
+            .eq("name_key", "taxonomy.categories.restaurants"), // Wants (spec 004 default)
+          admin.from("subcategories").select("id").eq("user_id", owner.id).eq("name", "Pantry"), // Groceries › Pantry (Needs); subcategories have no key
         ]);
         diningOut = cats?.[0]?.id;
         groceries = subs?.[0]?.id;
@@ -86,7 +82,7 @@ test.describe("US8 · settings and ledger", { tag: "@live" }, () => {
       .toEqual(["credit_card", 12, 20]);
     await expect(page.locator(`[data-testid="account-card"][data-id="${cardId}"]`)).toBeVisible();
 
-    // --- A subcategory "Pets" under the Wants category "Dining out" -----------------------
+    // --- A subcategory "Pets" under the Wants category "Restaurants & Cafes" --------------
     await page.goto("/settings/categories");
     const category = page.locator(`[data-testid="category-card"][data-id="${diningOut}"]`);
     await category.getByTestId("add-subcategory").click();
