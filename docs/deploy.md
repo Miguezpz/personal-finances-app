@@ -140,7 +140,12 @@ legible para consultar o reconstruir datos manualmente.
 - [ ] Registro deshabilitado en el panel de Supabase (paso 1.3).
 - [ ] En Vercel solo existe la clave **publicable**; ninguna variable contiene `service_role` ni `sb_secret_`.
 - [ ] El proyecto demo no tiene variables de Supabase.
-- [ ] `supabase db advisors --linked` sin avisos de nivel `warn` o superior.
+- [ ] `supabase db advisors --linked` sin avisos de nivel `warn` o superior, salvo
+      `auth_leaked_password_protection`: la comprobación contra HaveIBeenPwned solo existe en el
+      plan Pro de Supabase, y la app debe operar en Free (constitución, principio I). Se compensa con
+      el registro deshabilitado, un único usuario, el inicio con Google y una contraseña de respaldo
+      fuerte; en _Authentication → Sign In / Providers → Email_ conviene exigir longitud mínima ≥ 12
+      y dígitos, minúsculas, mayúsculas y símbolos (disponible en Free).
 - [ ] `.env.local` nunca se versiona (solo `.env.example`).
 - [ ] La app de Google está en modo **Testing** con un único _test user_ (el dueño) y su Client Secret
       solo existe en el panel de Supabase.
