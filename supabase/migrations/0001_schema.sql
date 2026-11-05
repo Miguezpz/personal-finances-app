@@ -1,5 +1,5 @@
 -- =============================================================================
--- 0001 · Schema (T019). Source: specs/001-personal-finances-core/contracts/db-schema.sql
+-- 0001 · Schema (T019). Source: specs/_archive/001-personal-finances-core/contracts/db-schema.sql
 --
 -- Conventions:
 --   * Money: bigint MXN CENTS. Percentages: smallint basis points (0–10000).

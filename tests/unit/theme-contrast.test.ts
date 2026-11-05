@@ -1,7 +1,7 @@
 /**
  * Spec 003 · FR-003 / FR-004 / FR-039 / SC-001: every text/background pair and every non-text indicator of the
  * palette meets WCAG 2.1 AA in BOTH themes. Reads the single source of truth (src/styles/tokens.css), so retouching a
- * color can't silently break contrast. Pairs: specs/003-ui-refresh/contracts/ui-theme.md §1 "Pares verificados".
+ * color can't silently break contrast. Pairs: specs/_archive/003-ui-refresh/contracts/ui-theme.md §1 "Pares verificados".
  */
 import { readFileSync } from "node:fs";
 import { resolve as resolvePath } from "node:path";

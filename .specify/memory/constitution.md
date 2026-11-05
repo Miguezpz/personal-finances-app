@@ -1,12 +1,3 @@
-<!--
-SYNC IMPACT REPORT (temporal; eliminar antes de hacer commit)
-- Version change: (plantilla sin ratificar) → 1.0.0
-- Principios modificados: ninguno renombrado (se definieron los 6 desde cero)
-- Secciones añadidas: Core Principles (I–VI), Restricciones Técnicas y de Seguridad,
-  Flujo de Desarrollo y Calidad, Governance
-- Secciones eliminadas: ninguna
-- Deferred / TODOs: ninguno
--->
 # Personal Finances App Constitution
 
 ## Core Principles

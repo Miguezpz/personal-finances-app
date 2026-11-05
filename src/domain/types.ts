@@ -1,5 +1,5 @@
 /**
- * Domain types (copied from specs/001-personal-finances-core/contracts/domain-types.ts, T013).
+ * Domain types (copied from specs/_archive/001-personal-finances-core/contracts/domain-types.ts, T013).
  * Source of truth for UI, the calculation engine and the data providers.
  * SQL row types (database.types.ts) are mapped to these in src/data/supabase/mappers.ts.
  */

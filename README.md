@@ -9,8 +9,8 @@ end with **Spec-Driven Development** (GitHub Spec Kit + Claude Code), and it run
 (Vercel Hobby + Supabase Free).
 
 - **Live demo (read-only, fictitious data, no sign-in):** https://personal-finances-demo.vercel.app
-- **Spec, plan and tasks:** [`specs/001-personal-finances-core/`](specs/001-personal-finances-core/)
-  · UI refresh: [`specs/003-ui-refresh/`](specs/003-ui-refresh/)
+- **Spec, plan and tasks:** [`specs/_archive/001-personal-finances-core/`](specs/_archive/001-personal-finances-core/)
+  · UI refresh: [`specs/_archive/003-ui-refresh/`](specs/_archive/003-ui-refresh/)
 
 | Desktop · light                                                         | Desktop · dark                                                        |
 | ----------------------------------------------------------------------- | --------------------------------------------------------------------- |
@@ -58,7 +58,7 @@ Browser (Next.js App Router, all derived values computed client-side)
 
 ## Design
 
-"Fresh & Growth" identity ([`specs/003-ui-refresh`](specs/003-ui-refresh/spec.md)):
+"Fresh & Growth" identity ([`specs/_archive/003-ui-refresh`](specs/_archive/003-ui-refresh/spec.md)):
 
 - **Palette in one place.** Ink `#052E2B`, teal `#0F766E`, emerald `#34D399`, mint `#A7F3D0` and mist `#ECFDF5`
   as brand primitives in [`src/styles/tokens.css`](src/styles/tokens.css), mapped to semantic tokens for a light
@@ -116,7 +116,7 @@ non-local database.
 ## Project structure
 
 ```
-specs/001-personal-finances-core/  spec, plan, research, data model, contracts, tasks, quickstart
+specs/_archive/001-personal-finances-core/  spec, plan, research, data model, contracts, tasks, quickstart
 src/app/            routes ((app) area: dashboard, income, expenses, recurring, receivables,
                     credit, goals, net-worth, ledger, settings/…)
 src/domain/         pure business logic, no I/O, no clock
@@ -130,10 +130,10 @@ scripts/            CI checks (demo bundle, no uploads) and the local-Supabase t
 
 ## Key decisions
 
-The reasoning lives next to the code: [`plan.md`](specs/001-personal-finances-core/plan.md)
+The reasoning lives next to the code: [`plan.md`](specs/_archive/001-personal-finances-core/plan.md)
 (constitution check, final verification and recorded deviations),
-[`research.md`](specs/001-personal-finances-core/research.md) (alternatives considered) and
-[`data-model.md`](specs/001-personal-finances-core/data-model.md) (formulas). A few of them:
+[`research.md`](specs/_archive/001-personal-finances-core/research.md) (alternatives considered) and
+[`data-model.md`](specs/_archive/001-personal-finances-core/data-model.md) (formulas). A few of them:
 
 - Money is always integer **cents** (`Cents` branded type) and percentages are **basis points**;
   no floating point touches an amount.

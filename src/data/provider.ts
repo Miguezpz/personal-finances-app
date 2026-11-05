@@ -1,5 +1,5 @@
 /**
- * DataProvider contract (copied from specs/001-personal-finances-core/contracts/data-provider.ts, T026).
+ * DataProvider contract (copied from specs/_archive/001-personal-finances-core/contracts/data-provider.ts, T026).
  *
  * Reglas:
  *  - La UI y los hooks solo conocen `DataProvider`; nunca importan `@supabase/*` (regla ESLint).
