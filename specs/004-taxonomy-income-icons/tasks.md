@@ -171,6 +171,7 @@ description: "Task list for spec 004 — Taxonomía completa, tipos de ingreso e
 - [ ] T064 Verificar a mano los escenarios A–J y el demo de `specs/004-taxonomy-income-icons/quickstart.md` en EN y ES y en claro y oscuro (`pnpm dev` y `pnpm dev:demo`), y marcar sus criterios de salida
 - [X] T065 [P] Actualizar `README.md` (tipos de ingreso, íconos y taxonomía por defecto) y `docs/deploy.md` (aplicar `0008` y la verificación SQL de quickstart § 4)
 - [ ] T066 Commit en `main` y, **solo con aprobación expresa del dueño**, aplicar `0008` a `potodtpkgadgsmeuuafx` con versión `0008` (una sola migración) y ejecutar las consultas de verificación de quickstart § 4 (26 activas, 1 Previous Balances, 0 sin ícono, 0 sin clave, ingresos en `other`, totales idénticos); después push para desplegar y repetir los escenarios B–F en producción
+  - 2026-11-05: `0008` aplicada a `potodtpkgadgsmeuuafx` con aprobación del dueño y registrada como versión `0008`. Verificación: 26 categorías activas, 1 Previous Balances (Needs) con su subcategoría, 0 sin ícono, 0 sin clave; gastos 0, ingresos 0, 16 cuentas, 2 recurrentes y 1 regla, igual que antes; `authenticated` no puede ejecutar `private.apply_taxonomy_004`; asesores de seguridad sin avisos nuevos. Pendiente: repetir los escenarios B–F en producción (requiere la sesión del dueño).
 
 ---
 
