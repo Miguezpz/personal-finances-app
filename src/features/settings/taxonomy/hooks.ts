@@ -7,7 +7,7 @@
  * it has no subcategories.
  */
 import type { NewEntity } from "@/data/provider";
-import { useSnapshotMutation } from "@/data/snapshot-cache";
+import { replaceTemp, useSnapshotMutation } from "@/data/snapshot-cache";
 import { useFinanceSnapshot } from "@/data/useFinanceSnapshot";
 import type { Category, FinanceSnapshot, Subcategory, Uuid } from "@/domain/types";
 
@@ -38,19 +38,24 @@ const patchItem = (
 export function useCreateCategory() {
   return useSnapshotMutation<NewEntity<Category>, Category>({
     mutationFn: (provider, input) => provider.taxonomy.createCategory(input),
-    optimistic: (s, input) => ({
+    optimistic: (s, input, { tempId }) => ({
       ...s,
-      categories: [...s.categories, { ...input, id: crypto.randomUUID() as Uuid }],
+      categories: [...s.categories, { ...input, id: tempId }],
     }),
+    created: (s, row, { tempId }) => ({ ...s, categories: replaceTemp(s.categories, tempId, row) }),
   });
 }
 
 export function useCreateSubcategory() {
   return useSnapshotMutation<NewEntity<Subcategory>, Subcategory>({
     mutationFn: (provider, input) => provider.taxonomy.createSubcategory(input),
-    optimistic: (s, input) => ({
+    optimistic: (s, input, { tempId }) => ({
       ...s,
-      subcategories: [...s.subcategories, { ...input, id: crypto.randomUUID() as Uuid }],
+      subcategories: [...s.subcategories, { ...input, id: tempId }],
+    }),
+    created: (s, row, { tempId }) => ({
+      ...s,
+      subcategories: replaceTemp(s.subcategories, tempId, row),
     }),
   });
 }

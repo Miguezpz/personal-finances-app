@@ -5,7 +5,7 @@
  * so the Safe-to-Spend changes the instant an expense is saved (FR-018, SC-004).
  */
 import type { NewEntity, Patch } from "@/data/provider";
-import { useSnapshotMutation } from "@/data/snapshot-cache";
+import { replaceTemp, useSnapshotMutation } from "@/data/snapshot-cache";
 import type { CardPayment, Expense, FinanceSnapshot, SpendBucket, Uuid } from "@/domain/types";
 
 /** Bucket inherited from the subcategory's parent category (FR-014). */
@@ -20,10 +20,11 @@ export function bucketOfSubcategory(
 export function useCreateExpense() {
   return useSnapshotMutation<NewEntity<Expense>, Expense>({
     mutationFn: (provider, input) => provider.expenses.create(input),
-    optimistic: (s, input) => ({
+    optimistic: (s, input, { tempId }) => ({
       ...s,
-      expenses: [...s.expenses, { ...input, id: crypto.randomUUID() as Uuid }],
+      expenses: [...s.expenses, { ...input, id: tempId }],
     }),
+    created: (s, row, { tempId }) => ({ ...s, expenses: replaceTemp(s.expenses, tempId, row) }),
   });
 }
 
@@ -50,9 +51,13 @@ export function useDeleteExpense() {
 export function useCreateCardPayment() {
   return useSnapshotMutation<NewEntity<CardPayment>, CardPayment>({
     mutationFn: (provider, input) => provider.cardPayments.create(input),
-    optimistic: (s, input) => ({
+    optimistic: (s, input, { tempId }) => ({
       ...s,
-      cardPayments: [...s.cardPayments, { ...input, id: crypto.randomUUID() as Uuid }],
+      cardPayments: [...s.cardPayments, { ...input, id: tempId }],
+    }),
+    created: (s, row, { tempId }) => ({
+      ...s,
+      cardPayments: replaceTemp(s.cardPayments, tempId, row),
     }),
   });
 }

@@ -5,7 +5,7 @@
  * useSnapshotMutation, so the UI updates optimistically and reconciles with the provider.
  */
 import type { RegisterIncomeInput } from "@/data/provider";
-import { useSnapshotMutation } from "@/data/snapshot-cache";
+import { replaceTemp, useSnapshotMutation } from "@/data/snapshot-cache";
 import { useFinanceSnapshot } from "@/data/useFinanceSnapshot";
 import type { FinanceSnapshot, Income, IncomeAllocation, Uuid } from "@/domain/types";
 
@@ -50,7 +50,15 @@ function withoutIncome(s: FinanceSnapshot, id: Uuid): FinanceSnapshot {
 export function useRegisterIncome() {
   return useSnapshotMutation<RegisterIncomeInput, Income>({
     mutationFn: (provider, input) => provider.incomes.register(input),
-    optimistic: (s, input) => withIncome(s, tempId(), input),
+    optimistic: (s, input, { tempId: id }) => withIncome(s, id, input),
+    // The server's income replaces the temporary one, and its allocations point to the real id.
+    created: (s, income, { tempId: id }) => ({
+      ...s,
+      incomes: replaceTemp(s.incomes, id, income),
+      allocations: s.allocations.map((a) =>
+        a.incomeId === id ? { ...a, incomeId: income.id } : a,
+      ),
+    }),
   });
 }
 

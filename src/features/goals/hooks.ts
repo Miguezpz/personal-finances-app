@@ -2,7 +2,7 @@
 
 /** Goal hooks (T145): selectors + optimistic writes over the snapshot. */
 import type { NewEntity, Patch } from "@/data/provider";
-import { useSnapshotMutation } from "@/data/snapshot-cache";
+import { replaceTemp, useSnapshotMutation } from "@/data/snapshot-cache";
 import { useFinanceSnapshot } from "@/data/useFinanceSnapshot";
 import type { FinanceSnapshot, Goal, Uuid } from "@/domain/types";
 
@@ -19,10 +19,11 @@ export function useGoalData() {
 export function useCreateGoal() {
   return useSnapshotMutation<NewEntity<Goal>, Goal>({
     mutationFn: (provider, input) => provider.goals.create(input),
-    optimistic: (s, input) => ({
+    optimistic: (s, input, { tempId }) => ({
       ...s,
-      goals: [...s.goals, { ...input, id: crypto.randomUUID() as Uuid }],
+      goals: [...s.goals, { ...input, id: tempId }],
     }),
+    created: (s, row, { tempId }) => ({ ...s, goals: replaceTemp(s.goals, tempId, row) }),
   });
 }
 

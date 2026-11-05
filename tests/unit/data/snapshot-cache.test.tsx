@@ -157,3 +157,40 @@ describe("useSnapshotMutation / updateSnapshot", () => {
     expect(queryClient.getQueryData(queryKeys.snapshot)).toBeUndefined();
   });
 });
+
+describe("useSnapshotMutation · created (temporary id swap)", () => {
+  it("puts the server's row in place of the optimistic one before the refetch lands", async () => {
+    const { wrapper, loadSnapshot } = setup(emptySnapshot());
+    const serverRow = makeExpense({ note: "server" });
+    const { result } = renderHook(
+      () => {
+        const expenses = useFinanceSnapshot(selectExpenses);
+        const add = useSnapshotMutation<Expense, Expense>({
+          mutationFn: async () => serverRow,
+          optimistic: (s, e, { tempId }) => ({
+            ...s,
+            expenses: [...s.expenses, { ...e, id: tempId }],
+          }),
+          created: (s, row, { tempId }) => ({
+            ...s,
+            expenses: s.expenses.map((x) => (x.id === tempId ? row : x)),
+          }),
+        });
+        return { expenses, add };
+      },
+      { wrapper },
+    );
+    await waitFor(() => expect(result.current.expenses.data).toEqual([]));
+
+    // The reconciling refetch never answers: whatever the cache holds comes from `created`.
+    const refetch = deferred<FinanceSnapshot>();
+    loadSnapshot.mockImplementation(() => refetch.promise);
+
+    const draft = makeExpense({ note: "draft" });
+    act(() => result.current.add.mutate(draft));
+    // The server's row is in the cache while the refetch is still pending.
+    await waitFor(() => expect(result.current.expenses.data).toEqual([serverRow]));
+    expect(loadSnapshot).toHaveBeenCalledTimes(2); // initial load + the reconciling refetch
+    refetch.resolve(emptySnapshot({ expenses: [serverRow] }));
+  });
+});

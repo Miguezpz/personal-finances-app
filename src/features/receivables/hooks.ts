@@ -5,7 +5,7 @@
  * the debtor owes — never a bucket (FR-026a).
  */
 import type { CreateReceivableInput, NewEntity, RecordCollectionInput } from "@/data/provider";
-import { useSnapshotMutation } from "@/data/snapshot-cache";
+import { replaceTemp, useSnapshotMutation } from "@/data/snapshot-cache";
 import { useFinanceSnapshot } from "@/data/useFinanceSnapshot";
 import { installmentStatusFor } from "@/domain/installments";
 import type { Debtor, FinanceSnapshot, Installment, Receivable, Uuid } from "@/domain/types";
@@ -26,15 +26,15 @@ const tempId = () => crypto.randomUUID() as Uuid;
 export function useCreateDebtor() {
   return useSnapshotMutation<NewEntity<Debtor>, Debtor>({
     mutationFn: (provider, input) => provider.receivables.createDebtor(input),
-    optimistic: (s, input) => ({ ...s, debtors: [...s.debtors, { ...input, id: tempId() }] }),
+    optimistic: (s, input, { tempId: id }) => ({ ...s, debtors: [...s.debtors, { ...input, id }] }),
+    created: (s, debtor, { tempId: id }) => ({ ...s, debtors: replaceTemp(s.debtors, id, debtor) }),
   });
 }
 
 export function useCreateReceivable() {
   return useSnapshotMutation<CreateReceivableInput, Receivable>({
     mutationFn: (provider, input) => provider.receivables.create(input),
-    optimistic: (s, { receivable, installments }) => {
-      const id = tempId();
+    optimistic: (s, { receivable, installments }, { tempId: id }) => {
       return {
         ...s,
         receivables: [...s.receivables, { ...receivable, id }],
@@ -51,6 +51,15 @@ export function useCreateReceivable() {
         ],
       };
     },
+    // The receivable gets its server id at once; its installments keep temporary ids until the
+    // refetch (the create RPC only returns the header).
+    created: (s, row, { tempId: id }) => ({
+      ...s,
+      receivables: replaceTemp(s.receivables, id, row),
+      installments: s.installments.map((i) =>
+        i.receivableId === id ? { ...i, receivableId: row.id } : i,
+      ),
+    }),
   });
 }
 

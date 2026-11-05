@@ -3,6 +3,9 @@
 /**
  * Writes against the single domain cache (T158, research.md R17):
  *   onMutate  → optimistic change applied to queryKeys.snapshot (the UI updates at once, SC-004)
+ *   onSuccess → for creates, `created` swaps the temporary id for the server's row right away, so
+ *               editing a just-created row targets the real one (before, it kept the temporary id
+ *               until the refetch landed, and an edit in that window was rejected as NOT_FOUND)
  *   onError   → rollback to the exact previous snapshot (also for DemoReadOnlyError)
  *   onSettled → invalidate queryKeys.snapshot to reconcile with the provider's truth
  * Offline, a write fails at once with ProviderError('OFFLINE') and changes nothing (no optimistic
@@ -14,7 +17,7 @@ import {
   type QueryClient,
   type UseMutationResult,
 } from "@tanstack/react-query";
-import type { FinanceSnapshot } from "@/domain/types";
+import type { FinanceSnapshot, Uuid } from "@/domain/types";
 import { isBrowserOffline } from "@/lib/network";
 import { useDataProvider } from "./context";
 import { ProviderError, type DataProvider } from "./provider";
@@ -37,15 +40,35 @@ export async function updateSnapshot(
   return () => queryClient.setQueryData<FinanceSnapshot>(queryKeys.snapshot, previous);
 }
 
+/** Per-mutation data shared by `optimistic` and `created`. */
+export interface OptimisticContext {
+  /** Id to give the optimistic row of a create; `created` replaces it with the server's. */
+  readonly tempId: Uuid;
+}
+
 export interface SnapshotMutationOptions<TVariables, TData> {
   /** The write; receives the active provider (never import a concrete provider in features). */
   mutationFn: (provider: DataProvider, variables: TVariables) => Promise<TData>;
   /** Pure optimistic change to the snapshot. Omit for writes whose effect can't be predicted. */
-  optimistic?: (snapshot: FinanceSnapshot, variables: TVariables) => FinanceSnapshot;
+  optimistic?: (
+    snapshot: FinanceSnapshot,
+    variables: TVariables,
+    context: OptimisticContext,
+  ) => FinanceSnapshot;
+  /**
+   * Creates only: applied as soon as the write succeeds (before the refetch) to put the server's
+   * row in place of the optimistic one that used `context.tempId`.
+   */
+  created?: (snapshot: FinanceSnapshot, data: TData, context: OptimisticContext) => FinanceSnapshot;
 }
 
-interface MutationContext {
+interface MutationContext extends OptimisticContext {
   rollback: Rollback;
+}
+
+/** Replaces the row whose id is `tempId` with the server's row (no-op if it isn't there). */
+export function replaceTemp<T extends { id: Uuid }>(list: readonly T[], tempId: Uuid, row: T): T[] {
+  return list.map((x) => (x.id === tempId ? row : x));
 }
 
 export function useSnapshotMutation<TVariables, TData = unknown>(
@@ -53,19 +76,33 @@ export function useSnapshotMutation<TVariables, TData = unknown>(
 ): UseMutationResult<TData, Error, TVariables, MutationContext> {
   const provider = useDataProvider();
   const queryClient = useQueryClient();
-  const { mutationFn, optimistic } = options;
+  const { mutationFn, optimistic, created } = options;
 
   return useMutation<TData, Error, TVariables, MutationContext>({
     mutationFn: (variables) =>
       isBrowserOffline()
         ? Promise.reject(new ProviderError("OFFLINE", "No connection: the write was not sent"))
         : mutationFn(provider, variables),
-    onMutate: async (variables) => ({
-      rollback:
-        optimistic && !isBrowserOffline()
-          ? await updateSnapshot(queryClient, (s) => optimistic(s, variables))
-          : () => {},
-    }),
+    onMutate: async (variables) => {
+      const tempId = crypto.randomUUID() as Uuid;
+      return {
+        tempId,
+        rollback:
+          optimistic && !isBrowserOffline()
+            ? await updateSnapshot(queryClient, (s) => optimistic(s, variables, { tempId }))
+            : () => {},
+      };
+    },
+    onSuccess: (data, _variables, context) => {
+      if (!created || !context) return;
+      const current = queryClient.getQueryData<FinanceSnapshot>(queryKeys.snapshot);
+      if (current !== undefined) {
+        queryClient.setQueryData<FinanceSnapshot>(
+          queryKeys.snapshot,
+          created(current, data, { tempId: context.tempId }),
+        );
+      }
+    },
     onError: (_error, _variables, context) => {
       context?.rollback();
     },

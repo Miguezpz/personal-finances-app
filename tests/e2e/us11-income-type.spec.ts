@@ -57,9 +57,8 @@ test.describe("Spec 004 · income type", { tag: "@live" }, () => {
       .toEqual([{ income_type: "salary", amount_cents: 150_000 }]);
 
     // --- Editing keeps the stored type selected and changes it ------------------------
-    // Reload so the list holds the server id (a just-created row keeps a temporary id until the
-    // snapshot refetch lands; editing it earlier is a separate, pre-existing race).
-    await page.reload();
+    // No reload: right after a create the row already carries its server id (snapshot-cache
+    // `created`), so editing it at once must reach the database.
     await card.getByRole("button", { name: text.edit }).click();
     await expect(page.getByTestId("income-type-salary")).toHaveAttribute("data-state", "checked");
     await page.getByTestId("income-type-gift").click();

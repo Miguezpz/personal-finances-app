@@ -5,7 +5,7 @@
  * accounts stay in the snapshot (history keeps pointing at them) and can be restored.
  */
 import type { NewEntity, Patch } from "@/data/provider";
-import { useSnapshotMutation } from "@/data/snapshot-cache";
+import { replaceTemp, useSnapshotMutation } from "@/data/snapshot-cache";
 import { useFinanceSnapshot } from "@/data/useFinanceSnapshot";
 import type { Account, FinanceSnapshot, Uuid } from "@/domain/types";
 
@@ -23,10 +23,11 @@ const patchAccount = (s: FinanceSnapshot, id: Uuid, patch: Patch<Account>): Fina
 export function useCreateAccount() {
   return useSnapshotMutation<NewEntity<Account>, Account>({
     mutationFn: (provider, input) => provider.accounts.create(input),
-    optimistic: (s, input) => ({
+    optimistic: (s, input, { tempId }) => ({
       ...s,
-      accounts: [...s.accounts, { ...input, id: crypto.randomUUID() as Uuid }],
+      accounts: [...s.accounts, { ...input, id: tempId }],
     }),
+    created: (s, row, { tempId }) => ({ ...s, accounts: replaceTemp(s.accounts, tempId, row) }),
   });
 }
 

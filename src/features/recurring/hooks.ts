@@ -5,7 +5,7 @@
  * snapshots in `expenses`, so every change here only affects future charges (FR-011).
  */
 import type { NewEntity, Patch } from "@/data/provider";
-import { useSnapshotMutation } from "@/data/snapshot-cache";
+import { replaceTemp, useSnapshotMutation } from "@/data/snapshot-cache";
 import { useFinanceSnapshot } from "@/data/useFinanceSnapshot";
 import type { FinanceSnapshot, IsoDate, RecurringExpense, Uuid } from "@/domain/types";
 
@@ -27,10 +27,11 @@ const patchRecurring = (
 export function useCreateRecurring() {
   return useSnapshotMutation<NewEntity<RecurringExpense>, RecurringExpense>({
     mutationFn: (provider, input) => provider.recurring.create(input),
-    optimistic: (s, input) => ({
+    optimistic: (s, input, { tempId }) => ({
       ...s,
-      recurring: [...s.recurring, { ...input, id: crypto.randomUUID() as Uuid }],
+      recurring: [...s.recurring, { ...input, id: tempId }],
     }),
+    created: (s, row, { tempId }) => ({ ...s, recurring: replaceTemp(s.recurring, tempId, row) }),
   });
 }
 
