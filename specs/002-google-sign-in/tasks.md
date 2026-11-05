@@ -119,6 +119,7 @@ mensaje "no autorizado"; con otra cuenta de Google, `count(auth.users)` sigue en
 - [X] T027 [P] Mencionar el inicio de sesión con Google en `README.md` (sección de funcionalidades o modo personal)
 - [x] T028 Ejecutar las puertas de calidad: `pnpm typecheck`, `pnpm lint`, `pnpm test`, `pnpm test:contract:local`, `pnpm test:e2e:local` y `pnpm check:demo-bundle`, todas en verde
 - [ ] T029 Commit, push y merge a `main` (despliegue automático de los dos proyectos de Vercel); verificar en producción los Escenarios A–D de `specs/002-google-sign-in/quickstart.md` en EN y ES y marcar sus criterios de salida
+  - 2026-11-05: código en `main` y desplegado en ambos proyectos. Verificado en producción sin sesión: Escenario C (`/auth/callback` sin código, con `code` inválido o con `next=https://example.com` → `/?authError=failed`; con `signup_disabled` → `/?authError=not_authorized`; nunca sale del origen), Escenario D (el demo no muestra botón de Google y `/auth/callback` vuelve al demo), la app personal muestra "Continue with Google", y en la nube `count(auth.users) = 1` con identidades `email` y `google`. Pendiente (dueño): Escenario A en producción en EN y ES, y T017 en local.
 
 ---
 
