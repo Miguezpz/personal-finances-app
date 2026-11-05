@@ -1,11 +1,11 @@
 "use client";
 
 /**
- * Theme menu (spec 003, FR-015, research R13): Light / Dark / System as a radio menu (menuitemradio tells screen
+ * Theme menu (spec 003, FR-015, research R13): Light / Dark / Neon / System as a radio menu (menuitemradio tells screen
  * readers which one is selected). Loaded lazily by ThemeToggle so the Radix menu isn't in the First Load JS. The choice persists on the device and is applied by <PreferencesEffects />; the
  * inline boot script applies it before the first paint on the next visit.
  */
-import { Monitor, Moon, Sun, type LucideIcon } from "lucide-react";
+import { Monitor, Moon, Sun, Zap, type LucideIcon } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { Button } from "@/components/ui/button";
 import {
@@ -25,9 +25,10 @@ import {
 export const THEME_ICONS: Record<ThemePreference, LucideIcon> = {
   light: Sun,
   dark: Moon,
+  neon: Zap,
   system: Monitor,
 };
-const OPTIONS: readonly ThemePreference[] = ["light", "dark", "system"];
+const OPTIONS: readonly ThemePreference[] = ["light", "dark", "neon", "system"];
 
 export default function ThemeMenu({ className }: { className?: string }) {
   const t = useTranslations("theme");

@@ -11,10 +11,11 @@ import { create } from "zustand";
 import { createJSONStorage, persist, type StateStorage } from "zustand/middleware";
 import type { DisplayCurrency, Locale } from "@/domain/types";
 
-/** Theme choice (spec 003). "system" follows the OS `prefers-color-scheme`. */
-export type ThemePreference = "system" | "light" | "dark";
+/** Theme choice (spec 003). "system" follows the OS `prefers-color-scheme` (light/dark only); "neon" is a third,
+ * dark-based theme ("Asphalt & Neon"). */
+export type ThemePreference = "system" | "light" | "dark" | "neon";
 /** The theme actually applied. */
-export type ResolvedTheme = "light" | "dark";
+export type ResolvedTheme = "light" | "dark" | "neon";
 
 export interface PreferencesState {
   /** UI language. Default 'en' (Principle VI). */
@@ -23,7 +24,7 @@ export interface PreferencesState {
   displayCurrency: DisplayCurrency;
   /** Masks amounts, balances and chart axes. */
   privacyMode: boolean;
-  /** Light / dark / follow the OS. Default "system" (FR-015). */
+  /** Light / dark / neon / follow the OS. Default "system" (FR-015). */
   theme: ThemePreference;
   /** false until rehydrated from storage; <Money> masks meanwhile outside the demo. */
   hydrated: boolean;
@@ -59,7 +60,7 @@ export const DISPLAY_CURRENCIES: readonly DisplayCurrency[] = ["MXN", "USD", "EU
 export const isLocale = (v: unknown): v is Locale => LOCALES.includes(v as Locale);
 const isCurrency = (v: unknown): v is DisplayCurrency =>
   DISPLAY_CURRENCIES.includes(v as DisplayCurrency);
-export const THEME_PREFERENCES: readonly ThemePreference[] = ["system", "light", "dark"];
+export const THEME_PREFERENCES: readonly ThemePreference[] = ["system", "light", "dark", "neon"];
 export const isThemePreference = (v: unknown): v is ThemePreference =>
   THEME_PREFERENCES.includes(v as ThemePreference);
 

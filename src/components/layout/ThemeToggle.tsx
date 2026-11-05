@@ -7,10 +7,15 @@
 import { useTranslations } from "next-intl";
 import dynamic from "next/dynamic";
 import { Button } from "@/components/ui/button";
-import { Monitor, Moon, Sun, type LucideIcon } from "lucide-react";
+import { Monitor, Moon, Sun, Zap, type LucideIcon } from "lucide-react";
 import { selectTheme, usePreferences, type ThemePreference } from "@/store/preferences";
 
-const ICONS: Record<ThemePreference, LucideIcon> = { light: Sun, dark: Moon, system: Monitor };
+const ICONS: Record<ThemePreference, LucideIcon> = {
+  light: Sun,
+  dark: Moon,
+  neon: Zap,
+  system: Monitor,
+};
 
 function ThemeTogglePlaceholder({ className }: { className?: string }) {
   const t = useTranslations("theme");

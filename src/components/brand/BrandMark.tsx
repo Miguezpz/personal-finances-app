@@ -1,6 +1,7 @@
 /**
  * Brand mark (spec 003, FR-009, research R7): a growth monogram — three ascending emerald bars on an ink
- * rounded square. Inline SVG (no request, follows the theme). Decorative: always next to the app name
+ * rounded square (acid bars on black in the neon theme: --mark-surface / --mark-bar). Inline SVG (no request,
+ * follows the theme). Decorative: always next to the app name
  * (visible or sr-only).
  */
 import { cn } from "@/lib/utils";
@@ -20,12 +21,12 @@ export function BrandMark({ className }: { className?: string }) {
         width="23"
         height="23"
         rx="6"
-        fill="var(--brand-ink, #052e2b)"
+        fill="var(--mark-surface, #052e2b)"
         stroke="var(--border, #d1e7e0)"
       />
-      <rect x="5.5" y="13" width="3" height="5.5" rx="1" fill="var(--brand-emerald, #34d399)" />
-      <rect x="10.5" y="9.5" width="3" height="9" rx="1" fill="var(--brand-emerald, #34d399)" />
-      <rect x="15.5" y="5.5" width="3" height="13" rx="1" fill="var(--brand-emerald, #34d399)" />
+      <rect x="5.5" y="13" width="3" height="5.5" rx="1" fill="var(--mark-bar, #34d399)" />
+      <rect x="10.5" y="9.5" width="3" height="9" rx="1" fill="var(--mark-bar, #34d399)" />
+      <rect x="15.5" y="5.5" width="3" height="13" rx="1" fill="var(--mark-bar, #34d399)" />
     </svg>
   );
 }

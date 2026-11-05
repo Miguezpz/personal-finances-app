@@ -1,6 +1,6 @@
 /**
  * Spec 003 · FR-003 / FR-004 / FR-039 / SC-001: every text/background pair and every non-text indicator of the
- * palette meets WCAG 2.1 AA in BOTH themes. Reads the single source of truth (src/styles/tokens.css), so retouching a
+ * palette meets WCAG 2.1 AA in ALL three themes (light, dark, neon). Reads the single source of truth (src/styles/tokens.css), so retouching a
  * color can't silently break contrast. Pairs: specs/_archive/003-ui-refresh/contracts/ui-theme.md §1 "Pares verificados".
  */
 import { readFileSync } from "node:fs";
@@ -26,10 +26,13 @@ function declarations(selector: string): Map<string, string> {
 
 const ROOT = declarations(":root");
 const DARK = declarations(".dark");
+const NEON = declarations(".neon");
 const THEMES = {
   light: ROOT,
   // .dark only overrides the semantics; the primitives come from :root.
   dark: new Map([...ROOT, ...DARK]),
+  // <html class="dark neon">: .neon overrides on top of .dark.
+  neon: new Map([...ROOT, ...DARK, ...NEON]),
 } as const;
 
 /** Resolves a semantic token to HEX: either a HEX literal or one level of var(--brand-*). */

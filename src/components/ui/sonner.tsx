@@ -14,7 +14,9 @@ import { resolveTheme, selectTheme, usePreferences } from "@/store/preferences";
 const Toaster = ({ ...props }: ToasterProps) => {
   // Same theme as the app (spec 003, research R4): the stored preference, "system" resolved live.
   const prefersDark = useMediaQuery("(prefers-color-scheme: dark)");
-  const theme = resolveTheme(usePreferences(selectTheme), prefersDark);
+  const resolved = resolveTheme(usePreferences(selectTheme), prefersDark);
+  // Sonner only knows light/dark; neon is a dark theme (its colors come from the CSS vars below).
+  const theme = resolved === "neon" ? "dark" : resolved;
 
   return (
     <Sonner

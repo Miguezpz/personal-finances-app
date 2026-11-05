@@ -8,6 +8,7 @@ import { expect, test } from "./fixtures";
 
 const DEEP = "rgb(3, 31, 29)"; // --brand-deep, dark background
 const WHITE = "rgb(255, 255, 255)";
+const ABYSS = "rgb(10, 10, 10)"; // --brand-abyss, neon background
 
 const startPage = (testInfo: TestInfo) =>
   testInfo.project.metadata.mode === "demo" ? "/dashboard" : "/";
@@ -16,7 +17,11 @@ async function isDark(page: Page) {
   return page.evaluate(() => document.documentElement.classList.contains("dark"));
 }
 
-async function pickTheme(page: Page, option: "light" | "dark" | "system") {
+async function isNeon(page: Page) {
+  return page.evaluate(() => document.documentElement.classList.contains("neon"));
+}
+
+async function pickTheme(page: Page, option: "light" | "dark" | "neon" | "system") {
   await page.getByTestId("theme-toggle").click();
   const item = page.getByTestId(`theme-option-${option}`);
   await item.click();
@@ -54,6 +59,32 @@ test.describe("US3 · theme", () => {
     await expect(page.locator("body")).toHaveCSS("background-color", WHITE);
   });
 
+  test("Neon (a third, dark-based theme) applies, persists and survives a light OS", async ({
+    page,
+  }, testInfo) => {
+    await page.emulateMedia({ colorScheme: "light" });
+    await page.goto(startPage(testInfo));
+    await expect(page.getByTestId("theme-toggle")).toBeVisible();
+
+    await pickTheme(page, "neon");
+    await expect.poll(() => isNeon(page)).toBe(true);
+    expect(await isDark(page)).toBe(true); // dark: variants keep applying
+    await expect(page.locator("body")).toHaveCSS("background-color", ABYSS);
+    await expect(page.locator('meta[name="theme-color"]').first()).toHaveAttribute(
+      "content",
+      "#0A0A0A",
+    );
+
+    // No flash on reload: the inline script applies it before hydration.
+    await page.reload({ waitUntil: "domcontentloaded" });
+    expect(await isNeon(page)).toBe(true);
+    await expect(page.locator("body")).toHaveCSS("background-color", ABYSS);
+
+    await pickTheme(page, "dark");
+    await expect.poll(() => isNeon(page)).toBe(false);
+    await expect(page.locator("body")).toHaveCSS("background-color", DEEP);
+  });
+
   test("System follows OS changes live, without reloading", async ({ page }, testInfo) => {
     await page.emulateMedia({ colorScheme: "dark" });
     await page.goto(startPage(testInfo));
@@ -78,7 +109,7 @@ test.describe("US3 · theme", () => {
     await page.addInitScript(() => {
       localStorage.setItem(
         "pfa:prefs:v1",
-        JSON.stringify({ state: { locale: "en", theme: "neon" }, version: 1 }),
+        JSON.stringify({ state: { locale: "en", theme: "sepia" }, version: 1 }),
       );
     });
     await page.emulateMedia({ colorScheme: "dark" });

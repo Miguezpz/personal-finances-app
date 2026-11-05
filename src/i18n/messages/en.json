@@ -50,6 +50,7 @@
     "toggle": "Theme",
     "light": "Light",
     "dark": "Dark",
+    "neon": "Neon",
     "system": "System"
   },
   "auth": {

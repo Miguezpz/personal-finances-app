@@ -49,13 +49,13 @@ describe("theme preference in the store", () => {
     expect(DEFAULT_PREFERENCES.theme).toBe("system");
   });
 
-  it.each(["system", "light", "dark"] as const)("rehydrates a stored %s", async (theme) => {
+  it.each(["system", "light", "dark", "neon"] as const)("rehydrates a stored %s", async (theme) => {
     store({ locale: "en", theme });
     await usePreferences.persist.rehydrate();
     expect(usePreferences.getState().theme).toBe(theme);
   });
 
-  it.each(["neon", 42, null, ""])("ignores an invalid stored theme (%s)", async (theme) => {
+  it.each(["sepia", 42, null, ""])("ignores an invalid stored theme (%s)", async (theme) => {
     store({ locale: "es", theme });
     await usePreferences.persist.rehydrate();
     expect(usePreferences.getState().theme).toBe("system");
@@ -87,6 +87,8 @@ describe("resolveTheme", () => {
     expect(resolveTheme("system", false)).toBe("light");
     expect(resolveTheme("light", true)).toBe("light");
     expect(resolveTheme("dark", false)).toBe("dark");
+    expect(resolveTheme("neon", false)).toBe("neon");
+    expect(resolveTheme("neon", true)).toBe("neon");
   });
 });
 
@@ -115,6 +117,23 @@ describe("applyTheme", () => {
     expect(metas.map((m) => m.content)).toEqual(["#FFFFFF", "#FFFFFF"]);
   });
 
+  it("neon + explicit: .dark AND .neon, dark color-scheme and both metas in the neon color", () => {
+    const metas = addThemeColorMetas();
+    applyTheme("neon", true);
+    expect(root().classList.contains("dark")).toBe(true);
+    expect(root().classList.contains("neon")).toBe(true);
+    expect(root().style.colorScheme).toBe("dark");
+    expect(metas.map((m) => m.content)).toEqual(["#0A0A0A", "#0A0A0A"]);
+  });
+
+  it.each(["dark", "light"] as const)("leaving neon for %s removes .neon", (next) => {
+    addThemeColorMetas();
+    applyTheme("neon", true);
+    applyTheme(next, true);
+    expect(root().classList.contains("neon")).toBe(false);
+    expect(root().classList.contains("dark")).toBe(next === "dark");
+  });
+
   it("system: restores the original, media-dependent contents", () => {
     const metas = addThemeColorMetas();
     applyTheme("dark", true);
@@ -132,16 +151,29 @@ describe("PREFERENCES_BOOT_SCRIPT (before the first paint)", () => {
     { stored: { theme: "system" }, prefersDark: true, dark: true },
     { stored: { theme: "light" }, prefersDark: true, dark: false },
     { stored: { theme: "dark" }, prefersDark: false, dark: true },
-    { stored: { theme: "neon" }, prefersDark: true, dark: true },
-    { stored: { theme: "neon" }, prefersDark: false, dark: false },
+    { stored: { theme: "sepia" }, prefersDark: true, dark: true },
+    { stored: { theme: "sepia" }, prefersDark: false, dark: false },
     { stored: { theme: "system" }, prefersDark: null, dark: false },
   ])("stored $stored, OS dark $prefersDark → dark $dark", ({ stored, prefersDark, dark }) => {
     store(stored);
     stubPrefersDark(prefersDark);
     run();
     expect(root().classList.contains("dark")).toBe(dark);
+    expect(root().classList.contains("neon")).toBe(false);
     expect(root().style.colorScheme).toBe(dark ? "dark" : "light");
   });
+
+  it.each([true, false, null])(
+    "stored neon applies .dark + .neon whatever the OS (%s)",
+    (prefersDark) => {
+      store({ theme: "neon" });
+      stubPrefersDark(prefersDark);
+      run();
+      expect(root().classList.contains("dark")).toBe(true);
+      expect(root().classList.contains("neon")).toBe(true);
+      expect(root().style.colorScheme).toBe("dark");
+    },
+  );
 
   it("still applies locale and privacy", () => {
     store({ locale: "es", privacyMode: true, theme: "dark" });
