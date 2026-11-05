@@ -6,24 +6,25 @@
  * Renders the monogram (ink rounded square + three ascending emerald bars, same design as src/app/icon.svg)
  * with `ImageResponse` from next/og and writes:
  *   - src/app/favicon.ico              16/32/48 px PNGs in an ICO container (ICO allows embedded PNG)
- *   - public/icons/icon-192.png        manifest icon
- *   - public/icons/icon-512.png        manifest icon
- *   - public/icons/icon-maskable-512.png  full-bleed ink background, monogram inside the central 80 % safe zone
+ *   - public/icons/icon-neon-192.png   manifest icon, Neon palette (black + acid green): Neon is the default theme and
+ *   - public/icons/icon-neon-512.png   an installed app's icon is fixed at install time
+ *   - public/icons/icon-neon-maskable-512.png  full-bleed black background, monogram inside the central 80 % safe zone
+ * The favicon keeps the green palette: it's the tab icon of the light/dark themes (Neon swaps in its own SVG).
  * Commit the resulting binaries.
  */
 import { mkdirSync, writeFileSync } from "node:fs";
 import { createElement as h } from "react";
 import { ImageResponse } from "next/og.js";
 
-const INK = "#052E2B";
-const TEAL = "#0F766E";
-const EMERALD = "#34D399";
+/** Palettes: square, frame, bars. */
+const GREEN = { square: "#052E2B", frame: "#0F766E", bars: "#34D399" };
+const NEON = { square: "#0A0A0A", frame: "#CEE616", bars: "#CEE616" };
 
 /**
  * The monogram as satori-compatible divs, drawn in a `size` px box.
  * `bleed`: the square fills the canvas with no rounded corners and the bars shrink into the maskable safe zone.
  */
-function monogram(size, { bleed = false } = {}) {
+function monogram(size, { bleed = false, palette = GREEN } = {}) {
   const tiny = size <= 16;
   // Geometry on a 32-unit grid (matches icon.svg); at 16 px the bars get thicker and the gaps smaller.
   const u = size / 32;
@@ -51,7 +52,7 @@ function monogram(size, { bleed = false } = {}) {
         height: size,
         display: "flex",
         position: "relative",
-        background: bleed ? INK : "transparent",
+        background: bleed ? palette.square : "transparent",
       },
     },
     !bleed &&
@@ -62,9 +63,9 @@ function monogram(size, { bleed = false } = {}) {
           top: 0,
           width: size,
           height: size,
-          background: INK,
+          background: palette.square,
           borderRadius: 8 * u,
-          border: tiny ? "none" : `${Math.max(1, 2 * u)}px solid ${TEAL}`,
+          border: tiny ? "none" : `${Math.max(1, 2 * u)}px solid ${palette.frame}`,
         },
       }),
     ...bars.map((b) =>
@@ -76,7 +77,7 @@ function monogram(size, { bleed = false } = {}) {
           top: at(b.top),
           width: b.w * scale * u,
           height: (bottom - b.top) * scale * u,
-          background: EMERALD,
+          background: palette.bars,
           borderRadius: Math.max(1, 1.5 * scale * u),
         },
       }),
@@ -119,8 +120,11 @@ const favicon = await Promise.all(
 writeFileSync("src/app/favicon.ico", ico(favicon));
 
 mkdirSync("public/icons", { recursive: true });
-writeFileSync("public/icons/icon-192.png", await png(192));
-writeFileSync("public/icons/icon-512.png", await png(512));
-writeFileSync("public/icons/icon-maskable-512.png", await png(512, { bleed: true }));
+writeFileSync("public/icons/icon-neon-192.png", await png(192, { palette: NEON }));
+writeFileSync("public/icons/icon-neon-512.png", await png(512, { palette: NEON }));
+writeFileSync(
+  "public/icons/icon-neon-maskable-512.png",
+  await png(512, { bleed: true, palette: NEON }),
+);
 
-console.log("Wrote src/app/favicon.ico and public/icons/icon-{192,512,maskable-512}.png");
+console.log("Wrote src/app/favicon.ico and public/icons/icon-neon-{192,512,maskable-512}.png");

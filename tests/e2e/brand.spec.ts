@@ -34,7 +34,7 @@ test.describe("Brand identity", () => {
       icons: { src: string; sizes: string }[];
     };
     expect(manifest.name).toBe("Personal Finances");
-    expect(manifest.theme_color).toBe("#0F766E");
+    expect(manifest.theme_color).toBe("#0A0A0A"); // installed app = Neon, the default theme
     const sizes = manifest.icons.map((i) => i.sizes);
     expect(sizes).toContain("192x192");
     expect(sizes).toContain("512x512");

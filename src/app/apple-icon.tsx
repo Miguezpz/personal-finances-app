@@ -1,8 +1,8 @@
 import { ImageResponse } from "next/og";
 
 /**
- * Apple touch icon (spec 003, FR-010, research R6): the brand monogram on a solid ink background (iOS doesn't
- * support transparency). No request-time APIs, so it's generated once at build time.
+ * Apple touch icon (spec 003, FR-010, research R6): the brand monogram in the Neon palette (the default theme, like
+ * the manifest icons): acid-green bars on solid black (iOS doesn't support transparency). No request-time APIs, so it's generated once at build time.
  */
 export const size = { width: 180, height: 180 };
 export const contentType = "image/png";
@@ -15,7 +15,7 @@ const BARS = [
 
 export default function AppleIcon() {
   return new ImageResponse(
-    <div style={{ width: "100%", height: "100%", display: "flex", background: "#052E2B" }}>
+    <div style={{ width: "100%", height: "100%", display: "flex", background: "#0A0A0A" }}>
       {BARS.map((bar) => (
         <div
           key={bar.left}
@@ -26,7 +26,7 @@ export default function AppleIcon() {
             width: 24,
             height: bar.height,
             borderRadius: 7,
-            background: "#34D399",
+            background: "#CEE616",
           }}
         />
       ))}
