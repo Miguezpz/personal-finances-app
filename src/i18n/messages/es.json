@@ -179,7 +179,7 @@
     "fundedPeriod": "Financia la quincena",
     "periodRange": "{start} – {end}",
     "suggested": "sugerida",
-    "kind": "Tipo",
+    "kind": "Frecuencia",
     "kindRecurring": "Fijo (recurrente)",
     "kindOneOff": "Eventual",
     "splitQuestion": "¿Cómo quieres registrar este ingreso eventual?",
@@ -210,7 +210,7 @@
     "invalidDate": "Escribe una fecha válida.",
     "invalidPeriod": "Elige una quincena.",
     "saveFailed": "No se pudo guardar el ingreso. Inténtalo de nuevo.",
-    "typeLabel": "Tipo",
+    "typeLabel": "Tipo de ingreso",
     "typeRequired": "Elige un tipo de ingreso",
     "type": {
       "salary": "Salario",

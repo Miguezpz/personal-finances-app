@@ -179,7 +179,7 @@
     "fundedPeriod": "Funds the quincena",
     "periodRange": "{start} – {end}",
     "suggested": "suggested",
-    "kind": "Type",
+    "kind": "Frequency",
     "kindRecurring": "Fixed (recurring)",
     "kindOneOff": "One-off",
     "splitQuestion": "How should this one-off income be recorded?",
@@ -210,7 +210,7 @@
     "invalidDate": "Enter a valid date.",
     "invalidPeriod": "Choose a quincena.",
     "saveFailed": "The income couldn't be saved. Try again.",
-    "typeLabel": "Type",
+    "typeLabel": "Income type",
     "typeRequired": "Choose an income type",
     "type": {
       "salary": "Salary",
