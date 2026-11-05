@@ -2,7 +2,7 @@
 
 **Branch**: `main` (sin rama de feature) | **Date**: 2026-11-05 | **Spec**: [spec.md](spec.md)
 
-**Input**: Feature specification from `specs/004-taxonomy-income-icons/spec.md`
+**Input**: Feature specification from `specs/_archive/004-taxonomy-income-icons/spec.md`
 
 ## Summary
 
@@ -51,7 +51,7 @@ Enfoque: una migración `0008` (enum `income_type`, columna `icon`, RPCs de ingr
 ### Documentation (this feature)
 
 ```text
-specs/004-taxonomy-income-icons/
+specs/_archive/004-taxonomy-income-icons/
 ├── plan.md
 ├── research.md
 ├── data-model.md

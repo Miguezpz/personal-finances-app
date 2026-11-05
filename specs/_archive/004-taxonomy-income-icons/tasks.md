@@ -4,7 +4,7 @@ description: "Task list for spec 004 — Taxonomía completa, tipos de ingreso e
 
 # Tasks: Taxonomía completa, tipos de ingreso e íconos
 
-**Input**: Design documents from `specs/004-taxonomy-income-icons/` (plan.md, spec.md, research.md, data-model.md, contracts/, quickstart.md)
+**Input**: Design documents from `specs/_archive/004-taxonomy-income-icons/` (plan.md, spec.md, research.md, data-model.md, contracts/, quickstart.md)
 
 **Tests**: se incluyen. La constitución exige pruebas automatizadas de la lógica financiera y verificación en normal/demo y EN/ES; research R10 y `contracts/data-provider.md` (C1–C8) definen qué se prueba.
 
@@ -21,7 +21,7 @@ description: "Task list for spec 004 — Taxonomía completa, tipos de ingreso e
 
 **Purpose**: línea base para medir y entorno local.
 
-- [X] T001 Levantar Supabase local con `pnpm db:start` y `pnpm db:reset`, y registrar en `specs/004-taxonomy-income-icons/quickstart.md` (§ Prerrequisitos, como nota) el peso actual de `/` y `/dashboard` obtenido con `pnpm build && node scripts/measure-first-load.mjs`, para comparar con SC-005 (< 5 KB gzip extra)
+- [X] T001 Levantar Supabase local con `pnpm db:start` y `pnpm db:reset`, y registrar en `specs/_archive/004-taxonomy-income-icons/quickstart.md` (§ Prerrequisitos, como nota) el peso actual de `/` y `/dashboard` obtenido con `pnpm build && node scripts/measure-first-load.mjs`, para comparar con SC-005 (< 5 KB gzip extra)
 
 ---
 
@@ -168,11 +168,11 @@ description: "Task list for spec 004 — Taxonomía completa, tipos de ingreso e
   - Se agregó `TaxonomyRepository.insertCategories/insertSubcategories` (inserción en lote idempotente, caso de contrato C9): el onboarding pasó de 94 peticiones a 4, lo que hacía fallar por tiempo varias e2e.
 - [X] T063 Medir `pnpm build && node scripts/measure-first-load.mjs` y comparar con T001: el crecimiento de `/` y `/dashboard` MUST ser < 5 KB gzip (SC-005); si se excede, mover los mapas grandes fuera de los módulos que carga el dashboard
   - Resultado: `/` 297.7 → 299.1 kB gzip (+1.4 kB); `/dashboard` 337.5 → 341.3 kB gzip (+3.8 kB). Dentro de SC-005 (< 5 kB).
-- [ ] T064 Verificar a mano los escenarios A–J y el demo de `specs/004-taxonomy-income-icons/quickstart.md` en EN y ES y en claro y oscuro (`pnpm dev` y `pnpm dev:demo`), y marcar sus criterios de salida
-  - 2026-11-05, demo en producción (ES, tema oscuro): 26 categorías con ícono (subcategorías en inglés, heredando el de su categoría); el alta de ingreso sin tipo no se envía y muestra "Elige un tipo de ingreso"; elegir "Regalo" rellena la descripción; guardar muestra el aviso de solo lectura; el ledger muestra íconos de tipo, categoría y cuenta; sin errores de consola. Hallazgo corregido: el formulario tenía dos campos "Tipo" (tipo de ingreso y fijo/eventual) → ahora "Tipo de ingreso" y "Frecuencia". Pendiente: escenarios en la app personal con la sesión del dueño.
+- [X] T064 Verificar a mano los escenarios A–J y el demo de `specs/_archive/004-taxonomy-income-icons/quickstart.md` en EN y ES y en claro y oscuro (`pnpm dev` y `pnpm dev:demo`), y marcar sus criterios de salida
+  - 2026-11-05, demo en producción (ES, tema oscuro): 26 categorías con ícono (subcategorías en inglés, heredando el de su categoría); el alta de ingreso sin tipo no se envía y muestra "Elige un tipo de ingreso"; elegir "Regalo" rellena la descripción; guardar muestra el aviso de solo lectura; el ledger muestra íconos de tipo, categoría y cuenta; sin errores de consola. Hallazgo corregido: el formulario tenía dos campos "Tipo" (tipo de ingreso y fijo/eventual) → ahora "Tipo de ingreso" y "Frecuencia". App personal verificada por el dueño en producción (2026-11-05).
 - [X] T065 [P] Actualizar `README.md` (tipos de ingreso, íconos y taxonomía por defecto) y `docs/deploy.md` (aplicar `0008` y la verificación SQL de quickstart § 4)
-- [ ] T066 Commit en `main` y, **solo con aprobación expresa del dueño**, aplicar `0008` a `potodtpkgadgsmeuuafx` con versión `0008` (una sola migración) y ejecutar las consultas de verificación de quickstart § 4 (26 activas, 1 Previous Balances, 0 sin ícono, 0 sin clave, ingresos en `other`, totales idénticos); después push para desplegar y repetir los escenarios B–F en producción
-  - 2026-11-05: `0008` aplicada a `potodtpkgadgsmeuuafx` con aprobación del dueño y registrada como versión `0008`. Verificación: 26 categorías activas, 1 Previous Balances (Needs) con su subcategoría, 0 sin ícono, 0 sin clave; gastos 0, ingresos 0, 16 cuentas, 2 recurrentes y 1 regla, igual que antes; `authenticated` no puede ejecutar `private.apply_taxonomy_004`; asesores de seguridad sin avisos nuevos. Pendiente: repetir los escenarios B–F en producción (requiere la sesión del dueño).
+- [X] T066 Commit en `main` y, **solo con aprobación expresa del dueño**, aplicar `0008` a `potodtpkgadgsmeuuafx` con versión `0008` (una sola migración) y ejecutar las consultas de verificación de quickstart § 4 (26 activas, 1 Previous Balances, 0 sin ícono, 0 sin clave, ingresos en `other`, totales idénticos); después push para desplegar y repetir los escenarios B–F en producción
+  - 2026-11-05: `0008` aplicada a `potodtpkgadgsmeuuafx` con aprobación del dueño y registrada como versión `0008`. Verificación: 26 categorías activas, 1 Previous Balances (Needs) con su subcategoría, 0 sin ícono, 0 sin clave; gastos 0, ingresos 0, 16 cuentas, 2 recurrentes y 1 regla, igual que antes; `authenticated` no puede ejecutar `private.apply_taxonomy_004`; asesores de seguridad sin avisos nuevos. Push y despliegue de los dos proyectos de Vercel correctos; escenarios en producción verificados por el dueño.
 
 ---
 
