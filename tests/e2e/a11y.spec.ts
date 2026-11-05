@@ -32,7 +32,18 @@ async function audit(page: Page, where: string) {
   expect(serious, `axe on ${where}`).toEqual([]);
 }
 
+/** Stores a theme before the app boots (the default is Neon; the light audits pin Light explicitly). */
+async function useTheme(page: Page, theme: "light" | "dark" | "neon" | "system") {
+  await page.addInitScript((stored) => {
+    localStorage.setItem("pfa:prefs:v1", JSON.stringify({ state: { theme: stored }, version: 1 }));
+  }, theme);
+}
+
 test.describe("Accessibility", { tag: "@demo" }, () => {
+  test.beforeEach(async ({ page }) => {
+    await useTheme(page, "light");
+  });
+
   test("every route has no serious or critical axe violations", async ({ page }) => {
     test.setTimeout(120_000);
     for (const route of APP_ROUTES) {
@@ -61,7 +72,8 @@ test.describe("Accessibility", { tag: "@demo" }, () => {
     page,
   }) => {
     test.setTimeout(180_000);
-    await page.emulateMedia({ colorScheme: "dark" }); // the default theme follows the system
+    await useTheme(page, "system"); // runs after the beforeEach's: the theme follows the emulated OS
+    await page.emulateMedia({ colorScheme: "dark" });
     for (const route of APP_ROUTES) {
       await page.goto(route);
       await expect(page.locator("main [aria-busy='true']")).toHaveCount(0);
@@ -108,6 +120,9 @@ test.describe("Accessibility", { tag: "@demo" }, () => {
 // Spec 003 · FR-038 / SC-002: the same audit on a phone viewport (bottom bar, floating CTA, bottom sheets).
 test.describe("Accessibility · mobile", { tag: "@demo" }, () => {
   test.use({ viewport: { width: 375, height: 812 }, hasTouch: true, isMobile: true });
+  test.beforeEach(async ({ page }) => {
+    await useTheme(page, "light");
+  });
 
   test("every route has no serious or critical axe violations", async ({ page }) => {
     test.setTimeout(120_000);
@@ -141,12 +156,7 @@ test.describe("Accessibility · mobile", { tag: "@demo" }, () => {
 for (const theme of ["dark", "neon"] as const) {
   test.describe(`Accessibility · ${theme} theme`, { tag: "@demo" }, () => {
     test.beforeEach(async ({ page }) => {
-      await page.addInitScript((stored) => {
-        localStorage.setItem(
-          "pfa:prefs:v1",
-          JSON.stringify({ state: { theme: stored }, version: 1 }),
-        );
-      }, theme);
+      await useTheme(page, theme);
     });
 
     test("every route has no serious or critical axe violations", async ({ page }) => {

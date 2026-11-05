@@ -1,6 +1,7 @@
 /**
  * Spec 003 · US3 dark theme (all four projects): no flash of the wrong theme (SC-004), the choice persists
- * (FR-016), "System" follows the OS live (FR-017) and an unreadable stored value falls back to the OS (FR-015).
+ * (FR-016), "System" follows the OS live (FR-017); a first visit (nothing stored) or an unreadable stored value opens
+ * in the default theme, Neon.
  * Demo projects use /dashboard; live projects the landing page (no session needed — it has the same control).
  */
 import type { Page, TestInfo } from "@playwright/test";
@@ -36,13 +37,37 @@ async function pickTheme(page: Page, option: "light" | "dark" | "neon" | "system
 }
 
 test.describe("US3 · theme", () => {
-  test("dark OS + nothing stored: the very first paint is already dark", async ({
+  for (const scheme of ["light", "dark"] as const) {
+    test(`first visit (nothing stored, ${scheme} OS): the very first paint is already Neon`, async ({
+      page,
+    }, testInfo) => {
+      await page.emulateMedia({ colorScheme: scheme });
+      await page.goto(startPage(testInfo), { waitUntil: "domcontentloaded" });
+      // Before hydration (the boot skeleton is still up): set by the inline <head> script.
+      expect(await isNeon(page)).toBe(true);
+      expect(await isDark(page)).toBe(true);
+      await expect(page.locator("body")).toHaveCSS("background-color", ABYSS);
+      // After hydration the menu shows Neon as the current choice and the tab icon follows.
+      await page.getByTestId("theme-toggle").click();
+      await expect(page.getByTestId("theme-option-neon")).toHaveAttribute("aria-checked", "true");
+      await page.keyboard.press("Escape");
+      await expect.poll(async () => (await tabIcons(page)).at(-1)).toBe("/icons/icon-neon.svg");
+    });
+  }
+
+  test("an explicit System choice persists: a dark OS paints the dark theme", async ({
     page,
   }, testInfo) => {
+    await page.addInitScript(() => {
+      localStorage.setItem(
+        "pfa:prefs:v1",
+        JSON.stringify({ state: { theme: "system" }, version: 1 }),
+      );
+    });
     await page.emulateMedia({ colorScheme: "dark" });
     await page.goto(startPage(testInfo), { waitUntil: "domcontentloaded" });
-    // Before hydration (the boot skeleton is still up): set by the inline <head> script.
     expect(await isDark(page)).toBe(true);
+    expect(await isNeon(page)).toBe(false);
     await expect(page.locator("body")).toHaveCSS("background-color", DEEP);
   });
 
@@ -114,7 +139,7 @@ test.describe("US3 · theme", () => {
     await expect.poll(() => isDark(page)).toBe(true);
   });
 
-  test("an unknown stored theme falls back to the OS, without errors", async ({
+  test("an unknown stored theme falls back to the default (Neon), without errors", async ({
     page,
   }, testInfo) => {
     const errors: string[] = [];
@@ -128,10 +153,10 @@ test.describe("US3 · theme", () => {
         JSON.stringify({ state: { locale: "en", theme: "sepia" }, version: 1 }),
       );
     });
-    await page.emulateMedia({ colorScheme: "dark" });
+    await page.emulateMedia({ colorScheme: "light" });
     await page.goto(startPage(testInfo));
     await expect(page.getByTestId("theme-toggle")).toBeVisible();
-    expect(await isDark(page)).toBe(true);
+    expect(await isNeon(page)).toBe(true);
     expect(errors).toEqual([]);
   });
 });

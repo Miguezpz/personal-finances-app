@@ -22,14 +22,15 @@ export const metadata: Metadata = {
   description: en.common.appDescription,
 };
 
-// Browser UI color follows the OS theme by default; a manual theme choice rewrites both metas
-// (applyTheme in src/store/effects.tsx, FR-011). viewportFit "cover" exposes the safe-area insets.
+// Browser UI color: Neon's (the default theme) on the first paint, whatever the OS; once the app runs, applyTheme
+// (src/store/effects.tsx, FR-011) rewrites both metas for the chosen theme ("System" → per-media light/dark color).
+// viewportFit "cover" exposes the safe-area insets.
 export const viewport: Viewport = {
   width: "device-width",
   initialScale: 1,
   themeColor: [
-    { media: "(prefers-color-scheme: light)", color: "#FFFFFF" },
-    { media: "(prefers-color-scheme: dark)", color: "#031F1D" },
+    { media: "(prefers-color-scheme: light)", color: "#0A0A0A" },
+    { media: "(prefers-color-scheme: dark)", color: "#0A0A0A" },
   ],
   colorScheme: "light dark",
   viewportFit: "cover",

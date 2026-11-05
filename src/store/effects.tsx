@@ -28,7 +28,7 @@ export function applyPreferences(prefs: Pick<PersistedPreferences, "locale" | "p
   document.cookie = `${LOCALE_COOKIE}=${prefs.locale}; path=/; max-age=${ONE_YEAR}; samesite=lax`;
 }
 
-/** Browser UI color of each theme (same values as `viewport.themeColor` in src/app/layout.tsx). */
+/** Browser UI color of each theme (`viewport.themeColor` in src/app/layout.tsx starts with the neon one). */
 export const THEME_COLORS: Record<ResolvedTheme, string> = {
   light: "#FFFFFF",
   dark: "#031F1D",
@@ -39,8 +39,8 @@ const DARK_QUERY = "(prefers-color-scheme: dark)";
 export const NEON_FAVICON = "/icons/icon-neon.svg";
 
 /**
- * Applies a resolved theme to <html>. `explicit` (the user picked light/dark): both theme-color metas take that
- * theme's color; otherwise ("system") each meta gets back its original, media-dependent content (FR-011).
+ * Applies a resolved theme to <html>. `explicit` (the user picked light/dark/neon): both theme-color metas take that
+ * theme's color; otherwise ("system") each meta takes the color of the scheme in its `media` (FR-011).
  * Neon is a dark theme: it keeps `.dark` (so every `dark:` variant applies) and adds `.neon` for its tokens; it also
  * gets its own tab icon (setNeonFavicon).
  */
@@ -50,8 +50,8 @@ export function applyTheme(resolved: ResolvedTheme, explicit: boolean) {
   root.classList.toggle("neon", resolved === "neon");
   root.style.colorScheme = resolved === "light" ? "light" : "dark";
   for (const meta of document.querySelectorAll<HTMLMetaElement>('meta[name="theme-color"]')) {
-    if (meta.dataset.originalContent === undefined) meta.dataset.originalContent = meta.content;
-    meta.content = explicit ? THEME_COLORS[resolved] : meta.dataset.originalContent;
+    const scheme = meta.getAttribute("media")?.includes("dark") ? "dark" : "light";
+    meta.content = THEME_COLORS[explicit ? resolved : scheme];
   }
   setNeonFavicon(resolved === "neon");
 }
@@ -162,7 +162,7 @@ export function PreferencesEffects() {
 /**
  * Inline <head> script (runs before first paint, see Next "Preventing flash before hydration"):
  * applies the stored locale, privacy mode and theme to <html> so a reload never flashes amounts, the wrong
- * language or the wrong theme (SC-004). Falls back to the NEXT_LOCALE cookie, then to EN; an unknown theme or no
- * matchMedia → "system" / light.
+ * language or the wrong theme (SC-004). Falls back to the NEXT_LOCALE cookie, then to EN; nothing stored or an
+ * unknown theme → "neon" (the default, same as DEFAULT_PREFERENCES); "system" without matchMedia → light.
  */
-export const PREFERENCES_BOOT_SCRIPT = `(function(){try{var d=document.documentElement,l="en",p=false,t="system";try{var s=JSON.parse(localStorage.getItem("pfa:prefs:v1")||"null");if(s&&s.state){if(s.state.locale==="en"||s.state.locale==="es")l=s.state.locale;p=s.state.privacyMode===true;if(s.state.theme==="light"||s.state.theme==="dark"||s.state.theme==="neon")t=s.state.theme;}else{var m=/(?:^|;\\s*)NEXT_LOCALE=(en|es)/.exec(document.cookie);if(m)l=m[1];}}catch(e){}var n=t==="neon",k=n||t==="dark"||(t==="system"&&!!window.matchMedia&&window.matchMedia("(prefers-color-scheme: dark)").matches);d.classList.toggle("dark",k);d.classList.toggle("neon",n);d.style.colorScheme=k?"dark":"light";d.lang=l;d.dataset.privacy=p?"on":"off";document.title=l==="es"?"Finanzas Personales":"Personal Finances";}catch(e){}})();`;
+export const PREFERENCES_BOOT_SCRIPT = `(function(){try{var d=document.documentElement,l="en",p=false,t="neon";try{var s=JSON.parse(localStorage.getItem("pfa:prefs:v1")||"null");if(s&&s.state){if(s.state.locale==="en"||s.state.locale==="es")l=s.state.locale;p=s.state.privacyMode===true;if(s.state.theme==="system"||s.state.theme==="light"||s.state.theme==="dark"||s.state.theme==="neon")t=s.state.theme;}else{var m=/(?:^|;\\s*)NEXT_LOCALE=(en|es)/.exec(document.cookie);if(m)l=m[1];}}catch(e){}var n=t==="neon",k=n||t==="dark"||(t==="system"&&!!window.matchMedia&&window.matchMedia("(prefers-color-scheme: dark)").matches);d.classList.toggle("dark",k);d.classList.toggle("neon",n);d.style.colorScheme=k?"dark":"light";d.lang=l;d.dataset.privacy=p?"on":"off";document.title=l==="es"?"Finanzas Personales":"Personal Finances";}catch(e){}})();`;

@@ -18,7 +18,10 @@ test.describe("Brand identity", () => {
   test("declares the brand icons and a valid web manifest", async ({ page, request }) => {
     await page.goto("/");
     const head = page.locator("head");
-    await expect(head.locator('link[rel="icon"][type="image/svg+xml"]')).toHaveCount(1);
+    // The app's own icons (Next metadata); the neon theme — the default — adds its tab icon on top (data-neon-icon).
+    await expect(
+      head.locator('link[rel="icon"][type="image/svg+xml"]:not([data-neon-icon])'),
+    ).toHaveCount(1);
     await expect(head.locator('link[rel="apple-touch-icon"]')).toHaveCount(1);
     await expect(head.locator('link[rel="manifest"]')).toHaveCount(1);
 

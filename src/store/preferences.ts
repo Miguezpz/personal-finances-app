@@ -24,7 +24,7 @@ export interface PreferencesState {
   displayCurrency: DisplayCurrency;
   /** Masks amounts, balances and chart axes. */
   privacyMode: boolean;
-  /** Light / dark / neon / follow the OS. Default "system" (FR-015). */
+  /** Light / dark / neon / follow the OS. Default "neon": a first visit opens in the neon theme. */
   theme: ThemePreference;
   /** false until rehydrated from storage; <Money> masks meanwhile outside the demo. */
   hydrated: boolean;
@@ -52,7 +52,7 @@ export const DEFAULT_PREFERENCES: PersistedPreferences = {
   locale: "en",
   displayCurrency: "MXN",
   privacyMode: false,
-  theme: "system",
+  theme: "neon",
 };
 
 export const LOCALES: readonly Locale[] = ["en", "es"];
@@ -120,7 +120,7 @@ export const usePreferences = create<PreferencesStore>()(
           ...(isLocale(p.locale) && { locale: p.locale }),
           ...(isCurrency(p.displayCurrency) && { displayCurrency: p.displayCurrency }),
           ...(typeof p.privacyMode === "boolean" && { privacyMode: p.privacyMode }),
-          // An unknown stored theme is ignored: the default ("system") stays (data-model.md §1).
+          // An unknown stored theme is ignored: the default ("neon") stays (data-model.md §1).
           ...(isThemePreference(p.theme) && { theme: p.theme }),
         };
       },
