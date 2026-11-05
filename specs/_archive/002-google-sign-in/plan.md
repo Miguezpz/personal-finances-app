@@ -2,7 +2,7 @@
 
 **Branch**: `002-google-sign-in` | **Date**: 2026-11-03 | **Spec**: [spec.md](./spec.md)
 
-**Input**: Feature specification from `specs/002-google-sign-in/spec.md`
+**Input**: Feature specification from `specs/_archive/002-google-sign-in/spec.md`
 
 ## Summary
 
@@ -63,7 +63,7 @@ rastros de Supabase (`pnpm check:demo-bundle`); textos EN/ES.
 ### Documentation (this feature)
 
 ```text
-specs/002-google-sign-in/
+specs/_archive/002-google-sign-in/
 ├── plan.md              # este archivo
 ├── research.md          # Phase 0
 ├── data-model.md        # Phase 1

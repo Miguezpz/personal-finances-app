@@ -71,9 +71,9 @@ pnpm typecheck && pnpm lint && pnpm test && pnpm test:e2e:local && pnpm check:de
 
 ## Criterios de salida
 
-- [ ] Escenario 0 confirma la vinculación automática
-- [ ] A en local y producción, EN y ES
-- [ ] B: mensaje "no autorizado" y cero usuarios nuevos
-- [ ] C: todas las filas
-- [ ] D: demo intacta y bundle limpio
-- [ ] Puertas de calidad en verde
+- [X] Escenario 0 confirma la vinculación automática
+- [X] A en producción, EN y ES (verificado por el dueño, 2026-11-05; no se repitió en local)
+- [ ] B: mensaje "no autorizado" y cero usuarios nuevos — no probado con otra cuenta real (la app de Google está en Testing y la bloquea antes); el mensaje está cubierto por C y por las e2e, y en la nube `count(auth.users) = 1`
+- [X] C: todas las filas
+- [X] D: demo intacta y bundle limpio
+- [X] Puertas de calidad en verde

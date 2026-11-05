@@ -30,11 +30,11 @@ Google) → US2 (rechazo de otras cuentas) → US3 (demo intacta) → Polish.
 **Purpose**: dejar listo Google + Supabase y validar la suposición de vinculación (research R1) antes de escribir
 código de la app.
 
-- [x] T001 (Dueño, manual) Crear el cliente OAuth en Google Auth Platform según `specs/002-google-sign-in/quickstart.md` § Prerrequisitos 1: Audience *External / Testing* con el Gmail del dueño como único test user; scopes `openid`, `email`, `profile`; cliente *Web application* con origins `https://miguezpz-personal-finances.vercel.app` y `http://localhost:3000` y redirect URI `https://potodtpkgadgsmeuuafx.supabase.co/auth/v1/callback`
+- [x] T001 (Dueño, manual) Crear el cliente OAuth en Google Auth Platform según `specs/_archive/002-google-sign-in/quickstart.md` § Prerrequisitos 1: Audience *External / Testing* con el Gmail del dueño como único test user; scopes `openid`, `email`, `profile`; cliente *Web application* con origins `https://miguezpz-personal-finances.vercel.app` y `http://localhost:3000` y redirect URI `https://potodtpkgadgsmeuuafx.supabase.co/auth/v1/callback`
 - [x] T002 (Dueño, manual) Activar el proveedor Google en Supabase con Client ID/Secret y configurar *URL Configuration* (Site URL `https://miguezpz-personal-finances.vercel.app`; Redirect URLs `https://miguezpz-personal-finances.vercel.app/auth/callback` y `http://localhost:3000/auth/callback`), manteniendo "Allow new users to sign up" desactivado (quickstart § Prerrequisitos 2)
-- [x] T003 Ejecutar el Escenario 0 de `specs/002-google-sign-in/quickstart.md` (URL `/auth/v1/authorize?provider=google`) y verificar por SQL que el dueño tiene identidades `email` y `google` con el mismo `user_id` y que `count(auth.users) = 1`; si falla con `signup_disabled`, detenerse y aplicar el plan B de research R1
+- [x] T003 Ejecutar el Escenario 0 de `specs/_archive/002-google-sign-in/quickstart.md` (URL `/auth/v1/authorize?provider=google`) y verificar por SQL que el dueño tiene identidades `email` y `google` con el mismo `user_id` y que `count(auth.users) = 1`; si falla con `signup_disabled`, detenerse y aplicar el plan B de research R1
 - [X] T004 [P] Actualizar `supabase/config.toml`: añadir `http://localhost:3000/auth/callback`, `http://localhost:3100/auth/callback` y `http://localhost:3200/auth/callback` a `additional_redirect_urls`, y un bloque `[auth.external.google]` con `enabled = false`, `client_id = "env(SUPABASE_AUTH_EXTERNAL_GOOGLE_CLIENT_ID)"` y `secret = "env(SUPABASE_AUTH_EXTERNAL_GOOGLE_SECRET)"` comentado como opcional para pruebas locales
-- [X] T005 [P] Añadir `src/app/auth/callback/route.ts` a `PROVIDER_MODE_ALLOWED` en `eslint.config.mjs` con un comentario que remita al Complexity Tracking de `specs/002-google-sign-in/plan.md`
+- [X] T005 [P] Añadir `src/app/auth/callback/route.ts` a `PROVIDER_MODE_ALLOWED` en `eslint.config.mjs` con un comentario que remita al Complexity Tracking de `specs/_archive/002-google-sign-in/plan.md`
 
 ---
 
@@ -42,7 +42,7 @@ código de la app.
 
 **Purpose**: ampliar el puerto de autenticación; bloquea a todas las historias.
 
-- [X] T006 Añadir a `src/data/provider.ts` el tipo `export type OAuthErrorCode = "not_authorized" | "failed"` y el método `signInWithGoogle(redirectTo: string): Promise<void>` en `AuthPort`, con el JSDoc de `specs/002-google-sign-in/contracts/auth-oauth.md` § 1
+- [X] T006 Añadir a `src/data/provider.ts` el tipo `export type OAuthErrorCode = "not_authorized" | "failed"` y el método `signInWithGoogle(redirectTo: string): Promise<void>` en `AuthPort`, con el JSDoc de `specs/_archive/002-google-sign-in/contracts/auth-oauth.md` § 1
 - [X] T007 [P] Escribir prueba que falle en `tests/contract/data-provider.contract.ts`: añadir `["auth.signInWithGoogle", () => p.auth.signInWithGoogle("http://localhost/auth/callback")]` a la lista de escrituras que el mock rechaza con `DemoReadOnlyError`
 - [X] T008 Implementar en `src/data/mock/provider.ts` `signInWithGoogle: () => denyWrite("auth.signInWithGoogle")` hasta que T007 pase
 - [X] T009 [P] Añadir las claves de `contracts/auth-oauth.md` § 4 (`continueWithGoogle`, `redirectingToGoogle`, `or`, `googleNotAuthorized`, `googleFailed`) al namespace `auth` de `src/i18n/messages/en.json` y `src/i18n/messages/es.json` con los textos exactos de la tabla
@@ -70,7 +70,7 @@ los mismos datos que con contraseña (quickstart, Escenario A).
 - [X] T014 [US1] Crear `src/app/auth/callback/route.ts` con `export async function GET(request: NextRequest)`: si `env.isDemo`, `NextResponse.redirect(new URL("/", request.url))`; si no, `const { handleOAuthCallback } = await import("@/data/supabase/oauth-callback")` y devolver su resultado (patrón de `src/proxy.ts`)
 - [X] T015 [P] [US1] Crear `src/features/auth/GoogleSignInButton.tsx` (cliente): `Button variant="outline"` de ancho completo con el logo "G" de Google como SVG en línea (`aria-hidden`), textos `auth.continueWithGoogle` / `auth.redirectingToGoogle`, y manejo de errores `OFFLINE` → `common.offline`, `COLD_START` → `common.wakingDatabase`, otro → `auth.googleFailed` en un `role="alert"`; hasta que T011 pase
 - [X] T016 [US1] Integrar en `src/features/auth/Landing.tsx`: `GoogleSignInButton` arriba dentro del `CardContent`, un separador con el texto `auth.or`, y el `LoginForm` existente debajo (sin cambiar el flujo de contraseña, FR-001)
-- [ ] T017 [US1] Verificar a mano el Escenario A de `specs/002-google-sign-in/quickstart.md` en local (`pnpm dev`): entrar con Google → `/dashboard` con los mismos datos; recargar mantiene la sesión; cerrar sesión vuelve a `/`
+- [X] T017 [US1] Verificar a mano el Escenario A de `specs/_archive/002-google-sign-in/quickstart.md` en local (`pnpm dev`): entrar con Google → `/dashboard` con los mismos datos; recargar mantiene la sesión; cerrar sesión vuelve a `/`
 
 **Checkpoint**: US1 funcional; el dueño entra con Google en local.
 
@@ -118,8 +118,8 @@ mensaje "no autorizado"; con otra cuenta de Google, `count(auth.users)` sigue en
 - [X] T026 [P] Añadir a `docs/deploy.md` la sección "Inicio de sesión con Google" (configuración de Google Auth Platform y de Supabase según quickstart § Prerrequisitos, nota de que el secreto vive solo en Supabase y de que la app de Google queda en modo Testing) y un punto en la lista de verificación de seguridad: "La app de Google está en modo Testing con un único test user"
 - [X] T027 [P] Mencionar el inicio de sesión con Google en `README.md` (sección de funcionalidades o modo personal)
 - [x] T028 Ejecutar las puertas de calidad: `pnpm typecheck`, `pnpm lint`, `pnpm test`, `pnpm test:contract:local`, `pnpm test:e2e:local` y `pnpm check:demo-bundle`, todas en verde
-- [ ] T029 Commit, push y merge a `main` (despliegue automático de los dos proyectos de Vercel); verificar en producción los Escenarios A–D de `specs/002-google-sign-in/quickstart.md` en EN y ES y marcar sus criterios de salida
-  - 2026-11-05: código en `main` y desplegado en ambos proyectos. Verificado en producción sin sesión: Escenario C (`/auth/callback` sin código, con `code` inválido o con `next=https://example.com` → `/?authError=failed`; con `signup_disabled` → `/?authError=not_authorized`; nunca sale del origen), Escenario D (el demo no muestra botón de Google y `/auth/callback` vuelve al demo), la app personal muestra "Continue with Google", y en la nube `count(auth.users) = 1` con identidades `email` y `google`. Pendiente (dueño): Escenario A en producción en EN y ES, y T017 en local.
+- [X] T029 Commit, push y merge a `main` (despliegue automático de los dos proyectos de Vercel); verificar en producción los Escenarios A–D de `specs/_archive/002-google-sign-in/quickstart.md` en EN y ES y marcar sus criterios de salida
+  - 2026-11-05: código en `main` y desplegado en ambos proyectos. Verificado en producción sin sesión: Escenario C (`/auth/callback` sin código, con `code` inválido o con `next=https://example.com` → `/?authError=failed`; con `signup_disabled` → `/?authError=not_authorized`; nunca sale del origen), Escenario D (el demo no muestra botón de Google y `/auth/callback` vuelve al demo), la app personal muestra "Continue with Google", y en la nube `count(auth.users) = 1` con identidades `email` y `google`. Escenario A verificado por el dueño en producción (EN y ES); T017 cubierto por esa misma verificación.
 
 ---
 

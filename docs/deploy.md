@@ -38,7 +38,7 @@ pruebas, semillas ni `db reset` contra la nube.
 ### Inicio de sesión con Google (solo app personal)
 
 El dueño puede entrar con su cuenta de Google además de su contraseña
-([spec 002](../specs/002-google-sign-in/spec.md)). La identidad de Google se vincula sola a la cuenta
+([spec 002](../specs/_archive/002-google-sign-in/spec.md)). La identidad de Google se vincula sola a la cuenta
 existente porque comparte el correo verificado; con el registro desactivado, cualquier otra cuenta de
 Google es rechazada ("Esta cuenta de Google no tiene acceso a esta app") sin crear usuario.
 
