@@ -13,7 +13,12 @@ El dueño guarda plantillas de gasto (nombre, monto, subcategoría y método de 
 - Un `ExpenseTemplatesRepository` en los dos proveedores, cubierto por la suite de contrato.
 - Funciones puras en `src/domain/quick-expenses.ts`.
 - El toque reutiliza el `useCreateExpense()` optimista que ya existe.
-- UI en el Dashboard (`QuickExpenseBar`), en Gastos (`QuickExpensesSection` y su diálogo) y un switch en `AddExpenseDialog`.
+- UI en tres lugares:
+  - En el Dashboard, `QuickExpenseBar`, con un menú "⋯" por botón para "Ayer" o "Registrar con otro monto o fecha".
+  - Arriba del diálogo de nuevo gasto, la misma fila; ese diálogo es el que abre el botón flotante del celular en cualquier página.
+  - En Gastos, `QuickExpensesSection` y su diálogo.
+
+  Además, un switch "Guardar como gasto rápido" en `AddExpenseDialog`.
 
 Detalle de decisiones en [research.md](research.md).
 
@@ -102,10 +107,11 @@ src/data/
 src/features/expenses/
 ├── quick-expense-hooks.ts            # nuevo: useQuickExpense + hooks de administración
 ├── template-schemas.ts               # nuevo: expenseTemplateFormSchema
-├── QuickExpenseBar.tsx               # nuevo (Dashboard)
+├── QuickExpenseBar.tsx               # nuevo (Dashboard + diálogo de nuevo gasto; menú "⋯")
+├── QuickExpenseCustomDialog.tsx      # nuevo (otro monto o fecha)
 ├── QuickExpensesSection.tsx          # nuevo (Gastos)
 ├── QuickExpenseTemplateDialog.tsx    # nuevo
-├── AddExpenseDialog.tsx              # switch "Guardar como gasto rápido"
+├── AddExpenseDialog.tsx              # fila de gastos rápidos + switch "Guardar como gasto rápido"
 └── ExpensesPage.tsx                  # monta la sección
 
 src/features/safe-to-spend/Dashboard.tsx      # monta QuickExpenseBar
@@ -128,7 +134,10 @@ tests/
    - Dominio: `types.ts` y `quick-expenses.ts`, con pruebas unitarias.
    - `provider.ts`, repo de Supabase, mapper, mock (repo + seed) y snapshot.
    - Suite de contrato en verde.
-2. **US1 Toque (P1)**: `useQuickExpense` (crear y Deshacer) y `QuickExpenseBar` en el Dashboard.
+2. **US1 Toque (P1)**:
+   - `useQuickExpense` (crear con `overrides` opcionales, y Deshacer).
+   - `QuickExpenseBar` en el Dashboard y en `AddExpenseDialog`, en modo nuevo.
+   - Menú "⋯" con `QuickExpenseCustomDialog`.
 3. **US2 Administración (P1)**: esquema, `QuickExpenseTemplateDialog`, `QuickExpensesSection` (subir, bajar, borrar) y el estado vacío del Dashboard.
 4. **US3 Guardar como gasto rápido (P2)**: switch en `AddExpenseDialog` con `templateFromExpense`.
 5. **Cierre**:

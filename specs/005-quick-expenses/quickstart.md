@@ -27,6 +27,10 @@ pnpm check:demo-bundle                      # aislamiento del demo
 | D | Tocar Deshacer | El gasto desaparece y el disponible vuelve exactamente al valor previo |
 | E | Tocar dos veces seguidas | Dos gastos; el Deshacer del segundo aviso solo borra el segundo |
 | F | Editar el monto a $30 y tocar | El gasto nuevo es de $30; el anterior sigue en $24 |
+| F1 | Menú "⋯" › Ayer | Gasto de $24 con fecha de ayer; aviso con Deshacer |
+| F2 | Menú "⋯" › Registrar con otro monto o fecha: $12, hoy | Gasto de $12 hoy; la plantilla sigue en $24; una fecha futura no se acepta |
+| F3 | Celular (390 px), en Metas: botón flotante › tocar "Transporte $24" arriba del formulario | Gasto registrado, el diálogo se cierra, aviso con Deshacer |
+| F4 | Editar un gasto existente | El diálogo de edición no muestra la fila de gastos rápidos |
 | G | Subir y bajar dos plantillas | El Dashboard respeta el orden |
 | H | Borrar la plantilla | Desaparece del Dashboard; los gastos ya creados siguen |
 | I | Archivar la subcategoría de una plantilla | Su botón queda deshabilitado con el motivo |

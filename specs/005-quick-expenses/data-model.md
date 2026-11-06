@@ -62,14 +62,16 @@ Además:
 - `templateAvailability(template, snapshot)`:
   - `{ usable: false, reason: 'subcategoryArchived' }` si su subcategoría está archivada.
   - `{ usable: true, accountDropped: true }` si su cuenta está archivada.
-- `templateToExpense(template, snapshot, today)`: devuelve el `NewEntity<Expense>` con:
-  - `amount`, `subcategoryId`
+- `templateToExpense(template, snapshot, today, overrides?)`: `overrides` es un `{ amount?: Cents; spentOn?: IsoDate }` opcional que viene del menú secundario (FR-007a). Devuelve el `NewEntity<Expense>` con:
+  - `amount` = `overrides.amount ?? template.amount`
+  - `subcategoryId`
   - `bucket` = `bucketOfSubcategory(...)`
   - `paymentAccountId` (null si la cuenta está archivada)
-  - `spentOn = today`, `note = name`, `origin = 'manual'`
+  - `spentOn` = `overrides.spentOn ?? today`
+  - `note = name`, `origin = 'manual'`
   - `recurringExpenseId = null`, `occurrenceDate = null`
 
-  Devuelve null si la plantilla no se puede usar.
+  Devuelve null si la plantilla no se puede usar, si `spentOn > today` o si `amount ≤ 0`. Nunca modifica la plantilla.
 - `templateFromExpense(input, subcategoryName)`: arma la plantilla de "Guardar como gasto rápido". El nombre es la nota recortada, o el nombre de la subcategoría si la nota está vacía, cortado a 40 caracteres.
 - `reorderIds(ids, id, direction)`: mueve un id una posición arriba o abajo.
 

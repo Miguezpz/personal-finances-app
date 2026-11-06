@@ -8,6 +8,14 @@
 
 **Input**: User description: "Gastos rápidos (plantillas de 1 toque). El usuario repite gastos como el transporte público ($24 MXN por 2 viajes), pero solo los días que sale, así que no sirve un cargo recurrente automático. Quiere guardar plantillas de gasto (nombre, monto, subcategoría, método de pago opcional) y registrarlas con un solo toque desde el Dashboard. El toque crea un gasto con fecha de hoy y nota = nombre de la plantilla, baja el Safe-to-Spend al instante (optimista) y muestra un toast con Deshacer. Se permiten varios toques el mismo día. Las plantillas se crean, editan y borran desde Gastos o Ajustes, y el diálogo de gasto puede ofrecer 'Guardar como gasto rápido'. El bucket se hereda de la categoría de la subcategoría, como en los recurrentes. Debe funcionar en modo demo (con una plantilla de ejemplo 'Transporte $24') y en vivo (tabla nueva expense_templates con RLS). Textos en es y en."
 
+## Clarifications
+
+### Session 2026-11-05
+
+- Q: ¿El botón de gasto rápido debe dejar elegir otra fecha cuando se olvidó registrar el gasto ese día? → A: Sí. El toque normal registra con la fecha de hoy; un menú secundario por botón permite registrar con otra fecha (ayer u otra).
+- Q: ¿Cómo se registra un día con un monto distinto al de la plantilla (por ejemplo, 1 viaje de $12 en lugar de $24)? → A: El menú secundario también permite cambiar el monto (y la fecha) antes de registrar; el toque normal usa el monto de la plantilla y la plantilla no cambia.
+- Q: ¿En qué lugares de la app deben estar los botones de gasto rápido? → A: En el Dashboard y, además, arriba del diálogo de nuevo gasto (que se abre desde cualquier página con el botón flotante del celular).
+
 ## User Scenarios & Testing *(mandatory)*
 
 ### User Story 1 - Registrar un gasto repetido con un toque (Priority: P1)
@@ -26,6 +34,9 @@ Como dueño, los días que salgo pago $24 de transporte público (2 viajes). Qui
 4. **Given** que el dueño ya tocó el botón hoy, **When** lo toca otra vez, **Then** se registra un segundo gasto (un día puede tener varios).
 5. **Given** que el guardado falla en el servidor, **When** llega el error, **Then** el gasto optimista se retira, el Safe-to-Spend se restablece y aparece un aviso de error traducido.
 6. **Given** un gasto creado por un toque, **When** el dueño lo abre desde la lista de gastos, **Then** puede editarlo o borrarlo como cualquier gasto manual.
+7. **Given** que el dueño olvidó registrar el transporte ayer, **When** abre el menú secundario del botón y elige "Ayer" (u otra fecha), **Then** se registra el gasto de la plantilla con esa fecha, con el mismo aviso y Deshacer, y descuenta de la quincena a la que pertenece esa fecha.
+8. **Given** que el dueño está en cualquier página en el celular, **When** abre el botón flotante de agregar gasto y toca "Transporte $24" arriba del formulario, **Then** se registra el gasto con fecha de hoy, el diálogo se cierra y aparece el aviso con Deshacer.
+9. **Given** que hoy el dueño solo hizo 1 viaje, **When** abre el menú secundario, elige "Registrar con otro monto o fecha" y cambia el monto a $12, **Then** se registra un gasto de $12 con fecha de hoy y la plantilla sigue en $24.
 
 ---
 
@@ -71,6 +82,7 @@ Como dueño, al registrar un gasto a mano quiero marcar "Guardar como gasto ráp
 - Toques muy rápidos seguidos: cada toque registra un gasto; el botón Deshacer de cada aviso deshace solo su propio gasto.
 - El dueño toca Deshacer después de que el aviso se cierra: ya no hay acción; puede borrar el gasto desde la lista.
 - "Hoy" es la fecha de negocio en la zona horaria del usuario, no la del navegador ni la del servidor.
+- Registrar con una fecha pasada de otra quincena: el gasto descuenta de esa quincena (y de las siguientes a través del arrastre), igual que un gasto manual con fecha pasada.
 - Modo demo: el Dashboard muestra la plantilla de ejemplo "Transporte $24"; tocarla, o crear, editar o borrar plantillas, se bloquea con el aviso de solo lectura, como cualquier otra edición.
 - Modo privacidad: el monto del botón se oculta como cualquier otra cantidad; el nombre sigue visible.
 - Nombre muy largo: el botón lo recorta visualmente sin romper el diseño en móvil.
@@ -92,7 +104,13 @@ Como dueño, al registrar un gasto a mano quiero marcar "Guardar como gasto ráp
 **Registro con un toque**
 
 - **FR-006**: El Dashboard MUST mostrar las plantillas activas como botones con nombre y monto, en el orden elegido por el dueño.
+- **FR-006a**: El diálogo de nuevo gasto (el que abren el botón del Dashboard y el botón flotante del celular en cualquier página) MUST mostrar arriba del formulario los mismos botones. Tocar uno registra el gasto (FR-007) y cierra el diálogo. En el diálogo de edición de un gasto no aparecen. Sin plantillas activas, el diálogo no muestra la fila.
 - **FR-007**: Un toque MUST registrar un gasto con el monto, la subcategoría y el método de pago de la plantilla, la fecha de negocio de hoy y el nombre de la plantilla como nota. El gasto es un gasto manual: se edita, se borra y se exporta como cualquier otro.
+- **FR-007a**: Cada botón MUST ofrecer un menú secundario, accesible con teclado y lector de pantalla, con dos acciones:
+  - "Ayer": registra la plantilla con la fecha de ayer.
+  - "Registrar con otro monto o fecha": abre un formulario corto con el monto y la fecha prellenados (monto de la plantilla, fecha de hoy). El monto debe ser mayor que cero y la fecha no puede ser futura.
+
+  El gasto resultante usa la subcategoría, el método de pago y la nota de la plantilla. La plantilla MUST NOT cambiar.
 - **FR-008**: El Safe-to-Spend MUST reflejar el gasto en el mismo momento del toque, y MUST revertirse si el guardado falla.
 - **FR-009**: Cada toque MUST mostrar un aviso de confirmación con la acción Deshacer durante al menos 5 segundos; Deshacer MUST eliminar exactamente ese gasto.
 - **FR-010**: Varios toques en el mismo día MUST registrar varios gastos.
@@ -126,7 +144,7 @@ Como dueño, al registrar un gasto a mano quiero marcar "Guardar como gasto ráp
 ## Assumptions
 
 - Los gastos rápidos son atajos manuales: no hay registro automático ni calendario. Los gastos automáticos siguen siendo los Recurrentes mensuales que ya existen.
-- El monto de la plantilla es el total por toque ($24 = 2 viajes); no se modela "número de usos × tarifa".
+- El monto de la plantilla es el total por toque ($24 = 2 viajes); no se modela "número de usos × tarifa". Un día con otro monto se registra desde el menú secundario (FR-007a).
 - La sección de administración vive en la página de Gastos; Ajustes puede enlazar a ella.
 - Borrar una plantilla puede ser un borrado lógico (archivada); para el dueño simplemente desaparece.
 - El gasto creado por un toque no guarda referencia a la plantilla; se reconoce por su nota.

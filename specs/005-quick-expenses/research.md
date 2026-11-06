@@ -63,8 +63,15 @@ No quedaron `NEEDS CLARIFICATION` en el Technical Context. Las decisiones siguie
 - **Decision**:
   - **Dashboard**: `QuickExpenseBar` entre el `PageHeader` y las tarjetas de bucket. Es una fila de botones con scroll horizontal propio (`overflow-x-auto`, sin scroll de página) y botones de 44 px de alto como mínimo. Sin plantillas, muestra un enlace "Crear gasto rápido" a `/expenses#quick-expenses`.
   - **Página de Gastos**: sección "Gastos rápidos" con la lista, el diálogo `QuickExpenseTemplateDialog` (crear/editar), los botones de subir y bajar, y borrar con confirmación.
-  - **`AddExpenseDialog`**: en modo nuevo, un `Switch` "Guardar como gasto rápido" (FR-012).
-- **Rationale**: el Dashboard es donde se decide gastar. La administración queda junto a los gastos, como la spec supone.
+  - **`AddExpenseDialog`**, en modo nuevo:
+    - El mismo `QuickExpenseBar` en variante compacta, arriba del formulario (FR-006a). Tocar un botón registra el gasto y cierra el diálogo. Como el botón flotante de `src/components/layout/MobileNav.tsx` abre este diálogo en todas las páginas, los gastos rápidos quedan a un toque desde cualquier pantalla.
+    - Un `Switch` "Guardar como gasto rápido" (FR-012).
+  - **Menú secundario** (FR-007a): cada botón de la fila va junto a un pequeño botón "⋯", un `DropdownMenu` de shadcn que ya existe y es accesible con teclado. Ofrece:
+    - "Ayer": registra con `addDays(today, -1)`.
+    - "Registrar con otro monto o fecha": abre `QuickExpenseCustomDialog` con monto y fecha prellenados; la fecha no puede ser futura.
+
+    Se descarta "mantener presionado": no lo descubre nadie y no funciona con teclado.
+- **Rationale**: el Dashboard es donde se decide gastar, y el diálogo de nuevo gasto es el punto de entrada del celular desde cualquier página. La administración queda junto a los gastos, como la spec supone.
 
 ## R9 · Snapshot, CSV y demo
 

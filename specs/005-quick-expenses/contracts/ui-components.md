@@ -6,8 +6,11 @@ Todo texto visible sale de `src/i18n/messages/{en,es}.json`, en el namespace nue
 
 ```ts
 function useQuickExpense(): {
-  /** Registra el gasto de la plantilla con fecha de hoy y muestra el aviso con Deshacer. */
-  apply(template: ExpenseTemplate): void;
+  /**
+   * Registra el gasto de la plantilla (por defecto con fecha de hoy y el monto de la plantilla)
+   * y muestra el aviso con Deshacer. `overrides` viene del menú secundario (FR-007a).
+   */
+  apply(template: ExpenseTemplate, overrides?: { amount?: Cents; spentOn?: IsoDate }): void;
 };
 ```
 
@@ -24,7 +27,25 @@ Hooks de administración en el mismo archivo, todos con `useSnapshotMutation` op
 
 ## `QuickExpenseBar` — `src/features/expenses/QuickExpenseBar.tsx`
 
-Va en el Dashboard, entre el `PageHeader` y las tarjetas de bucket. Si el snapshot no ha cargado, no se muestra.
+```ts
+props: {
+  variant: "dashboard" | "dialog";
+  /** Se llama después de registrar; el diálogo de gasto lo usa para cerrarse. */
+  onApplied?: () => void;
+}
+```
+
+Se usa en dos lugares (FR-006, FR-006a):
+- `variant="dashboard"`: en el Dashboard, entre el `PageHeader` y las tarjetas de bucket.
+- `variant="dialog"`: en `AddExpenseDialog`, solo en modo nuevo, arriba del formulario. Sin plantillas activas no se muestra nada; el enlace de "crear" es exclusivo del Dashboard.
+
+Si el snapshot no ha cargado, no se muestra.
+
+Cada plantilla lleva su botón principal (un toque = hoy) y, al lado, un botón "⋯" (`DropdownMenu`) con el nombre accesible "Más opciones para {name}" y dos acciones:
+- `t("yesterday")`: registra con la fecha de ayer.
+- `t("customize")`: abre `QuickExpenseCustomDialog`.
+
+En demo, las dos acciones muestran el aviso de solo lectura, igual que el toque.
 
 | Estado | Render |
 |---|---|
@@ -53,13 +74,28 @@ props: { open: boolean; template: ExpenseTemplate | null; onOpenChange(open: boo
 - Esquema `expenseTemplateFormSchema` en `src/features/expenses/template-schemas.ts`. Los mensajes son claves i18n: `nameRequired`, `nameTooLong`, `invalidAmount`, `subcategoryRequired`.
 - Una plantilla nueva se guarda con `sort = max(sort activas) + 1`.
 
+## `QuickExpenseCustomDialog` — `src/features/expenses/QuickExpenseCustomDialog.tsx`
+
+```ts
+props: { template: ExpenseTemplate; open: boolean; onOpenChange(open: boolean): void }
+```
+
+- Campos:
+  - Monto: prellenado con el de la plantilla; debe ser mayor que cero.
+  - Fecha: prellenada con hoy; `max` = hoy, sin fechas futuras.
+- Muestra en solo lectura la subcategoría, el método de pago y la nota (el nombre de la plantilla).
+- Al guardar llama `apply(template, { amount, spentOn })` y cierra. La plantilla no cambia.
+- Esquema `quickExpenseOverrideSchema` en `template-schemas.ts`. Mensajes `invalidAmount` y `futureDate`.
+
 ## `AddExpenseDialog` — cambio
 
-- Solo en modo nuevo, un `Switch` "Guardar como gasto rápido" (`data-testid="save-as-template"`).
+- Solo en modo nuevo:
+  - `<QuickExpenseBar variant="dialog" onApplied={() => onOpenChange(false)} />` arriba del formulario, separada por un `Separator`.
+  - Un `Switch` "Guardar como gasto rápido" (`data-testid="save-as-template"`).
 - Si está marcado, cuando el gasto se guarda con éxito se crea la plantilla con `templateFromExpense()`. Con 12 activas, el switch queda deshabilitado con el motivo.
 
 ## Claves i18n (`quickExpenses`)
 
-`title`, `create`, `createFirst`, `edit`, `delete`, `deleteConfirm`, `moveUp`, `moveDown`, `name`, `amount`, `subcategory`, `paymentMethod`, `noPaymentMethod`, `added`, `undo`, `undone`, `addFailed`, `apply`, `unavailableSubcategory`, `accountArchived`, `limitReached`, `saveAsTemplate`, `saved`, `saveFailed`, `nameRequired`, `nameTooLong`, `invalidAmount`, `subcategoryRequired`.
+`title`, `create`, `createFirst`, `edit`, `delete`, `deleteConfirm`, `moveUp`, `moveDown`, `name`, `amount`, `subcategory`, `paymentMethod`, `noPaymentMethod`, `added`, `undo`, `undone`, `addFailed`, `apply`, `unavailableSubcategory`, `accountArchived`, `limitReached`, `saveAsTemplate`, `saved`, `saveFailed`, `nameRequired`, `nameTooLong`, `invalidAmount`, `subcategoryRequired`, `moreOptions`, `yesterday`, `customize`, `customTitle`, `date`, `futureDate`, `register`.
 
 La prueba de paridad EN/ES (`tests/unit/i18n`) cubre las claves nuevas.
