@@ -238,7 +238,7 @@ description: "Task list for spec 005 — Gastos rápidos (plantillas de 1 toque)
 - [X] T035 [P] Agregar a `tests/e2e/mobile.spec.ts` un caso a 360 px con 6 plantillas: la fila se desplaza sola, `document.scrollingElement.scrollWidth <= innerWidth` y cada botón mide ≥ 44 px de alto (SC-005)
 - [X] T036 [P] Agregar a `tests/unit/components/money.test.tsx`, o a una prueba de `QuickExpenseBar`, que en modo privacidad el monto del botón se enmascara y el nombre no (FR-015)
 - [X] T037 Correr las puertas de calidad: `pnpm typecheck && pnpm lint && pnpm format:check && pnpm test && pnpm db:test && pnpm test:contract:local && pnpm test:e2e:local && pnpm check:demo-bundle`. Medir con `pnpm build && node scripts/measure-first-load.mjs`: `/dashboard` < 5 KB gzip sobre la línea base de T001
-- [ ] T038 Recorrer los escenarios manuales A–N y F1–F4 de `specs/005-quick-expenses/quickstart.md` en `pnpm dev` (EN y ES, claro y oscuro) y § 3 en `pnpm dev:demo`
+- [X] T038 Recorrer los escenarios manuales A–N y F1–F4 de `specs/005-quick-expenses/quickstart.md` en `pnpm dev` (EN y ES, claro y oscuro) y § 3 en `pnpm dev:demo`
 - [ ] T039 **Solo con aprobación explícita del usuario**: aplicar `supabase/migrations/0009_expense_templates.sql` al proyecto en la nube `potodtpkgadgsmeuuafx`, revisar los advisors de seguridad (sin tablas sin RLS) y desplegar desde git justo después (quickstart § 4)
 
 ---
