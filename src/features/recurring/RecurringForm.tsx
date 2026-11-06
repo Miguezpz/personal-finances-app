@@ -2,7 +2,8 @@
 
 /**
  * Create / edit a recurring expense (T084, FR-007). Editing only affects future charges: applied
- * ones are snapshots in the history (FR-011). The start date is fixed once created.
+ * ones are snapshots in the history (FR-011). Moving the start date earlier (or creating one in the
+ * past) charges the unapplied months in between as soon as it's saved; the form warns how many.
  */
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useTranslations } from "next-intl";
@@ -21,9 +22,11 @@ import { Field, FieldDescription, FieldError, FieldGroup, FieldLabel } from "@/c
 import { Input } from "@/components/ui/input";
 import { NativeSelect, NativeSelectOption } from "@/components/ui/native-select";
 import { isNotifiedGlobally } from "@/data/errors";
+import { isIsoDate } from "@/domain/dates";
 import { useFinanceSnapshot } from "@/data/useFinanceSnapshot";
 import { formatCentsAsInput } from "@/domain/parse";
-import type { FinanceSnapshot, RecurringExpense, Uuid } from "@/domain/types";
+import { retroactiveChargeCount } from "@/domain/recurring";
+import type { FinanceSnapshot, IsoDate, RecurringExpense, Uuid } from "@/domain/types";
 import { bucketOfSubcategory } from "@/features/expenses/hooks";
 import {
   SubcategoryOptions,
@@ -39,7 +42,34 @@ const selectFormData = (s: FinanceSnapshot) => ({
   categories: s.categories,
   subcategories: s.subcategories,
   accounts: s.accounts.filter((a) => !a.archived),
+  expenses: s.expenses,
 });
+
+/** Past charges that saving the form would create (0 while the inputs are incomplete). */
+function retroactiveCountFor(
+  recurring: RecurringExpense | null | undefined,
+  startsOn: string,
+  chargeDay: string,
+  expenses: FinanceSnapshot["expenses"] | undefined,
+  today: IsoDate,
+): number {
+  const day = Number(chargeDay);
+  if (!expenses || !isIsoDate(startsOn) || !Number.isInteger(day) || day < 1 || day > 31) return 0;
+  const draft: RecurringExpense = recurring
+    ? { ...recurring, chargeDay: day }
+    : {
+        id: "draft" as Uuid,
+        name: "",
+        amount: 0 as RecurringExpense["amount"],
+        chargeDay: day,
+        subcategoryId: "" as Uuid,
+        bucket: "needs",
+        paymentAccountId: null,
+        startsOn: startsOn as IsoDate,
+        endedOn: null,
+      };
+  return retroactiveChargeCount(draft, startsOn as IsoDate, recurring ? expenses : [], today);
+}
 
 interface Props {
   open: boolean;
@@ -79,6 +109,9 @@ export function RecurringForm({ open, onOpenChange, recurring }: Props) {
         },
   });
   const subcategoryId = useWatch({ control: form.control, name: "subcategoryId" });
+  const startsOn = useWatch({ control: form.control, name: "startsOn" });
+  const chargeDay = useWatch({ control: form.control, name: "chargeDay" });
+  const retroactive = retroactiveCountFor(recurring, startsOn, chargeDay, data?.expenses, today);
   const bucket = data && subcategoryId ? bucketOfSubcategory(data, subcategoryId as Uuid) : null;
   const errors = form.formState.errors;
   const errorText = (key: string | undefined) => (key ? t(key as RecurringMessageKey) : null);
@@ -94,13 +127,19 @@ export function RecurringForm({ open, onOpenChange, recurring }: Props) {
       },
     };
     if (recurring) {
-      // startsOn is fixed once created; everything else applies to future charges only.
+      // A paused one can't start after its pause (DB check ended_on >= starts_on).
+      if (recurring.endedOn && values.startsOn > recurring.endedOn) {
+        form.setError("startsOn", { message: "startsAfterEnd" });
+        return;
+      }
+      // Applies to future charges; an earlier startsOn also charges the unapplied months since.
       const patch = {
         name: values.name,
         amount: values.amount,
         chargeDay: values.chargeDay,
         subcategoryId: values.subcategoryId,
         paymentAccountId: values.paymentAccountId,
+        startsOn: values.startsOn,
         bucket: inherited,
       };
       update.mutate({ id: recurring.id, patch }, callbacks);
@@ -192,13 +231,16 @@ export function RecurringForm({ open, onOpenChange, recurring }: Props) {
               </Field>
               <Field data-invalid={Boolean(errors.startsOn)}>
                 <FieldLabel htmlFor="recurring-start">{t("startsOn")}</FieldLabel>
-                <Input
-                  id="recurring-start"
-                  type="date"
-                  disabled={editing}
-                  {...form.register("startsOn")}
-                />
-                {errors.startsOn && <FieldError>{errorText(errors.startsOn.message)}</FieldError>}
+                <Input id="recurring-start" type="date" {...form.register("startsOn")} />
+                {errors.startsOn ? (
+                  <FieldError>{errorText(errors.startsOn.message)}</FieldError>
+                ) : (
+                  retroactive > 0 && (
+                    <FieldDescription data-testid="recurring-retroactive">
+                      {t("retroactiveCharges", { count: retroactive })}
+                    </FieldDescription>
+                  )
+                )}
               </Field>
             </div>
           </FieldGroup>

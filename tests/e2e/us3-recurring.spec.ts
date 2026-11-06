@@ -1,7 +1,8 @@
 /**
  * T086 · US3 end to end (live-en, live-es): create "Rent" charged today, reload twice and find
  * exactly ONE applied occurrence (idempotent materialization, FR-010 / SC-005); it shows as
- * charged on the dashboard; pausing it stops further charges (US3-6).
+ * charged on the dashboard; pausing it stops further charges (US3-6). Demo: the start date of an
+ * existing one is editable and backdating it warns how many past charges it will record.
  */
 import { parseIsoDate } from "../../src/domain/dates";
 import { todayIn } from "../../src/domain/periods";
@@ -86,5 +87,17 @@ test.describe("US3 · recurring expenses", { tag: "@live" }, () => {
     await expect(page.getByTestId("recurring-card")).toHaveAttribute("data-status", "paused");
     await page.waitForTimeout(800);
     expect(await appliedRent()).toHaveLength(1);
+  });
+});
+
+test.describe("US3 · recurring start date", { tag: "@demo" }, () => {
+  test("can be moved to the past when editing, with a warning", async ({ page }) => {
+    await page.goto("/recurring");
+    await page.getByTestId("edit-recurring").first().click();
+    const start = page.locator("#recurring-start");
+    await expect(start).toBeEnabled();
+    await expect(page.getByTestId("recurring-retroactive")).toHaveCount(0);
+    await start.fill("2020-01-01");
+    await expect(page.getByTestId("recurring-retroactive")).toBeVisible();
   });
 });

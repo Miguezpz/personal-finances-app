@@ -364,7 +364,7 @@
     "addTitle": "Agregar gasto fijo",
     "editTitle": "Editar gasto fijo",
     "addHint": "Se cobra cada mes en su día, a partir de la fecha de inicio.",
-    "editHint": "Los cambios solo aplican a cargos futuros; los anteriores se quedan como estaban.",
+    "editHint": "Los cambios solo aplican a cargos futuros. Si cambias la fecha de inicio a una anterior, se registran los cargos de esos meses.",
     "empty": "Aún no tienes gastos fijos.",
     "name": "Nombre",
     "namePlaceholder": "Renta",
@@ -377,6 +377,7 @@
     "paymentMethod": "Pagado con",
     "noPaymentMethod": "Sin especificar",
     "startsOn": "Inicia el",
+    "retroactiveCharges": "{count, plural, one {Al guardar se registrará # cargo pasado.} other {Al guardar se registrarán # cargos pasados.}}",
     "save": "Guardar",
     "saved": "Gasto fijo guardado.",
     "saveFailed": "No se pudo guardar. Inténtalo de nuevo.",
@@ -400,7 +401,8 @@
     "invalidAmount": "Escribe un monto mayor a 0 (p. ej. 8,000.00).",
     "invalidChargeDay": "Escribe un día entre 1 y 31.",
     "subcategoryRequired": "Elige una categoría.",
-    "invalidDate": "Escribe una fecha válida."
+    "invalidDate": "Escribe una fecha válida.",
+    "startsAfterEnd": "La fecha de inicio no puede ser posterior a la pausa."
   },
   "receivables": {
     "title": "Por cobrar",

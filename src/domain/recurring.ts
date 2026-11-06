@@ -154,3 +154,16 @@ export function nextChargeDate(r: RecurringExpense, from: IsoDate): IsoDate | nu
   const horizon = addMonthsToMonthStart(start, 13);
   return occurrencesBetween(r, start, horizon)[0] ?? null;
 }
+
+/**
+ * How many past charges saving `r` with `startsOn` would create right away (the background sync
+ * materializes every due, unapplied month). Used to warn before backdating the start date.
+ */
+export function retroactiveChargeCount(
+  r: RecurringExpense,
+  startsOn: IsoDate,
+  applied: readonly Applied[],
+  today: IsoDate,
+): number {
+  return dueOccurrences([{ ...r, startsOn }], applied, today).length;
+}

@@ -364,7 +364,7 @@
     "addTitle": "Add recurring expense",
     "editTitle": "Edit recurring expense",
     "addHint": "It's charged every month on its day, from the start date on.",
-    "editHint": "Changes only apply to future charges; past ones stay as they were.",
+    "editHint": "Changes only apply to future charges. Moving the start date earlier records the charges of those months.",
     "empty": "No recurring expenses yet.",
     "name": "Name",
     "namePlaceholder": "Rent",
@@ -377,6 +377,7 @@
     "paymentMethod": "Paid with",
     "noPaymentMethod": "Not specified",
     "startsOn": "Starts on",
+    "retroactiveCharges": "{count, plural, one {Saving will record # past charge.} other {Saving will record # past charges.}}",
     "save": "Save",
     "saved": "Recurring expense saved.",
     "saveFailed": "It couldn't be saved. Try again.",
@@ -400,7 +401,8 @@
     "invalidAmount": "Enter an amount greater than 0 (e.g. 8,000.00).",
     "invalidChargeDay": "Enter a day between 1 and 31.",
     "subcategoryRequired": "Choose a category.",
-    "invalidDate": "Enter a valid date."
+    "invalidDate": "Enter a valid date.",
+    "startsAfterEnd": "The start date can't be after the pause."
   },
   "receivables": {
     "title": "Receivables",

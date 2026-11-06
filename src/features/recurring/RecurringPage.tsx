@@ -189,6 +189,7 @@ export function RecurringPage() {
                         variant="outline"
                         size="sm"
                         onClick={() => setForm({ open: true, recurring: r })}
+                        data-testid="edit-recurring"
                       >
                         <Pencil aria-hidden="true" />
                         {t("edit")}

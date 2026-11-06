@@ -6,7 +6,12 @@
 import { describe, expect, it } from "vitest";
 import { cents } from "@/domain/money";
 import { periodOf } from "@/domain/periods";
-import { dueOccurrences, pendingOccurrences, recurringStatusForPeriod } from "@/domain/recurring";
+import {
+  dueOccurrences,
+  pendingOccurrences,
+  recurringStatusForPeriod,
+  retroactiveChargeCount,
+} from "@/domain/recurring";
 import type { Expense, RecurringExpense } from "@/domain/types";
 import { d, makeExpense, makeRecurring } from "../../utils/fixtures";
 
@@ -189,5 +194,25 @@ describe("recurringStatusForPeriod", () => {
         status: "pending",
       }),
     ]);
+  });
+});
+
+describe("retroactiveChargeCount", () => {
+  const internet = makeRecurring({ chargeDay: 1, startsOn: d("2026-11-05") });
+  const today = d("2026-11-05");
+
+  it("counts the charge a backdated start brings into the current month", () => {
+    expect(retroactiveChargeCount(internet, internet.startsOn, [], today)).toBe(0);
+    expect(retroactiveChargeCount(internet, d("2026-11-01"), [], today)).toBe(1);
+    expect(retroactiveChargeCount(internet, d("2026-09-01"), [], today)).toBe(3);
+  });
+
+  it("ignores months already applied", () => {
+    const applied = [apply(internet, "2026-10-01")];
+    expect(retroactiveChargeCount(internet, d("2026-10-01"), applied, today)).toBe(1);
+  });
+
+  it("is 0 for a start date in the future", () => {
+    expect(retroactiveChargeCount(internet, d("2026-12-01"), [], today)).toBe(0);
   });
 });
