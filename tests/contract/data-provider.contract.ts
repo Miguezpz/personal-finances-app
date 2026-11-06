@@ -194,7 +194,15 @@ async function seedThroughProvider(p: DataProvider) {
     liabilities: cents(50_000),
     netWorth: cents(450_000),
   });
-  return { debit, card, stocks, sub, rule, recurring, receivable, goal };
+  const template = await p.expenseTemplates.create({
+    name: "Bus",
+    amount: cents(2400),
+    subcategoryId: sub.id,
+    paymentAccountId: card.id,
+    sort: 0,
+    archived: false,
+  });
+  return { debit, card, stocks, sub, rule, recurring, receivable, goal, template };
 }
 
 function expectForeignKeysResolved(s: FinanceSnapshot) {
@@ -243,6 +251,10 @@ function expectForeignKeysResolved(s: FinanceSnapshot) {
   });
   s.installments.forEach((x) => has(receivables, x.receivableId, "installment.receivableId"));
   s.contributions.forEach((x) => has(goals, x.goalId, "contribution.goalId"));
+  s.expenseTemplates.forEach((x) => {
+    has(subcategories, x.subcategoryId, "expenseTemplate.subcategoryId");
+    has(accounts, x.paymentAccountId, "expenseTemplate.paymentAccountId");
+  });
 }
 
 export function runDataProviderContract(
@@ -313,6 +325,7 @@ export function runDataProviderContract(
         receivables,
         goals,
         netWorth,
+        templates,
       ] = await Promise.all([
         provider.settings.get(),
         provider.accounts.list({ includeArchived: true }),
@@ -327,6 +340,7 @@ export function runDataProviderContract(
         provider.receivables.list(),
         provider.goals.list(),
         provider.netWorth.list(),
+        provider.expenseTemplates.list(),
       ]);
       expect(settings).toEqual(s.settings);
       expect(sortById(accounts)).toEqual(sortById(s.accounts));
@@ -344,6 +358,7 @@ export function runDataProviderContract(
       expect(sortById(goals.goals)).toEqual(sortById(s.goals));
       expect(sortById(goals.contributions)).toEqual(sortById(s.contributions));
       expect(sortById(netWorth)).toEqual(sortById(s.netWorthSnapshots));
+      expect(sortById(templates)).toEqual(sortById(s.expenseTemplates));
     });
 
     it("range filters return only rows inside the range", async () => {
@@ -607,7 +622,128 @@ export function runDataProviderContract(
         expect(updated.status).toBe("partial");
         expect(updated.collected).toBe(100_000);
       });
+      // ---------- Spec 005 · quick expenses (contracts/data-provider.md T1–T7) ----------
+      describe("expense templates", () => {
+        const missingId = "00000000-0000-4000-8000-0000000fffff" as Uuid;
+        const subId = async () => {
+          const s = await provider.loadSnapshot();
+          const sub = s.subcategories[0];
+          if (!sub) throw new Error("seed missing");
+          return sub.id;
+        };
+        const newTemplate = async (name: string, sort = 0) => ({
+          name,
+          amount: cents(2400),
+          subcategoryId: await subId(),
+          paymentAccountId: null,
+          sort,
+          archived: false,
+        });
+
+        it("T1 · creates a template that list() and the snapshot include", async () => {
+          const input = await newTemplate("Transporte");
+          const created = await provider.expenseTemplates.create(input);
+          expect(created).toEqual({ ...input, id: expect.any(String) });
+          expect(await provider.expenseTemplates.list()).toContainEqual(created);
+          expect((await provider.loadSnapshot()).expenseTemplates).toContainEqual(created);
+        });
+
+        it("T2 · update changes only the patched fields", async () => {
+          const created = await provider.expenseTemplates.create(await newTemplate("Café"));
+          const updated = await provider.expenseTemplates.update(created.id, {
+            amount: cents(3000),
+          });
+          expect(updated).toEqual({ ...created, amount: 3000 });
+        });
+
+        it("T3 · remove archives it and leaves expenses with the same note alone", async () => {
+          const input = await newTemplate("Metro");
+          const created = await provider.expenseTemplates.create(input);
+          const expense = await provider.expenses.create({
+            amount: input.amount,
+            spentOn: d("2026-11-05"),
+            subcategoryId: input.subcategoryId,
+            bucket: "needs",
+            paymentAccountId: null,
+            note: "Metro",
+            origin: "manual",
+            recurringExpenseId: null,
+            occurrenceDate: null,
+          });
+          await provider.expenseTemplates.remove(created.id);
+          const listed = (await provider.expenseTemplates.list()).find((t) => t.id === created.id);
+          expect(listed).toEqual({ ...created, archived: true });
+          expect(await provider.expenses.list()).toContainEqual(expense);
+        });
+
+        it("T4 · reorder writes sort = index of each id", async () => {
+          const a = await provider.expenseTemplates.create(await newTemplate("A", 0));
+          const b = await provider.expenseTemplates.create(await newTemplate("B", 1));
+          await provider.expenseTemplates.reorder([b.id, a.id]);
+          const list = await provider.expenseTemplates.list();
+          expect(list.find((t) => t.id === a.id)?.sort).toBe(1);
+          expect(list.find((t) => t.id === b.id)?.sort).toBe(0);
+        });
+
+        it("T5 · rejects a 41-character name or a zero amount with VALIDATION", async () => {
+          await expectProviderError(
+            provider.expenseTemplates.create(await newTemplate("x".repeat(41))),
+            "VALIDATION",
+          );
+          await expectProviderError(
+            provider.expenseTemplates.create({ ...(await newTemplate("Zero")), amount: cents(0) }),
+            "VALIDATION",
+          );
+        });
+
+        it("T6 · rejects an unknown subcategory like an expense does", async () => {
+          const expenseError = await provider.expenses
+            .create({
+              amount: cents(100),
+              spentOn: d("2026-11-05"),
+              subcategoryId: missingId,
+              bucket: "needs",
+              paymentAccountId: null,
+              note: null,
+              origin: "manual",
+              recurringExpenseId: null,
+              occurrenceDate: null,
+            })
+            .then(
+              () => null,
+              (e: unknown) => e,
+            );
+          expect(expenseError).toBeInstanceOf(ProviderError);
+          await expectProviderError(
+            provider.expenseTemplates.create({
+              ...(await newTemplate("Ghost")),
+              subcategoryId: missingId,
+            }),
+            (expenseError as ProviderError).code,
+          );
+        });
+
+        it("T7 · update and remove of an unknown id reject with NOT_FOUND", async () => {
+          await expectProviderError(
+            provider.expenseTemplates.update(missingId, { amount: cents(1) }),
+            "NOT_FOUND",
+          );
+          await expectProviderError(provider.expenseTemplates.remove(missingId), "NOT_FOUND");
+        });
+      });
     } else {
+      it("T8 · the demo has exactly one active quick expense: Transporte $24 in Public transport", async () => {
+        const s = await provider.loadSnapshot();
+        const active = s.expenseTemplates.filter((t) => !t.archived);
+        expect(active).toHaveLength(1);
+        const [template] = active;
+        expect(template).toMatchObject({ name: "Transporte", amount: 2400, sort: 0 });
+        const sub = s.subcategories.find((x) => x.id === template?.subcategoryId);
+        const category = s.categories.find((c) => c.id === sub?.categoryId);
+        expect(sub?.name).toBe("Public transport");
+        expect(category?.nameKey).toBe("taxonomy.categories.transportGas");
+      });
+
       it("C7 · the demo uses the 26 default categories and typed incomes", async () => {
         const s = await provider.loadSnapshot();
         expect(s.categories).toHaveLength(26);
@@ -693,6 +829,14 @@ export function runDataProviderContract(
             "netWorth.upsertMonthly",
             () => p.netWorth.upsertMonthly(before.netWorthSnapshots[0] as never),
           ],
+          // T9 · spec 005: quick expense templates are read-only too.
+          [
+            "expenseTemplates.create",
+            () => p.expenseTemplates.create(before.expenseTemplates[0] as never),
+          ],
+          ["expenseTemplates.update", () => p.expenseTemplates.update(anyId, { amount: cents(1) })],
+          ["expenseTemplates.remove", () => p.expenseTemplates.remove(anyId)],
+          ["expenseTemplates.reorder", () => p.expenseTemplates.reorder([anyId])],
         ];
         for (const [name, write] of writes) {
           const error = await write().then(

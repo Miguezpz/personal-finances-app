@@ -6,16 +6,10 @@
  */
 import type { NewEntity, Patch } from "@/data/provider";
 import { replaceTemp, useSnapshotMutation } from "@/data/snapshot-cache";
-import type { CardPayment, Expense, FinanceSnapshot, SpendBucket, Uuid } from "@/domain/types";
+import type { CardPayment, Expense, Uuid } from "@/domain/types";
 
-/** Bucket inherited from the subcategory's parent category (FR-014). */
-export function bucketOfSubcategory(
-  s: Pick<FinanceSnapshot, "categories" | "subcategories">,
-  subcategoryId: Uuid,
-): SpendBucket | null {
-  const sub = s.subcategories.find((x) => x.id === subcategoryId);
-  return s.categories.find((c) => c.id === sub?.categoryId)?.macro ?? null;
-}
+/** Bucket inherited from the subcategory's parent category (FR-014); lives in src/domain since spec 005. */
+export { bucketOfSubcategory } from "@/domain/quick-expenses";
 
 export function useCreateExpense() {
   return useSnapshotMutation<NewEntity<Expense>, Expense>({

@@ -143,6 +143,17 @@ export const expenseSchema = z
     "origin consistent with recurring fields",
   );
 
+/** Spec 005: same limits as the checks of migration 0009. */
+export const expenseTemplateSchema = z.strictObject({
+  id: uuid,
+  name: z.string().min(1).max(40),
+  amount: positiveCents,
+  subcategoryId: uuid,
+  paymentAccountId: uuid.nullable(),
+  sort: z.number().int().min(0).max(32_767),
+  archived: z.boolean(),
+});
+
 export const cardPaymentSchema = z.strictObject({
   id: uuid,
   cardAccountId: uuid,
@@ -248,4 +259,5 @@ export const financeSnapshotSchema = z.strictObject({
   goals: z.array(goalSchema),
   contributions: z.array(contributionSchema),
   netWorthSnapshots: z.array(netWorthSnapshotSchema),
+  expenseTemplates: z.array(expenseTemplateSchema),
 });

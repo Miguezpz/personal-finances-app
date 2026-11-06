@@ -4,6 +4,7 @@
 
 - Docker en marcha y Supabase local con `pnpm db:start`, porque esta feature agrega la tabla `expense_templates`.
 - Nunca correr pruebas, seeds ni `db reset` contra la nube.
+- Línea base de peso (T001, 2026-11-05, antes de la feature): `/` 299.5 kB gzip, `/dashboard` 341.9 kB gzip (`pnpm build && node scripts/measure-first-load.mjs`). Meta: `/dashboard` < 346.9 kB gzip.
 
 ## 1. Puertas automáticas
 

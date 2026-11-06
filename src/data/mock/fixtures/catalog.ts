@@ -112,6 +112,9 @@ export function subcategoryId(categoryNameKey: string, subName: string): Uuid {
 
 export const RULE_ID = id(0x3001);
 
+/** Quick expense of the demo (spec 005, FR-013): "Transporte · $24" in Public transport. */
+export const EXPENSE_TEMPLATE_ID = id(0x4001);
+
 export const rule = (effectiveFrom: IsoDate) => ({
   id: RULE_ID,
   effectiveFrom,

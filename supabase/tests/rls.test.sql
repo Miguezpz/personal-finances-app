@@ -29,8 +29,8 @@ end $$;
 select is(
   (select count(*)::int from pg_class c join pg_namespace n on n.oid = c.relnamespace
     where n.nspname = 'public' and c.relkind = 'r' and c.relrowsecurity and c.relforcerowsecurity),
-  17,
-  'all 17 tables have RLS enabled and forced'
+  18,
+  'all 18 tables have RLS enabled and forced'
 );
 select is(
   (select count(*)::int from pg_class c join pg_namespace n on n.oid = c.relnamespace
@@ -41,7 +41,7 @@ select is(
 select is(
   (select count(*)::int from pg_policies where schemaname = 'public' and policyname = tablename || '_owner'
       and roles = '{authenticated}' and cmd = 'ALL'),
-  17,
+  18,
   'every table has one owner policy for authenticated'
 );
 
@@ -50,7 +50,8 @@ select table_privs_are('public', t, 'anon', array[]::text[], 'anon has no privil
   from unnest(array[
     'user_settings','accounts','distribution_rules','investment_subrules','categories','subcategories',
     'incomes','income_allocations','recurring_expenses','expenses','card_payments','debtors',
-    'receivables','installments','goals','goal_contributions','net_worth_snapshots','ledger_entries']) as t;
+    'receivables','installments','goals','goal_contributions','net_worth_snapshots','expense_templates',
+    'ledger_entries']) as t;
 
 select function_privs_are('public', 'register_income', array['jsonb','jsonb'], 'anon', array[]::text[]);
 select function_privs_are('public', 'replace_income', array['uuid','jsonb','jsonb'], 'anon', array[]::text[]);
@@ -76,6 +77,11 @@ select lives_ok($$
   values (50000, '2026-11-02', '50000000-0000-0000-0000-000000000005', 'needs', 'a0000000-0000-0000-0000-00000000000a')
 $$, 'owner creates an expense');
 select lives_ok($$ insert into user_settings default values $$, 'owner creates settings');
+select lives_ok($$
+  insert into expense_templates (id, name, amount_cents, subcategory_id, payment_account_id)
+  values ('7e000000-0000-0000-0000-000000000007', 'Transport', 2400,
+          '50000000-0000-0000-0000-000000000005', 'a0000000-0000-0000-0000-00000000000a')
+$$, 'owner creates an expense template');
 
 select is((select count(*)::int from ledger_entries), 1, 'owner sees its ledger entry');
 select is((select user_id from accounts limit 1), 'aaaaaaaa-0000-0000-0000-000000000001'::uuid,
@@ -94,6 +100,7 @@ select is_empty('select * from subcategories', 'intruder cannot read subcategori
 select is_empty('select * from expenses', 'intruder cannot read expenses');
 select is_empty('select * from user_settings', 'intruder cannot read settings');
 select is_empty('select * from ledger_entries', 'intruder cannot read the ledger view');
+select is_empty('select * from expense_templates', 'intruder cannot read expense templates');
 
 select results_eq(
   $$ with u as (update accounts set name = 'hacked' returning 1) select count(*)::int from u $$,
@@ -101,6 +108,16 @@ select results_eq(
 select results_eq(
   $$ with d as (delete from expenses returning 1) select count(*)::int from d $$,
   array[0], 'intruder deletes 0 rows');
+select results_eq(
+  $$ with u as (update expense_templates set amount_cents = 1 returning 1) select count(*)::int from u $$,
+  array[0], 'intruder updates 0 expense templates');
+select results_eq(
+  $$ with d as (delete from expense_templates returning 1) select count(*)::int from d $$,
+  array[0], 'intruder deletes 0 expense templates');
+select throws_ok($$
+  insert into expense_templates (name, amount_cents, subcategory_id)
+  values ('Stolen', 100, '50000000-0000-0000-0000-000000000005')
+$$, '23503', null, 'intruder cannot reference another user''s subcategory from a template (composite FK)');
 
 select throws_ok($$
   insert into accounts (user_id, kind, name) values ('aaaaaaaa-0000-0000-0000-000000000001', 'cash', 'Planted')
@@ -127,6 +144,7 @@ $$, '23503', null, 'intruder cannot reference another user''s account through an
 select pg_temp.act_as('aaaaaaaa-0000-0000-0000-000000000001');
 select is((select name from accounts), 'Owner card (renamed)', 'owner data unchanged by the intruder');
 select is((select count(*)::int from expenses), 1, 'owner expense still there');
+select is((select amount_cents from expense_templates), 2400::bigint, 'owner template unchanged by the intruder');
 
 -- ---------- anon: every read is denied --------------------------------------
 select pg_temp.act_as_anon();

@@ -107,6 +107,14 @@ export function createMockProvider(options: MockProviderOptions = {}): DataProvi
       remove: () => denyWrite("recurring.remove"),
     },
 
+    expenseTemplates: {
+      list: () => list(s().expenseTemplates),
+      create: () => denyWrite("expenseTemplates.create"),
+      update: () => denyWrite("expenseTemplates.update"),
+      remove: () => denyWrite("expenseTemplates.remove"),
+      reorder: () => denyWrite("expenseTemplates.reorder"),
+    },
+
     cardPayments: {
       list: (range) => list(s().cardPayments.filter((p) => inRange(p.paidOn, range))),
       create: () => denyWrite("cardPayments.create"),

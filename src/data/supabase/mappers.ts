@@ -11,6 +11,7 @@ import type {
   Debtor,
   DistributionRule,
   Expense,
+  ExpenseTemplate,
   Goal,
   GoalContribution,
   Income,
@@ -149,6 +150,16 @@ export const toExpense = (r: Row<"expenses">): Expense => ({
   origin: r.origin,
   recurringExpenseId: uuidOrNull(r.recurring_expense_id),
   occurrenceDate: dateOrNull(r.occurrence_date),
+});
+
+export const toExpenseTemplate = (r: Row<"expense_templates">): ExpenseTemplate => ({
+  id: uuid(r.id),
+  name: r.name,
+  amount: cents(r.amount_cents),
+  subcategoryId: uuid(r.subcategory_id),
+  paymentAccountId: uuidOrNull(r.payment_account_id),
+  sort: r.sort,
+  archived: r.archived,
 });
 
 export const toCardPayment = (r: Row<"card_payments">): CardPayment => ({
@@ -303,6 +314,18 @@ export const fromExpense = (e: Partial<Omit<Expense, "id">>): Update<"expenses">
   ...(e.origin !== undefined && { origin: e.origin }),
   ...(e.recurringExpenseId !== undefined && { recurring_expense_id: e.recurringExpenseId }),
   ...(e.occurrenceDate !== undefined && { occurrence_date: e.occurrenceDate }),
+});
+
+/** No user_id: the column defaults to auth.uid(). */
+export const fromExpenseTemplate = (
+  t: Partial<Omit<ExpenseTemplate, "id">>,
+): Update<"expense_templates"> => ({
+  ...(t.name !== undefined && { name: t.name }),
+  ...(t.amount !== undefined && { amount_cents: t.amount }),
+  ...(t.subcategoryId !== undefined && { subcategory_id: t.subcategoryId }),
+  ...(t.paymentAccountId !== undefined && { payment_account_id: t.paymentAccountId }),
+  ...(t.sort !== undefined && { sort: t.sort }),
+  ...(t.archived !== undefined && { archived: t.archived }),
 });
 
 export const fromGoal = (g: Partial<Omit<Goal, "id">>): Update<"goals"> => ({

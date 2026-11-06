@@ -8,6 +8,7 @@ import { createSupabaseAuth } from "./auth";
 import { getSupabaseBrowserClient, type AppSupabaseClient } from "./client";
 import { createAccountsRepository } from "./repos/accounts";
 import { createCardPaymentsRepository } from "./repos/card-payments";
+import { createExpenseTemplatesRepository } from "./repos/expense-templates";
 import { createExpensesRepository, createRecurringRepository } from "./repos/expenses";
 import {
   createGoalsRepository,
@@ -35,6 +36,7 @@ export function createSupabaseProvider(options: SupabaseProviderOptions = {}): D
   const incomes = createIncomesRepository(db);
   const expenses = createExpensesRepository(db);
   const recurring = createRecurringRepository(db);
+  const expenseTemplates = createExpenseTemplatesRepository(db);
   const cardPayments = createCardPaymentsRepository(db);
   const receivables = createReceivablesRepository(db);
   const goals = createGoalsRepository(db);
@@ -52,6 +54,7 @@ export function createSupabaseProvider(options: SupabaseProviderOptions = {}): D
     incomes,
     expenses,
     recurring,
+    expenseTemplates,
     cardPayments,
     receivables,
     goals,
@@ -74,6 +77,7 @@ export function createSupabaseProvider(options: SupabaseProviderOptions = {}): D
         receivableData,
         goalData,
         netWorthSnapshots,
+        templateList,
       ] = await Promise.all([
         settings.get(),
         accounts.list({ includeArchived: true }),
@@ -88,6 +92,7 @@ export function createSupabaseProvider(options: SupabaseProviderOptions = {}): D
         receivables.list(),
         goals.list(),
         netWorth.list(),
+        expenseTemplates.list(),
       ]);
       return {
         settings: userSettings,
@@ -106,6 +111,7 @@ export function createSupabaseProvider(options: SupabaseProviderOptions = {}): D
         goals: goalData.goals,
         contributions: goalData.contributions,
         netWorthSnapshots,
+        expenseTemplates: templateList,
       };
     },
   };

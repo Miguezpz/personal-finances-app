@@ -10,6 +10,7 @@ import type {
   Category,
   DistributionRule,
   Expense,
+  ExpenseTemplate,
   FinanceSnapshot,
   Goal,
   Income,
@@ -44,7 +45,19 @@ export const emptySnapshot = (overrides: Partial<FinanceSnapshot> = {}): Finance
   goals: [],
   contributions: [],
   netWorthSnapshots: [],
+  expenseTemplates: [],
   ...overrides,
+});
+
+export const makeTemplate = (o: Partial<ExpenseTemplate> = {}): ExpenseTemplate => ({
+  id: testId(),
+  name: "Transporte",
+  amount: cents(2400),
+  subcategoryId: testId(),
+  paymentAccountId: null,
+  sort: 0,
+  archived: false,
+  ...o,
 });
 
 export const makeAccount = (o: Partial<Account> = {}): Account => ({

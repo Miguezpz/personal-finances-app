@@ -37,6 +37,7 @@ import type {
   CardPayment,
   Cents,
   Expense,
+  ExpenseTemplate,
   FinanceSnapshot,
   Goal,
   GoalContribution,
@@ -54,6 +55,7 @@ import {
   ACCOUNTS,
   ACCOUNT_IDS,
   CATEGORIES,
+  EXPENSE_TEMPLATE_ID,
   SUBCATEGORIES,
   RULE_ID,
   rule,
@@ -648,6 +650,17 @@ export function generateDemoSnapshot(options: SeedOptions): FinanceSnapshot {
     goals,
     contributions,
     netWorthSnapshots,
+    expenseTemplates: [
+      {
+        id: EXPENSE_TEMPLATE_ID,
+        name: "Transporte",
+        amount: cents(2400),
+        subcategoryId: subcategoryId("taxonomy.categories.transportGas", "Public transport"),
+        paymentAccountId: null,
+        sort: 0,
+        archived: false,
+      } satisfies ExpenseTemplate,
+    ],
   };
 }
 

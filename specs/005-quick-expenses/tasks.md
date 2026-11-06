@@ -21,7 +21,7 @@ description: "Task list for spec 005 — Gastos rápidos (plantillas de 1 toque)
 
 **Purpose**: entorno local y línea base de peso.
 
-- [ ] T001 Levantar Supabase local con `pnpm db:start` y `pnpm db:reset`. Medir el peso actual de `/dashboard` con `pnpm build && node scripts/measure-first-load.mjs` y anotarlo como línea base en `specs/005-quick-expenses/quickstart.md` (§ Prerrequisitos), para la meta de < 5 KB gzip extra del plan
+- [X] T001 Levantar Supabase local con `pnpm db:start` y `pnpm db:reset`. Medir el peso actual de `/dashboard` con `pnpm build && node scripts/measure-first-load.mjs` y anotarlo como línea base en `specs/005-quick-expenses/quickstart.md` (§ Prerrequisitos), para la meta de < 5 KB gzip extra del plan
 
 ---
 
@@ -31,7 +31,7 @@ description: "Task list for spec 005 — Gastos rápidos (plantillas de 1 toque)
 
 **⚠️ CRITICAL**: ninguna historia empieza antes de terminar esta fase.
 
-- [ ] T002 Crear `supabase/migrations/0009_expense_templates.sql` según data-model.md:
+- [X] T002 Crear `supabase/migrations/0009_expense_templates.sql` según data-model.md:
   - `create table public.expense_templates` con:
     - `id uuid primary key default gen_random_uuid()`
     - `user_id uuid not null default auth.uid() references auth.users (id) on delete cascade`
@@ -48,7 +48,7 @@ description: "Task list for spec 005 — Gastos rápidos (plantillas de 1 toque)
   - Trigger `before update … execute function public.set_updated_at()`, igual que `trg_recurring_updated` en `0001_schema.sql`.
   - Índices `(user_id, subcategory_id)`, `(user_id, payment_account_id)` y `(user_id, sort) where not archived`.
   - RLS con el patrón de `0005_rls.sql`: `enable` y `force row level security`, `revoke all … from anon, public`, `grant select, insert, update, delete … to authenticated`, y la política `expense_templates_owner` `for all to authenticated using (user_id = (select auth.uid())) with check (user_id = (select auth.uid()))`.
-- [ ] T003 Pruebas pgTAP. Correr `pnpm db:reset && pnpm db:test`.
+- [X] T003 Pruebas pgTAP. Correr `pnpm db:reset && pnpm db:test`.
   - Crear `supabase/tests/expense-templates.test.sql`:
     - Rechaza `name` vacío y de 41 caracteres.
     - Rechaza `amount_cents = 0`.
@@ -57,11 +57,11 @@ description: "Task list for spec 005 — Gastos rápidos (plantillas de 1 toque)
     - `updated_at` cambia al actualizar.
   - En `supabase/tests/rls.test.sql`, agregar `'expense_templates'` a la lista de tablas y probar que el usuario B no ve ni modifica la plantilla de A.
   - En `supabase/tests/account-deletion.test.sql`, insertar una plantilla y comprobar que se borra con el usuario.
-- [ ] T004 Regenerar `src/data/supabase/database.types.ts` con `pnpm db:types`
-- [ ] T005 [P] En `src/domain/types.ts`:
+- [X] T004 Regenerar `src/data/supabase/database.types.ts` con `pnpm db:types`
+- [X] T005 [P] En `src/domain/types.ts`:
   - Agregar `interface ExpenseTemplate extends Owned { name: string; amount: Cents; subcategoryId: Uuid; paymentAccountId: Uuid | null; sort: number; archived: boolean }`, con los comentarios de data-model.md ("1–40 caracteres; se usa como nota del gasto", "Total por toque … > 0").
   - Agregar `expenseTemplates: readonly ExpenseTemplate[]` a `FinanceSnapshot`.
-- [ ] T006 [P] Crear `src/domain/quick-expenses.ts` (puro, sin React):
+- [X] T006 [P] Crear `src/domain/quick-expenses.ts` (puro, sin React):
   - `MAX_ACTIVE_TEMPLATES = 12`, `TEMPLATE_NAME_MAX = 40`.
   - `activeTemplates(templates)`: no archivadas, orden `sort` y luego `name`.
   - `canAddTemplate(templates)`: activas < 12.
@@ -70,7 +70,7 @@ description: "Task list for spec 005 — Gastos rápidos (plantillas de 1 toque)
   - `templateFromExpense(input: { amount; subcategoryId; paymentAccountId; note }, subcategoryName): NewEntity<ExpenseTemplate>` sin `sort`: el nombre es la nota recortada o el nombre de la subcategoría, cortado a 40.
   - `nextSort(templates)`: max(sort de activas) + 1, o 0 si no hay.
   - `reorderIds(ids, id, "up" | "down")`.
-- [ ] T007 [P] Crear `tests/unit/domain/quick-expenses.test.ts`:
+- [X] T007 [P] Crear `tests/unit/domain/quick-expenses.test.ts`:
   - Orden y filtrado de `activeTemplates`.
   - Límite de 12 en `canAddTemplate`.
   - `templateToExpense` con:
@@ -82,8 +82,8 @@ description: "Task list for spec 005 — Gastos rápidos (plantillas de 1 toque)
   - `templateFromExpense` con nota, sin nota y con una nota de 60 caracteres (se corta a 40).
   - `nextSort`.
   - `reorderIds` en los extremos.
-- [ ] T008 En `src/data/provider.ts`, agregar `ExpenseTemplatesRepository` (`list`, `create`, `update`, `remove` lógico y `reorder(ids)`, según `contracts/data-provider.md`) y `readonly expenseTemplates: ExpenseTemplatesRepository` en `DataProvider`
-- [ ] T009 Implementar el repo de Supabase:
+- [X] T008 En `src/data/provider.ts`, agregar `ExpenseTemplatesRepository` (`list`, `create`, `update`, `remove` lógico y `reorder(ids)`, según `contracts/data-provider.md`) y `readonly expenseTemplates: ExpenseTemplatesRepository` en `DataProvider`
+- [X] T009 Implementar el repo de Supabase:
   - `src/data/supabase/mappers.ts`: `toExpenseTemplate` y `fromExpenseTemplate` (`amount_cents ↔ amount`, `subcategory_id ↔ subcategoryId`, `payment_account_id ↔ paymentAccountId`; sin `user_id`).
   - Crear `src/data/supabase/repos/expense-templates.ts`:
     - `list`: orden `sort, name`, con paginación por `range` como los demás repos.
@@ -92,16 +92,16 @@ description: "Task list for spec 005 — Gastos rápidos (plantillas de 1 toque)
     - `reorder`: un `update({ sort: i })` por id, en paralelo.
     - Un id inexistente en `update` o `remove` lanza `ProviderError('NOT_FOUND')`, y un `check` violado lanza `VALIDATION` (confirmar el mapeo `23514` en `mappers.ts`).
   - Registrar el repo y agregar `expenseTemplates` al `loadSnapshot()` en `src/data/supabase/provider.ts`.
-- [ ] T010 Actualizar el mock:
+- [X] T010 Actualizar el mock:
   - En `src/data/mock/seed.ts`, sembrar una plantilla `{ name: "Transporte", amount: 2400, subcategoryId: subcategoryId("taxonomy.categories.transportGas", "Public transport"), paymentAccountId: null, sort: 0, archived: false }` con id fijo, e incluirla en el snapshot.
   - En `src/data/mock/provider.ts`, agregar `expenseTemplates: { list: () => list(s().expenseTemplates), create/update/remove/reorder: () => denyWrite("expenseTemplates.<método>") }`.
   - Ajustar `src/data/mock/store.ts` si enumera las colecciones.
-- [ ] T011 Actualizar `tests/utils/memory-provider.ts` para que `expenseTemplates` sea escribible sobre el snapshot mutable (create con id nuevo de servidor, update, remove lógico, reorder). Agregar `expenseTemplates: []` en `tests/utils/fixtures.ts` y en cualquier snapshot de prueba que `pnpm typecheck` marque
-- [ ] T012 Pruebas de contrato. Correr `pnpm test:contract:local`.
+- [X] T011 Actualizar `tests/utils/memory-provider.ts` para que `expenseTemplates` sea escribible sobre el snapshot mutable (create con id nuevo de servidor, update, remove lógico, reorder). Agregar `expenseTemplates: []` en `tests/utils/fixtures.ts` y en cualquier snapshot de prueba que `pnpm typecheck` marque
+- [X] T012 Pruebas de contrato. Correr `pnpm test:contract:local`.
   - Agregar el `strictObject` de `ExpenseTemplate` en `tests/contract/schemas.ts` y validarlo en el caso de `loadSnapshot`.
   - En `tests/contract/data-provider.contract.ts`, agregar T1–T7 dentro del bloque de proveedores con escritura.
   - Agregar T8 (snapshot del demo con 1 plantilla "Transporte", `amount: 2400`, en "Public transport") y T9 (escrituras rechazadas con `DemoReadOnlyError`) en el bloque de solo lectura.
-- [ ] T013 [P] En `src/domain/csv.ts`, agregar `expense_templates.csv` a `snapshotToCsvBundle` con las columnas `id,name,amount_cents,subcategory_id,payment_account_id,sort,archived`, y actualizar `tests/unit/domain/csv.test.ts`
+- [X] T013 [P] En `src/domain/csv.ts`, agregar `expense_templates.csv` a `snapshotToCsvBundle` con las columnas `id,name,amount_cents,subcategory_id,payment_account_id,sort,archived`, y actualizar `tests/unit/domain/csv.test.ts`
 
 **Checkpoint**: esquema local, dominio y ambos proveedores con plantillas, y las suites unitaria, pgTAP y de contrato en verde.
 

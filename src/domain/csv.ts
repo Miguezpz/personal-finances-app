@@ -231,6 +231,19 @@ export function snapshotToCsvBundle(
         e.occurrenceDate,
       ]),
     ),
+    // Spec 005: quick expenses (archived ones included, like the rest of the backup).
+    "expense_templates.csv": toCsv(
+      ["id", "name", "amount_mxn", "subcategory_id", "payment_account_id", "sort", "archived"],
+      s.expenseTemplates.map((t) => [
+        t.id,
+        t.name,
+        money(t.amount),
+        t.subcategoryId,
+        t.paymentAccountId,
+        t.sort,
+        t.archived,
+      ]),
+    ),
     "card_payments.csv": toCsv(
       ["id", "card_account_id", "from_account_id", "amount_mxn", "paid_on", "note"],
       s.cardPayments.map((p) => [

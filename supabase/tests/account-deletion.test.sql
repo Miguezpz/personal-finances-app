@@ -50,6 +50,8 @@ values ('90000000-0000-0000-0000-000000000009', 'sinking_fund', 'Tax', 'needs', 
 insert into goal_contributions (goal_id, period_start, amount_cents, source_bucket)
 values ('90000000-0000-0000-0000-000000000009', '2026-11-01', 100, 'needs');
 insert into net_worth_snapshots (snapshot_on, assets_cents, liabilities_cents) values ('2026-11-01', 10, 0);
+insert into expense_templates (name, amount_cents, subcategory_id, payment_account_id)
+values ('Transport', 2400, '50000000-0000-0000-0000-000000000005', 'a3000000-0000-0000-0000-000000000003');
 
 set constraints all immediate;   -- the data set itself is valid
 set constraints all deferred;
@@ -93,9 +95,10 @@ select is(
      select count(*) from public.installments       where user_id = 'cccccccc-0000-0000-0000-000000000003' union all
      select count(*) from public.goals              where user_id = 'cccccccc-0000-0000-0000-000000000003' union all
      select count(*) from public.goal_contributions where user_id = 'cccccccc-0000-0000-0000-000000000003' union all
-     select count(*) from public.net_worth_snapshots where user_id = 'cccccccc-0000-0000-0000-000000000003') t),
+     select count(*) from public.net_worth_snapshots where user_id = 'cccccccc-0000-0000-0000-000000000003' union all
+     select count(*) from public.expense_templates  where user_id = 'cccccccc-0000-0000-0000-000000000003') t),
   0,
-  'no row of the deleted user remains in any of the 17 tables'
+  'no row of the deleted user remains in any of the 18 tables'
 );
 
 select * from finish();

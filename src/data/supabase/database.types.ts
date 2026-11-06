@@ -87,6 +87,32 @@ isOneToOne: false
                   Relationships: [
                     
                   ]
+                },"expense_templates": {
+                  Row: {
+                    "amount_cents": number,"archived": boolean,"created_at": string,"id": string,"name": string,"payment_account_id": string | null,"sort": number,"subcategory_id": string,"updated_at": string,"user_id": string
+                  }
+                  ComputedFields: never
+                  Insert: {
+                    "amount_cents": number,"archived"?: boolean,"created_at"?: string,"id"?: string,"name": string,"payment_account_id"?: string | null,"sort"?: number,"subcategory_id": string,"updated_at"?: string,"user_id"?: string
+                  }
+                  Update: {
+                    "amount_cents"?: number,"archived"?: boolean,"created_at"?: string,"id"?: string,"name"?: string,"payment_account_id"?: string | null,"sort"?: number,"subcategory_id"?: string,"updated_at"?: string,"user_id"?: string
+                  }
+                  Relationships: [
+                    {
+      foreignKeyName: "expense_templates_user_id_payment_account_id_fkey"
+      columns: ["user_id","payment_account_id"]
+isOneToOne: false
+      referencedRelation: "accounts"
+      referencedColumns: ["user_id","id"]
+    },{
+      foreignKeyName: "expense_templates_user_id_subcategory_id_fkey"
+      columns: ["user_id","subcategory_id"]
+isOneToOne: false
+      referencedRelation: "subcategories"
+      referencedColumns: ["user_id","id"]
+    }
+                  ]
                 },"expenses": {
                   Row: {
                     "amount_cents": number,"bucket": Database["public"]['Enums']["spend_bucket"],"created_at": string,"id": string,"note": string | null,"occurrence_date": string | null,"origin": Database["public"]['Enums']["expense_origin"],"payment_account_id": string | null,"recurring_expense_id": string | null,"spent_on": string,"subcategory_id": string,"updated_at": string,"user_id": string

@@ -98,6 +98,7 @@ describe("snapshotToCsvBundle", () => {
         "categories.csv",
         "debtors.csv",
         "distribution_rules.csv",
+        "expense_templates.csv",
         "expenses.csv",
         "goal_contributions.csv",
         "goals.csv",
@@ -119,6 +120,18 @@ describe("snapshotToCsvBundle", () => {
     expect(rows("installments.csv")).toBe(snapshot.installments.length);
     expect(rows("settings.csv")).toBe(1);
     expect(bundle["expenses.csv"]).toContain("amount_mxn");
+  });
+
+  it("exports the quick expense templates (spec 005)", () => {
+    const snapshot = generateDemoSnapshot({ today: "2026-11-01" as IsoDate });
+    const lines = (snapshotToCsvBundle(snapshot)["expense_templates.csv"] as string)
+      .slice(1)
+      .trimEnd()
+      .split("\r\n");
+    const [template] = snapshot.expenseTemplates;
+    expect(lines[0]).toBe("id,name,amount_mxn,subcategory_id,payment_account_id,sort,archived");
+    expect(lines).toHaveLength(snapshot.expenseTemplates.length + 1);
+    expect(lines[1]).toBe(`${template?.id},Transporte,24.00,${template?.subcategoryId},,0,false`);
   });
 
   it("exports the income type as a stable enum value and the taxonomy icons (spec 004)", () => {

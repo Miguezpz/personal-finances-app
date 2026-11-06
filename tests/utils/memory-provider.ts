@@ -4,27 +4,54 @@
  * (recurring_expense_id, occurrence_date) unique index of `expenses` and the foreign key to
  * `recurring_expenses`, like Postgres. `recurring.create` assigns a NEW server id (different from
  * any optimistic one) and can be held open with `holdRecurringCreate()`.
+ *
+ * Spec 005: `expenses.create`/`remove` and every `expenseTemplates` write also work over the
+ * snapshot (create → new server id, remove of a template = archived). `holdExpenseCreate()` keeps
+ * expense creations pending, to test Undo while the server hasn't answered.
  */
 import { vi, type Mock } from "vitest";
 import { createMockProvider } from "@/data/mock/provider";
 import {
   ProviderError,
   type DataProvider,
+  type ExpenseTemplatesRepository,
   type ExpensesRepository,
   type NewEntity,
   type RecurringRepository,
 } from "@/data/provider";
-import type { Expense, FinanceSnapshot, RecurringExpense, Uuid } from "@/domain/types";
+import type {
+  Expense,
+  ExpenseTemplate,
+  FinanceSnapshot,
+  RecurringExpense,
+  Uuid,
+} from "@/domain/types";
 
 type MaterializeFn = ExpensesRepository["materializeRecurring"];
 type CreateRecurringFn = RecurringRepository["create"];
+type CreateExpenseFn = ExpensesRepository["create"];
+type RemoveExpenseFn = ExpensesRepository["remove"];
+type Templates = ExpenseTemplatesRepository;
 
 export interface MemoryProvider extends DataProvider {
   readonly state: { snapshot: FinanceSnapshot };
-  readonly expenses: ExpensesRepository & { materializeRecurring: Mock<MaterializeFn> };
+  readonly expenses: ExpensesRepository & {
+    materializeRecurring: Mock<MaterializeFn>;
+    create: Mock<CreateExpenseFn>;
+    remove: Mock<RemoveExpenseFn>;
+  };
   readonly recurring: RecurringRepository & { create: Mock<CreateRecurringFn> };
+  readonly expenseTemplates: {
+    list: Templates["list"];
+    create: Mock<Templates["create"]>;
+    update: Mock<Templates["update"]>;
+    remove: Mock<Templates["remove"]>;
+    reorder: Mock<Templates["reorder"]>;
+  };
   /** Keeps every recurring.create pending until the returned function is called. */
   holdRecurringCreate(): () => void;
+  /** Keeps every expenses.create pending until the returned function is called. */
+  holdExpenseCreate(): () => void;
 }
 
 let seq = 0;
@@ -67,22 +94,81 @@ export function createMemoryProvider(initial: FinanceSnapshot): MemoryProvider {
     return row;
   });
 
+  let expenseHold: Promise<void> | null = null;
+  const createExpense = vi.fn<CreateExpenseFn>(async (input) => {
+    if (expenseHold) await expenseHold;
+    const row: Expense = { ...input, id: newId() };
+    state.snapshot = { ...state.snapshot, expenses: [...state.snapshot.expenses, row] };
+    return row;
+  });
+  const removeExpense = vi.fn<RemoveExpenseFn>(async (id) => {
+    state.snapshot = {
+      ...state.snapshot,
+      expenses: state.snapshot.expenses.filter((e) => e.id !== id),
+    };
+  });
+
+  const findTemplate = (id: Uuid) => {
+    const row = state.snapshot.expenseTemplates.find((t) => t.id === id);
+    if (!row) throw new ProviderError("NOT_FOUND", `template ${id} does not exist`);
+    return row;
+  };
+  const setTemplates = (rows: ExpenseTemplate[]) => {
+    state.snapshot = { ...state.snapshot, expenseTemplates: rows };
+  };
+  const expenseTemplates: MemoryProvider["expenseTemplates"] = {
+    list: async () => [...state.snapshot.expenseTemplates],
+    create: vi.fn<Templates["create"]>(async (input) => {
+      const row: ExpenseTemplate = { ...input, id: newId() };
+      setTemplates([...state.snapshot.expenseTemplates, row]);
+      return row;
+    }),
+    update: vi.fn<Templates["update"]>(async (id, patch) => {
+      const row = { ...findTemplate(id), ...patch };
+      setTemplates(state.snapshot.expenseTemplates.map((t) => (t.id === id ? row : t)));
+      return row;
+    }),
+    remove: vi.fn<Templates["remove"]>(async (id) => {
+      findTemplate(id);
+      setTemplates(
+        state.snapshot.expenseTemplates.map((t) => (t.id === id ? { ...t, archived: true } : t)),
+      );
+    }),
+    reorder: vi.fn<Templates["reorder"]>(async (ids) => {
+      ids.forEach(findTemplate);
+      setTemplates(
+        state.snapshot.expenseTemplates.map((t) =>
+          ids.includes(t.id) ? { ...t, sort: ids.indexOf(t.id) } : t,
+        ),
+      );
+    }),
+  };
+
+  const holdOpen = (set: (p: Promise<void> | null) => void) => {
+    let release!: () => void;
+    set(new Promise<void>((r) => (release = r)));
+    return () => {
+      set(null);
+      release();
+    };
+  };
+
   return {
     ...base,
     mode: "live",
     capabilities: { canWrite: true },
     state,
-    expenses: { ...base.expenses, materializeRecurring },
-    recurring: { ...base.recurring, create },
-    loadSnapshot: vi.fn(async () => state.snapshot),
-    holdRecurringCreate() {
-      let release!: () => void;
-      hold = new Promise<void>((r) => (release = r));
-      return () => {
-        hold = null;
-        release();
-      };
+    expenses: {
+      ...base.expenses,
+      materializeRecurring,
+      create: createExpense,
+      remove: removeExpense,
     },
+    recurring: { ...base.recurring, create },
+    expenseTemplates,
+    loadSnapshot: vi.fn(async () => state.snapshot),
+    holdRecurringCreate: () => holdOpen((p) => (hold = p)),
+    holdExpenseCreate: () => holdOpen((p) => (expenseHold = p)),
   };
 }
 

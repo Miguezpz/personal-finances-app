@@ -160,6 +160,21 @@ export interface Expense extends Owned {
   occurrenceDate: IsoDate | null;
 }
 
+/** Gasto rápido (spec 005): plantilla que registra un gasto manual con un toque. */
+export interface ExpenseTemplate extends Owned {
+  /** 1–40 caracteres; se usa como nota del gasto. */
+  name: string;
+  /** Total por toque, en centavos de MXN, > 0. */
+  amount: Cents;
+  subcategoryId: Uuid;
+  /** null = sin método de pago. */
+  paymentAccountId: Uuid | null;
+  /** Posición en la fila del Dashboard (0 = primero). */
+  sort: number;
+  /** true = borrada por el usuario (no se lista). */
+  archived: boolean;
+}
+
 export interface CardPayment extends Owned {
   cardAccountId: Uuid;
   fromAccountId: Uuid | null;
@@ -274,4 +289,6 @@ export interface FinanceSnapshot {
   goals: readonly Goal[];
   contributions: readonly GoalContribution[];
   netWorthSnapshots: readonly NetWorthSnapshot[];
+  /** Gastos rápidos (spec 005), incluidas las archivadas. */
+  expenseTemplates: readonly ExpenseTemplate[];
 }

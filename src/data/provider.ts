@@ -15,6 +15,7 @@ import type {
   Debtor,
   DistributionRule,
   Expense,
+  ExpenseTemplate,
   FinanceSnapshot,
   Goal,
   GoalContribution,
@@ -171,6 +172,18 @@ export interface RecurringRepository {
   remove(id: Uuid): Promise<void>;
 }
 
+/** Gastos rápidos (spec 005). Un toque usa `expenses.create`; aquí solo se administran plantillas. */
+export interface ExpenseTemplatesRepository {
+  /** Todas, incluidas las archivadas, ordenadas por sort, name. */
+  list(): Promise<ExpenseTemplate[]>;
+  create(input: NewEntity<ExpenseTemplate>): Promise<ExpenseTemplate>;
+  update(id: Uuid, patch: Patch<ExpenseTemplate>): Promise<ExpenseTemplate>;
+  /** Borrado lógico: archived = true. Los gastos no se tocan. */
+  remove(id: Uuid): Promise<void>;
+  /** sort = índice en `ids` para cada id dado. */
+  reorder(ids: readonly Uuid[]): Promise<void>;
+}
+
 export interface CardPaymentsRepository {
   list(range?: { from: IsoDate; to: IsoDate }): Promise<CardPayment[]>;
   create(input: NewEntity<CardPayment>): Promise<CardPayment>;
@@ -264,6 +277,7 @@ export interface DataProvider {
   readonly incomes: IncomesRepository;
   readonly expenses: ExpensesRepository;
   readonly recurring: RecurringRepository;
+  readonly expenseTemplates: ExpenseTemplatesRepository;
   readonly cardPayments: CardPaymentsRepository;
   readonly receivables: ReceivablesRepository;
   readonly goals: GoalsRepository;
