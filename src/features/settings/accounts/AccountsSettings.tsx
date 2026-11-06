@@ -120,6 +120,7 @@ export function AccountsSettings() {
                     variant="outline"
                     size="sm"
                     onClick={() => setForm({ open: true, account: a })}
+                    data-testid="edit-account"
                   >
                     <Pencil aria-hidden="true" />
                     {t("edit")}

@@ -4,6 +4,7 @@
  * and download the CSV with exactly one row per movement.
  */
 import { readFile } from "node:fs/promises";
+import { ACCOUNT_IDS } from "../../src/data/mock/fixtures/catalog";
 import { addDays } from "../../src/domain/dates";
 import { periodOf, todayIn } from "../../src/domain/periods";
 import { expect, test } from "./fixtures";
@@ -161,5 +162,25 @@ test.describe("US8 · settings and ledger", { tag: "@live" }, () => {
     expect(lines).toContain(`${today},expense,"Vet, checkup",-250.00,E2E Card,wants,Pets,false`);
     expect(lines.some((l) => l.includes(",income,Salary,2000.00,"))).toBe(true);
     expect(lines.some((l) => l.includes(",-123.45,"))).toBe(true);
+  });
+});
+
+test.describe("US8 · account kind (demo)", { tag: "@demo" }, () => {
+  test("can be changed when editing unless the history depends on it", async ({ page }) => {
+    await page.goto("/settings/accounts");
+    // Gold Card has card payments: it can't stop being a card.
+    await page
+      .locator(`[data-testid="account-card"][data-id="${ACCOUNT_IDS.goldCard}"]`)
+      .getByTestId("edit-account")
+      .click();
+    const kind = page.locator("#account-kind");
+    await expect(kind).toBeEnabled();
+    await expect(page.getByTestId("account-kind-blocked")).toHaveCount(0);
+    await kind.selectOption("checking");
+    await expect(page.getByTestId("account-kind-blocked")).toBeVisible();
+    await expect(page.getByTestId("save-account")).toBeDisabled();
+    await kind.selectOption("credit_card");
+    await expect(page.getByTestId("account-kind-blocked")).toHaveCount(0);
+    await expect(page.getByTestId("save-account")).toBeEnabled();
   });
 });

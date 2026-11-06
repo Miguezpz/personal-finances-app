@@ -504,7 +504,10 @@
     "editAccount": "Editar cuenta",
     "accountFormHint": "Las tarjetas de crédito necesitan su día de corte y cuántos días después vence el pago.",
     "accountKind": "Tipo",
-    "kindFixed": "El tipo no se puede cambiar una vez creada la cuenta.",
+    "kindFixed": "Si lo registraste mal, cámbialo: los gastos hechos con esta cuenta se tratan según el nuevo tipo.",
+    "kindBlockedCardHistory": "Esta tarjeta tiene pagos o compras a MSI registrados; no puede dejar de ser tarjeta.",
+    "kindBlockedMoneyHistory": "Esta cuenta recibió ingresos o pagó tarjetas; no puede convertirse en tarjeta de crédito.",
+    "kindBlockedInvestmentRules": "Una regla de reparto usa esta cuenta de inversión; quítala de la regla antes de cambiar el tipo.",
     "kindGroups": {
       "checking": "Débito",
       "savings": "Ahorro",

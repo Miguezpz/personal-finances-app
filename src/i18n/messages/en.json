@@ -504,7 +504,10 @@
     "editAccount": "Edit account",
     "accountFormHint": "Credit cards need their cut-off day and how many days later the payment is due.",
     "accountKind": "Type",
-    "kindFixed": "The type can't change once the account exists.",
+    "kindFixed": "If you picked the wrong one, change it: expenses paid with this account follow the new kind.",
+    "kindBlockedCardHistory": "This card has payments or MSI purchases recorded; it can't stop being a card.",
+    "kindBlockedMoneyHistory": "This account received income or paid cards; it can't become a credit card.",
+    "kindBlockedInvestmentRules": "A distribution rule uses this investment account; remove it from the rule before changing the kind.",
     "kindGroups": {
       "checking": "Checking",
       "savings": "Savings",

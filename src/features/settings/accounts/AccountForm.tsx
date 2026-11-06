@@ -1,8 +1,9 @@
 "use client";
 
 /**
- * Create / edit an account or card (T122). The kind is fixed once created (history and card
- * statements depend on it); card fields only appear for credit cards.
+ * Create / edit an account or card (T122). The kind can change while no recorded history depends
+ * on it (domain/account-kind.ts); otherwise the form says why. Card fields only appear for credit
+ * cards.
  */
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useTranslations } from "next-intl";
@@ -22,9 +23,11 @@ import { Field, FieldDescription, FieldError, FieldGroup, FieldLabel } from "@/c
 import { Input } from "@/components/ui/input";
 import { NativeSelect, NativeSelectOption } from "@/components/ui/native-select";
 import { isNotifiedGlobally, isProviderError } from "@/data/errors";
+import { useFinanceSnapshot } from "@/data/useFinanceSnapshot";
+import { kindChangeBlocker, type KindChangeBlocker } from "@/domain/account-kind";
 import { INSTITUTIONS } from "@/domain/institutions";
 import { formatCentsAsInput } from "@/domain/parse";
-import type { Account } from "@/domain/types";
+import type { Account, FinanceSnapshot } from "@/domain/types";
 import { useCreateAccount, useUpdateAccount } from "./hooks";
 import {
   ACCOUNT_KINDS,
@@ -34,6 +37,21 @@ import {
 } from "./schema";
 
 type SettingsMessageKey = Parameters<ReturnType<typeof useTranslations<"settings">>>[0];
+
+const BLOCKER_MESSAGES = {
+  cardHistory: "kindBlockedCardHistory",
+  moneyHistory: "kindBlockedMoneyHistory",
+  investmentRules: "kindBlockedInvestmentRules",
+} as const satisfies Record<KindChangeBlocker, SettingsMessageKey>;
+
+/** Only what decides whether the kind can change (domain/account-kind.ts). */
+const selectKindDeps = (s: FinanceSnapshot) => ({
+  cardPayments: s.cardPayments,
+  receivables: s.receivables,
+  incomes: s.incomes,
+  allocations: s.allocations,
+  rules: s.rules,
+});
 
 interface Props {
   open: boolean;
@@ -49,6 +67,7 @@ export function AccountForm({ open, onOpenChange, account, takenNames }: Props) 
   const create = useCreateAccount();
   const update = useUpdateAccount();
   const editing = Boolean(account);
+  const { data: kindDeps } = useFinanceSnapshot(selectKindDeps);
 
   const form = useForm<AccountFormInput, unknown, AccountFormOutput>({
     resolver: zodResolver(accountFormSchema),
@@ -75,9 +94,11 @@ export function AccountForm({ open, onOpenChange, account, takenNames }: Props) 
   const accountName = useWatch({ control: form.control, name: "name" });
   const institution = useWatch({ control: form.control, name: "institution" });
   const errors = form.formState.errors;
+  const blocker = account && kindDeps ? kindChangeBlocker(account, kind, kindDeps) : null;
   const errorText = (key: string | undefined) => (key ? t(key as SettingsMessageKey) : null);
 
   function onSubmit(values: AccountFormOutput) {
+    if (blocker) return;
     const lower = values.name.toLocaleLowerCase();
     if (takenNames.some((n) => n.toLocaleLowerCase() === lower)) {
       form.setError("name", { message: "nameTaken" });
@@ -91,8 +112,10 @@ export function AccountForm({ open, onOpenChange, account, takenNames }: Props) 
       },
     };
     if (account) {
-      // The kind is fixed once created (statements and history depend on it).
+      // The kind can change unless recorded history depends on it (blocker above); leaving
+      // credit_card clears the card terms (the schema returns null for them).
       const patch = {
+        kind: values.kind,
         name: values.name,
         institution: values.institution,
         cutOffDay: values.cutOffDay,
@@ -121,16 +144,26 @@ export function AccountForm({ open, onOpenChange, account, takenNames }: Props) 
           className="flex flex-col gap-5"
         >
           <FieldGroup>
-            <Field>
+            <Field data-invalid={Boolean(blocker)}>
               <FieldLabel htmlFor="account-kind">{t("accountKind")}</FieldLabel>
-              <NativeSelect id="account-kind" disabled={editing} {...form.register("kind")}>
+              <NativeSelect
+                id="account-kind"
+                aria-invalid={Boolean(blocker)}
+                {...form.register("kind")}
+              >
                 {ACCOUNT_KINDS.map((k) => (
                   <NativeSelectOption key={k} value={k}>
                     {t(`kinds.${k}`)}
                   </NativeSelectOption>
                 ))}
               </NativeSelect>
-              {editing && <FieldDescription>{t("kindFixed")}</FieldDescription>}
+              {blocker ? (
+                <FieldError data-testid="account-kind-blocked">
+                  {t(BLOCKER_MESSAGES[blocker])}
+                </FieldError>
+              ) : (
+                editing && <FieldDescription>{t("kindFixed")}</FieldDescription>
+              )}
             </Field>
 
             <Field data-invalid={Boolean(errors.name)}>
@@ -223,7 +256,12 @@ export function AccountForm({ open, onOpenChange, account, takenNames }: Props) 
           <Button type="button" variant="outline" onClick={() => onOpenChange(false)}>
             {tc("cancel")}
           </Button>
-          <Button type="submit" form="account-form" data-testid="save-account">
+          <Button
+            type="submit"
+            form="account-form"
+            disabled={Boolean(blocker)}
+            data-testid="save-account"
+          >
             {tc("save")}
           </Button>
         </DialogFooter>
