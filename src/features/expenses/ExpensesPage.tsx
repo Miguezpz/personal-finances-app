@@ -10,7 +10,8 @@ import { useTranslations } from "next-intl";
 import { useMemo, useState } from "react";
 import { toast } from "sonner";
 import { CategoryIcon } from "@/components/icons/CategoryIcon";
-import { ACCOUNT_KIND_ICONS, BUCKET_ICONS } from "@/components/icons/domain-icons";
+import { AccountMark } from "@/components/icons/AccountMark";
+import { BUCKET_ICONS } from "@/components/icons/domain-icons";
 import { navIcon } from "@/components/layout/nav-items";
 import { PageHeader } from "@/components/layout/PageHeader";
 import { Money } from "@/components/money/Money";
@@ -86,18 +87,13 @@ export function ExpensesPage() {
     return sub ? nameOf(sub) : "";
   };
   const accountName = (id: string | null) => data?.accounts.find((a) => a.id === id)?.name ?? null;
-  const accountIcon = (id: string | null) => {
-    const kind = data?.accounts.find((a) => a.id === id)?.kind;
-    return kind ? ACCOUNT_KIND_ICONS[kind] : null;
-  };
   const accountLabel = (id: string | null) => {
-    const name = accountName(id);
-    const Icon = accountIcon(id);
-    if (!name) return null;
+    const account = data?.accounts.find((a) => a.id === id);
+    if (!account?.name) return null;
     return (
       <span className="inline-flex items-center gap-1">
-        {Icon && <Icon aria-hidden="true" focusable="false" className="size-3.5" />}
-        {name}
+        <AccountMark account={account} className="size-3.5" />
+        {account.name}
       </span>
     );
   };

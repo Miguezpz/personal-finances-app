@@ -8,6 +8,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { useTranslations } from "next-intl";
 import { useForm, useWatch } from "react-hook-form";
 import { toast } from "sonner";
+import { AccountMark } from "@/components/icons/AccountMark";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -21,6 +22,7 @@ import { Field, FieldDescription, FieldError, FieldGroup, FieldLabel } from "@/c
 import { Input } from "@/components/ui/input";
 import { NativeSelect, NativeSelectOption } from "@/components/ui/native-select";
 import { isNotifiedGlobally, isProviderError } from "@/data/errors";
+import { INSTITUTIONS } from "@/domain/institutions";
 import { formatCentsAsInput } from "@/domain/parse";
 import type { Account } from "@/domain/types";
 import { useCreateAccount, useUpdateAccount } from "./hooks";
@@ -70,6 +72,8 @@ export function AccountForm({ open, onOpenChange, account, takenNames }: Props) 
         },
   });
   const kind = useWatch({ control: form.control, name: "kind" });
+  const accountName = useWatch({ control: form.control, name: "name" });
+  const institution = useWatch({ control: form.control, name: "institution" });
   const errors = form.formState.errors;
   const errorText = (key: string | undefined) => (key ? t(key as SettingsMessageKey) : null);
 
@@ -142,7 +146,25 @@ export function AccountForm({ open, onOpenChange, account, takenNames }: Props) 
 
             <Field data-invalid={Boolean(errors.institution)}>
               <FieldLabel htmlFor="account-institution">{t("institution")}</FieldLabel>
-              <Input id="account-institution" maxLength={60} {...form.register("institution")} />
+              {/* Suggest the known banks so the account gets its logo (domain/institutions.ts). */}
+              <div className="flex items-center gap-2">
+                <Input
+                  id="account-institution"
+                  maxLength={60}
+                  list="account-institution-options"
+                  autoComplete="off"
+                  {...form.register("institution")}
+                />
+                <AccountMark
+                  account={{ kind, name: accountName, institution: institution || null }}
+                  className="size-8"
+                />
+              </div>
+              <datalist id="account-institution-options">
+                {INSTITUTIONS.map((i) => (
+                  <option key={i.slug} value={i.name} />
+                ))}
+              </datalist>
               {errors.institution && (
                 <FieldError>{errorText(errors.institution.message)}</FieldError>
               )}

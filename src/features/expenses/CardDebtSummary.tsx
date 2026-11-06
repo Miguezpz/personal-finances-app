@@ -5,9 +5,10 @@
  * third parties), the "pay to avoid interest" amount as the headline — never the minimum payment —
  * and its due date. A purchase with the card raises it; a card payment lowers it.
  */
-import { CalendarClock, CreditCard, Scissors, TriangleAlert } from "lucide-react";
+import { CalendarClock, Scissors, TriangleAlert } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { useMemo } from "react";
+import { AccountMark } from "@/components/icons/AccountMark";
 import { Money } from "@/components/money/Money";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -51,7 +52,7 @@ export function CardDebtSummary({ onPay }: { onPay: (cardId: Uuid, amount: Cents
             <Card data-testid="card-debt" data-card={card.id} data-overdue={status.overdue}>
               <CardHeader className="flex flex-row items-start justify-between gap-2">
                 <CardTitle className="flex items-center gap-2 text-base">
-                  <CreditCard aria-hidden="true" className="size-4 text-muted-foreground" />
+                  <AccountMark account={card} className="size-6" />
                   {card.name}
                 </CardTitle>
                 {status.overdue && (

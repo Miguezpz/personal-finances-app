@@ -9,7 +9,8 @@ import { useTranslations } from "next-intl";
 import { useState } from "react";
 import { toast } from "sonner";
 import { CategoryIcon } from "@/components/icons/CategoryIcon";
-import { ACCOUNT_KIND_ICONS, BUCKET_ICONS } from "@/components/icons/domain-icons";
+import { AccountMark } from "@/components/icons/AccountMark";
+import { BUCKET_ICONS } from "@/components/icons/domain-icons";
 import { navIcon } from "@/components/layout/nav-items";
 import { PageHeader } from "@/components/layout/PageHeader";
 import { Money } from "@/components/money/Money";
@@ -121,7 +122,6 @@ export function RecurringPage() {
             const sub = lookups.subcategories.find((x) => x.id === r.subcategoryId);
             const account = lookups.accounts.find((a) => a.id === r.paymentAccountId);
             const BucketIcon = BUCKET_ICONS[r.bucket];
-            const AccountIcon = account ? ACCOUNT_KIND_ICONS[account.kind] : null;
             return (
               <li key={r.id}>
                 <Card
@@ -158,14 +158,7 @@ export function RecurringPage() {
                         {account && (
                           <span className="inline-flex items-center gap-1">
                             {" "}
-                            ·{" "}
-                            {AccountIcon && (
-                              <AccountIcon
-                                aria-hidden="true"
-                                focusable="false"
-                                className="size-4"
-                              />
-                            )}
+                            · <AccountMark account={account} />
                             {account.name}
                           </span>
                         )}

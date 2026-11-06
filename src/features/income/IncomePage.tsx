@@ -9,7 +9,8 @@ import { useTranslations } from "next-intl";
 import Link from "next/link";
 import { useState } from "react";
 import { toast } from "sonner";
-import { ACCOUNT_KIND_ICONS, BUCKET_ICONS } from "@/components/icons/domain-icons";
+import { AccountMark } from "@/components/icons/AccountMark";
+import { BUCKET_ICONS } from "@/components/icons/domain-icons";
 import { INCOME_TYPE_ICONS } from "@/components/icons/income-type-icons";
 import { navIcon } from "@/components/layout/nav-items";
 import { PageHeader } from "@/components/layout/PageHeader";
@@ -44,14 +45,14 @@ function IncomeCard({
   income,
   allocations,
   accountName,
-  accountKind,
+  accountOf,
   onEdit,
   onDelete,
 }: {
   income: Income;
   allocations: readonly IncomeAllocation[];
   accountName: (id: string | null) => string;
-  accountKind: (id: string | null) => Account["kind"] | null;
+  accountOf: (id: string | null) => Account | null;
   onEdit: () => void;
   onDelete: () => void;
 }) {
@@ -87,8 +88,7 @@ function IncomeCard({
           <ul className="grid gap-1 text-sm sm:grid-cols-2" aria-label={t("preview")}>
             {sorted.map((a) => {
               const BucketIcon = BUCKET_ICONS[a.bucket];
-              const kind = accountKind(a.accountId);
-              const AccountIcon = kind ? ACCOUNT_KIND_ICONS[kind] : null;
+              const account = accountOf(a.accountId);
               return (
                 <li
                   key={a.id}
@@ -103,10 +103,7 @@ function IncomeCard({
                     {tb(a.bucket)}
                     {a.accountId && (
                       <span className="inline-flex items-center gap-1 text-muted-foreground">
-                        ·
-                        {AccountIcon && (
-                          <AccountIcon aria-hidden="true" focusable="false" className="size-3.5" />
-                        )}
+                        ·{account && <AccountMark account={account} className="size-3.5" />}
                         {accountName(a.accountId)}
                       </span>
                     )}
@@ -148,7 +145,7 @@ export function IncomePage() {
   const [toDelete, setToDelete] = useState<Income | null>(null);
 
   const accountName = (id: string | null) => accounts?.find((a) => a.id === id)?.name ?? "";
-  const accountKind = (id: string | null) => accounts?.find((a) => a.id === id)?.kind ?? null;
+  const accountOf = (id: string | null) => accounts?.find((a) => a.id === id) ?? null;
   const incomes = data
     ? [...data.incomes].sort((a, b) => (a.receivedOn < b.receivedOn ? 1 : -1))
     : [];
@@ -204,7 +201,7 @@ export function IncomePage() {
                 income={income}
                 allocations={data.allocations.filter((a) => a.incomeId === income.id)}
                 accountName={accountName}
-                accountKind={accountKind}
+                accountOf={accountOf}
                 onEdit={() => setDialog({ open: true, income })}
                 onDelete={() => setToDelete(income)}
               />

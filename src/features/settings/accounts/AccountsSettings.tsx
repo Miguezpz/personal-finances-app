@@ -21,6 +21,7 @@ import { AccountForm } from "./AccountForm";
 import { hasPendingInstallments, useAccounts, useArchiveAccount, useRestoreAccount } from "./hooks";
 import { ACCOUNT_KINDS } from "./schema";
 import { EmptyState } from "@/components/ui/empty-state";
+import { AccountMark } from "@/components/icons/AccountMark";
 import { ACCOUNT_KIND_ICONS } from "@/components/icons/domain-icons";
 
 const selectMsi = (s: FinanceSnapshot) => ({
@@ -94,6 +95,7 @@ export function AccountsSettings() {
                 <CardHeader className="flex flex-row items-start justify-between gap-4">
                   <div className="flex min-w-0 flex-col gap-1">
                     <CardTitle className="flex flex-wrap items-center gap-2 text-base">
+                      <AccountMark account={a} className="size-6" />
                       <span className="truncate">{a.name}</span>
                       <AccountKindBadge kind={a.kind} label={t(`kinds.${a.kind}`)} />
                       {a.archived && <Badge variant="secondary">{t("archivedBadge")}</Badge>}

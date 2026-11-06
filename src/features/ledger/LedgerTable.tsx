@@ -10,7 +10,8 @@ import type { LucideIcon } from "lucide-react";
 import { useTranslations } from "next-intl";
 import type { ReactNode } from "react";
 import { CategoryIcon } from "@/components/icons/CategoryIcon";
-import { ACCOUNT_KIND_ICONS, LEDGER_TYPE_ICONS } from "@/components/icons/domain-icons";
+import { AccountMark } from "@/components/icons/AccountMark";
+import { LEDGER_TYPE_ICONS } from "@/components/icons/domain-icons";
 import { Money } from "@/components/money/Money";
 import {
   Table,
@@ -21,7 +22,7 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { taxonomyIconFor, type ResolvedTaxonomyIcon } from "@/domain/icons";
-import type { LedgerEntry } from "@/domain/types";
+import type { Account, LedgerEntry } from "@/domain/types";
 import { useTaxonomyName } from "@/features/settings/taxonomy/useTaxonomyName";
 import { formatDate } from "@/i18n/format";
 import { cn } from "@/lib/utils";
@@ -36,13 +37,25 @@ interface Props {
 interface Labelled {
   text: string;
   icon: ResolvedTaxonomyIcon | LucideIcon | null;
+  /** An account shows its bank's mark instead of `icon`. */
+  account?: Account;
 }
 
-/** Text with its decorative icon in front (a taxonomy key or a Lucide component). */
-function WithIcon({ icon, children }: { icon: Labelled["icon"]; children: ReactNode }) {
+/** Text with its decorative icon in front (an account mark, a taxonomy key or a Lucide icon). */
+function WithIcon({
+  icon,
+  account,
+  children,
+}: {
+  icon: Labelled["icon"];
+  account?: Account | undefined;
+  children: ReactNode;
+}) {
   return (
     <span className="inline-flex min-w-0 items-center gap-1">
-      {typeof icon === "string" ? (
+      {account ? (
+        <AccountMark account={account} className="size-3.5" />
+      ) : typeof icon === "string" ? (
         <CategoryIcon icon={icon} className="size-3.5" />
       ) : icon ? (
         <IconGlyph icon={icon} />
@@ -74,7 +87,7 @@ export function LedgerTable({ entries, lookups }: Props) {
   };
   const accountOf = (e: LedgerEntry): Labelled | null => {
     const account = e.accountId ? lookups.accounts.find((a) => a.id === e.accountId) : null;
-    return account?.name ? { text: account.name, icon: ACCOUNT_KIND_ICONS[account.kind] } : null;
+    return account?.name ? { text: account.name, icon: null, account } : null;
   };
 
   return (
@@ -103,7 +116,11 @@ export function LedgerTable({ entries, lookups }: Props) {
                 <p className="flex min-w-0 flex-wrap items-center gap-x-1.5 text-xs text-muted-foreground">
                   {e.description && <span>{t(`types.${e.type}`)}</span>}
                   {category && <WithIcon icon={category.icon}>{category.text}</WithIcon>}
-                  {account && <WithIcon icon={account.icon}>{account.text}</WithIcon>}
+                  {account && (
+                    <WithIcon icon={account.icon} account={account.account}>
+                      {account.text}
+                    </WithIcon>
+                  )}
                 </p>
                 <p className="text-xs text-muted-foreground tabular-nums">
                   {formatDate(e.occurredOn, locale)}
@@ -170,7 +187,11 @@ function LedgerRows({
                 {category && <WithIcon icon={category.icon}>{category.text}</WithIcon>}
               </TableCell>
               <TableCell className="hidden max-w-40 align-top text-muted-foreground md:table-cell">
-                {account && <WithIcon icon={account.icon}>{account.text}</WithIcon>}
+                {account && (
+                  <WithIcon icon={account.icon} account={account.account}>
+                    {account.text}
+                  </WithIcon>
+                )}
               </TableCell>
               <TableCell
                 className={cn("text-right align-top font-medium", e.amount > 0 && "text-success")}

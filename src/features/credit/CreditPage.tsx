@@ -5,9 +5,10 @@
  * avoid interest as the headline, its due date and the total debt (with the full MSI balance) —
  * and the timeline of paydays, due dates and collections.
  */
-import { CalendarClock, CreditCard, TriangleAlert } from "lucide-react";
+import { CalendarClock, TriangleAlert } from "lucide-react";
 import Link from "next/link";
 import { useTranslations } from "next-intl";
+import { AccountMark } from "@/components/icons/AccountMark";
 import { Money } from "@/components/money/Money";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -68,7 +69,7 @@ export function CreditPage() {
                     <Card data-testid="credit-card" data-card={card.id}>
                       <CardHeader>
                         <CardTitle className="flex flex-wrap items-center gap-2 text-base">
-                          <CreditCard aria-hidden="true" className="size-4 text-muted-foreground" />
+                          <AccountMark account={card} className="size-6" />
                           {card.name}
                           {status.overdue && (
                             <Badge variant="destructive">
