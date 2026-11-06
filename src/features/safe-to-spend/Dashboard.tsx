@@ -12,7 +12,10 @@ import { useEffect, useState } from "react";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
-import { AddExpenseDialog } from "@/features/expenses/AddExpenseDialog";
+import {
+  LazyAddExpenseDialog,
+  usePreloadAddExpenseDialog,
+} from "@/features/expenses/LazyAddExpenseDialog";
 import { QuickExpenseBar } from "@/features/expenses/QuickExpenseBar";
 import { formatPeriodRange } from "@/features/income/format";
 import { useMediaQuery } from "@/lib/use-media-query";
@@ -38,6 +41,7 @@ export function Dashboard() {
   const locale = usePreferences(selectLocale);
   const { data, recurringItems, hasAllocations, isPending, isError, refetch } = useSafeToSpend();
   const [adding, setAdding] = useState(false);
+  usePreloadAddExpenseDialog();
   const introPlayed = useUi((s) => s.dashboardIntroPlayed);
   const markIntroPlayed = useUi((s) => s.markDashboardIntroPlayed);
   const reduced = useMediaQuery("(prefers-reduced-motion: reduce)");
@@ -161,7 +165,7 @@ export function Dashboard() {
         </div>
       )}
 
-      {adding && <AddExpenseDialog open={adding} onOpenChange={setAdding} />}
+      {adding && <LazyAddExpenseDialog open={adding} onOpenChange={setAdding} />}
     </section>
   );
 }

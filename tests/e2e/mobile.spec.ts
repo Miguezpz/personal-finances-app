@@ -173,3 +173,58 @@ test.describe("US2 · no horizontal scroll", { tag: "@demo" }, () => {
     });
   }
 });
+
+// Spec 005 · SC-005: six quick expenses at 360 px scroll inside their own row, never the page,
+// and every button is at least 44 px tall.
+test.describe("Spec 005 · quick expense row on a phone", { tag: "@live" }, () => {
+  test.use({ viewport: { width: 360, height: 740 }, hasTouch: true, isMobile: true });
+
+  test("six templates: the row scrolls by itself and its buttons are ≥ 44 px", async ({
+    ownerPage: page,
+    admin,
+    owner,
+    userClient,
+  }) => {
+    let subcategoryId: string | undefined;
+    await expect
+      .poll(async () => {
+        const { data } = await admin
+          .from("subcategories")
+          .select("id")
+          .eq("user_id", owner.id)
+          .eq("name", "Public transport");
+        subcategoryId = data?.[0]?.id;
+        return subcategoryId;
+      })
+      .toBeTruthy();
+    const names = ["Transporte", "Café de la mañana", "Comida", "Estacionamiento", "Metro", "Uber"];
+    const { error } = await userClient.from("expense_templates").insert(
+      names.map((name, sort) => ({
+        name,
+        amount_cents: 2400 + sort * 1000,
+        sort,
+        subcategory_id: subcategoryId as string,
+      })),
+    );
+    expect(error).toBeNull();
+
+    await page.goto("/dashboard");
+    const bar = page.getByTestId("quick-expense-bar");
+    await expect(bar.locator("li")).toHaveCount(6);
+    await expect(page.locator("main [aria-busy='true']")).toHaveCount(0);
+
+    const overflow = await page.evaluate(
+      () => (document.scrollingElement?.scrollWidth ?? 0) - window.innerWidth,
+    );
+    expect(overflow, "page horizontal overflow").toBeLessThanOrEqual(0);
+    const row = await bar.evaluate((el) => ({ scroll: el.scrollWidth, client: el.clientWidth }));
+    expect(row.scroll, "the row itself scrolls").toBeGreaterThan(row.client);
+
+    const buttons = bar.locator("button");
+    expect(await buttons.count()).toBe(12);
+    for (let i = 0; i < 12; i++) {
+      const box = await buttons.nth(i).boundingBox();
+      expect(box?.height ?? 0, `height of button ${i}`).toBeGreaterThanOrEqual(44);
+    }
+  });
+});

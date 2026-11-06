@@ -96,6 +96,36 @@ test.describe("Accessibility", { tag: "@demo" }, () => {
     }
   });
 
+  test("spec 005: the quick expense row, its ⋯ menu, the section and its dialogs, light and dark", async ({
+    page,
+  }) => {
+    test.setTimeout(120_000);
+    for (const scheme of ["light", "dark"] as const) {
+      await useTheme(page, scheme);
+      const where = (what: string) => `${what} (${scheme})`;
+
+      await page.goto("/dashboard");
+      await expect(page.getByTestId("quick-expense-bar")).toBeVisible();
+      await expect(page.locator("main [aria-busy='true']")).toHaveCount(0);
+      await page.locator('[data-testid^="quick-expense-menu-"]').first().click();
+      await expect(page.getByRole("menu")).toBeVisible();
+      await audit(page, where("quick expense menu"));
+
+      await page.getByRole("menuitem").last().click();
+      await expect(page.getByRole("dialog")).toBeVisible();
+      await audit(page, where("another amount or date dialog"));
+      await page.keyboard.press("Escape");
+
+      await page.goto("/expenses#quick-expenses");
+      await expect(page.getByTestId("template-row").first()).toBeVisible();
+      await audit(page, where("quick expenses section"));
+      await page.getByTestId("template-edit").first().click();
+      await expect(page.getByRole("dialog")).toBeVisible();
+      await audit(page, where("quick expense dialog"));
+      await page.keyboard.press("Escape");
+    }
+  });
+
   test("keyboard: the first Tab offers to skip to the content, which then gets focus", async ({
     page,
   }) => {

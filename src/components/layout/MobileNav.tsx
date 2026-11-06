@@ -12,7 +12,10 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
 import { Button } from "@/components/ui/button";
-import { AddExpenseDialog } from "@/features/expenses/AddExpenseDialog";
+import {
+  LazyAddExpenseDialog,
+  usePreloadAddExpenseDialog,
+} from "@/features/expenses/LazyAddExpenseDialog";
 import { cn } from "@/lib/utils";
 import { useUi } from "@/store/ui";
 import { NavIndicator } from "./NavIndicator";
@@ -73,6 +76,7 @@ export function MobileNav() {
   const sidebarOpen = useUi((s) => s.sidebarOpen);
   const setSidebarOpen = useUi((s) => s.setSidebarOpen);
   const [adding, setAdding] = useState(false);
+  usePreloadAddExpenseDialog();
   const fabHidden = useFabHidden();
   const listRef = useRef<HTMLDivElement>(null);
 
@@ -155,7 +159,7 @@ export function MobileNav() {
         </div>
       </nav>
 
-      {adding && <AddExpenseDialog open={adding} onOpenChange={setAdding} />}
+      {adding && <LazyAddExpenseDialog open={adding} onOpenChange={setAdding} />}
     </>
   );
 }

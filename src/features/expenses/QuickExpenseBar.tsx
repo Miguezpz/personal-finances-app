@@ -9,27 +9,32 @@
  *    every page); nothing without templates. `onApplied` lets the dialog close itself.
  * The row scrolls on its own, so the page never scrolls sideways at 360 px (SC-005).
  */
-import { MoreHorizontal, Plus } from "lucide-react";
+import { Plus } from "lucide-react";
 import { useTranslations } from "next-intl";
 import Link from "next/link";
-import { useState } from "react";
-import { CategoryIcon } from "@/components/icons/CategoryIcon";
+import { lazy, Suspense, useState } from "react";
 import { Money, useMoneyFormatter, useShouldMask } from "@/components/money/Money";
 import { Button } from "@/components/ui/button";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
 import { useFinanceSnapshot } from "@/data/useFinanceSnapshot";
 import { addDays } from "@/domain/dates";
 import { taxonomyIconFor } from "@/domain/icons";
 import { activeTemplates, templateAvailability } from "@/domain/quick-expenses";
 import type { ExpenseTemplate, FinanceSnapshot } from "@/domain/types";
 import { useToday } from "@/lib/use-today";
-import { QuickExpenseCustomDialog } from "./QuickExpenseCustomDialog";
+import { QuickExpenseMenuTrigger } from "./QuickExpenseMenuTrigger";
 import { useQuickExpense } from "./quick-expense-hooks";
+
+// The Radix menu and the "another amount or date" dialog load in their own chunks (the menu right
+// after the row appears, the dialog on demand), keeping the Dashboard's First Load JS within the
+// plan's budget. The bar only renders on the client, once the snapshot is loaded.
+const QuickExpenseMenu = lazy(() => import("./QuickExpenseMenu"));
+// The full taxonomy icon set is ~10 KB gzip; the icon is decorative, so it can arrive a moment later.
+const CategoryIcon = lazy(() =>
+  import("@/components/icons/CategoryIcon").then((m) => ({ default: m.CategoryIcon })),
+);
+const QuickExpenseCustomDialog = lazy(() =>
+  import("./QuickExpenseCustomDialog").then((m) => ({ default: m.QuickExpenseCustomDialog })),
+);
 
 const selectBarData = (s: FinanceSnapshot) => ({
   templates: activeTemplates(s.expenseTemplates),
@@ -101,53 +106,48 @@ export function QuickExpenseBar({ variant, onApplied }: Props) {
                 data-testid={`quick-expense-${template.id}`}
                 onClick={() => record(template)}
               >
-                <CategoryIcon icon={taxonomyIconFor(template.subcategoryId, data)} />
+                <Suspense fallback={<span aria-hidden="true" className="size-4 shrink-0" />}>
+                  <CategoryIcon icon={taxonomyIconFor(template.subcategoryId, data)} />
+                </Suspense>
                 <span className="max-w-40 truncate">{template.name}</span>
                 <Money cents={template.amount} className="font-semibold" />
                 {disabled && <span className="sr-only">{t("unavailableSubcategory")}</span>}
               </Button>
-              <DropdownMenu>
-                <DropdownMenuTrigger asChild>
-                  <Button
-                    type="button"
-                    variant="outline"
-                    className="min-h-11 w-9 rounded-l-none border-l-0 px-0"
-                    disabled={disabled}
-                    aria-label={t("moreOptions", { name: template.name })}
-                    data-testid={`quick-expense-menu-${template.id}`}
-                  >
-                    <MoreHorizontal aria-hidden="true" />
-                  </Button>
-                </DropdownMenuTrigger>
-                <DropdownMenuContent align="end">
-                  <DropdownMenuItem
-                    data-testid="quick-expense-yesterday"
-                    onSelect={() => record(template, { spentOn: addDays(today, -1) })}
-                  >
-                    {t("yesterday")}
-                  </DropdownMenuItem>
-                  <DropdownMenuItem
-                    data-testid="quick-expense-customize"
-                    onSelect={() => setCustom(template)}
-                  >
-                    {t("customize")}
-                  </DropdownMenuItem>
-                </DropdownMenuContent>
-              </DropdownMenu>
+              <Suspense
+                fallback={
+                  <QuickExpenseMenuTrigger
+                    templateId={template.id}
+                    label={t("moreOptions", { name: template.name })}
+                    disabled
+                  />
+                }
+              >
+                <QuickExpenseMenu
+                  templateId={template.id}
+                  label={t("moreOptions", { name: template.name })}
+                  disabled={disabled}
+                  yesterdayLabel={t("yesterday")}
+                  customizeLabel={t("customize")}
+                  onYesterday={() => record(template, { spentOn: addDays(today, -1) })}
+                  onCustomize={() => setCustom(template)}
+                />
+              </Suspense>
             </li>
           );
         })}
       </ul>
 
       {custom && (
-        <QuickExpenseCustomDialog
-          template={custom}
-          open
-          onOpenChange={(open) => {
-            if (!open) setCustom(null);
-          }}
-          onApplied={onApplied}
-        />
+        <Suspense fallback={null}>
+          <QuickExpenseCustomDialog
+            template={custom}
+            open
+            onOpenChange={(open) => {
+              if (!open) setCustom(null);
+            }}
+            onApplied={onApplied}
+          />
+        </Suspense>
       )}
     </>
   );
