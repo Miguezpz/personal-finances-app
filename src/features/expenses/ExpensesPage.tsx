@@ -38,6 +38,7 @@ import { AddExpenseDialog } from "./AddExpenseDialog";
 import { CardDebtSummary } from "./CardDebtSummary";
 import { CardPaymentDialog } from "./CardPaymentDialog";
 import { useDeleteCardPayment, useDeleteExpense } from "./hooks";
+import { QuickExpensesSection } from "./QuickExpensesSection";
 
 const PAGE = 50;
 
@@ -149,6 +150,8 @@ export function ExpensesPage() {
       />
 
       <CardDebtSummary onPay={(cardId, amount) => setPayDialog({ open: true, cardId, amount })} />
+
+      <QuickExpensesSection />
 
       <section aria-labelledby="movements" className="flex flex-col gap-3">
         <h2 id="movements" className="text-lg font-semibold tracking-tight">

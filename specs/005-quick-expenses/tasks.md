@@ -168,14 +168,14 @@ description: "Task list for spec 005 — Gastos rápidos (plantillas de 1 toque)
 
 ### Tests for User Story 2
 
-- [ ] T024 [P] [US2] Agregar a `tests/unit/features/template-schema.test.ts` los casos de `expenseTemplateFormSchema`:
+- [X] T024 [P] [US2] Agregar a `tests/unit/features/template-schema.test.ts` los casos de `expenseTemplateFormSchema`:
   - Nombre `"  "` con `nameRequired`.
   - Nombre de 41 caracteres con `nameTooLong`.
   - Monto "0" con `invalidAmount`.
   - Subcategoría vacía con `subcategoryRequired`.
   - `paymentAccountId: ""` se convierte en `null`.
   - Salida tipada con `amount: Cents`.
-- [ ] T025 [P] [US2] Agregar a `tests/unit/features/quick-expense.test.tsx` los casos de los hooks de administración:
+- [X] T025 [P] [US2] Agregar a `tests/unit/features/quick-expense.test.tsx` los casos de los hooks de administración:
   - `useCreateTemplate` optimista con `sort = nextSort`.
   - `useRemoveTemplate` la oculta de `activeTemplates` sin tocar `expenses`.
   - `useReorderTemplates` intercambia `sort`.
@@ -183,14 +183,14 @@ description: "Task list for spec 005 — Gastos rápidos (plantillas de 1 toque)
 
 ### Implementation for User Story 2
 
-- [ ] T026 [P] [US2] Agregar a `quickExpenses` en `en.json` y `es.json`: `create`, `createFirst`, `edit`, `delete`, `deleteConfirm`, `moveUp`, `moveDown`, `name`, `subcategory`, `paymentMethod`, `noPaymentMethod`, `limitReached`, `saved`, `saveFailed`, `nameRequired`, `nameTooLong`, `subcategoryRequired`, `empty`. Correr la prueba de paridad
-- [ ] T027 [US2] Agregar a `src/features/expenses/template-schemas.ts` `expenseTemplateFormSchema` (nombre `trim` 1–40; monto con `parseMoneyInput` > 0; `subcategoryId` requerido; `paymentAccountId` "" → null), siguiendo `src/features/recurring/schemas.ts`. Agregar a `src/features/expenses/quick-expense-hooks.ts`:
+- [X] T026 [P] [US2] Agregar a `quickExpenses` en `en.json` y `es.json`: `create`, `createFirst`, `edit`, `delete`, `deleteConfirm`, `moveUp`, `moveDown`, `name`, `subcategory`, `paymentMethod`, `noPaymentMethod`, `limitReached`, `saved`, `saveFailed`, `nameRequired`, `nameTooLong`, `subcategoryRequired`, `empty`. Correr la prueba de paridad
+- [X] T027 [US2] Agregar a `src/features/expenses/template-schemas.ts` `expenseTemplateFormSchema` (nombre `trim` 1–40; monto con `parseMoneyInput` > 0; `subcategoryId` requerido; `paymentAccountId` "" → null), siguiendo `src/features/recurring/schemas.ts`. Agregar a `src/features/expenses/quick-expense-hooks.ts`:
   - `useCreateTemplate`, `useUpdateTemplate`, `useRemoveTemplate` y `useReorderTemplates`.
   - Usan `useSnapshotMutation` con `optimistic` y, para create, `created` con `replaceTemp`.
-- [ ] T028 [US2] Crear `src/features/expenses/QuickExpenseTemplateDialog.tsx` (props `{ open, template, onOpenChange }`):
+- [X] T028 [US2] Crear `src/features/expenses/QuickExpenseTemplateDialog.tsx` (props `{ open, template, onOpenChange }`):
   - Campos: nombre, monto, subcategoría (`SubcategoryOptions`, solo activas) y método de pago (cuentas activas, con `noPaymentMethod`).
   - Al guardar: create (con `sort: nextSort(...)`) o update; toast `saved` o `saveFailed`, respetando `isNotifiedGlobally`.
-- [ ] T029 [US2] Crear `src/features/expenses/QuickExpensesSection.tsx` y montarlo en `src/features/expenses/ExpensesPage.tsx` con `id="quick-expenses"`:
+- [X] T029 [US2] Crear `src/features/expenses/QuickExpensesSection.tsx` y montarlo en `src/features/expenses/ExpensesPage.tsx` con `id="quick-expenses"`:
   - Lista de activas con nombre, subcategoría, método de pago y `<Money>`.
   - Aviso `accountArchived` cuando la cuenta está archivada.
   - Botones Editar, Subir y Bajar (deshabilitados en los extremos, con `useReorderTemplates` y `reorderIds`).
@@ -199,7 +199,7 @@ description: "Task list for spec 005 — Gastos rápidos (plantillas de 1 toque)
   - Estado vacío con `EmptyState`.
 
   En `QuickExpenseBar` `variant="dashboard"` sin plantillas activas, mostrar el enlace `createFirst` a `/expenses#quick-expenses`.
-- [ ] T030 [US2] Agregar a `tests/e2e/us13-quick-expenses.spec.ts`:
+- [X] T030 [US2] Agregar a `tests/e2e/us13-quick-expenses.spec.ts`:
   - `@live`:
     - Crear una plantilla desde Gastos y verla en el Dashboard.
     - Editar el monto a $30: el siguiente toque registra $30 y el gasto anterior sigue en $24.
@@ -219,11 +219,11 @@ description: "Task list for spec 005 — Gastos rápidos (plantillas de 1 toque)
 
 **Independent Test**: un nuevo gasto de $24 en Public transport con nota "Transporte" y el switch marcado crea el gasto y la plantilla (quickstart J).
 
-- [ ] T031 [P] [US3] Agregar `saveAsTemplate` a `quickExpenses` en `en.json` y `es.json`
-- [ ] T032 [US3] En `src/features/expenses/AddExpenseDialog.tsx`, solo en modo nuevo:
+- [X] T031 [P] [US3] Agregar `saveAsTemplate` a `quickExpenses` en `en.json` y `es.json`
+- [X] T032 [US3] En `src/features/expenses/AddExpenseDialog.tsx`, solo en modo nuevo:
   - Un `Switch` con `Label` `saveAsTemplate` y `data-testid="save-as-template"`, deshabilitado con `limitReached` cuando `!canAddTemplate`.
   - En el `onSuccess` del gasto, si está marcado, llamar `useCreateTemplate` con `templateFromExpense(values, nombre de la subcategoría)` y `sort: nextSort(...)`.
-- [ ] T033 [US3] Agregar a `tests/e2e/us13-quick-expenses.spec.ts` (`@live`):
+- [X] T033 [US3] Agregar a `tests/e2e/us13-quick-expenses.spec.ts` (`@live`):
   - Gasto con nota y el switch marcado: aparecen el gasto y la plantilla "Transporte".
   - Sin nota: la plantilla toma el nombre de la subcategoría.
   - El diálogo de edición no muestra el switch.

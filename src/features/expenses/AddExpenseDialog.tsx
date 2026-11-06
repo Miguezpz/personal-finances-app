@@ -8,6 +8,7 @@
  */
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useTranslations } from "next-intl";
+import { useState } from "react";
 import { useForm, useWatch } from "react-hook-form";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
@@ -22,15 +23,20 @@ import {
 import { Field, FieldDescription, FieldError, FieldGroup, FieldLabel } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
 import { NativeSelect, NativeSelectOption } from "@/components/ui/native-select";
+import { Label } from "@/components/ui/label";
 import { Separator } from "@/components/ui/separator";
+import { Switch } from "@/components/ui/switch";
 import { isNotifiedGlobally } from "@/data/errors";
 import { useFinanceSnapshot } from "@/data/useFinanceSnapshot";
 import { formatCentsAsInput } from "@/domain/parse";
+import { canAddTemplate, nextSort, templateFromExpense } from "@/domain/quick-expenses";
 import type { Expense, FinanceSnapshot, Uuid } from "@/domain/types";
 import { SubcategoryOptions } from "@/features/settings/taxonomy/SubcategoryOptions";
+import { useTaxonomyName } from "@/features/settings/taxonomy/useTaxonomyName";
 import { useToday } from "@/lib/use-today";
 import { bucketOfSubcategory, useCreateExpense, useUpdateExpense } from "./hooks";
 import { QuickExpenseBar } from "./QuickExpenseBar";
+import { useCreateTemplate } from "./quick-expense-hooks";
 import { expenseFormSchema, type ExpenseFormInput, type ExpenseFormOutput } from "./schemas";
 
 type ExpensesMessageKey = Parameters<ReturnType<typeof useTranslations<"expenses">>>[0];
@@ -39,6 +45,7 @@ const selectFormData = (s: FinanceSnapshot) => ({
   categories: s.categories,
   subcategories: s.subcategories.filter((x) => !x.archived),
   accounts: s.accounts.filter((a) => !a.archived),
+  templates: s.expenseTemplates,
 });
 
 const selectHasActiveTemplates = (s: FinanceSnapshot) =>
@@ -55,10 +62,15 @@ export function AddExpenseDialog({ open, onOpenChange, expense }: Props) {
   const t = useTranslations("expenses");
   const tb = useTranslations("buckets");
   const tc = useTranslations("common");
+  const tq = useTranslations("quickExpenses");
+  const nameOf = useTaxonomyName();
   const today = useToday();
   const { data } = useFinanceSnapshot(selectFormData);
   const createExpense = useCreateExpense();
   const updateExpense = useUpdateExpense();
+  const createTemplate = useCreateTemplate();
+  const [saveAsTemplate, setSaveAsTemplate] = useState(false);
+  const canSaveTemplate = data ? canAddTemplate(data.templates) : false;
 
   const form = useForm<ExpenseFormInput, unknown, ExpenseFormOutput>({
     resolver: zodResolver(expenseFormSchema),
@@ -91,16 +103,31 @@ export function AddExpenseDialog({ open, onOpenChange, expense }: Props) {
     if (expense) {
       updateExpense.mutate({ id: expense.id, patch: { ...values, bucket: inherited } }, callbacks);
     } else {
-      createExpense.mutate(
-        {
-          ...values,
-          bucket: inherited,
-          origin: "manual",
-          recurringExpenseId: null,
-          occurrenceDate: null,
-        },
-        callbacks,
-      );
+      const saved = createExpense.mutateAsync({
+        ...values,
+        bucket: inherited,
+        origin: "manual",
+        recurringExpenseId: null,
+        occurrenceDate: null,
+      });
+      saved.then(callbacks.onSuccess, callbacks.onError);
+      // Spec 005 (FR-012): the template is created once the expense is saved. Promises, not
+      // per-call callbacks: the dialog unmounts right after submitting.
+      if (saveAsTemplate && canSaveTemplate) {
+        const sub = data.subcategories.find((x) => x.id === values.subcategoryId);
+        const template = {
+          ...templateFromExpense(values, sub ? nameOf(sub) : ""),
+          sort: nextSort(data.templates),
+        };
+        saved
+          .then(() => createTemplate.mutateAsync(template))
+          .then(
+            () => toast.success(tq("saved")),
+            (e: unknown) => {
+              if (!isNotifiedGlobally(e)) toast.error(tq("saveFailed"));
+            },
+          );
+      }
     }
     onOpenChange(false);
   }
@@ -179,6 +206,27 @@ export function AddExpenseDialog({ open, onOpenChange, expense }: Props) {
               <Input id="expense-note" maxLength={200} {...form.register("note")} />
               {errors.note && <FieldError>{errorText(errors.note.message)}</FieldError>}
             </Field>
+
+            {!expense && (
+              <Field>
+                <div className="flex items-center gap-3">
+                  <Switch
+                    id="expense-save-template"
+                    checked={saveAsTemplate && canSaveTemplate}
+                    onCheckedChange={setSaveAsTemplate}
+                    disabled={!canSaveTemplate}
+                    aria-describedby={canSaveTemplate ? undefined : "expense-save-template-limit"}
+                    data-testid="save-as-template"
+                  />
+                  <Label htmlFor="expense-save-template">{tq("saveAsTemplate")}</Label>
+                </div>
+                {data && !canSaveTemplate && (
+                  <FieldDescription id="expense-save-template-limit">
+                    {tq("limitReached")}
+                  </FieldDescription>
+                )}
+              </Field>
+            )}
           </FieldGroup>
         </form>
 
