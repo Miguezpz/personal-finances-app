@@ -505,6 +505,13 @@
     "accountFormHint": "Credit cards need their cut-off day and how many days later the payment is due.",
     "accountKind": "Type",
     "kindFixed": "The type can't change once the account exists.",
+    "kindGroups": {
+      "checking": "Checking",
+      "savings": "Savings",
+      "credit_card": "Credit cards",
+      "investment": "Investment",
+      "cash": "Cash"
+    },
     "kinds": {
       "checking": "Checking",
       "savings": "Savings",

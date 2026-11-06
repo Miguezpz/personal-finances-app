@@ -22,7 +22,7 @@ import {
 } from "@/components/ui/dialog";
 import { Field, FieldDescription, FieldError, FieldGroup, FieldLabel } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
-import { NativeSelect, NativeSelectOption } from "@/components/ui/native-select";
+import { NativeSelect } from "@/components/ui/native-select";
 import { Label } from "@/components/ui/label";
 import { Separator } from "@/components/ui/separator";
 import { Switch } from "@/components/ui/switch";
@@ -34,6 +34,7 @@ import type { Expense, FinanceSnapshot, Uuid } from "@/domain/types";
 import { SubcategoryOptions } from "@/features/settings/taxonomy/SubcategoryOptions";
 import { useTaxonomyName } from "@/features/settings/taxonomy/useTaxonomyName";
 import { useToday } from "@/lib/use-today";
+import { PaymentAccountOptions } from "@/features/settings/accounts/PaymentAccountOptions";
 import { bucketOfSubcategory, useCreateExpense, useUpdateExpense } from "./hooks";
 import { QuickExpenseBar } from "./QuickExpenseBar";
 import { useCreateTemplate } from "./quick-expense-hooks";
@@ -191,12 +192,10 @@ export function AddExpenseDialog({ open, onOpenChange, expense }: Props) {
               <Field>
                 <FieldLabel htmlFor="expense-account">{t("paymentMethod")}</FieldLabel>
                 <NativeSelect id="expense-account" {...form.register("paymentAccountId")}>
-                  <NativeSelectOption value="">{t("noPaymentMethod")}</NativeSelectOption>
-                  {(data?.accounts ?? []).map((a) => (
-                    <NativeSelectOption key={a.id} value={a.id}>
-                      {a.name}
-                    </NativeSelectOption>
-                  ))}
+                  <PaymentAccountOptions
+                    accounts={data?.accounts ?? []}
+                    placeholder={t("noPaymentMethod")}
+                  />
                 </NativeSelect>
               </Field>
             </div>

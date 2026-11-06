@@ -20,13 +20,14 @@ import {
 } from "@/components/ui/dialog";
 import { Field, FieldDescription, FieldError, FieldGroup, FieldLabel } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
-import { NativeSelect, NativeSelectOption } from "@/components/ui/native-select";
+import { NativeSelect } from "@/components/ui/native-select";
 import { isNotifiedGlobally } from "@/data/errors";
 import { useFinanceSnapshot } from "@/data/useFinanceSnapshot";
 import { formatCentsAsInput } from "@/domain/parse";
 import { TEMPLATE_NAME_MAX, nextSort } from "@/domain/quick-expenses";
 import type { ExpenseTemplate, FinanceSnapshot } from "@/domain/types";
 import { SubcategoryOptions } from "@/features/settings/taxonomy/SubcategoryOptions";
+import { PaymentAccountOptions } from "@/features/settings/accounts/PaymentAccountOptions";
 import { useCreateTemplate, useUpdateTemplate } from "./quick-expense-hooks";
 import {
   expenseTemplateFormSchema,
@@ -162,12 +163,10 @@ export function QuickExpenseTemplateDialog({ open, template, onOpenChange }: Pro
             <Field>
               <FieldLabel htmlFor="template-account">{t("paymentMethod")}</FieldLabel>
               <NativeSelect id="template-account" {...form.register("paymentAccountId")}>
-                <NativeSelectOption value="">{t("noPaymentMethod")}</NativeSelectOption>
-                {(data?.accounts ?? []).map((a) => (
-                  <NativeSelectOption key={a.id} value={a.id}>
-                    {a.name}
-                  </NativeSelectOption>
-                ))}
+                <PaymentAccountOptions
+                  accounts={data?.accounts ?? []}
+                  placeholder={t("noPaymentMethod")}
+                />
               </NativeSelect>
             </Field>
           </FieldGroup>

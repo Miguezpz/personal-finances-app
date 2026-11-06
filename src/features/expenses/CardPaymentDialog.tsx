@@ -26,6 +26,7 @@ import { useFinanceSnapshot } from "@/data/useFinanceSnapshot";
 import { formatCentsAsInput } from "@/domain/parse";
 import type { Cents, FinanceSnapshot, Uuid } from "@/domain/types";
 import { useToday } from "@/lib/use-today";
+import { PaymentAccountOptions } from "@/features/settings/accounts/PaymentAccountOptions";
 import { useCreateCardPayment } from "./hooks";
 import {
   cardPaymentFormSchema,
@@ -130,12 +131,10 @@ export function CardPaymentDialog({ open, onOpenChange, cardId, suggestedAmount 
             <Field>
               <FieldLabel htmlFor="payment-from">{t("paidFrom")}</FieldLabel>
               <NativeSelect id="payment-from" {...form.register("fromAccountId")}>
-                <NativeSelectOption value="">{t("noPaymentMethod")}</NativeSelectOption>
-                {(data?.sources ?? []).map((a) => (
-                  <NativeSelectOption key={a.id} value={a.id}>
-                    {a.name}
-                  </NativeSelectOption>
-                ))}
+                <PaymentAccountOptions
+                  accounts={data?.sources ?? []}
+                  placeholder={t("noPaymentMethod")}
+                />
               </NativeSelect>
             </Field>
 

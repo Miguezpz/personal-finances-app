@@ -505,6 +505,13 @@
     "accountFormHint": "Las tarjetas de crédito necesitan su día de corte y cuántos días después vence el pago.",
     "accountKind": "Tipo",
     "kindFixed": "El tipo no se puede cambiar una vez creada la cuenta.",
+    "kindGroups": {
+      "checking": "Débito",
+      "savings": "Ahorro",
+      "credit_card": "Tarjetas de crédito",
+      "investment": "Inversión",
+      "cash": "Efectivo"
+    },
     "kinds": {
       "checking": "Débito",
       "savings": "Ahorro",

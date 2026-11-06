@@ -20,7 +20,7 @@ import {
 } from "@/components/ui/dialog";
 import { Field, FieldDescription, FieldError, FieldGroup, FieldLabel } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
-import { NativeSelect, NativeSelectOption } from "@/components/ui/native-select";
+import { NativeSelect } from "@/components/ui/native-select";
 import { isNotifiedGlobally } from "@/data/errors";
 import { isIsoDate } from "@/domain/dates";
 import { useFinanceSnapshot } from "@/data/useFinanceSnapshot";
@@ -33,6 +33,7 @@ import {
   useHasSubcategories,
 } from "@/features/settings/taxonomy/SubcategoryOptions";
 import { useToday } from "@/lib/use-today";
+import { PaymentAccountOptions } from "@/features/settings/accounts/PaymentAccountOptions";
 import { useCreateRecurring, useUpdateRecurring } from "./hooks";
 import { recurringFormSchema, type RecurringFormInput, type RecurringFormOutput } from "./schemas";
 
@@ -221,12 +222,10 @@ export function RecurringForm({ open, onOpenChange, recurring }: Props) {
               <Field>
                 <FieldLabel htmlFor="recurring-account">{t("paymentMethod")}</FieldLabel>
                 <NativeSelect id="recurring-account" {...form.register("paymentAccountId")}>
-                  <NativeSelectOption value="">{t("noPaymentMethod")}</NativeSelectOption>
-                  {(data?.accounts ?? []).map((a) => (
-                    <NativeSelectOption key={a.id} value={a.id}>
-                      {a.name}
-                    </NativeSelectOption>
-                  ))}
+                  <PaymentAccountOptions
+                    accounts={data?.accounts ?? []}
+                    placeholder={t("noPaymentMethod")}
+                  />
                 </NativeSelect>
               </Field>
               <Field data-invalid={Boolean(errors.startsOn)}>
