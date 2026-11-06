@@ -12,7 +12,7 @@ pruebas, semillas ni `db reset` contra la nube.
 ## 1. Supabase en la nube (una sola vez)
 
 1. Crear el proyecto en [supabase.com](https://supabase.com) (plan Free) y anotar el _Project ref_.
-2. Aplicar las migraciones del repositorio (`supabase/migrations/0001…0008`):
+2. Aplicar las migraciones del repositorio (`supabase/migrations/0001…0009`):
 
    ```bash
    pnpm exec supabase login
@@ -103,6 +103,10 @@ NEXT_PUBLIC_DEMO_MODE=true pnpm build && pnpm check:demo-bundle
   app en varias pestañas no duplica nada.
 - **Nuevas migraciones**: después de agregar un archivo en `supabase/migrations`, probar en local
   (`pnpm db:reset && pnpm db:test && pnpm test:contract:local`) y luego `pnpm exec supabase db push`.
+- **Migración 0009 (spec 005: gastos rápidos)**: crea la tabla `expense_templates` con RLS
+  forzado y la política de dueño. El frontend de la spec 005 lee esta tabla al cargar los datos,
+  así que **la migración va antes del despliegue**: como Vercel despliega solo cada push a `main`,
+  aplicarla antes de subir el código que la usa. Aplicada en la nube el 2026-11-05.
 - **Migración 0008 (spec 004: tipos de ingreso, íconos y taxonomía por defecto)**: además de las
   columnas nuevas, rellena las cuentas que ya existen. A cada categoría activa cuyo nombre coincide
   exactamente con una por defecto le asigna su clave de traducción y su ícono, y agrega la categoría
