@@ -22,6 +22,7 @@ import {
 import { Field, FieldDescription, FieldError, FieldGroup, FieldLabel } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
 import { NativeSelect, NativeSelectOption } from "@/components/ui/native-select";
+import { Separator } from "@/components/ui/separator";
 import { isNotifiedGlobally } from "@/data/errors";
 import { useFinanceSnapshot } from "@/data/useFinanceSnapshot";
 import { formatCentsAsInput } from "@/domain/parse";
@@ -29,6 +30,7 @@ import type { Expense, FinanceSnapshot, Uuid } from "@/domain/types";
 import { SubcategoryOptions } from "@/features/settings/taxonomy/SubcategoryOptions";
 import { useToday } from "@/lib/use-today";
 import { bucketOfSubcategory, useCreateExpense, useUpdateExpense } from "./hooks";
+import { QuickExpenseBar } from "./QuickExpenseBar";
 import { expenseFormSchema, type ExpenseFormInput, type ExpenseFormOutput } from "./schemas";
 
 type ExpensesMessageKey = Parameters<ReturnType<typeof useTranslations<"expenses">>>[0];
@@ -38,6 +40,9 @@ const selectFormData = (s: FinanceSnapshot) => ({
   subcategories: s.subcategories.filter((x) => !x.archived),
   accounts: s.accounts.filter((a) => !a.archived),
 });
+
+const selectHasActiveTemplates = (s: FinanceSnapshot) =>
+  s.expenseTemplates.some((t) => !t.archived);
 
 interface Props {
   open: boolean;
@@ -107,6 +112,9 @@ export function AddExpenseDialog({ open, onOpenChange, expense }: Props) {
           <DialogTitle>{expense ? t("editTitle") : t("addTitle")}</DialogTitle>
           <DialogDescription>{t("addDescription")}</DialogDescription>
         </DialogHeader>
+
+        {/* Spec 005 (FR-006a): new expenses only; a tap records it and closes the dialog. */}
+        {!expense && <NewExpenseQuickRow onApplied={() => onOpenChange(false)} />}
 
         <form
           id="expense-form"
@@ -189,5 +197,17 @@ export function AddExpenseDialog({ open, onOpenChange, expense }: Props) {
         </DialogFooter>
       </DialogContent>
     </Dialog>
+  );
+}
+
+/** The quick expense row plus its separator; renders nothing without active templates. */
+function NewExpenseQuickRow({ onApplied }: { onApplied: () => void }) {
+  const { data: hasTemplates } = useFinanceSnapshot(selectHasActiveTemplates);
+  if (!hasTemplates) return null;
+  return (
+    <div className="flex min-w-0 flex-col gap-4">
+      <QuickExpenseBar variant="dialog" onApplied={onApplied} />
+      <Separator />
+    </div>
   );
 }

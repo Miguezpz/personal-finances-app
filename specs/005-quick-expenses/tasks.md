@@ -115,28 +115,28 @@ description: "Task list for spec 005 — Gastos rápidos (plantillas de 1 toque)
 
 ### Tests for User Story 1
 
-- [ ] T014 [P] [US1] Crear `tests/unit/features/quick-expense.test.tsx` con `renderWithProviders` y `tests/utils/memory-provider.ts`:
+- [X] T014 [P] [US1] Crear `tests/unit/features/quick-expense.test.tsx` con `renderWithProviders` y `tests/utils/memory-provider.ts`:
   - `apply` agrega el gasto optimista antes de que el create resuelva.
   - Si el create falla, el snapshot vuelve exactamente al previo.
   - Deshacer mientras el create sigue pendiente espera el id real y borra ese id, no el temporal.
   - Dos `apply` seguidos: el Deshacer del segundo deja el primero.
   - `overrides` de monto y fecha llegan al gasto y la plantilla no cambia.
-- [ ] T015 [P] [US1] Agregar a `tests/unit/features/template-schema.test.ts` (nuevo) los casos de `quickExpenseOverrideSchema`: monto "12" válido; "0", "-1" y "abc" con `invalidAmount`; fecha de mañana con `futureDate`; fecha de hoy válida
+- [X] T015 [P] [US1] Agregar a `tests/unit/features/template-schema.test.ts` (nuevo) los casos de `quickExpenseOverrideSchema`: monto "12" válido; "0", "-1" y "abc" con `invalidAmount`; fecha de mañana con `futureDate`; fecha de hoy válida
 
 ### Implementation for User Story 1
 
-- [ ] T016 [P] [US1] Agregar a `src/i18n/messages/en.json` y `es.json` el namespace `quickExpenses` con las claves de US1: `title`, `apply` ("Registrar {name}, {amount}"), `added`, `undo`, `undone`, `addFailed`, `moreOptions`, `yesterday`, `customize`, `customTitle`, `amount`, `date`, `futureDate`, `invalidAmount`, `register`, `unavailableSubcategory`, `accountArchived`. Correr `tests/unit/i18n/parity.test.ts`
-- [ ] T017 [US1] Crear `src/features/expenses/template-schemas.ts` con `quickExpenseOverrideSchema` (monto con `parseMoneyInput` > 0 → `Cents`; fecha `isIsoDate` y `<= today`, con `today` inyectado como parámetro de una fábrica `makeQuickExpenseOverrideSchema(today)`)
-- [ ] T018 [US1] Crear `src/features/expenses/quick-expense-hooks.ts` con `useQuickExpense()`, según `contracts/ui-components.md`:
+- [X] T016 [P] [US1] Agregar a `src/i18n/messages/en.json` y `es.json` el namespace `quickExpenses` con las claves de US1: `title`, `apply` ("Registrar {name}, {amount}"), `added`, `undo`, `undone`, `addFailed`, `moreOptions`, `yesterday`, `customize`, `customTitle`, `amount`, `date`, `futureDate`, `invalidAmount`, `register`, `unavailableSubcategory`, `accountArchived`. Correr `tests/unit/i18n/parity.test.ts`
+- [X] T017 [US1] Crear `src/features/expenses/template-schemas.ts` con `quickExpenseOverrideSchema` (monto con `parseMoneyInput` > 0 → `Cents`; fecha `isIsoDate` y `<= today`, con `today` inyectado como parámetro de una fábrica `makeQuickExpenseOverrideSchema(today)`)
+- [X] T018 [US1] Crear `src/features/expenses/quick-expense-hooks.ts` con `useQuickExpense()`, según `contracts/ui-components.md`:
   - `apply(template, overrides?)` llama `templateToExpense` con el snapshot y `useToday()`, y luego `useCreateExpense().mutateAsync`.
   - Al crear: `toast.success(t("added", { name }), { duration: 6000, action: { label: t("undo"), onClick } })`. El `onClick` espera la promesa de esa creación y llama `useDeleteExpense().mutate(row.id)`, con `toast(t("undone"))` al terminar.
   - Si falla y `!isNotifiedGlobally(e)`: `toast.error(t("addFailed"))`.
-- [ ] T019 [US1] Crear `src/features/expenses/QuickExpenseCustomDialog.tsx` (props `{ template, open, onOpenChange }`):
+- [X] T019 [US1] Crear `src/features/expenses/QuickExpenseCustomDialog.tsx` (props `{ template, open, onOpenChange }`):
   - Campos: monto, prellenado con `formatCentsAsInput(template.amount)`, y fecha, prellenada con hoy (`max` = hoy).
   - En solo lectura: subcategoría, método de pago y nota.
   - Al guardar: `apply(template, { amount, spentOn })` y cerrar.
   - Usa `Dialog`, `Field`, `Input` y `react-hook-form` con `zodResolver`, igual que `AddExpenseDialog.tsx`.
-- [ ] T020 [US1] Crear `src/features/expenses/QuickExpenseBar.tsx` (props `{ variant: "dashboard" | "dialog"; onApplied?: () => void }`):
+- [X] T020 [US1] Crear `src/features/expenses/QuickExpenseBar.tsx` (props `{ variant: "dashboard" | "dialog"; onApplied?: () => void }`):
   - Lee `activeTemplates` del snapshot; si el snapshot no ha cargado, no muestra nada.
   - Contenedor `<ul role="list" data-testid="quick-expense-bar">`, horizontal con `overflow-x-auto` y sin desbordar la página.
   - Por plantilla:
@@ -144,9 +144,9 @@ description: "Task list for spec 005 — Gastos rápidos (plantillas de 1 toque)
     - Al lado, un botón "⋯" (`DropdownMenu`, `aria-label={t("moreOptions", { name })}`) con "Ayer" (`apply(template, { spentOn: addDays(today, -1) })`) y "Registrar con otro monto o fecha" (abre `QuickExpenseCustomDialog`).
   - Si la subcategoría está archivada (`templateAvailability`), el botón queda `disabled` con `title` y texto `sr-only` `unavailableSubcategory`.
   - En `variant="dialog"` sin plantillas no muestra nada. El estado vacío del Dashboard se agrega en US2 (T029).
-- [ ] T021 [US1] En `src/features/safe-to-spend/Dashboard.tsx`, montar `<QuickExpenseBar variant="dashboard" />` dentro del bloque con datos, antes de la rejilla de `BucketCard`. Si hay animación de entrada (`intro`), respetarla y no moverla bajo reduced motion
-- [ ] T022 [US1] En `src/features/expenses/AddExpenseDialog.tsx`, solo en modo nuevo (sin `expense`), mostrar `<QuickExpenseBar variant="dialog" onApplied={() => onOpenChange(false)} />` arriba del formulario, seguido de un `Separator`. Verificar que el botón flotante (`fab-add-expense` en `src/components/layout/MobileNav.tsx`) lo muestra en cualquier página
-- [ ] T023 [US1] Crear `tests/e2e/us13-quick-expenses.spec.ts`.
+- [X] T021 [US1] En `src/features/safe-to-spend/Dashboard.tsx`, montar `<QuickExpenseBar variant="dashboard" />` dentro del bloque con datos, antes de la rejilla de `BucketCard`. Si hay animación de entrada (`intro`), respetarla y no moverla bajo reduced motion
+- [X] T022 [US1] En `src/features/expenses/AddExpenseDialog.tsx`, solo en modo nuevo (sin `expense`), mostrar `<QuickExpenseBar variant="dialog" onApplied={() => onOpenChange(false)} />` arriba del formulario, seguido de un `Separator`. Verificar que el botón flotante (`fab-add-expense` en `src/components/layout/MobileNav.tsx`) lo muestra en cualquier página
+- [X] T023 [US1] Crear `tests/e2e/us13-quick-expenses.spec.ts`.
   - Bloque `@live`, sembrando la plantilla y el ingreso con `userClient` como en `tests/e2e/us4-expenses.spec.ts`:
     - Tocar `quick-expense-{id}` baja Needs $24; Deshacer lo restablece.
     - Dos toques crean dos gastos.

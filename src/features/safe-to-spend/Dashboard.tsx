@@ -13,6 +13,7 @@ import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { AddExpenseDialog } from "@/features/expenses/AddExpenseDialog";
+import { QuickExpenseBar } from "@/features/expenses/QuickExpenseBar";
 import { formatPeriodRange } from "@/features/income/format";
 import { useMediaQuery } from "@/lib/use-media-query";
 import { CollectionAlerts } from "@/features/receivables/CollectionAlerts";
@@ -107,6 +108,9 @@ export function Dashboard() {
         </Alert>
       ) : (
         <div className="flex flex-col gap-6">
+          {/* Spec 005: one tap records a repeated expense (no entrance animation of its own). */}
+          <QuickExpenseBar variant="dashboard" />
+
           {!hasAllocations && (
             <Alert>
               <AlertTitle>{t("emptyTitle")}</AlertTitle>
