@@ -29,6 +29,7 @@ import {
   monthStart,
   parseIsoDate,
 } from "@/domain/dates";
+import { dueDateFor } from "@/domain/card-terms";
 import { allocateByWeights, cents } from "@/domain/money";
 import { clampChargeDay } from "@/domain/periods";
 import { DEFAULT_USER_SETTINGS } from "@/domain/settings";
@@ -134,8 +135,15 @@ function shiftCutOff(card: Account, cutOff: IsoDate, months: number): IsoDate {
   return cutOffOn(card, year, month);
 }
 
+/** Same adjusted due date as the app (card-terms.ts), so the demo shows business days. */
 const dueFor = (card: Account, cutOff: IsoDate) =>
-  addDays(cutOff, card.paymentDueOffsetDays as number);
+  dueDateFor(
+    {
+      cutOffDay: card.cutOffDay as number,
+      paymentDueOffsetDays: card.paymentDueOffsetDays as number,
+    },
+    cutOff,
+  );
 
 // ---------------------------------------------------------------------------
 // Profiles

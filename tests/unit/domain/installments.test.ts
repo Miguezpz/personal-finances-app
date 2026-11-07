@@ -61,7 +61,7 @@ describe("buildCollectionSchedule", () => {
     expect(s.map((i) => i.cardDueOn)).toEqual([
       "2026-11-30",
       "2026-12-30",
-      "2027-01-30",
+      "2027-01-29", // Sat Jan 30 → Fri Jan 29 (spec 007: previous business day)
       "2027-03-02", // Feb 10 + 20 days
       "2027-03-30",
       "2027-04-30",

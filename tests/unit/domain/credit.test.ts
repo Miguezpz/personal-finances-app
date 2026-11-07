@@ -42,6 +42,27 @@ const empty = {
 };
 
 describe("cardStatus · dates", () => {
+  it("uses the due date moved back to a business day for 'overdue' (spec 007, US2-3)", () => {
+    // Nu: cut-off Sep 23 + 11 = Sun Oct 4 → Fri Oct 2.
+    const nu = makeCard({ cutOffDay: 23, paymentDueOffsetDays: 11 });
+    const data = {
+      ...empty,
+      expenses: [
+        makeExpense({
+          amount: cents(1_000),
+          spentOn: d("2026-09-20"),
+          paymentAccountId: nu.id,
+          bucket: "wants",
+        }),
+      ],
+    };
+    expect(cardStatus(nu, data, d("2026-10-02"))).toMatchObject({
+      nextPaymentDue: "2026-10-02",
+      overdue: false,
+    });
+    expect(cardStatus(nu, data, d("2026-10-03")).overdue).toBe(true);
+  });
+
   it("last cut-off is the latest cut-off on or before today; due = cut-off + offset", () => {
     expect(cardStatus(card, empty, d("2026-11-12"))).toMatchObject({
       lastCutOff: "2026-11-10",

@@ -4,15 +4,16 @@
  * Calendar (shared with credit.ts and the demo seed):
  *  - A purchase is billed on the first statement whose cut-off is ≥ the purchase date (a purchase
  *    on the cut-off day closes with that statement).
- *  - Installment k (1..N) is billed k−1 statements later: cardDueOn = that cut-off + offset days.
+ *  - Installment k (1..N) is billed k−1 statements later: cardDueOn = dueDateFor(that cut-off),
+ *    i.e. cut-off + offset days moved back to a business day (card-terms.ts, spec 007).
  *  - The debtor is asked to pay `collectionLeadDays` before: dueOn = cardDueOn − lead, with at least
  *    one day of lead so dueOn < cardDueOn always holds (FR-024; settings allow 0).
  *  - Equal installments; the cents remainder goes on the last one (Σ = total, SC-006).
  * Collections never touch any bucket: they only reduce what the debtor owes (FR-026a).
  */
-import { addDays, addMonthsToMonthStart, daysBetween, parseIsoDate } from "./dates";
+import { installmentDatesFor, statementCutOffFor } from "./card-terms";
+import { addDays, daysBetween } from "./dates";
 import { InvalidDateError, InvalidMoneyError } from "./errors";
-import { clampChargeDay } from "./periods";
 import type { Account, Cents, Installment, IsoDate, Receivable } from "./types";
 
 /** Alerts cover overdue collections and the next 7 days (fixed, FR-025). */
@@ -42,18 +43,7 @@ export interface ScheduledInstallment {
   amount: Cents;
 }
 
-function cutOffIn(cutOffDay: number, monthStartDate: IsoDate): IsoDate {
-  const { year, month } = parseIsoDate(monthStartDate);
-  return clampChargeDay(year, month, cutOffDay);
-}
-
-/** Cut-off of the statement a purchase falls into: the first cut-off ≥ purchase date. */
-export function statementCutOffFor(cutOffDay: number, purchaseDate: IsoDate): IsoDate {
-  const thisMonth = cutOffIn(cutOffDay, purchaseDate);
-  return purchaseDate <= thisMonth
-    ? thisMonth
-    : cutOffIn(cutOffDay, addMonthsToMonthStart(purchaseDate, 1));
-}
+export { installmentDatesFor, statementCutOffFor };
 
 export function buildCollectionSchedule(
   card: Pick<Account, "cutOffDay" | "paymentDueOffsetDays">,
@@ -65,14 +55,12 @@ export function buildCollectionSchedule(
   if (card.cutOffDay === null || card.paymentDueOffsetDays === null) {
     throw new InvalidDateError("The card has no cut-off day / payment due offset configured");
   }
-  const { cutOffDay, paymentDueOffsetDays } = card;
-  const lead = Math.max(1, collectionLeadDays);
-  const firstCutOff = statementCutOffFor(cutOffDay, purchaseDate);
-  return splitInstallments(total, termMonths).map((amount, i) => {
-    const cutOff = cutOffIn(cutOffDay, addMonthsToMonthStart(firstCutOff, i));
-    const cardDueOn = addDays(cutOff, paymentDueOffsetDays);
-    return { seq: i + 1, dueOn: addDays(cardDueOn, -lead), cardDueOn, amount };
-  });
+  const terms = { cutOffDay: card.cutOffDay, paymentDueOffsetDays: card.paymentDueOffsetDays };
+  return splitInstallments(total, termMonths).map((amount, i) => ({
+    seq: i + 1,
+    ...installmentDatesFor(terms, purchaseDate, i + 1, collectionLeadDays),
+    amount,
+  }));
 }
 
 const owed = (i: Pick<Installment, "amount" | "collected">) => i.amount - i.collected;

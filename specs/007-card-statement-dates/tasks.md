@@ -21,7 +21,7 @@ description: "Task list for spec 007 — Fechas de corte y pago de tarjetas desd
 
 **Purpose**: entorno local listo.
 
-- [ ] T001 Confirmar que Supabase local corre (`pnpm db:start`) y que `pnpm test` pasa en verde antes de cambiar nada (línea base)
+- [X] T001 Confirmar que Supabase local corre (`pnpm db:start`) y que `pnpm test` pasa en verde antes de cambiar nada (línea base)
 
 ---
 
@@ -31,13 +31,13 @@ description: "Task list for spec 007 — Fechas de corte y pago de tarjetas desd
 
 **⚠️ CRITICAL**: ninguna historia empieza antes de terminar esta fase.
 
-- [ ] T002 [P] Escribir `tests/unit/domain/business-days.test.ts` (en rojo) según `contracts/domain.md`:
+- [X] T002 [P] Escribir `tests/unit/domain/business-days.test.ts` (en rojo) según `contracts/domain.md`:
   - `easterSunday` para 2024–2030 (2026 = 5 abr, 2027 = 28 mar).
   - Los 11 inhábiles de 2026 y de 2027 (FR-009): 1 ene, primer lunes de feb, tercer lunes de mar, Jueves Santo (Pascua − 3), Viernes Santo (Pascua − 2), 1 may, 16 sep, 2 nov, tercer lunes de nov, 12 dic, 25 dic.
   - `isBusinessDay`: sábado, domingo e inhábil → `false`.
   - `previousBusinessDay`: sáb 4 jul 2026 → vie 3 jul; sáb 4 abr 2026 → mié 1 abr (Semana Santa); vie 25 dic 2026 → jue 24 dic; un día hábil se devuelve igual.
-- [ ] T003 Crear `src/domain/business-days.ts` (R1): `easterSunday(year): IsoDate` (algoritmo gregoriano anónimo), `bankHolidays(year): ReadonlySet<IsoDate>` memorizado por año en un `Map` de módulo, `isBusinessDay(date)` y `previousBusinessDay(date)`. Sin leer el reloj. T002 en verde
-- [ ] T004 [P] Escribir `tests/unit/domain/card-terms.test.ts` (en rojo) según `contracts/domain.md`:
+- [X] T003 Crear `src/domain/business-days.ts` (R1): `easterSunday(year): IsoDate` (algoritmo gregoriano anónimo), `bankHolidays(year): ReadonlySet<IsoDate>` memorizado por año en un `Map` de módulo, `isBusinessDay(date)` y `previousBusinessDay(date)`. Sin leer el reloj. T002 en verde
+- [X] T004 [P] Escribir `tests/unit/domain/card-terms.test.ts` (en rojo) según `contracts/domain.md`:
   - Tabla de las 6 tarjetas reales (spec US1-3): BBVA 5 nov→25 nov = (5, 20); Banregio 14 oct→4 nov = (14, 21); DiDi 22 nov→7 dic = (22, 15); Nu 23 oct→3 nov = (23, 11); Plata 10 oct→9 nov = (10, 30); Mercado Pago 27 nov→7 dic = (27, 10).
   - `dueDateFor` con los casos de research.md: Nu (23, 11) desde 23 jun → 3 jul, 23 sep → 2 oct, 23 oct → 3 nov; Banregio (14, 21) desde 14 nov → 4 dic; BBVA (5, 20) desde 5 dic → 24 dic.
   - Errores: `dueNotAfterCutOff` (límite igual o anterior al corte) y `dueTooFar` (61 días); 60 días es válido.
@@ -46,7 +46,7 @@ description: "Task list for spec 007 — Fechas de corte y pago de tarjetas desd
   - `latestStatement` → `cardTermsFromStatement` da los mismos términos (ida y vuelta, FR-005), para las 6 tarjetas.
   - Invariante 2 de data-model.md: offset 1 con un día siguiente inhábil devuelve el nominal (nunca ≤ corte).
   - `rescheduleCardInstallments`: ignora las `collected`, incluye las `partial`, ignora las de otra tarjeta y devuelve `[]` cuando todo está al día.
-- [ ] T005 Crear `src/domain/card-terms.ts` (R3/R4/R7) con `CardTerms`, `Statement`, `StatementError`, `StatementWarning`, `InstallmentDates`, `cardTermsOf`, `lastCutOffOn` (movida desde `src/domain/credit.ts`), `cutOffIn`, `nominalDueDate`, `dueDateFor` (invariante 2: si `previousBusinessDay(nominal) ≤ cutOffOn`, usar el nominal), `cardTermsFromStatement`, `statementWarnings`, `upcomingStatements(terms, today, count = 3)`, `latestStatement` (límite NOMINAL) y `installmentDatesFor(terms, purchaseDate, seq, lead)` + `rescheduleCardInstallments(card, receivables, installments, lead)` (solo las no cobradas de esa tarjeta cuyas fechas cambian). T004 en verde
+- [X] T005 Crear `src/domain/card-terms.ts` (R3/R4/R7) con `CardTerms`, `Statement`, `StatementError`, `StatementWarning`, `InstallmentDates`, `cardTermsOf`, `lastCutOffOn` (movida desde `src/domain/credit.ts`), `cutOffIn`, `nominalDueDate`, `dueDateFor` (invariante 2: si `previousBusinessDay(nominal) ≤ cutOffOn`, usar el nominal), `cardTermsFromStatement`, `statementWarnings`, `upcomingStatements(terms, today, count = 3)`, `latestStatement` (límite NOMINAL) y `installmentDatesFor(terms, purchaseDate, seq, lead)` + `rescheduleCardInstallments(card, receivables, installments, lead)` (solo las no cobradas de esa tarjeta cuyas fechas cambian). T004 en verde
 
 **Checkpoint**: dominio listo; las historias pueden empezar.
 
@@ -58,10 +58,10 @@ description: "Task list for spec 007 — Fechas de corte y pago de tarjetas desd
 
 **Independent Test**: Nu (23, 11): el estado del 23 sep 2026 vence el vie 2 oct y el del 23 jun el vie 3 jul; el del 23 oct, el mar 3 nov.
 
-- [ ] T006 [US2] En `src/domain/credit.ts`: `cardStatus.nextPaymentDue = dueDateFor(...)`, `creditTimeline` usa `dueDateFor` para cada estado, `lastCutOffOn` se reexporta desde `./card-terms` y `requireCard` usa `cardTermsOf`
-- [ ] T007 [US2] En `src/domain/installments.ts`: `buildCollectionSchedule` usa `installmentDatesFor` (que usa `dueDateFor`); `cutOffIn` y `statementCutOffFor` sin duplicar lógica con `card-terms.ts` (sin import circular)
-- [ ] T008 [US2] En `src/data/mock/seed.ts`: `dueFor` usa `dueDateFor` para que el demo muestre los mismos límites (US2-5)
-- [ ] T009 [US2] Ajustar `tests/unit/domain/credit.test.ts`, `tests/unit/domain/credit-timeline.test.ts` e `tests/unit/domain/installments.test.ts` (R8): las expectativas que caían en fin de semana o inhábil pasan a la fecha ajustada, con comentario; agregar en `credit.test.ts` un caso Nu donde `overdue` y `nextPaymentDue` usan la fecha ajustada (US2-3). `pnpm test` en verde
+- [X] T006 [US2] En `src/domain/credit.ts`: `cardStatus.nextPaymentDue = dueDateFor(...)`, `creditTimeline` usa `dueDateFor` para cada estado, `lastCutOffOn` se reexporta desde `./card-terms` y `requireCard` usa `cardTermsOf`
+- [X] T007 [US2] En `src/domain/installments.ts`: `buildCollectionSchedule` usa `installmentDatesFor` (que usa `dueDateFor`); `cutOffIn` y `statementCutOffFor` sin duplicar lógica con `card-terms.ts` (sin import circular)
+- [X] T008 [US2] En `src/data/mock/seed.ts`: `dueFor` usa `dueDateFor` para que el demo muestre los mismos límites (US2-5)
+- [X] T009 [US2] Ajustar `tests/unit/domain/credit.test.ts`, `tests/unit/domain/credit-timeline.test.ts` e `tests/unit/domain/installments.test.ts` (R8): las expectativas que caían en fin de semana o inhábil pasan a la fecha ajustada, con comentario; agregar en `credit.test.ts` un caso Nu donde `overdue` y `nextPaymentDue` usan la fecha ajustada (US2-3). `pnpm test` en verde
 
 **Checkpoint**: Gastos, calendario de crédito, MSI nuevas y demo muestran límites ajustados.
 

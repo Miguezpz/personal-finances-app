@@ -1,8 +1,8 @@
 /**
  * Credit cards (FR-013a/b, FR-028/029, research.md R13).
  *
- * Statement calendar: cut-off on clampChargeDay(y, m, cutOffDay); payment due = cut-off +
- * paymentDueOffsetDays. A card purchase lowers its bucket the day it happens (that's an Expense)
+ * Statement calendar (card-terms.ts): cut-off on clampChargeDay(y, m, cutOffDay); payment due =
+ * cut-off + paymentDueOffsetDays, moved back to the previous business day (spec 007, FR-010). A card purchase lowers its bucket the day it happens (that's an Expense)
  * and raises the card's debt; a card payment settles debt and never touches the buckets.
  *
  *   totalDebt          = Σ purchases with the card + Σ full MSI totals on the card − Σ payments  (≥ 0)
@@ -15,7 +15,8 @@
  * above is identical on a fresh card (US10-1a: $5,000) and correct over any history. Future MSI
  * installments are never part of the "totalero" amount, but always part of the total debt.
  */
-import { addDays, parseIsoDate } from "./dates";
+import { cardTermsOf, dueDateFor, lastCutOffOn, type CardTerms } from "./card-terms";
+import { parseIsoDate } from "./dates";
 import { InvalidDateError } from "./errors";
 import { clampChargeDay } from "./periods";
 import type { Account, Cents, FinanceSnapshot, IsoDate } from "./types";
@@ -33,31 +34,18 @@ export interface CardStatus {
 
 type CardData = Pick<FinanceSnapshot, "expenses" | "cardPayments" | "receivables" | "installments">;
 
-function requireCard(card: Account): { cutOffDay: number; offset: number } {
-  if (
-    card.kind !== "credit_card" ||
-    card.cutOffDay === null ||
-    card.paymentDueOffsetDays === null
-  ) {
-    throw new InvalidDateError(`Account ${card.id} is not a configured credit card`);
-  }
-  return { cutOffDay: card.cutOffDay, offset: card.paymentDueOffsetDays };
+function requireCard(card: Account): CardTerms {
+  const terms = cardTermsOf(card);
+  if (!terms) throw new InvalidDateError(`Account ${card.id} is not a configured credit card`);
+  return terms;
 }
 
-/** Latest cut-off on or before `today`. */
-export function lastCutOffOn(cutOffDay: number, today: IsoDate): IsoDate {
-  const { year, month } = parseIsoDate(today);
-  const thisMonth = clampChargeDay(year, month, cutOffDay);
-  if (thisMonth <= today) return thisMonth;
-  return month === 1
-    ? clampChargeDay(year - 1, 12, cutOffDay)
-    : clampChargeDay(year, month - 1, cutOffDay);
-}
+export { lastCutOffOn };
 
 export function cardStatus(card: Account, data: CardData, today: IsoDate): CardStatus {
-  const { cutOffDay, offset } = requireCard(card);
-  const lastCutOff = lastCutOffOn(cutOffDay, today);
-  const nextPaymentDue = addDays(lastCutOff, offset);
+  const terms = requireCard(card);
+  const lastCutOff = lastCutOffOn(terms.cutOffDay, today);
+  const nextPaymentDue = dueDateFor(terms, lastCutOff);
 
   let purchases = 0;
   let billedPurchases = 0;
@@ -168,11 +156,11 @@ export function creditTimeline(
   // would be listed twice.
   for (const card of s.accounts) {
     if (card.kind !== "credit_card" || card.archived) continue;
-    const { cutOffDay, offset } = requireCard(card);
+    const terms = requireCard(card);
     let previous: number | null = null;
     for (const { year, month } of monthsBetween(from, to, 2)) {
-      const cutOff = clampChargeDay(year, month, cutOffDay);
-      const due = addDays(cutOff, offset);
+      const cutOff = clampChargeDay(year, month, terms.cutOffDay);
+      const due = dueDateFor(terms, cutOff);
       if (due < from) continue;
       if (due > to) break;
       const cumulative = cardStatus(card, s, cutOff).payToAvoidInterest;
