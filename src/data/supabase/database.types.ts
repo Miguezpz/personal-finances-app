@@ -411,7 +411,27 @@ isOneToOne: false
                            },
 "save_distribution_rule":
 { Args: { "p_rule": Json,"p_subrules": Json }; Returns: string
-                           }
+                           },
+"update_account_with_installments":
+{ Args: { "p_id": string,"p_installments": Json,"p_patch": Json }; Returns: {
+              "archived_at": string | null,
+"created_at": string,
+"cut_off_day": number | null,
+"id": string,
+"institution": string | null,
+"kind": Database["public"]['Enums']["account_kind"],
+"name": string,
+"opening_balance_cents": number,
+"payment_due_offset_days": number | null,
+"updated_at": string,
+"user_id": string
+            }
+                          SetofOptions: {
+        from: "*"
+        to: "accounts"
+        isOneToOne: true
+        isSetofReturn: false
+      } }
           }
           Enums: {
             "account_kind": "checking"|"savings"|"credit_card"|"investment"|"cash","bucket_kind": "needs"|"wants"|"investment","expense_origin": "manual"|"recurring","goal_kind": "emergency_fund"|"sinking_fund","income_type": "salary"|"gift"|"debt_repayment"|"cashback"|"extra"|"sales"|"savings"|"investment_returns"|"other","installment_status": "pending"|"partial"|"collected","spend_bucket": "needs"|"wants"

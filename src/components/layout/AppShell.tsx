@@ -18,6 +18,7 @@ import { useAuthSync, useSession } from "@/features/auth/useSession";
 import { FxStatus } from "@/features/fx/FxStatus";
 import { useMaterializeContributions } from "@/features/goals/useMaterializeContributions";
 import { useNetWorthSnapshot } from "@/features/net-worth/useNetWorthSnapshot";
+import { useRescheduleInstallments } from "@/features/receivables/useRescheduleInstallments";
 import { useMaterializeRecurring } from "@/features/recurring/useMaterializeRecurring";
 import { useOnboarding } from "@/features/settings/onboarding";
 import { cn } from "@/lib/utils";
@@ -98,6 +99,7 @@ function BackgroundProcesses() {
   useAuthSync();
   useOnboarding();
   useMaterializeRecurring();
+  useRescheduleInstallments();
   useMaterializeContributions();
   useNetWorthSnapshot();
   return null;

@@ -623,6 +623,128 @@ export function runDataProviderContract(
         expect(updated.collected).toBe(100_000);
       });
       // ---------- Spec 005 · quick expenses (contracts/data-provider.md T1–T7) ----------
+      describe("card terms + MSI rescheduling (spec 007, C1–C6)", () => {
+        const setup = async () => {
+          const make = (name: string, cutOffDay: number) =>
+            provider.accounts.create({
+              kind: "credit_card",
+              name,
+              institution: null,
+              cutOffDay,
+              paymentDueOffsetDays: 20,
+              openingBalance: cents(0),
+              archived: false,
+            });
+          const card = await make(`Terms ${Math.random().toString(36).slice(2, 8)}`, 15);
+          const other = await make(`Other ${Math.random().toString(36).slice(2, 8)}`, 1);
+          const debtor = await provider.receivables.createDebtor({
+            name: `Debtor ${Math.random().toString(36).slice(2, 8)}`,
+          });
+          const buy = (cardAccountId: Uuid, termMonths: number) =>
+            provider.receivables.create({
+              receivable: {
+                debtorId: debtor.id,
+                cardAccountId,
+                description: "MSI",
+                total: cents(30_000 * termMonths),
+                termMonths,
+                purchaseDate: d("2026-10-20"),
+              },
+              installments: Array.from({ length: termMonths }, (_, i) => ({
+                seq: i + 1,
+                dueOn: d(`2027-0${i + 1}-01`),
+                cardDueOn: d(`2027-0${i + 1}-05`),
+                amount: cents(30_000),
+              })),
+            });
+          const purchase = await buy(card.id, 3);
+          const foreignPurchase = await buy(other.id, 1);
+          const { installments } = await provider.receivables.list();
+          const of = (id: Uuid) =>
+            installments.filter((i) => i.receivableId === id).sort((a, b) => a.seq - b.seq);
+          const [first, second, third] = of(purchase.id);
+          const [foreign] = of(foreignPurchase.id);
+          if (!first || !second || !third || !foreign) throw new Error("setup failed");
+          await provider.receivables.recordCollection({
+            installmentId: first.id,
+            collected: first.amount,
+            collectedOn: d("2027-01-01"),
+          });
+          return { card, first, second, third, foreign };
+        };
+        const installment = async (id: Uuid) =>
+          (await provider.receivables.list()).installments.find((i) => i.id === id);
+        const move = (id: Uuid, month: number) => ({
+          id,
+          dueOn: d(`2027-0${month}-02`),
+          cardDueOn: d(`2027-0${month}-04`),
+        });
+
+        it("C1: changes the terms and the not-collected installments together", async () => {
+          const { card, second, third } = await setup();
+          const updated = await provider.accounts.update(
+            card.id,
+            { cutOffDay: 14, paymentDueOffsetDays: 21 },
+            [move(second.id, 2), move(third.id, 3)],
+          );
+          expect(updated).toMatchObject({ id: card.id, cutOffDay: 14, paymentDueOffsetDays: 21 });
+          expect(await installment(second.id)).toMatchObject(move(second.id, 2));
+          expect(await installment(third.id)).toMatchObject(move(third.id, 3));
+        });
+
+        it("C2: a collected installment rejects everything (VALIDATION)", async () => {
+          const { card, first, second } = await setup();
+          await expectProviderError(
+            provider.accounts.update(card.id, { cutOffDay: 14 }, [
+              move(second.id, 2),
+              move(first.id, 1),
+            ]),
+            "VALIDATION",
+          );
+          const accounts = await provider.accounts.list();
+          expect(accounts.find((a) => a.id === card.id)?.cutOffDay).toBe(15);
+          expect(await installment(second.id)).toMatchObject({ cardDueOn: second.cardDueOn });
+          expect(await installment(first.id)).toMatchObject({ cardDueOn: first.cardDueOn });
+        });
+
+        it("C3: another card's installment rejects everything (VALIDATION)", async () => {
+          const { card, foreign } = await setup();
+          await expectProviderError(
+            provider.accounts.update(card.id, { cutOffDay: 14 }, [move(foreign.id, 1)]),
+            "VALIDATION",
+          );
+          const accounts = await provider.accounts.list();
+          expect(accounts.find((a) => a.id === card.id)?.cutOffDay).toBe(15);
+          expect(await installment(foreign.id)).toMatchObject({ cardDueOn: foreign.cardDueOn });
+        });
+
+        it("C4: an empty patch only moves the installments", async () => {
+          const { card, third } = await setup();
+          const updated = await provider.accounts.update(card.id, {}, [move(third.id, 4)]);
+          expect(updated).toMatchObject({ cutOffDay: 15, paymentDueOffsetDays: 20 });
+          expect(await installment(third.id)).toMatchObject(move(third.id, 4));
+        });
+
+        it("C5: without reschedule, the installments do not change", async () => {
+          const { card, second } = await setup();
+          const renamed = `${card.name} X`;
+          expect(await provider.accounts.update(card.id, { name: renamed })).toMatchObject({
+            name: renamed,
+          });
+          expect(await installment(second.id)).toMatchObject({ cardDueOn: second.cardDueOn });
+        });
+
+        it("C6: an unknown account is NOT_FOUND", async () => {
+          const { second } = await setup();
+          await expectProviderError(
+            provider.accounts.update("00000000-0000-4000-8000-0000000000ff" as Uuid, {}, [
+              move(second.id, 2),
+            ]),
+            "NOT_FOUND",
+          );
+        });
+      });
+
       describe("expense templates", () => {
         const missingId = "00000000-0000-4000-8000-0000000fffff" as Uuid;
         const subId = async () => {
@@ -765,6 +887,14 @@ export function runDataProviderContract(
           ["settings.update", () => p.settings.update({ collectionLeadDays: 5 })],
           ["accounts.create", () => p.accounts.create(before.accounts[0] as never)],
           ["accounts.update", () => p.accounts.update(anyId, { name: "x" })],
+          // C7 (spec 007): rescheduling installments is a write too.
+          [
+            "accounts.update",
+            () =>
+              p.accounts.update(anyId, {}, [
+                { id: anyId, dueOn: d("2026-12-01"), cardDueOn: d("2026-12-04") },
+              ]),
+          ],
           ["accounts.archive", () => p.accounts.archive(anyId)],
           ["rules.save", () => p.rules.save({ rule: before.rules[0] as never })],
           [

@@ -31,6 +31,7 @@ import type {
   Uuid,
   UserSettings,
 } from "@/domain/types";
+import type { InstallmentDates } from "@/domain/card-terms";
 
 // ---------------------------------------------------------------------------
 // Errores tipados
@@ -102,7 +103,17 @@ export interface SettingsRepository {
 export interface AccountsRepository {
   list(opts?: { includeArchived?: boolean }): Promise<Account[]>;
   create(input: NewEntity<Account>): Promise<Account>;
-  update(id: Uuid, patch: Patch<Account>): Promise<Account>;
+  /**
+   * `reschedule` (spec 007): fechas nuevas de mensualidades MSI no cobradas de ESTA tarjeta, que se
+   * aplican en la MISMA transacción que el patch (RPC `update_account_with_installments`). Si
+   * alguna no es de la tarjeta o ya está cobrada, no cambia nada (VALIDATION). Vacío u omitido →
+   * update directo.
+   */
+  update(
+    id: Uuid,
+    patch: Patch<Account>,
+    reschedule?: readonly InstallmentDates[],
+  ): Promise<Account>;
   /** Archiva; rechaza (CONFLICT) si hay MSI pendientes asociados a la tarjeta (edge case del spec). */
   archive(id: Uuid): Promise<void>;
 }

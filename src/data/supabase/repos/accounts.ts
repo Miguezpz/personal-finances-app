@@ -44,7 +44,22 @@ export function createAccountsRepository(db: AppSupabaseClient): AccountsReposit
       return toAccount(row);
     },
 
-    async update(id, patch) {
+    async update(id, patch, reschedule) {
+      if (reschedule && reschedule.length > 0) {
+        // Spec 007: card terms + MSI dates in one transaction (0010_update_card_terms.sql).
+        const row = await exec(
+          db.rpc("update_account_with_installments", {
+            p_id: id,
+            p_patch: fromAccount(patch),
+            p_installments: reschedule.map((i) => ({
+              id: i.id,
+              due_on: i.dueOn,
+              card_due_on: i.cardDueOn,
+            })),
+          }),
+        );
+        return toAccount(row);
+      }
       const row = await exec(
         db.from("accounts").update(fromAccount(patch)).eq("id", id).select("*").single(),
       );

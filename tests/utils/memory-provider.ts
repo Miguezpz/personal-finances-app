@@ -8,11 +8,15 @@
  * Spec 005: `expenses.create`/`remove` and every `expenseTemplates` write also work over the
  * snapshot (create → new server id, remove of a template = archived). `holdExpenseCreate()` keeps
  * expense creations pending, to test Undo while the server hasn't answered.
+ *
+ * Spec 007: `accounts.update` patches the account and, with `reschedule`, the installments in the
+ * same step, with the RPC's checks (that card's, not collected; all or nothing → VALIDATION).
  */
 import { vi, type Mock } from "vitest";
 import { createMockProvider } from "@/data/mock/provider";
 import {
   ProviderError,
+  type AccountsRepository,
   type DataProvider,
   type ExpenseTemplatesRepository,
   type ExpensesRepository,
@@ -32,6 +36,7 @@ type CreateRecurringFn = RecurringRepository["create"];
 type CreateExpenseFn = ExpensesRepository["create"];
 type RemoveExpenseFn = ExpensesRepository["remove"];
 type Templates = ExpenseTemplatesRepository;
+type UpdateAccountFn = AccountsRepository["update"];
 
 export interface MemoryProvider extends DataProvider {
   readonly state: { snapshot: FinanceSnapshot };
@@ -41,6 +46,7 @@ export interface MemoryProvider extends DataProvider {
     remove: Mock<RemoveExpenseFn>;
   };
   readonly recurring: RecurringRepository & { create: Mock<CreateRecurringFn> };
+  readonly accounts: AccountsRepository & { update: Mock<UpdateAccountFn> };
   readonly expenseTemplates: {
     list: Templates["list"];
     create: Mock<Templates["create"]>;
@@ -144,6 +150,30 @@ export function createMemoryProvider(initial: FinanceSnapshot): MemoryProvider {
     }),
   };
 
+  const updateAccount = vi.fn<UpdateAccountFn>(async (id, patch, reschedule = []) => {
+    const s = state.snapshot;
+    const account = s.accounts.find((a) => a.id === id);
+    if (!account) throw new ProviderError("NOT_FOUND", `account ${id} does not exist`);
+    const ofCard = new Set(s.receivables.filter((r) => r.cardAccountId === id).map((r) => r.id));
+    const dates = new Map(reschedule.map((r) => [r.id, r]));
+    const allowed = s.installments.filter(
+      (i) => dates.has(i.id) && ofCard.has(i.receivableId) && i.status !== "collected",
+    );
+    if (allowed.length !== reschedule.length) {
+      throw new ProviderError("VALIDATION", "installments of another card or already collected");
+    }
+    const row = { ...account, ...patch };
+    state.snapshot = {
+      ...s,
+      accounts: s.accounts.map((a) => (a.id === id ? row : a)),
+      installments: s.installments.map((i) => {
+        const next = dates.get(i.id);
+        return next ? { ...i, dueOn: next.dueOn, cardDueOn: next.cardDueOn } : i;
+      }),
+    };
+    return row;
+  });
+
   const holdOpen = (set: (p: Promise<void> | null) => void) => {
     let release!: () => void;
     set(new Promise<void>((r) => (release = r)));
@@ -165,6 +195,7 @@ export function createMemoryProvider(initial: FinanceSnapshot): MemoryProvider {
       remove: removeExpense,
     },
     recurring: { ...base.recurring, create },
+    accounts: { ...base.accounts, update: updateAccount },
     expenseTemplates,
     loadSnapshot: vi.fn(async () => state.snapshot),
     holdRecurringCreate: () => holdOpen((p) => (hold = p)),
