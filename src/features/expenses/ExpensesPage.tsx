@@ -1,7 +1,7 @@
 "use client";
 
 /**
- * Expenses (T092): card debt summary, and every expense and card payment, newest first, with edit
+ * Expenses (T092): spending by payment method for the quincena, card debt summary, and every expense and card payment, newest first, with edit
  * and delete. Automatic (recurring) charges are labelled; third-party MSI charges never appear
  * here — they aren't personal expenses (FR-020).
  */
@@ -40,6 +40,7 @@ import { CardDebtSummary } from "./CardDebtSummary";
 import { CardPaymentDialog } from "./CardPaymentDialog";
 import { useDeleteCardPayment, useDeleteExpense } from "./hooks";
 import { QuickExpensesSection } from "./QuickExpensesSection";
+import { SpendingByMethod } from "./SpendingByMethod";
 
 const PAGE = 50;
 
@@ -144,6 +145,8 @@ export function ExpensesPage() {
           </>
         }
       />
+
+      <SpendingByMethod />
 
       <CardDebtSummary onPay={(cardId, amount) => setPayDialog({ open: true, cardId, amount })} />
 
