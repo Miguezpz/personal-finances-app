@@ -108,8 +108,8 @@ description: "Task list for spec 007 — Fechas de corte y pago de tarjetas desd
 
 - [X] T025 [P] Crear `tests/e2e/us14-card-statement-dates.spec.ts`: `@demo` (abrir una tarjeta del demo, ver fechas prellenadas y 3 estados, guardar muestra solo lectura, axe sin violaciones serias en el diálogo, EN y ES) y `@live` (tarjeta con compra MSI a 3 meses; cambiar el corte por fechas → Por cobrar muestra las fechas nuevas). Revisar e2e existentes que lean fechas de límite del seed (R8)
 - [X] T026 Puertas: `pnpm typecheck && pnpm lint && pnpm format:check && pnpm test`, `pnpm db:reset && pnpm db:types && pnpm db:test`, `pnpm test:contract:local`, `pnpm test:e2e:local`, `pnpm check:demo-bundle`
-- [ ] T027 Nube (quickstart § 4): aplicar `0010_update_card_terms.sql` a `potodtpkgadgsmeuuafx`, revisar advisors de seguridad, desplegar desde git (push a `main`)
-- [ ] T028 Abrir la app una vez en producción y verificar con SQL de solo lectura: la mensualidad pendiente de Banregio queda con `card_due_on = 2026-12-04` y `due_on = 2026-12-01`; las 6 tarjetas conservan sus términos (SC-006)
+- [X] T027 Nube (quickstart § 4): aplicar `0010_update_card_terms.sql` a `potodtpkgadgsmeuuafx`, revisar advisors de seguridad, desplegar desde git (push a `main`)
+- [X] T028 Abrir la app una vez en producción y verificar con SQL de solo lectura: la mensualidad pendiente de Banregio queda con `card_due_on = 2026-12-04` y `due_on = 2026-12-01`; las 6 tarjetas conservan sus términos (SC-006)
 
 ---
 
