@@ -64,6 +64,8 @@ test.describe("US8 · settings and ledger", { tag: "@live" }, () => {
     await page.getByTestId("add-account").click();
     await page.locator("#account-kind").selectOption("credit_card");
     await page.locator("#account-name").fill("E2E Card");
+    // Spec 007: statement dates are the default; this flow types the numbers by hand.
+    await page.getByTestId("card-terms-mode").click();
     await page.locator("#account-cutoff").fill("12");
     await page.locator("#account-due").fill("20");
     await page.getByTestId("save-account").click();

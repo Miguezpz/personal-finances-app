@@ -42,7 +42,9 @@
     ".next-e2e-live/types/**/*.ts",
     ".next-e2e-live/dev/types/**/*.ts",
     ".next-e2e-democheck/types/**/*.ts",
-    ".next-e2e-democheck/dev/types/**/*.ts"
+    ".next-e2e-democheck/dev/types/**/*.ts",
+    ".next-demo-check/types/**/*.ts",
+    ".next-demo-check/dev/types/**/*.ts"
   ],
   "exclude": [
     "node_modules",
