@@ -3,7 +3,7 @@
 /**
  * Create / edit an account or card (T122). The kind can change while no recorded history depends
  * on it (domain/account-kind.ts); otherwise the form says why. Card fields only appear for credit
- * cards.
+ * cards (CardTermsFields: statement dates by default, numbers by hand as an option; spec 007).
  */
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useTranslations } from "next-intl";
@@ -25,9 +25,12 @@ import { NativeSelect, NativeSelectOption } from "@/components/ui/native-select"
 import { isNotifiedGlobally, isProviderError } from "@/data/errors";
 import { useFinanceSnapshot } from "@/data/useFinanceSnapshot";
 import { kindChangeBlocker, type KindChangeBlocker } from "@/domain/account-kind";
+import { cardTermsOf, latestStatement } from "@/domain/card-terms";
 import { INSTITUTIONS } from "@/domain/institutions";
 import { formatCentsAsInput } from "@/domain/parse";
-import type { Account, FinanceSnapshot } from "@/domain/types";
+import type { Account, FinanceSnapshot, IsoDate } from "@/domain/types";
+import { useToday } from "@/lib/use-today";
+import { CardTermsFields } from "./CardTermsFields";
 import { useCreateAccount, useUpdateAccount } from "./hooks";
 import {
   ACCOUNT_KINDS,
@@ -61,6 +64,37 @@ interface Props {
   takenNames: readonly string[];
 }
 
+/** Edit: the card's latest statement (FR-005), so saving unchanged keeps the same terms. */
+function defaultValues(account: Account | null | undefined, today: IsoDate): AccountFormInput {
+  if (!account) {
+    return {
+      kind: "checking",
+      name: "",
+      institution: "",
+      termsMode: "statement",
+      statementCutOffOn: "",
+      statementDueOn: "",
+      cutOffDay: "",
+      paymentDueOffsetDays: "20",
+      openingBalance: "",
+    };
+  }
+  const terms = cardTermsOf(account);
+  const latest = terms ? latestStatement(terms, today) : null;
+  return {
+    kind: account.kind,
+    name: account.name,
+    institution: account.institution ?? "",
+    termsMode: "statement",
+    statementCutOffOn: latest?.cutOffOn ?? "",
+    statementDueOn: latest?.dueOn ?? "",
+    cutOffDay: account.cutOffDay === null ? "" : String(account.cutOffDay),
+    paymentDueOffsetDays:
+      account.paymentDueOffsetDays === null ? "" : String(account.paymentDueOffsetDays),
+    openingBalance: formatCentsAsInput(account.openingBalance),
+  };
+}
+
 export function AccountForm({ open, onOpenChange, account, takenNames }: Props) {
   const t = useTranslations("settings");
   const tc = useTranslations("common");
@@ -68,27 +102,11 @@ export function AccountForm({ open, onOpenChange, account, takenNames }: Props) 
   const update = useUpdateAccount();
   const editing = Boolean(account);
   const { data: kindDeps } = useFinanceSnapshot(selectKindDeps);
+  const today = useToday();
 
   const form = useForm<AccountFormInput, unknown, AccountFormOutput>({
     resolver: zodResolver(accountFormSchema),
-    defaultValues: account
-      ? {
-          kind: account.kind,
-          name: account.name,
-          institution: account.institution ?? "",
-          cutOffDay: account.cutOffDay === null ? "" : String(account.cutOffDay),
-          paymentDueOffsetDays:
-            account.paymentDueOffsetDays === null ? "" : String(account.paymentDueOffsetDays),
-          openingBalance: formatCentsAsInput(account.openingBalance),
-        }
-      : {
-          kind: "checking",
-          name: "",
-          institution: "",
-          cutOffDay: "",
-          paymentDueOffsetDays: "20",
-          openingBalance: "",
-        },
+    defaultValues: defaultValues(account, today),
   });
   const kind = useWatch({ control: form.control, name: "kind" });
   const accountName = useWatch({ control: form.control, name: "name" });
@@ -203,35 +221,7 @@ export function AccountForm({ open, onOpenChange, account, takenNames }: Props) 
               )}
             </Field>
 
-            {kind === "credit_card" && (
-              <div className="grid grid-cols-2 gap-4">
-                <Field data-invalid={Boolean(errors.cutOffDay)}>
-                  <FieldLabel htmlFor="account-cutoff">{t("cutOffDay")}</FieldLabel>
-                  <Input
-                    id="account-cutoff"
-                    inputMode="numeric"
-                    autoComplete="off"
-                    {...form.register("cutOffDay")}
-                  />
-                  {errors.cutOffDay && (
-                    <FieldError>{errorText(errors.cutOffDay.message)}</FieldError>
-                  )}
-                </Field>
-                <Field data-invalid={Boolean(errors.paymentDueOffsetDays)}>
-                  <FieldLabel htmlFor="account-due">{t("dueOffset")}</FieldLabel>
-                  <Input
-                    id="account-due"
-                    inputMode="numeric"
-                    autoComplete="off"
-                    {...form.register("paymentDueOffsetDays")}
-                  />
-                  {errors.paymentDueOffsetDays && (
-                    <FieldError>{errorText(errors.paymentDueOffsetDays.message)}</FieldError>
-                  )}
-                </Field>
-                <FieldDescription className="col-span-2">{t("cardHint")}</FieldDescription>
-              </div>
-            )}
+            {kind === "credit_card" && <CardTermsFields form={form} today={today} />}
 
             <Field data-invalid={Boolean(errors.openingBalance)}>
               <FieldLabel htmlFor="account-opening">{t("openingBalance")}</FieldLabel>

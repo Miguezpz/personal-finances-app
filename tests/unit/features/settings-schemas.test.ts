@@ -34,6 +34,49 @@ describe("accountFormSchema", () => {
     });
   });
 
+  describe("card terms from a statement (spec 007)", () => {
+    const card = { ...base, kind: "credit_card" as const };
+    const statement = (cut: string, due: string) => ({
+      ...card,
+      termsMode: "statement" as const,
+      statementCutOffOn: cut,
+      statementDueOn: due,
+    });
+
+    it("derives the same output as typing the numbers by hand", () => {
+      const fromDates = accountFormSchema.parse(statement("2026-11-22", "2026-12-07"));
+      const byHand = accountFormSchema.parse({
+        ...card,
+        termsMode: "manual",
+        cutOffDay: "22",
+        paymentDueOffsetDays: "15",
+      });
+      expect(fromDates).toEqual(byHand);
+      expect(fromDates).toMatchObject({ cutOffDay: 22, paymentDueOffsetDays: 15 });
+    });
+
+    it("reports invalid statements on the due date field", () => {
+      const issues = (r: ReturnType<typeof accountFormSchema.safeParse>) =>
+        r.success ? [] : r.error.issues.map((i) => [i.path.join("."), i.message]);
+      expect(issues(accountFormSchema.safeParse(statement("2026-11-22", "2026-11-22")))).toEqual([
+        ["statementDueOn", "dueNotAfterCutOff"],
+      ]);
+      expect(issues(accountFormSchema.safeParse(statement("2026-11-01", "2027-01-01")))).toEqual([
+        ["statementDueOn", "dueTooFar"],
+      ]);
+      expect(issues(accountFormSchema.safeParse(statement("", "")))).toEqual([
+        ["statementCutOffOn", "invalidCutOffDate"],
+        ["statementDueOn", "invalidDueDate"],
+      ]);
+    });
+
+    it("ignores statement dates for other kinds", () => {
+      expect(
+        accountFormSchema.parse({ ...statement("2026-11-22", "2026-12-07"), kind: "checking" }),
+      ).toMatchObject({ cutOffDay: null, paymentDueOffsetDays: null });
+    });
+  });
+
   it("requires a cut-off day 1–31 and 1–60 days to pay for credit cards", () => {
     const card = { ...base, kind: "credit_card" as const };
     expect(
