@@ -127,8 +127,14 @@ export function AppShell({ children, toolbar }: { children: ReactNode; toolbar?:
   const canSignOut = Boolean(session.data?.email);
 
   async function signOut() {
-    await provider.auth.signOut();
-    router.replace("/");
+    try {
+      await provider.auth.signOut();
+    } catch {
+      // The local session is already gone (the adapter falls back to a local sign-out), so
+      // leaving the app is still correct; only the other devices' sessions may remain.
+    } finally {
+      router.replace("/");
+    }
   }
 
   return (

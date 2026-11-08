@@ -47,8 +47,14 @@ export function createSupabaseAuth(db: AppSupabaseClient): AuthPort {
     },
 
     async signOut() {
+      // Global scope revokes every refresh token of the account (all devices). If that call
+      // fails (offline, cold start), still drop this device's session cookies so the browser
+      // can't keep using them, then report the failure.
       const { error } = await db.auth.signOut();
-      if (error) throw toProviderError(error);
+      if (error) {
+        await db.auth.signOut({ scope: "local" }).catch(() => undefined);
+        throw toProviderError(error);
+      }
     },
 
     onChange(cb) {

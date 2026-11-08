@@ -9,5 +9,5 @@ import { env } from "@/lib/env";
  */
 export default function Home() {
   if (env.isDemo) redirect("/dashboard");
-  return <Landing demoUrl={env.demoUrl} />;
+  return <Landing demoUrl={env.demoUrl} passwordSignIn={env.passwordSignIn} />;
 }

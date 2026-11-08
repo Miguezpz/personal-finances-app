@@ -16,9 +16,11 @@ import { LoginForm } from "./LoginForm";
 interface LandingProps {
   /** Public demo deployment (NEXT_PUBLIC_DEMO_URL); the button is hidden when not configured. */
   demoUrl: string | null;
+  /** Email + password form (NEXT_PUBLIC_PASSWORD_SIGN_IN); off on the personal deployment. */
+  passwordSignIn: boolean;
 }
 
-export function Landing({ demoUrl }: LandingProps) {
+export function Landing({ demoUrl, passwordSignIn }: LandingProps) {
   const t = useTranslations("auth");
   const tc = useTranslations("common");
 
@@ -45,13 +47,18 @@ export function Landing({ demoUrl }: LandingProps) {
               <OAuthErrorAlert />
             </Suspense>
             <GoogleSignInButton />
-            {/* Password sign-in stays as the fallback (002-google-sign-in, FR-001). */}
-            <div className="flex items-center gap-3 text-xs text-muted-foreground uppercase">
-              <Separator className="flex-1" />
-              <span>{t("or")}</span>
-              <Separator className="flex-1" />
-            </div>
-            <LoginForm />
+            {/* Password sign-in (002-google-sign-in, FR-001): kept for local dev and the e2e/contract
+                suites; the personal deployment turns it off and only accepts Google. */}
+            {passwordSignIn && (
+              <>
+                <div className="flex items-center gap-3 text-xs text-muted-foreground uppercase">
+                  <Separator className="flex-1" />
+                  <span>{t("or")}</span>
+                  <Separator className="flex-1" />
+                </div>
+                <LoginForm />
+              </>
+            )}
           </CardContent>
         </Card>
 

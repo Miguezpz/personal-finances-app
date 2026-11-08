@@ -11,17 +11,26 @@ export type Env =
   | {
       readonly isDemo: true;
       readonly demoUrl: string | null;
+      /** The demo has no sign-in at all. */
+      readonly passwordSignIn: false;
       readonly supabase: null;
     }
   | {
       readonly isDemo: false;
       readonly demoUrl: string | null;
+      /**
+       * Show the email + password form on the landing page. On by default (local dev, e2e and
+       * contract tests sign in with a password); the personal deployment sets it to "false" because
+       * the Email provider is disabled in Supabase there and Google is the only way in.
+       */
+      readonly passwordSignIn: boolean;
       readonly supabase: { readonly url: string; readonly publishableKey: string };
     };
 
 type EnvKey =
   | "NEXT_PUBLIC_DEMO_MODE"
   | "NEXT_PUBLIC_DEMO_URL"
+  | "NEXT_PUBLIC_PASSWORD_SIGN_IN"
   | "NEXT_PUBLIC_SUPABASE_URL"
   | "NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY";
 
@@ -56,6 +65,7 @@ const schema = z
   .object({
     NEXT_PUBLIC_DEMO_MODE: optional(z.enum(["true", "false"])),
     NEXT_PUBLIC_DEMO_URL: optional(z.url()),
+    NEXT_PUBLIC_PASSWORD_SIGN_IN: optional(z.enum(["true", "false"])),
     NEXT_PUBLIC_SUPABASE_URL: optional(z.url()),
     NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY: optional(z.string()),
   })
@@ -102,12 +112,13 @@ export function parseEnv(raw: RawEnv): Env {
   const demoUrl = v.NEXT_PUBLIC_DEMO_URL ?? null;
 
   if (v.NEXT_PUBLIC_DEMO_MODE === "true") {
-    return { isDemo: true, demoUrl, supabase: null };
+    return { isDemo: true, demoUrl, passwordSignIn: false, supabase: null };
   }
   // superRefine guarantees both values in live mode.
   return {
     isDemo: false,
     demoUrl,
+    passwordSignIn: v.NEXT_PUBLIC_PASSWORD_SIGN_IN !== "false",
     supabase: {
       url: v.NEXT_PUBLIC_SUPABASE_URL as string,
       publishableKey: v.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY as string,
@@ -124,6 +135,7 @@ function readRawEnv(): RawEnv {
   return {
     NEXT_PUBLIC_DEMO_MODE: process.env.NEXT_PUBLIC_DEMO_MODE,
     NEXT_PUBLIC_DEMO_URL: process.env.NEXT_PUBLIC_DEMO_URL,
+    NEXT_PUBLIC_PASSWORD_SIGN_IN: process.env.NEXT_PUBLIC_PASSWORD_SIGN_IN,
     NEXT_PUBLIC_SUPABASE_URL: demo ? undefined : process.env.NEXT_PUBLIC_SUPABASE_URL,
     NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY: demo
       ? undefined
@@ -150,6 +162,9 @@ export const env = {
   },
   get demoUrl(): string | null {
     return getEnv().demoUrl;
+  },
+  get passwordSignIn(): boolean {
+    return getEnv().passwordSignIn;
   },
   get supabase(): Env["supabase"] {
     return getEnv().supabase;

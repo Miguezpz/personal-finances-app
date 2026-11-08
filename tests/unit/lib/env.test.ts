@@ -4,6 +4,7 @@ import { EnvError, parseEnv, type RawEnv } from "@/lib/env";
 const base: RawEnv = {
   NEXT_PUBLIC_DEMO_MODE: undefined,
   NEXT_PUBLIC_DEMO_URL: undefined,
+  NEXT_PUBLIC_PASSWORD_SIGN_IN: undefined,
   NEXT_PUBLIC_SUPABASE_URL: undefined,
   NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY: undefined,
 };
@@ -15,7 +16,7 @@ const legacyJwt = (role: string) => `${b64url({ alg: "HS256" })}.${b64url({ role
 describe("parseEnv", () => {
   it("demo mode needs no Supabase variables", () => {
     const env = parseEnv({ ...base, NEXT_PUBLIC_DEMO_MODE: "true" });
-    expect(env).toEqual({ isDemo: true, demoUrl: null, supabase: null });
+    expect(env).toEqual({ isDemo: true, demoUrl: null, passwordSignIn: false, supabase: null });
   });
 
   it("live mode (default) requires the Supabase URL and publishable key", () => {
@@ -48,7 +49,40 @@ describe("parseEnv", () => {
     expect(env).toEqual({
       isDemo: false,
       demoUrl: "https://personal-finances-demo.vercel.app",
+      passwordSignIn: true,
       supabase: { url: "http://127.0.0.1:54321", publishableKey: "sb_publishable_abc123" },
+    });
+  });
+
+  describe("NEXT_PUBLIC_PASSWORD_SIGN_IN", () => {
+    const live = {
+      ...base,
+      NEXT_PUBLIC_SUPABASE_URL: "http://127.0.0.1:54321",
+      NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY: "sb_publishable_abc123",
+    };
+
+    it.each([
+      [undefined, true],
+      ["", true],
+      ["true", true],
+      ["false", false],
+    ])("%j → passwordSignIn %s", (value, expected) => {
+      expect(parseEnv({ ...live, NEXT_PUBLIC_PASSWORD_SIGN_IN: value }).passwordSignIn).toBe(
+        expected,
+      );
+    });
+
+    it("rejects anything other than true/false", () => {
+      expect(() => parseEnv({ ...live, NEXT_PUBLIC_PASSWORD_SIGN_IN: "no" })).toThrow(EnvError);
+    });
+
+    it("is always off in the demo", () => {
+      const env = parseEnv({
+        ...base,
+        NEXT_PUBLIC_DEMO_MODE: "true",
+        NEXT_PUBLIC_PASSWORD_SIGN_IN: "true",
+      });
+      expect(env.passwordSignIn).toBe(false);
     });
   });
 
