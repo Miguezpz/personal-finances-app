@@ -8,6 +8,6 @@ export const DEBTOR_IDS = {
 } as const;
 
 export const DEBTORS: readonly Debtor[] = [
-  { id: DEBTOR_IDS.ana, name: "Ana (sister)" },
-  { id: DEBTOR_IDS.carlos, name: "Carlos (roommate)" },
+  { id: DEBTOR_IDS.ana, name: "Ana" },
+  { id: DEBTOR_IDS.carlos, name: "Carlos" },
 ];

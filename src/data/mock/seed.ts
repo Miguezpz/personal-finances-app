@@ -70,8 +70,8 @@ export interface SeedOptions {
   /** Months of history including the current one (demo: 6). */
   months?: number;
   /**
-   * Average manual expenses per day (demo 1.55, calibrated so Needs and Wants hover around their
-   * allocation and the semáforo shows every color over time; perf tests use more).
+   * Average manual expenses per day (demo 1.5, calibrated so Needs and Wants stay positive with a
+   * modest surplus: mostly green, sometimes yellow, never a negative balance; perf tests use more).
    */
   expensesPerDay?: number;
   seed?: number;
@@ -155,7 +155,8 @@ interface SpendProfile {
   weight: number;
   min: number; // pesos
   max: number;
-  notes?: readonly string[];
+  /** Short, merchant-style titles; one is picked per expense so rows don't just repeat the subcategory. */
+  notes: readonly string[];
 }
 
 const PROFILES: readonly SpendProfile[] = [
@@ -163,23 +164,25 @@ const PROFILES: readonly SpendProfile[] = [
     sub: ["taxonomy.categories.groceries", "Pantry"],
     bucket: "needs",
     weight: 5,
-    min: 200,
-    max: 1400,
-    notes: ["Weekly groceries"],
+    min: 250,
+    max: 1100,
+    notes: ["Walmart", "Soriana", "Costco", "La Comer", "Chedraui"],
   },
   {
     sub: ["taxonomy.categories.groceries", "Hygiene"],
     bucket: "needs",
     weight: 3,
     min: 80,
-    max: 400,
+    max: 350,
+    notes: ["Farmacia", "Oxxo", "Walmart"],
   },
   {
     sub: ["taxonomy.categories.transportGas", "Fuel"],
     bucket: "needs",
     weight: 2,
     min: 400,
-    max: 900,
+    max: 850,
+    notes: ["Pemex", "Shell", "BP"],
   },
   {
     sub: ["taxonomy.categories.transportGas", "Public transport"],
@@ -187,64 +190,71 @@ const PROFILES: readonly SpendProfile[] = [
     weight: 2,
     min: 30,
     max: 120,
+    notes: ["Metro", "Metrobús", "Uber"],
   },
   {
     sub: ["taxonomy.categories.healthInsurance", "Medicine"],
     bucket: "needs",
     weight: 1,
     min: 80,
-    max: 600,
+    max: 500,
+    notes: ["Farmacia", "Similares"],
   },
   {
     sub: ["taxonomy.categories.homeServices", "Electricity"],
     bucket: "needs",
     weight: 0.3,
     min: 300,
-    max: 900,
-    notes: ["Electricity"],
+    max: 800,
+    notes: ["CFE"],
   },
   {
     sub: ["taxonomy.categories.healthInsurance", "Doctor"],
     bucket: "needs",
     weight: 0.2,
     min: 600,
-    max: 1500,
+    max: 1200,
+    notes: ["Dentist", "Checkup"],
   },
   {
     sub: ["taxonomy.categories.restaurants", "Restaurants"],
     bucket: "wants",
     weight: 5.8,
     min: 250,
-    max: 900,
-    notes: ["Dinner with friends"],
+    max: 800,
+    notes: ["Tacos", "Sushi", "Pizza", "Brunch", "Dinner out"],
   },
   {
     sub: ["taxonomy.categories.restaurants", "Coffee"],
     bucket: "wants",
     weight: 5.8,
     min: 50,
-    max: 150,
+    max: 140,
+    notes: ["Starbucks", "Café", "Cielito"],
   },
   {
     sub: ["taxonomy.categories.entertainment", "Concerts"],
     bucket: "wants",
     weight: 1.2,
     min: 400,
-    max: 1500,
+    max: 1400,
+    notes: ["Ticketmaster", "Cinépolis"],
   },
   {
     sub: ["taxonomy.categories.clothes", "Clothing"],
     bucket: "wants",
     weight: 1.4,
     min: 400,
-    max: 1800,
+    max: 1600,
+    notes: ["Zara", "Liverpool", "H&M"],
   },
   {
     sub: ["taxonomy.categories.tech", "Audio"],
     bucket: "wants",
     weight: 0.45,
     min: 800,
-    max: 3500,
+    max: 3000,
+    notes: ["Amazon", "Mercado Libre"],
   },
 ];
 
@@ -268,14 +278,14 @@ interface RecurringSpec {
 const RECURRING: readonly RecurringSpec[] = [
   {
     name: "Rent",
-    amount: 850_000,
+    amount: 750_000,
     chargeDay: 1,
     sub: ["taxonomy.housing", "Rent"],
     bucket: "needs",
     paymentAccountId: ACCOUNT_IDS.debit,
   },
   {
-    name: "Home internet",
+    name: "Izzi",
     amount: 64_900,
     chargeDay: 10,
     sub: ["taxonomy.categories.homeServices", "Internet"],
@@ -283,7 +293,7 @@ const RECURRING: readonly RecurringSpec[] = [
     paymentAccountId: ACCOUNT_IDS.goldCard,
   },
   {
-    name: "Streaming",
+    name: "Netflix",
     amount: 29_900,
     chargeDay: 18,
     sub: ["taxonomy.categories.streaming", "Video streaming"],
@@ -291,7 +301,7 @@ const RECURRING: readonly RecurringSpec[] = [
     paymentAccountId: ACCOUNT_IDS.goldCard,
   },
   {
-    name: "Mobile plan",
+    name: "Telcel",
     amount: 39_900,
     chargeDay: 22,
     sub: ["taxonomy.categories.telecom", "Mobile plan"],
@@ -299,7 +309,7 @@ const RECURRING: readonly RecurringSpec[] = [
     paymentAccountId: ACCOUNT_IDS.debit,
   },
   {
-    name: "Gym",
+    name: "Smart Fit",
     amount: 74_900,
     chargeDay: 31,
     sub: ["taxonomy.categories.gymWellness", "Gym"],
@@ -312,7 +322,7 @@ const RECURRING: readonly RecurringSpec[] = [
 // Generator
 // ---------------------------------------------------------------------------
 export function generateDemoSnapshot(options: SeedOptions): FinanceSnapshot {
-  const { today, months = 6, expensesPerDay = 1.55, seed = DEFAULT_SEED } = options;
+  const { today, months = 6, expensesPerDay = 1.5, seed = DEFAULT_SEED } = options;
   let counter = 0x10000;
   const nextId = () =>
     `00000000-0000-4000-8000-${(counter++).toString(16).padStart(12, "0")}` as Uuid;
@@ -431,7 +441,7 @@ export function generateDemoSnapshot(options: SeedOptions): FinanceSnapshot {
       if (rng() >= p) continue;
       const profile = weightedPick(rng, PROFILES);
       const amount = cents(randInt(rng, profile.min, profile.max) * 100 + (rng() < 0.3 ? 50 : 0));
-      const note = profile.notes && rng() < 0.25 ? (profile.notes[0] as string) : null;
+      const note = profile.notes[randInt(rng, 0, profile.notes.length - 1)] as string;
       expenses.push({
         id: nextId(),
         amount,

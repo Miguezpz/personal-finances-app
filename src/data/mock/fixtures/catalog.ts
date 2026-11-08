@@ -1,5 +1,6 @@
 /**
- * Demo catalog (T039): fictitious accounts, the default taxonomy and a 50/30/20 rule with 90/10
+ * Demo catalog (T039): example accounts at well-known Mexican banks (so the demo shows their logo
+ * tiles, see domain/institutions.ts) with fictitious balances, the default taxonomy and a 50/30/20 rule with 90/10
  * investment sub-rules. No real data of the owner (FR-048). Ids are fixed so the demo is stable.
  */
 import { DEFAULT_TAXONOMY } from "@/domain/default-taxonomy";
@@ -21,8 +22,8 @@ export const ACCOUNTS: readonly Account[] = [
   {
     id: ACCOUNT_IDS.debit,
     kind: "checking",
-    name: "Everyday Debit",
-    institution: "Demo Bank",
+    name: "BBVA Debit",
+    institution: "BBVA",
     cutOffDay: null,
     paymentDueOffsetDays: null,
     openingBalance: cents(3_500_000),
@@ -31,8 +32,8 @@ export const ACCOUNTS: readonly Account[] = [
   {
     id: ACCOUNT_IDS.goldCard,
     kind: "credit_card",
-    name: "Gold Card",
-    institution: "Demo Bank",
+    name: "Nu Credit",
+    institution: "Nu",
     cutOffDay: 10,
     paymentDueOffsetDays: 20,
     openingBalance: cents(0),
@@ -41,8 +42,8 @@ export const ACCOUNTS: readonly Account[] = [
   {
     id: ACCOUNT_IDS.travelCard,
     kind: "credit_card",
-    name: "Travel Card",
-    institution: "Sample Credit",
+    name: "Amex Gold",
+    institution: "American Express",
     cutOffDay: 25,
     paymentDueOffsetDays: 20,
     openingBalance: cents(0),
@@ -51,8 +52,8 @@ export const ACCOUNTS: readonly Account[] = [
   {
     id: ACCOUNT_IDS.brokerage,
     kind: "investment",
-    name: "Stock Brokerage",
-    institution: "Demo Invest",
+    name: "GBM+",
+    institution: "GBM",
     cutOffDay: null,
     paymentDueOffsetDays: null,
     openingBalance: cents(12_000_000),
@@ -61,8 +62,8 @@ export const ACCOUNTS: readonly Account[] = [
   {
     id: ACCOUNT_IDS.sofipo,
     kind: "investment",
-    name: "Sofipo Savings",
-    institution: "Demo Sofipo",
+    name: "Finsus",
+    institution: "Finsus",
     cutOffDay: null,
     paymentDueOffsetDays: null,
     openingBalance: cents(5_000_000),
@@ -71,7 +72,7 @@ export const ACCOUNTS: readonly Account[] = [
   {
     id: ACCOUNT_IDS.cash,
     kind: "cash",
-    name: "Wallet",
+    name: "Cash",
     institution: null,
     cutOffDay: null,
     paymentDueOffsetDays: null,
