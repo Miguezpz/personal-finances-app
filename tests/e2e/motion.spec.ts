@@ -60,70 +60,71 @@ test.describe("US4 · motion", { tag: "@demo" }, () => {
     }
   });
 
-  test("spec 010: navigating starts a view transition and the header stays still", async ({
+  test("spec 010: navigating fades the new page in and the header stays still", async ({
     page,
   }) => {
+    await page.goto("/expenses");
+    await expect(page.locator("main [aria-busy='true']")).toHaveCount(0);
+    const header = await page.locator("header").first().boundingBox();
+    await page.locator('aside nav a[href="/goals"]').click();
+    await page.waitForURL("**/goals");
+    expect(
+      await page
+        .locator("main > div")
+        .first()
+        .evaluate((el) => getComputedStyle(el).animationName),
+    ).toBe("page-in");
+    expect(await page.locator("header").first().boundingBox()).toEqual(header);
+  });
+
+  test("spec 010: on mobile the header and the bottom bar never fade, move or get covered while navigating", async ({
+    page,
+  }) => {
+    // A <ViewTransition> drew the pages in a layer above the shell: on iOS the bar vanished for a moment on every tap.
+    await page.setViewportSize({ width: 375, height: 812 });
     await page.addInitScript(() => {
-      const w = window as unknown as { __vt: number };
+      const w = window as unknown as { __vt: number; __shell: string[] };
       w.__vt = 0;
+      w.__shell = [];
       const start = document.startViewTransition?.bind(document);
       if (start)
         document.startViewTransition = ((arg: Parameters<typeof start>[0]) => {
           w.__vt++;
           return start(arg);
         }) as typeof document.startViewTransition;
-    });
-    await page.goto("/expenses");
-    await expect(page.locator("main [aria-busy='true']")).toHaveCount(0);
-    const header = await page.locator("header").first().boundingBox();
-    await page.locator('aside nav a[href="/goals"]').click();
-    await page.waitForURL("**/goals");
-    await expect
-      .poll(() => page.evaluate(() => (window as unknown as { __vt: number }).__vt))
-      .toBeGreaterThan(0);
-    expect(await page.locator("header").first().boundingBox()).toEqual(header);
-  });
-
-  test("spec 010: on mobile the header and the bottom bar stay above the page while it transitions", async ({
-    page,
-  }) => {
-    // Each gets its own snapshot; inside the root snapshot the page's snapshots painted over them (a flash per tap).
-    await page.setViewportSize({ width: 375, height: 812 });
-    await page.addInitScript(() => {
-      const w = window as unknown as { __vtReady: string[] };
-      w.__vtReady = [];
-      const start = document.startViewTransition?.bind(document);
-      if (start)
-        document.startViewTransition = ((arg: Parameters<typeof start>[0]) => {
-          const t = start(arg);
-          t.ready.then(
-            () => w.__vtReady.push("ready"),
-            (e: Error) => w.__vtReady.push(e.name),
-          );
-          return t;
-        }) as typeof document.startViewTransition;
+      // Every frame: the header and the bar are fully opaque and not animating themselves.
+      const sample = () => {
+        for (const el of [
+          document.querySelector("header"),
+          document.querySelector("[data-testid=mobile-nav]"),
+        ]) {
+          if (!el) continue;
+          const opacity = getComputedStyle(el).opacity;
+          if (opacity !== "1" || el.getAnimations().length > 0)
+            w.__shell.push(`${el.tagName} opacity=${opacity}`);
+        }
+        requestAnimationFrame(sample);
+      };
+      requestAnimationFrame(sample);
     });
     await page.goto("/dashboard");
     await expect(page.locator("main [aria-busy='true']")).toHaveCount(0);
-    const vtName = (testId: string) =>
-      page.getByTestId(testId).evaluate((el) => getComputedStyle(el).viewTransitionName);
-    expect(await vtName("mobile-nav")).toBe("mobile-nav");
-    expect(
-      await page
-        .locator("header")
-        .first()
-        .evaluate((el) => getComputedStyle(el).viewTransitionName),
-    ).toBe("app-header");
+    const bar = await page.getByTestId("mobile-nav").boundingBox();
 
+    await page.evaluate(() => window.scrollTo(0, 400));
     await page.getByTestId("mobile-nav-expenses").click();
     await page.waitForURL("**/expenses");
     await page.getByTestId("mobile-nav-more").click();
     await page.getByTestId("more-sheet").locator('a[href="/goals"]').click();
     await page.waitForURL("**/goals");
-    // A duplicated name would skip the transition (ready rejects with InvalidStateError).
-    await expect
-      .poll(() => page.evaluate(() => (window as unknown as { __vtReady: string[] }).__vtReady))
-      .toEqual(["ready", "ready"]);
+    await page.waitForTimeout(300); // past the page's entrance
+
+    const result = await page.evaluate(() => {
+      const w = window as unknown as { __vt: number; __shell: string[] };
+      return { vt: w.__vt, shell: w.__shell };
+    });
+    expect(result).toEqual({ vt: 0, shell: [] });
+    expect(await page.getByTestId("mobile-nav").boundingBox()).toEqual(bar);
   });
 
   test("spec 010: goal bars grow with a transform (never width); the net-worth chart doesn't animate", async ({

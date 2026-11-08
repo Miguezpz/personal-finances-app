@@ -114,7 +114,7 @@ Como dueño, quiero que los errores de validación aparezcan suavemente, que el 
 
 ### Functional Requirements
 
-- **FR-001**: Al navegar entre secciones, el contenido saliente MUST desvanecerse y el entrante MUST aparecer con desvanecimiento y desplazamiento de 4 px, usando la transición de vistas nativa del navegador cuando esté disponible; el total MUST ser ≤ 300 ms.
+- **FR-001**: Al navegar entre secciones, el contenido entrante MUST aparecer con desvanecimiento y desplazamiento de 4 px; el total MUST ser ≤ 300 ms. *(Enmienda 2026-11-08: ya no se usa la transición de vistas nativa ni se desvanece el contenido saliente: sus capas se dibujaban sobre el encabezado y la barra inferior, y en iOS la barra desaparecía un instante en cada toque, contra FR-002.)*
 - **FR-002**: El encabezado y la navegación MUST permanecer fijos durante la transición de ruta, y la página MUST seguir aceptando clics.
 - **FR-003**: Los elementos que ocupan el lugar de un esqueleto de carga MUST aparecer con un desvanecimiento de ≤ 200 ms (no la página completa).
 - **FR-004**: Las filas que aparecen en Gastos, Ingresos y Gastos fijos después de la primera carga de la lista (altas y deshacer) MUST entrar con desvanecimiento y desplazamiento de 4 px en ≤ 200 ms; la primera carga no anima filas.

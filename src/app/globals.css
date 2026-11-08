@@ -164,53 +164,18 @@
 }
 
 /*
- * Spec 010 · route transition (React <ViewTransition> in src/app/(app)/template.tsx). The old page fades out
- * quickly; the new one fades in shortly after, rising 4 px — 240 ms in all (spec 003: ≤ 300 ms). The root snapshot
- * doesn't animate, so the header and the navigation stay still, and clicks pass through the overlay.
+ * Spec 010 · route transition, mounted by src/app/(app)/template.tsx: the new page fades in rising 4 px (180 ms,
+ * spec 003: ≤ 300 ms). Only the page animates; the header and the navigation are outside it and never move. No
+ * fill mode, so the transform is gone once it ends (a transform would trap the page's fixed descendants).
  */
-@keyframes vt-fade-out {
-  to {
-    opacity: 0;
-  }
-}
-@keyframes vt-rise-in {
+@keyframes page-in {
   from {
     opacity: 0;
     transform: translateY(4px);
   }
 }
-::view-transition-old(root),
-::view-transition-new(root) {
-  animation: none;
-}
-::view-transition {
-  pointer-events: none;
-}
-::view-transition-old(.page-out) {
-  animation: vt-fade-out 120ms var(--ease-out-quint) both;
-}
-::view-transition-new(.page-in) {
-  animation: vt-rise-in 180ms var(--ease-out-quint) 60ms both;
-}
-/*
- * The sticky header, the fixed bottom bar and the mobile "More" sheet (which closes as its link navigates) get their
- * own snapshot (view-transition-name in AppShell / MobileNav). Otherwise they'd stay inside the root snapshot, and the
- * page's snapshots, painted above root, would cover them while they fade — on mobile the content scrolled under the
- * bar flashed over it on every tap. They're captured after the page (higher z-index), and show only their live new
- * state (the nav indicator sliding, the sheet sliding out), without moving or cross-fading.
- */
-::view-transition-group(app-header),
-::view-transition-group(mobile-nav),
-::view-transition-group(more-sheet),
-::view-transition-new(app-header),
-::view-transition-new(mobile-nav),
-::view-transition-new(more-sheet) {
-  animation: none;
-}
-::view-transition-old(app-header),
-::view-transition-old(mobile-nav),
-::view-transition-old(more-sheet) {
-  display: none;
+@utility animate-page-in {
+  animation: page-in 180ms var(--ease-out-quint);
 }
 
 /* Spec 010 · rows that appear after the list was on screen (adds, Undo) and rows on their way out (delete). */
@@ -275,12 +240,5 @@ html[data-privacy="off"] input[data-money] {
   }
   .animate-shimmer {
     animation: none !important;
-  }
-  /* Spec 010: route transitions swap instantly. */
-  ::view-transition-old(*),
-  ::view-transition-new(*),
-  ::view-transition-group(*) {
-    animation-duration: 0s !important;
-    animation-delay: 0s !important;
   }
 }

@@ -1,9 +1,8 @@
 "use client";
 
 /**
- * Reveal what replaces a loading skeleton (spec 010, FR-003, research R2). React's <ViewTransition>
- * only runs for transitions, Suspense or deferred values — a resolved query is a plain update — so
- * this watches `main`: in the batch where an `[aria-busy="true"]` node disappears, the elements
+ * Reveal what replaces a loading skeleton (spec 010, FR-003, research R2). The route animation only
+ * plays when the page mounts — a resolved query is a plain update — so this watches `main`: in the batch where an `[aria-busy="true"]` node disappears, the elements
  * inserted in that same batch fade in, rising 4 px (opacity/transform only, 200 ms). Nothing under
  * reduced motion. The amounts are already rendered (and masked when privacy is on) in the first
  * frame; only their container's opacity moves.
