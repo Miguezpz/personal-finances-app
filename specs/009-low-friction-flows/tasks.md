@@ -103,7 +103,7 @@ description: "Task list for spec 009 — Flujos y formularios con menos fricció
 
 ## Phase 10: Polish
 
-- [ ] T039 Gate completo: `pnpm typecheck && pnpm lint && pnpm test`, `E2E_MODES=demo pnpm test:e2e`, `pnpm build`, medir el First Load (≤ +20 kB vs T001), build demo + `pnpm check:demo-bundle`
+- [ ] T039 Gate completo: `pnpm typecheck && pnpm lint && pnpm test`, `E2E_MODES=demo pnpm test:e2e`, `pnpm build`, medir el First Load (≤ +20 kB vs T001), build demo + `pnpm check:demo-bundle`; verificar 44 px táctiles en chips y filas nuevas (FR-032) en tests/e2e/mobile.spec.ts
 - [ ] T040 Ejecución de los e2e `@live` (recordar, deshacer, reintentar) y revisión visual en el deploy: **omitidas por decisión del usuario**
 - [ ] T041 Marcar las tareas completadas y documentar en "Notas" cualquier bloqueo
 

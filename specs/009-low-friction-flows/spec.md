@@ -155,7 +155,7 @@ Como dueño, quiero administrar mis gastos rápidos en Configuración, con un en
 - **Borrado sin conexión**: falla al instante con el aviso de sin conexión y el registro no desaparece (como hoy).
 - **Reintentar tras cerrar el aviso**: si el aviso se cierra o expira, los valores se pierden (no se guardan borradores).
 - **Reintentar con otro diálogo abierto**: reemplaza el diálogo abierto.
-- **"Guardar y agregar otro" que falla**: el formulario queda con los valores; aplica el aviso con "Reintentar".
+- **"Guardar y agregar otro" que falla**: el formulario ya se reinició para el siguiente gasto; el aviso de error con "Reintentar" reabre el diálogo con los valores del gasto que falló.
 - **Sin historial**: no aparecen chips de subcategorías recientes.
 - **Filtros sin resultados**: estado vacío con "Quitar filtros".
 - **Parámetros inválidos en el enlace de Bitácora**: se ignoran y se usa el valor por defecto.
