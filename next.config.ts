@@ -1,4 +1,9 @@
 import type { NextConfig } from "next";
+import { securityHeaders } from "./src/lib/security-headers";
+
+// Same rule as src/lib/env.ts: a demo build never knows the Supabase URL, even if it's set.
+const isDemo = process.env.NEXT_PUBLIC_DEMO_MODE === "true";
+const supabaseUrl = isDemo ? null : process.env.NEXT_PUBLIC_SUPABASE_URL?.trim() || null;
 
 const nextConfig: NextConfig = {
   // NEXT_PUBLIC_DEMO_MODE is inlined at build time, so the e2e demo and live servers need
@@ -19,6 +24,15 @@ const nextConfig: NextConfig = {
     instantInsights: { validationLevel: "manual-warning" },
   },
   partialPrefetching: true,
+  // CSP + hardening headers on every route (src/lib/security-headers.ts).
+  async headers() {
+    return [
+      {
+        source: "/:path*",
+        headers: securityHeaders({ supabaseUrl, isDev: process.env.NODE_ENV === "development" }),
+      },
+    ];
+  },
   turbopack: {
     rules: {
       "*.css": {
