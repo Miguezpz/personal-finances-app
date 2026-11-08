@@ -1,16 +1,22 @@
 # Personal Finances
 
 A personal finance app built around the Mexican **quincena** (paid on the 15th and the last day of
-the month): every income is split automatically by your rules into **Needs / Wants / Investment**,
-and the dashboard tells you how much is **safe to spend** in each bucket until the next payday.
+the month; the English UI calls it a **pay period**): every income is split automatically by your
+rules into **Needs / Wants / Investment**, and the dashboard tells you how much is **safe to spend** in each bucket until the next payday.
 
 It's my day-to-day money tool and a portfolio project. It is designed, specified and tested end to
 end with **Spec-Driven Development** (GitHub Spec Kit + Claude Code), and it runs at **zero cost**
 (Vercel Hobby + Supabase Free).
 
-- **Live demo (read-only, fictitious data, no sign-in):** https://personal-finances-demo.vercel.app
-- **Spec, plan and tasks:** [`specs/_archive/001-personal-finances-core/`](specs/_archive/001-personal-finances-core/)
-  · UI refresh: [`specs/_archive/003-ui-refresh/`](specs/_archive/003-ui-refresh/)
+- **Live demo (read-only, no sign-in):** https://personal-finances-demo.vercel.app — fictitious
+  balances and movements on example accounts at well-known Mexican banks (BBVA, Nu, Amex, GBM,
+  Finsus), with short merchant-style expense names and budgets that stay in the green.
+- **Specs (spec, plan, tasks):** [core](specs/_archive/001-personal-finances-core/) ·
+  [Google sign-in](specs/_archive/002-google-sign-in/) · [UI refresh](specs/_archive/003-ui-refresh/) ·
+  [taxonomy & icons](specs/_archive/004-taxonomy-income-icons/) · [quick expenses](specs/005-quick-expenses/) ·
+  [card statement dates](specs/007-card-statement-dates/) · [navigation](specs/008-navigation-shell/) ·
+  [low-friction flows](specs/009-low-friction-flows/) · [motion](specs/010-motion-polish/) — UX summary in
+  [`docs/ux-roadmap.md`](docs/ux-roadmap.md)
 
 | Desktop · light                                                         | Desktop · dark                                                        |
 | ----------------------------------------------------------------------- | --------------------------------------------------------------------- |
@@ -22,16 +28,16 @@ end with **Spec-Driven Development** (GitHub Spec Kit + Claude Code), and it run
 
 ## What it does
 
-| Area                     | Highlights                                                                                                                                                                                                                                           |
-| ------------------------ | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Income & rules           | Versioned distribution rules (e.g. 50/30/20 with Investment sub-rules); exact splits in integer cents, largest-remainder rounding, funded quincena chosen per income. Every income has a type (salary, gift, cashback, sales…), exported in the CSV. |
-| Safe-to-Spend            | Per-bucket balance with carry-over between quincenas, a traffic light (never color alone) and days to payday. Recurring charges are reserved from day 1 of the quincena.                                                                             |
-| Expenses & cards         | One-tap expenses that inherit the bucket from their subcategory; credit cards in "totalero" mode: the headline is always the **amount to pay to avoid interest**, never the minimum.                                                                 |
-| Categories               | A ready-made taxonomy of 26 categories (13 Needs, 13 Wants) with Lucide icons; each category's icon can be changed and subcategories inherit it unless they get their own.                                                                           |
-| Third parties (MSI)      | Interest-free installment purchases made for someone else: collection calendar ahead of the card's due date, kept out of personal metrics.                                                                                                           |
-| Credit, goals, net worth | Timeline of paydays × card due dates × collections; emergency fund (months of vital expenses) and sinking funds; monthly net-worth history.                                                                                                          |
-| Ledger & export          | Every movement, filterable; CSV of the (filtered) ledger or a full ZIP backup (one CSV per table) generated in the browser.                                                                                                                          |
-| Everywhere               | English/Spanish switch in place, MXN/USD/EUR display (data stays in MXN), privacy mode that masks every amount (charts included), cold-start and offline handling.                                                                                   |
+| Area                     | Highlights                                                                                                                                                                                                                                                         |
+| ------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| Income & rules           | Versioned distribution rules (e.g. 50/30/20 with Investment sub-rules); exact splits in integer cents, largest-remainder rounding, funded quincena chosen per income. Every income has a type (salary, gift, cashback, sales…), exported in the CSV.               |
+| Safe-to-Spend            | Per-bucket balance with carry-over between quincenas, a traffic light (never color alone) and days to payday. Recurring charges are reserved from day 1 of the quincena. The headline never goes negative: an overspent bucket shows $0 and how much it went over. |
+| Expenses & cards         | One-tap expenses that inherit the bucket from their subcategory; credit cards in "totalero" mode: the headline is always the **amount to pay to avoid interest**, never the minimum. Accounts show their bank's logo.                                              |
+| Categories               | A ready-made taxonomy of 26 categories (13 Needs, 13 Wants) with Lucide icons; each category's icon can be changed and subcategories inherit it unless they get their own.                                                                                         |
+| Third parties (MSI)      | Interest-free installment purchases made for someone else: collection calendar ahead of the card's due date, kept out of personal metrics.                                                                                                                         |
+| Credit, goals, net worth | Timeline of paydays × card due dates × collections; emergency fund (months of vital expenses) and sinking funds; monthly net-worth history.                                                                                                                        |
+| Ledger & export          | Every movement, filterable; CSV of the (filtered) ledger or a full ZIP backup (one CSV per table) generated in the browser.                                                                                                                                        |
+| Everywhere               | English/Spanish switch in place, MXN/USD/EUR display (data stays in MXN), privacy mode that masks every amount (charts included), cold-start and offline handling.                                                                                                 |
 
 ## Architecture
 
@@ -62,16 +68,20 @@ Browser (Next.js App Router, all derived values computed client-side)
 "Fresh & Growth" identity ([`specs/_archive/003-ui-refresh`](specs/_archive/003-ui-refresh/spec.md)):
 
 - **Palette in one place.** Ink `#052E2B`, teal `#0F766E`, emerald `#34D399`, mint `#A7F3D0` and mist `#ECFDF5`
-  as brand primitives in [`src/styles/tokens.css`](src/styles/tokens.css), mapped to semantic tokens for a light
-  and a dark theme. A unit test reads that file and fails if any text/background pair drops below WCAG AA
-  (4.5:1) or any indicator below 3:1 — in both themes. Emerald is never used as text on light surfaces.
-- **Light / Dark / System.** Stored with the other device preferences and applied by an inline script before
-  the first paint, so a reload never flashes the wrong theme; "System" follows the OS live.
-- **Mobile first.** Bottom navigation, one floating "Add expense" button as the only highlighted action, forms as
-  bottom sheets with the numeric keyboard, ledger as cards, 44 px touch targets, no horizontal scroll from 320 px.
-- **Motion that respects you.** Short (≤ 300 ms) transitions on opacity/transform only, a sliding nav indicator
-  (Framer Motion, loaded after hydration), a once-per-session entrance on the dashboard — and none of it with
-  "reduce motion" on. No amount is ever animated, and with privacy mode on, amount fields blur instantly.
+  for the light and dark themes, plus an "Asphalt & Neon" theme (near-black `#0A0A0A` with acid lime `#CEE616`),
+  all as brand primitives in [`src/styles/tokens.css`](src/styles/tokens.css) mapped to semantic tokens. A unit
+  test reads that file and fails if any text/background pair drops below WCAG AA (4.5:1) or any indicator below
+  3:1 — in all three themes. Emerald is never used as text on light surfaces.
+- **Neon (default) / Light / Dark / System.** Stored with the other device preferences and applied by an inline
+  script before the first paint, so a reload never flashes the wrong theme; "System" follows the OS live. Brand
+  surfaces such as the demo notice use the primary token, so they follow the theme (lime with near-black text in neon).
+- **Mobile first.** Bottom bar `Dashboard · Expenses · ＋ · Credit · More` (＋ opens a sheet with expense, income, card
+  payment and quick expenses), forms as bottom sheets with the numeric keyboard, ledger as cards, 44 px touch
+  targets, no horizontal scroll from 320 px.
+- **Motion that respects you.** Short (≤ 300 ms) transitions on opacity/transform only: a page-in fade when
+  navigating (the header and bottom bar never move), new rows sliding in and deleted ones fading out, a sliding
+  nav indicator (Framer Motion, loaded after hydration) — and none of it with "reduce motion" on. No amount is
+  ever animated, and with privacy mode on, amount fields blur instantly.
 - **Brand icons and manifest** (installable on a phone), generated by `scripts/generate-favicon.mjs`.
 
 ## Stack
@@ -105,7 +115,7 @@ Deploying the two Vercel projects and the Supabase cloud project: [`docs/deploy.
 | Command                                              | What it checks                                                                                                                                                                                                                                          |
 | ---------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | `pnpm typecheck` · `pnpm lint` · `pnpm format:check` | strict TS, no `any`, Supabase imports only in `src/data/supabase`, no hard-coded UI text, no amounts formatted outside `<Money>`                                                                                                                        |
-| `pnpm test`                                          | domain (incl. property-based tests), hooks, i18n parity, theme contrast (WCAG AA, both themes), performance budgets (Safe-to-Spend < 50 ms and full export < 10 s with 5 years of data)                                                                 |
+| `pnpm test`                                          | domain (incl. property-based tests), hooks, i18n parity, theme contrast (WCAG AA, all three themes), performance budgets (Safe-to-Spend < 50 ms and full export < 10 s with 5 years of data)                                                            |
 | `pnpm test:contract:local`                           | the same DataProvider contract against the Mock and a local Supabase                                                                                                                                                                                    |
 | `pnpm db:test`                                       | pgTAP: RLS isolation between users, exact-sum invariants, account deletion                                                                                                                                                                              |
 | `pnpm test:e2e:local`                                | Playwright matrix demo/live × EN/ES: P1 flows, toggles, privacy sweep, read-only demo with zero Supabase requests, cold start/offline, accessibility (axe, light/dark/neon/mobile), theme, mobile layout, reduced motion, perceived-performance budgets |
@@ -117,7 +127,8 @@ non-local database.
 ## Project structure
 
 ```
-specs/_archive/001-personal-finances-core/  spec, plan, research, data model, contracts, tasks, quickstart
+specs/              one folder per feature (spec, plan, research, data model, contracts, tasks, quickstart);
+                    finished ones live in specs/_archive/
 src/app/            routes ((app) area: dashboard, income, expenses, recurring, receivables,
                     credit, goals, net-worth, ledger, settings/…)
 src/domain/         pure business logic, no I/O, no clock

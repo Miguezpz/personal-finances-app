@@ -211,7 +211,7 @@ En total, el First Load de `/dashboard` creció **+7.5 kB gzip** (cada spec ten�
 
 **010 · Animaciones y pulido**
 
-- Transición de ruta con `<ViewTransition>` de React 19.3 en `template.tsx`: el contenido sale y entra; el shell queda quieto y la página sigue interactiva.
+- Transición de ruta: en `template.tsx`, la página que entra hace un fade de 180 ms (opacidad y 4 px). El header, la barra inferior y la hoja "Más" no se mueven. Al principio era un `<ViewTransition>` de React 19.3, pero se reemplazó el 2026-11-08 (ver desviaciones).
 - Revelado suave de lo que reemplaza al esqueleto.
 - Las filas nuevas entran animadas; las borradas se desvanecen antes de ocultarse; la fila editada destella.
 - Las tarjetas de metas y Patrimonio destellan cuando cambia su monto; la barra de metas crece con `scaleX` (antes animaba el ancho).
@@ -226,12 +226,31 @@ En total, el First Load de `/dashboard` creció **+7.5 kB gzip** (cada spec ten�
 - **Errores de validación**: entran con desvanecimiento y desplazamiento, sin animar la altura con `interpolate-size`, porque el spec 003 solo permite opacidad, transform y color de fondo.
 - **Icono del panel "Apariencia"**: conserva el icono original de ajustes (`SlidersHorizontal`) por preferencia del usuario (2026-11-08); solo cambió el nombre.
 - **Pagos de tarjeta en Bitácora**: no abren edición, porque no existe un diálogo para editar pagos.
+- **Transición de ruta sin `<ViewTransition>`** (2026-11-08): en iOS (WebKit), las capturas de la transición se pintaban encima de todo el documento, así que la barra inferior y el header desaparecían en cada toque, aunque tuvieran su propio `view-transition-name` y `z-index`. Ahora solo anima la página que entra, con CSS. El FR-001 y el R1 del spec 010 se corrigieron.
 
 ### Omitido por decisión del usuario
 
 - Ejecutar los e2e `live-en`/`live-es` (no se levantó Docker ni Supabase local). Los e2e `@live` nuevos (recordar lo último usado, deshacer) quedaron escritos, pero no se ejecutaron.
 - Revisión visual en el deploy de Vercel (390 px y 1440 px, temas claro, oscuro y neón, con movimiento reducido).
 - No se tocó el proyecto Supabase en la nube y no hubo migraciones.
+
+### Ajustes posteriores (2026-11-08)
+
+Cambios hechos fuera de speckit, con commit + push a `main`:
+
+- **Shell**: el header, la barra inferior y la hoja "Más" ya no se tapan durante la navegación. El botón ＋ queda encima del indicador deslizante de la barra.
+- **Datos del demo** (`src/data/mock/`):
+  - Las cuentas usan bancos conocidos para que se vean sus logos: BBVA Debit, Nu Credit, Amex Gold, GBM+, Finsus y Cash. Los saldos siguen siendo ficticios.
+  - Cada gasto tiene un título corto tipo comercio (Walmart, Pemex, Starbucks…) en lugar de repetir la subcategoría.
+  - Los fijos se llaman Rent, Izzi, Netflix, Telcel y Smart Fit, y los deudores Ana y Carlos.
+  - El gasto se recalibró a 1.5 gastos/día, con renta de $7,500 y montos máximos más bajos. En una simulación de cada dos días de 2026, Necesidades y Gustos nunca quedan en negativo: casi siempre en verde y a veces en amarillo.
+- **Disponible para gastar nunca negativo**: si una bolsa se excede, el número grande muestra $0.00 y debajo "Te pasaste por $X" (EN "Over by"). El cálculo y el arrastre del déficit no cambian. Lo cubre `tests/unit/features/bucket-card.test.tsx`.
+- **Aviso del demo**: usa `bg-primary`/`text-primary-foreground` en lugar de ámbar (lima con texto casi negro en neón).
+- **Textos**:
+  - EN: "quincena" → "pay period" (17 cadenas), "recognise" → "recognize", MSI explicado una vez y "safe-to-spend balance" dentro de las oraciones.
+  - ES: "Deseos" → "Gustos" (el nombre de la bolsa), "Safe-to-Spend" → "disponible para gastar", "Dashboard"/"ledger" → "Inicio"/"bitácora", "el demo" en todos lados, "Último/Próximo corte" y "vence hoy mismo".
+
+Gate: unit 707 ✓ · typecheck ✓ · lint ✓ · format ✓. No se corrieron los e2e. Las capturas de `docs/screenshots/` son anteriores a estos cambios.
 
 ### Bloqueos pendientes
 
