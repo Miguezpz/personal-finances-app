@@ -251,6 +251,7 @@
     "addExpense": "Add expense",
     "safeToSpend": "Safe to spend",
     "ofBasePrefix": "of",
+    "overByPrefix": "Over by",
     "progressLabel": "{bucket} budget left",
     "carryIn": "Carried over",
     "allocated": "Allocated this quincena",

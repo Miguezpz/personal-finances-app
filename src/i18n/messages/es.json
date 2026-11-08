@@ -251,6 +251,7 @@
     "addExpense": "Registrar gasto",
     "safeToSpend": "Disponible para gastar",
     "ofBasePrefix": "de",
+    "overByPrefix": "Te pasaste por",
     "progressLabel": "Presupuesto restante de {bucket}",
     "carryIn": "Arrastre anterior",
     "allocated": "Asignado esta quincena",

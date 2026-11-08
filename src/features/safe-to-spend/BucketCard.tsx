@@ -12,7 +12,7 @@ import Link from "next/link";
 import { useTranslations } from "next-intl";
 import { Money } from "@/components/money/Money";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { negateCents } from "@/domain/money";
+import { negateCents, ZERO_CENTS } from "@/domain/money";
 import type { RecurringStatusItem } from "@/domain/recurring";
 import type { BucketSafeToSpend } from "@/domain/safe-to-spend";
 import type { Cents } from "@/domain/types";
@@ -81,6 +81,7 @@ export function BucketCard({
 
   // Re-key the balance block when the balance changes, to replay the highlight (not on the first render).
   const { key: flashes, flashing } = useFlashOnChange(data.available);
+  const overspent = data.available < 0;
 
   // The bar starts at 0 and grows to its value on the next frame.
   const mounted = useMountedFrame();
@@ -115,17 +116,27 @@ export function BucketCard({
           )}
         >
           <span className="text-sm text-muted-foreground">{t("safeToSpend")}</span>
+          {/* Never a negative headline: an overspent bucket shows $0 and how much it went over. */}
           <Money
-            cents={data.available}
+            cents={overspent ? ZERO_CENTS : data.available}
             className={cn(
               "text-[clamp(2rem,6vw,2.75rem)] leading-tight font-semibold tracking-tight",
-              data.available < 0 && "text-red-700 dark:text-red-400",
+              overspent && "text-red-700 dark:text-red-400",
             )}
           />
-          {data.base > 0 && (
-            <span className="text-sm text-muted-foreground">
-              {t("ofBasePrefix")} <Money cents={data.base} />
+          {overspent ? (
+            <span
+              className="text-sm font-medium text-red-700 dark:text-red-400"
+              data-testid={`bucket-${data.bucket}-over`}
+            >
+              {t("overByPrefix")} <Money cents={negateCents(data.available)} />
             </span>
+          ) : (
+            data.base > 0 && (
+              <span className="text-sm text-muted-foreground">
+                {t("ofBasePrefix")} <Money cents={data.base} />
+              </span>
+            )
           )}
         </div>
 
