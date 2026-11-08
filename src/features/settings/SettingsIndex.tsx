@@ -1,54 +1,23 @@
 "use client";
 
 /** Settings index (T126): links to every settings page plus the data export (Principle I). */
-import {
-  ChevronRight,
-  Landmark,
-  type LucideIcon,
-  Percent,
-  SlidersHorizontal,
-  Tags,
-} from "lucide-react";
+import { ChevronRight } from "lucide-react";
 import Link from "next/link";
 import { useTranslations } from "next-intl";
+import { navIcon } from "@/components/layout/nav-items";
+import { PageHeader } from "@/components/layout/PageHeader";
 import { Card, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { ExportButton } from "@/features/ledger/ExportButton";
-
-interface Section {
-  href: string;
-  icon: LucideIcon;
-  title: "rulesLink" | "accountsTitle" | "categoriesTitle" | "preferencesTitle";
-  hint: "rulesLinkHint" | "accountsLinkHint" | "categoriesLinkHint" | "preferencesLinkHint";
-}
-
-const SECTIONS: readonly Section[] = [
-  { href: "/settings/rules", icon: Percent, title: "rulesLink", hint: "rulesLinkHint" },
-  { href: "/settings/accounts", icon: Landmark, title: "accountsTitle", hint: "accountsLinkHint" },
-  {
-    href: "/settings/categories",
-    icon: Tags,
-    title: "categoriesTitle",
-    hint: "categoriesLinkHint",
-  },
-  {
-    href: "/settings/preferences",
-    icon: SlidersHorizontal,
-    title: "preferencesTitle",
-    hint: "preferencesLinkHint",
-  },
-];
+import { SETTINGS_SECTIONS } from "./settings-sections";
 
 export function SettingsIndex() {
   const t = useTranslations("settings");
   return (
     <section className="flex flex-col gap-6">
-      <header className="flex flex-col gap-1">
-        <h1 className="text-2xl font-semibold tracking-tight">{t("title")}</h1>
-        <p className="text-sm text-muted-foreground">{t("description")}</p>
-      </header>
+      <PageHeader icon={navIcon("/settings")} title={t("title")} description={t("description")} />
 
       <ul className="grid gap-4 md:grid-cols-2">
-        {SECTIONS.map(({ href, icon: Icon, title, hint }) => (
+        {SETTINGS_SECTIONS.map(({ href, icon: Icon, title, hint }) => (
           <li key={href}>
             <Link
               href={href}

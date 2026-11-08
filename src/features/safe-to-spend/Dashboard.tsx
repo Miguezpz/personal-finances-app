@@ -18,6 +18,7 @@ import { CollectionAlerts } from "@/features/receivables/CollectionAlerts";
 import { selectLocale, usePreferences } from "@/store/preferences";
 import { useUi } from "@/store/ui";
 import { BucketCard } from "./BucketCard";
+import { DashboardAlertStrip } from "./DashboardAlertStrip";
 import { useSafeToSpend } from "./useSafeToSpend";
 import { PageHeader } from "@/components/layout/PageHeader";
 import { navIcon } from "@/components/layout/nav-items";
@@ -91,6 +92,9 @@ export function Dashboard() {
         </Alert>
       ) : (
         <div className="flex flex-col gap-6">
+          {/* Spec 008 (FR-019): on mobile the alerts sit on top as a compact, tappable strip. */}
+          <DashboardAlertStrip overspentBuckets={overspent.map((b) => tb(b.bucket))} />
+
           {/* Spec 005: one tap records a repeated expense (no entrance animation of its own). */}
           <QuickExpenseBar variant="dashboard" />
 
@@ -111,8 +115,8 @@ export function Dashboard() {
             </Alert>
           )}
 
-          {/* Mobile: balances first, alerts after (FR-027); desktop keeps alerts on top. */}
-          <div className="flex flex-col gap-6 empty:hidden max-md:order-last">
+          {/* Desktop: the full alerts above the buckets; mobile shows DashboardAlertStrip instead. */}
+          <div className="flex flex-col gap-6 empty:hidden max-md:hidden">
             <CollectionAlerts />
 
             {overspent.length > 0 && (

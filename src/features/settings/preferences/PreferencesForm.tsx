@@ -34,7 +34,11 @@ export function PreferencesSettings() {
   const { data: settings } = useSettings();
   return (
     <section className="flex flex-col gap-6">
-      <SettingsHeader title={t("preferencesTitle")} description={t("preferencesDescription")} />
+      <SettingsHeader
+        href="/settings/preferences"
+        title={t("preferencesTitle")}
+        description={t("preferencesDescription")}
+      />
       {settings ? (
         // Re-mount after a save so the form shows the stored values.
         <PreferencesForm key={JSON.stringify(settings)} settings={settings} />

@@ -1,35 +1,29 @@
 "use client";
 
-/** Header of every settings sub-page: back link to the settings index, title, hint, action. */
-import { ChevronLeft } from "lucide-react";
-import Link from "next/link";
+/** Header of every settings sub-page (spec 008, FR-014/FR-015): the shared PageHeader with the
+ * section's icon and the "‹ Settings" link back to the index. */
 import { useTranslations } from "next-intl";
 import type { ReactNode } from "react";
+import { PageHeader } from "@/components/layout/PageHeader";
+import { settingsIcon } from "./settings-sections";
 
 interface Props {
+  /** The sub-page's route, e.g. "/settings/rules" (picks its icon). */
+  href: string;
   title: string;
   description: string;
   action?: ReactNode;
 }
 
-export function SettingsHeader({ title, description, action }: Props) {
+export function SettingsHeader({ href, title, description, action }: Props) {
   const t = useTranslations("settings");
   return (
-    <header className="flex flex-col gap-3">
-      <Link
-        href="/settings"
-        className="inline-flex w-fit items-center gap-1 text-sm text-muted-foreground hover:text-foreground"
-      >
-        <ChevronLeft aria-hidden="true" className="size-4" />
-        {t("title")}
-      </Link>
-      <div className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
-        <div className="flex flex-col gap-1">
-          <h1 className="text-2xl font-semibold tracking-tight">{title}</h1>
-          <p className="text-sm text-muted-foreground">{description}</p>
-        </div>
-        {action}
-      </div>
-    </header>
+    <PageHeader
+      icon={settingsIcon(href)}
+      title={title}
+      description={description}
+      actions={action}
+      back={{ href: "/settings", label: t("title") }}
+    />
   );
 }

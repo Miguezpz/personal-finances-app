@@ -77,9 +77,9 @@ description: "Task list for spec 008 — Navegación y consistencia del shell"
 
 **Independent Test**: quickstart G.
 
-- [ ] T021 [US3] Crear src/features/credit/use-card-statements.ts (hook: tarjetas activas + `cardStatementSummary` con `useToday`) y mover allí `useCardStatuses` desde src/features/expenses/CardDebtSummary.tsx
-- [ ] T022 [US3] Crear src/features/credit/CardStatementCard.tsx (`variant="full"|"compact"` según contracts/ui-shell.md; `<Money>` para todo monto; Badge "Vencido" con icono; `pay-card` → `openCreate({kind:"card-payment", cardId, suggestedAmount: payAmount})`)
-- [ ] T023 [US3] Usar `CardStatementCard variant="full"` en src/features/credit/CreditPage.tsx (eliminar la selección por timeline de las líneas 60-66) y `variant="compact"` en src/features/expenses/CardDebtSummary.tsx con enlace `cards-see-credit` a `/credit`
+- [X] T021 [US3] Crear src/features/credit/use-card-statements.ts (hook: tarjetas activas + `cardStatementSummary` con `useToday`) y mover allí `useCardStatuses` desde src/features/expenses/CardDebtSummary.tsx
+- [X] T022 [US3] Crear src/features/credit/CardStatementCard.tsx (`variant="full"|"compact"` según contracts/ui-shell.md; `<Money>` para todo monto; Badge "Vencido" con icono; `pay-card` → `openCreate({kind:"card-payment", cardId, suggestedAmount: payAmount})`)
+- [X] T023 [US3] Usar `CardStatementCard variant="full"` en src/features/credit/CreditPage.tsx (eliminar la selección por timeline de las líneas 60-66) y `variant="compact"` en src/features/expenses/CardDebtSummary.tsx con enlace `cards-see-credit` a `/credit`
 - [ ] T024 [US3] Actualizar tests/e2e/us10-credit-goals.spec.ts, tests/e2e/us4-expenses.spec.ts y tests/e2e/us9-privacy.spec.ts a la nueva tarjeta; agregar en navigation.spec.ts (demo) que Crédito y Gastos muestran el mismo monto y fecha por tarjeta
 
 **Checkpoint**: gate rápido + commit.
@@ -90,9 +90,9 @@ description: "Task list for spec 008 — Navegación y consistencia del shell"
 
 **Independent Test**: quickstart H e I.
 
-- [ ] T025 [P] [US4] Agregar prop `back?: {href, label}` a src/components/layout/PageHeader.tsx
-- [ ] T026 [US4] Crear src/features/settings/settings-sections.ts (SECTIONS compartido con iconos); `SettingsIndex.tsx` usa PageHeader con `navIcon("/settings")`; `SettingsHeader.tsx` delega en PageHeader con el icono de su sección y `back`; src/features/settings/rules/RulesSettings.tsx usa SettingsHeader
-- [ ] T027 [P] [US4] Renombrar el panel en src/components/layout/PreferencesSheet.tsx a `nav.appearance` con icono `Palette` (conservar testids)
+- [X] T025 [P] [US4] Agregar prop `back?: {href, label}` a src/components/layout/PageHeader.tsx
+- [X] T026 [US4] Crear src/features/settings/settings-sections.ts (SECTIONS compartido con iconos); `SettingsIndex.tsx` usa PageHeader con `navIcon("/settings")`; `SettingsHeader.tsx` delega en PageHeader con el icono de su sección y `back`; src/features/settings/rules/RulesSettings.tsx usa SettingsHeader
+- [X] T027 [P] [US4] Renombrar el panel en src/components/layout/PreferencesSheet.tsx a `nav.appearance` con icono `Palette` (conservar testids)
 - [ ] T028 [US4] e2e: encabezado con icono y "‹ Configuración" en `/settings/rules`; panel "Apariencia" en móvil, en tests/e2e/navigation.spec.ts
 
 ---
@@ -101,8 +101,8 @@ description: "Task list for spec 008 — Navegación y consistencia del shell"
 
 **Independent Test**: quickstart J.
 
-- [ ] T029 [US5] En src/components/layout/AppShell.tsx: header con `pt-[env(safe-area-inset-top)]`, padding lateral con `max(1rem, env(safe-area-inset-left/right))` y altura mínima en lugar de `h-14`; `main` con `pb-[calc(5rem+env(safe-area-inset-bottom))] md:pb-6`
-- [ ] T030 [US5] Crear src/features/safe-to-spend/DashboardAlertStrip.tsx (`md:hidden`; filas compactas tocables: sobregiro → `/expenses`, cobros por vencer → `/receivables` usando el hook expuesto desde src/features/receivables/CollectionAlerts.tsx; nada si no hay alertas) y usarla arriba en Dashboard.tsx; el bloque de alertas completo pasa a `max-md:hidden`
+- [X] T029 [US5] En src/components/layout/AppShell.tsx: header con `pt-[env(safe-area-inset-top)]`, padding lateral con `max(1rem, env(safe-area-inset-left/right))` y altura mínima en lugar de `h-14`; `main` con `pb-[calc(5rem+env(safe-area-inset-bottom))] md:pb-6`
+- [X] T030 [US5] Crear src/features/safe-to-spend/DashboardAlertStrip.tsx (`md:hidden`; filas compactas tocables: sobregiro → `/expenses`, cobros por vencer → `/receivables` usando el hook expuesto desde src/features/receivables/CollectionAlerts.tsx; nada si no hay alertas) y usarla arriba en Dashboard.tsx; el bloque de alertas completo pasa a `max-md:hidden`
 - [ ] T031 [US5] e2e móvil: franja de alertas antes de los buckets cuando hay alertas (demo), en tests/e2e/mobile.spec.ts
 
 ---

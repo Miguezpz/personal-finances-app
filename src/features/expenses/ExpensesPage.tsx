@@ -109,11 +109,7 @@ export function ExpensesPage() {
 
       <SpendingByMethod />
 
-      <CardDebtSummary
-        onPay={(cardId, amount) =>
-          openCreate({ kind: "card-payment", cardId, suggestedAmount: amount })
-        }
-      />
+      <CardDebtSummary />
 
       <QuickExpensesSection />
 

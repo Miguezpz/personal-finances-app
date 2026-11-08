@@ -20,12 +20,11 @@ import { useReceivables } from "./hooks";
 
 const MAX_SHOWN = 5;
 
-export function CollectionAlerts() {
-  const t = useTranslations("receivables");
-  const locale = usePreferences(selectLocale);
+/** Overdue collections and those due within the alert window (also read by the Dashboard's mobile
+ * alert strip, spec 008 FR-019). */
+export function useCollectionAlerts() {
   const today = useToday();
   const { data } = useReceivables();
-
   const alerts = useMemo(
     () =>
       data
@@ -33,6 +32,13 @@ export function CollectionAlerts() {
         : [],
     [data, today],
   );
+  return { data, alerts };
+}
+
+export function CollectionAlerts() {
+  const t = useTranslations("receivables");
+  const locale = usePreferences(selectLocale);
+  const { data, alerts } = useCollectionAlerts();
   if (!data || alerts.length === 0) return null;
 
   const debtorName = (id: string) => data.debtors.find((d) => d.id === id)?.name ?? "";

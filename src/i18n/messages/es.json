@@ -758,7 +758,8 @@
     "statePending": "Pendiente",
     "stateOverdue": "Vencido",
     "dueShort": "vence {date}",
-    "seeInCredit": "Ver en Crédito"
+    "seeInCredit": "Ver en Crédito",
+    "pay": "Pagar"
   },
   "goals": {
     "title": "Metas",

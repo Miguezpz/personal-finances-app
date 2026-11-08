@@ -758,7 +758,8 @@
     "statePending": "Pending",
     "stateOverdue": "Overdue",
     "dueShort": "due {date}",
-    "seeInCredit": "See in Credit"
+    "seeInCredit": "See in Credit",
+    "pay": "Pay"
   },
   "goals": {
     "title": "Goals",

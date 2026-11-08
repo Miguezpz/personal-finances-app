@@ -1,11 +1,12 @@
 "use client";
 
 /**
- * Mobile preferences panel (spec 003, FR-021, research R12): the compact mobile header keeps only the logo, privacy
+ * Mobile appearance panel (spec 003, FR-021, research R12; renamed "Appearance" in spec 008, FR-016, so it isn't
+ * confused with the Settings › Preferences page): the compact mobile header keeps only the logo, privacy
  * and this button; language, currency, theme and sign-out live in a bottom sheet. It's a dialog (not a menu), so the
  * toggles keep their button semantics and their data-testids.
  */
-import { Coins, Languages, LogOut, type LucideIcon, SlidersHorizontal } from "lucide-react";
+import { Coins, Languages, LogOut, type LucideIcon, Palette } from "lucide-react";
 import { useTranslations } from "next-intl";
 import type { ReactNode } from "react";
 import { Button } from "@/components/ui/button";
@@ -59,10 +60,10 @@ export function PreferencesSheet({
           variant="ghost"
           size="icon-sm"
           className="md:hidden"
-          aria-label={t("preferences")}
+          aria-label={t("appearance")}
           data-testid="preferences-open"
         >
-          <SlidersHorizontal aria-hidden="true" />
+          <Palette aria-hidden="true" />
         </Button>
       </SheetTrigger>
       <SheetContent
@@ -71,7 +72,7 @@ export function PreferencesSheet({
         data-testid="preferences-sheet"
       >
         <SheetHeader className="p-0">
-          <SheetTitle>{t("preferences")}</SheetTitle>
+          <SheetTitle>{t("appearance")}</SheetTitle>
         </SheetHeader>
         <div className="flex flex-col gap-2">
           <Row label={tc("language")} icon={Languages}>

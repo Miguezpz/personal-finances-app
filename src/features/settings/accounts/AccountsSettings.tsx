@@ -65,6 +65,7 @@ export function AccountsSettings() {
   return (
     <section className="flex flex-col gap-6">
       <SettingsHeader
+        href="/settings/accounts"
         title={t("accountsTitle")}
         description={t("accountsDescription")}
         action={

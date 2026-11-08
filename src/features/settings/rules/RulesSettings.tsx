@@ -12,6 +12,7 @@ import { useToday } from "@/lib/use-today";
 import { selectLocale, usePreferences } from "@/store/preferences";
 import { useInvestmentAccounts, useRules } from "./hooks";
 import { RuleForm } from "./RuleForm";
+import { SettingsHeader } from "../SettingsHeader";
 
 export function RulesSettings() {
   const t = useTranslations("rules");
@@ -39,10 +40,7 @@ export function RulesSettings() {
 
   return (
     <section className="flex flex-col gap-6">
-      <header className="flex flex-col gap-1">
-        <h1 className="text-2xl font-semibold tracking-tight">{t("title")}</h1>
-        <p className="text-sm text-muted-foreground">{t("description")}</p>
-      </header>
+      <SettingsHeader href="/settings/rules" title={t("title")} description={t("description")} />
 
       <Card>
         <CardHeader>

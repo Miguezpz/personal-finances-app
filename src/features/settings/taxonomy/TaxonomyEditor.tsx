@@ -205,6 +205,7 @@ export function TaxonomyEditor() {
   return (
     <section className="flex flex-col gap-6">
       <SettingsHeader
+        href="/settings/categories"
         title={t("categoriesTitle")}
         description={t("categoriesDescription")}
         action={
