@@ -21,6 +21,7 @@ Revisé la app en código (shell, 11 features, sistema de motion) y en vivo (dem
    - No hay transición de salida entre rutas ni retroalimentación al guardar.
 
 Decisiones tomadas:
+
 - **Navegación:** barra con ＋ central.
 - **Animaciones:** respetar spec 003 (solo CSS y View Transitions nativas, ≤300 ms, nunca animar montos, sin framer-motion fuera del indicador de nav).
 - **Entrega:** un spec por fase, siguiendo speckit, en `main` y con commit + push por paso.
@@ -32,15 +33,16 @@ Numeración: el 006 está reservado (calendario de pago, pendiente) y el 007 ya 
 ## Spec 008 — Navegación y consistencia del shell (P1)
 
 ### Nueva arquitectura de información (`src/components/layout/nav-items.ts`)
+
 Los ítems pasan a tener `group` y se ordenan así:
 
-| Grupo | Ítems |
-|---|---|
+| Grupo     | Ítems                             |
+| --------- | --------------------------------- |
 | Principal | Inicio, Gastos, Ingresos, Crédito |
-| Planear | Gastos fijos, Metas |
-| Deudas | Por cobrar |
-| Análisis | Bitácora, Patrimonio |
-| Pie | Configuración |
+| Planear   | Gastos fijos, Metas               |
+| Deudas    | Por cobrar                        |
+| Análisis  | Bitácora, Patrimonio              |
+| Pie       | Configuración                     |
 
 - **Sidebar desktop** (`AppShell.tsx` `NavLinks`): secciones con encabezado pequeño, Configuración fija al fondo y `max-h-[calc(100dvh-…)] overflow-y-auto` en el `nav` sticky, para que no se corte en pantallas bajas.
 - **Barra móvil** (`MobileNav.tsx`): `Inicio · Gastos · (＋) · Crédito · Más`.
@@ -50,6 +52,7 @@ Los ítems pasan a tener `group` y se ordenan así:
 - **Panel "Más"**: pasa de `Sheet side="left"` a `side="bottom"`, con las secciones agrupadas (Ingresos va arriba, en "Principal") y el título "Más" en lugar del nombre de la app. Se reutilizan `Sheet` (`ui/sheet.tsx`) y `NavIndicator`.
 
 ### Hoja de creación "＋" (componente nuevo `src/components/layout/CreateSheet.tsx`)
+
 - Tiene 3 acciones grandes: **Gasto**, **Ingreso** y **Pagar tarjeta**.
 - Debajo van los chips de gastos rápidos (se reutiliza `QuickExpenseBar` en su variante `dialog`).
 - Cada acción abre el diálogo existente en modo lazy (`LazyAddExpenseDialog`, `RegisterIncomeDialog`, `CardPaymentDialog`).
@@ -57,21 +60,25 @@ Los ítems pasan a tener `group` y se ordenan así:
 - El estado de qué diálogo está abierto vive en el store `useUi` (zustand), para que cualquier página pueda abrir uno (por ejemplo "Pagar" desde Crédito).
 
 ### Desktop: acción global
+
 - En la top bar va un botón **"＋ Nuevo"** (cta, con dropdown Gasto/Ingreso/Pagar tarjeta). Es el único CTA destacado por pantalla (FR-006).
 - Los CTA de cada página pasan a `outline`, o se quitan si duplican la acción global (por ejemplo "Add expense" en Dashboard y Expenses).
 - Atajos de teclado: `N` gasto, `I` ingreso, `P` pagar tarjeta. Se ignoran mientras el foco esté en un input, y se muestran en el dropdown.
 
 ### Consistencia de headers
+
 - `PageHeader` en todas las páginas, incluidas `SettingsIndex.tsx` y `RulesSettings.tsx` (que no tienen icono).
 - Rules usa `SettingsHeader`, para tener el enlace "‹ Configuración" que hoy le falta.
 - Se renombra el sheet de la top bar de "Preferencias" a **"Apariencia"** (idioma, moneda, tema, salir) y se cambia su icono a `Palette` o `UserRound`, para no confundirlo con `/settings/preferences`.
 
 ### Fixes del shell
+
 - `AppShell.tsx:150`: header con `pt-[env(safe-area-inset-top)]` y padding left/right con el inset.
 - `AppShell.tsx:209`: `pb-[calc(5rem+…)]` solo bajo `md` (`md:pb-6`).
 - Reordenar el Dashboard en móvil: las alertas (sobregiro, cobros) van **arriba**, compactas y tocables. Hoy `Dashboard.tsx:131` las manda al final con `max-md:order-last`.
 
 ### Unificar el estado de tarjetas
+
 - Componente nuevo `CardStatementCard` (en `src/features/credit/`) que muestra:
   - el **último estado** (pagado ✓ / pendiente / vencido);
   - el **próximo estado** (monto y fecha);
@@ -123,21 +130,22 @@ Los ítems pasan a tener `group` y se ordenan así:
 
 Todo con CSS, `tw-animate-css` y el `<ViewTransition>` de React 19.3: funciona sin config en el App Router y no agrega bundle (guía en `node_modules/next/dist/docs/01-app/02-guides/view-transitions.md`). Todas las animaciones duran ≤300 ms, solo usan opacity, transform y background-color, y respetan el kill-switch de `globals.css:195-210`.
 
-| Interacción | Técnica |
-|---|---|
-| Cambio de ruta (con salida) | `<ViewTransition>` en `src/app/(app)/template.tsx` en lugar de `animate-content-in`; crossfade y desplazamiento de 4 px |
-| Skeleton → contenido | `<ViewTransition>` alrededor de `PageQueryState` (revela un Suspense o crossfade) |
-| Alta de fila (gasto, ingreso, etc.) | `@starting-style` y la clase `animate-row-in` nueva (fade + 4 px, `duration-base`) |
-| Baja de fila / deshacer | `<ViewTransition>` con `startTransition` alrededor del update optimista |
-| Abrir y cerrar la hoja ＋ / "Más" | slide-up existente del Sheet, más un handle visual y **drag-to-dismiss** con pointer events nativos (sin librería) en `ui/dialog.tsx` y `ui/sheet.tsx` |
-| Guardar con éxito | pulso de `bg-surface-highlight` en la fila o card afectada (reutiliza `animate-balance-highlight`) |
-| Montos que cambian | se extiende el flash de fondo de `BucketCard` a metas y patrimonio (el texto nunca se anima) |
-| Barra de metas | crece desde 0 con `scaleX`, igual que `BucketCard.tsx:88-93` |
-| Gráfica de patrimonio | se mantiene sin animación (decisión de spec 003) |
-| Errores de validación | fade-in con altura animada usando `interpolate-size: allow-keywords` |
-| Botón ＋ central | rotación de 45° del icono mientras la hoja está abierta |
+| Interacción                         | Técnica                                                                                                                                                |
+| ----------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| Cambio de ruta (con salida)         | `<ViewTransition>` en `src/app/(app)/template.tsx` en lugar de `animate-content-in`; crossfade y desplazamiento de 4 px                                |
+| Skeleton → contenido                | `<ViewTransition>` alrededor de `PageQueryState` (revela un Suspense o crossfade)                                                                      |
+| Alta de fila (gasto, ingreso, etc.) | `@starting-style` y la clase `animate-row-in` nueva (fade + 4 px, `duration-base`)                                                                     |
+| Baja de fila / deshacer             | `<ViewTransition>` con `startTransition` alrededor del update optimista                                                                                |
+| Abrir y cerrar la hoja ＋ / "Más"   | slide-up existente del Sheet, más un handle visual y **drag-to-dismiss** con pointer events nativos (sin librería) en `ui/dialog.tsx` y `ui/sheet.tsx` |
+| Guardar con éxito                   | pulso de `bg-surface-highlight` en la fila o card afectada (reutiliza `animate-balance-highlight`)                                                     |
+| Montos que cambian                  | se extiende el flash de fondo de `BucketCard` a metas y patrimonio (el texto nunca se anima)                                                           |
+| Barra de metas                      | crece desde 0 con `scaleX`, igual que `BucketCard.tsx:88-93`                                                                                           |
+| Gráfica de patrimonio               | se mantiene sin animación (decisión de spec 003)                                                                                                       |
+| Errores de validación               | fade-in con altura animada usando `interpolate-size: allow-keywords`                                                                                   |
+| Botón ＋ central                    | rotación de 45° del icono mientras la hoja está abierta                                                                                                |
 
 También entran los ajustes de accesibilidad que encontré:
+
 - `pointer-coarse` en items de dropdown, radio y switch.
 - `focus-visible` en dropdown-menu.
 - Se actualiza `tests/e2e/motion.spec.ts` para cubrir las animaciones nuevas.
@@ -145,16 +153,19 @@ También entran los ajustes de accesibilidad que encontré:
 ---
 
 ## Archivos críticos
+
 - **Shell:** `src/components/layout/{AppShell,MobileNav,nav-items,PageHeader,PreferencesSheet}.tsx`, `CreateSheet.tsx` (nuevo), `src/store/ui.ts` (o donde viva `useUi`).
 - **Flujos:** `src/data/snapshot-cache.ts`, `src/domain/parse.ts`, `src/features/expenses/{AddExpenseDialog,ExpensesPage,CardDebtSummary,QuickExpenseBar}.tsx`, `src/features/income/RegisterIncomeDialog.tsx`, `src/features/credit/CreditPage.tsx`, `src/features/ledger/{LedgerPage,LedgerFilters,LedgerTable}.tsx`, `src/features/receivables/*`.
 - **Motion:** `src/app/(app)/template.tsx`, `src/app/globals.css`, `src/components/ui/{dialog,sheet,dropdown-menu}.tsx`.
 - **i18n:** `src/i18n/messages/{en,es}.json`, con claves nuevas para los grupos de nav, la hoja ＋, deshacer y reintentar.
 
 ## Verificación (por spec)
+
 - `pnpm typecheck && pnpm lint && pnpm test` (unit, incluido parse con fast-check y theme-contrast).
 - `E2E_MODES=demo pnpm test:e2e`. Es solo UI, así que no se levanta Supabase local (memoria). Se actualizan los e2e de nav (barra, "Más", ＋), deshacer, reintentar, filtros por URL, `a11y.spec.ts` y `motion.spec.ts`.
 - `pnpm build` y `pnpm check:demo-bundle`, para confirmar que el first-load no crece más de +20 kB (SC-006).
 - Revisión visual en la demo desplegada (Vercel desde `main`) a 390 px y 1440 px, en tema claro, oscuro y neon, con `prefers-reduced-motion` activado y desactivado.
 
 ## Flujo de trabajo
+
 Cada spec pasa por `/speckit-specify` → `clarify` → `plan` → `tasks` → `implement`, con commit + push a `main` en cada paso.

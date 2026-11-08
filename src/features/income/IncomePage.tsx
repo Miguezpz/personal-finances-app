@@ -18,7 +18,6 @@ import { Money } from "@/components/money/Money";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { EmptyState } from "@/components/ui/empty-state";
-import { ResponsiveCtaButton } from "@/components/ui/responsive-cta";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import {
   Dialog,
@@ -34,9 +33,9 @@ import { useFinanceSnapshot } from "@/data/useFinanceSnapshot";
 import type { Account, FinanceSnapshot, Income, IncomeAllocation } from "@/domain/types";
 import { formatDate } from "@/i18n/format";
 import { selectLocale, usePreferences } from "@/store/preferences";
+import { openCreate } from "@/store/ui";
 import { formatPeriodRange } from "./format";
 import { useDeleteIncome, useIncomes } from "./hooks";
-import { RegisterIncomeDialog } from "./RegisterIncomeDialog";
 
 const selectAccounts = (s: FinanceSnapshot) => s.accounts;
 const BUCKET_ORDER = { needs: 0, wants: 1, investment: 2 } as const;
@@ -138,10 +137,6 @@ export function IncomePage() {
   const { data } = useIncomes();
   const { data: accounts } = useFinanceSnapshot(selectAccounts);
   const deleteIncome = useDeleteIncome();
-  const [dialog, setDialog] = useState<{ open: boolean; income: Income | null }>({
-    open: false,
-    income: null,
-  });
   const [toDelete, setToDelete] = useState<Income | null>(null);
 
   const accountName = (id: string | null) => accounts?.find((a) => a.id === id)?.name ?? "";
@@ -175,13 +170,6 @@ export function IncomePage() {
                 {tr("title")}
               </Link>
             </Button>
-            <ResponsiveCtaButton
-              onClick={() => setDialog({ open: true, income: null })}
-              data-testid="register-income"
-            >
-              <Plus aria-hidden="true" />
-              {t("register")}
-            </ResponsiveCtaButton>
           </>
         }
       />
@@ -192,7 +180,22 @@ export function IncomePage() {
           <Skeleton className="h-32" />
         </div>
       ) : incomes.length === 0 ? (
-        <EmptyState icon={navIcon("/income")}>{t("empty")}</EmptyState>
+        <EmptyState
+          icon={navIcon("/income")}
+          action={
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => openCreate({ kind: "income" })}
+              data-testid="empty-register-income"
+            >
+              <Plus aria-hidden="true" />
+              {t("register")}
+            </Button>
+          }
+        >
+          {t("empty")}
+        </EmptyState>
       ) : (
         <ul className="flex flex-col gap-4">
           {incomes.map((income) => (
@@ -202,21 +205,12 @@ export function IncomePage() {
                 allocations={data.allocations.filter((a) => a.incomeId === income.id)}
                 accountName={accountName}
                 accountOf={accountOf}
-                onEdit={() => setDialog({ open: true, income })}
+                onEdit={() => openCreate({ kind: "income", income })}
                 onDelete={() => setToDelete(income)}
               />
             </li>
           ))}
         </ul>
-      )}
-
-      {dialog.open && (
-        <RegisterIncomeDialog
-          key={dialog.income?.id ?? "new"}
-          open={dialog.open}
-          income={dialog.income}
-          onOpenChange={(open) => setDialog((d) => ({ ...d, open }))}
-        />
       )}
 
       <Dialog open={toDelete !== null} onOpenChange={(open) => !open && setToDelete(null)}>

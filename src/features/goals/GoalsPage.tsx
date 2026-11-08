@@ -12,7 +12,6 @@ import { toast } from "sonner";
 import { Money } from "@/components/money/Money";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { ResponsiveCtaButton } from "@/components/ui/responsive-cta";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 import { isNotifiedGlobally } from "@/data/errors";
@@ -106,13 +105,10 @@ export function GoalsPage() {
         description={t("description")}
         actions={
           <>
-            <ResponsiveCtaButton
-              onClick={() => setForm({ open: true, goal: null })}
-              data-testid="add-goal"
-            >
+            <Button onClick={() => setForm({ open: true, goal: null })} data-testid="add-goal">
               <Plus aria-hidden="true" />
               {t("addTitle")}
-            </ResponsiveCtaButton>
+            </Button>
           </>
         }
       />

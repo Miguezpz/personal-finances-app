@@ -19,20 +19,20 @@ description: "Task list for spec 008 — Navegación y consistencia del shell"
 
 ## Phase 1: Setup
 
-- [ ] T001 Registrar la línea base del First Load JS de `/dashboard` y `/expenses` (salida de `pnpm build`) en la sección "Notas" al final de specs/008-navigation-shell/tasks.md
+- [X] T001 Registrar la línea base del First Load JS de `/dashboard` y `/expenses` (salida de `pnpm build`) en la sección "Notas" al final de specs/008-navigation-shell/tasks.md
 
 ---
 
 ## Phase 2: Foundational (Blocking Prerequisites)
 
-- [ ] T002 Retipar el estado de diálogos en src/store/ui.ts: eliminar `DialogId`/`openDialog(id,payload)`; agregar `CreateDialog` (unión discriminada `{kind:"expense"; expense?: Expense|null} | {kind:"income"; income?: Income|null} | {kind:"card-payment"; cardId?: Uuid|null; suggestedAmount?: Cents|null}`), `activeDialog: CreateDialog|null`, `createSheetOpen`, `openCreate(d)` (cierra createSheet, sidebar y preferences antes de abrir), `closeDialog()`, `setCreateSheetOpen(open)`
-- [ ] T003 [P] Agregar `group: "main"|"plan"|"debts"|"insights"|"footer"` a `NavItem`, `NAV_GROUPS` (main: dashboard, expenses, income, credit · plan: recurring, goals · debts: receivables · insights: ledger, netWorth · footer: settings), `MOBILE_BAR_ITEMS` (dashboard, expenses, credit), `isSecondaryRoute(pathname)` y `SECONDARY_NAV_GROUPS` (grupos sin los ítems de la barra) en src/components/layout/nav-items.ts; quitar `primary`, `PRIMARY_NAV_ITEMS` y `SECONDARY_NAV_ITEMS` y actualizar sus usos
-- [ ] T004 [P] Pruebas de nav-items (orden de grupos, `isSecondaryRoute` para `/goals`, `/settings/rules`, `/expenses` y `/credit`) en tests/unit/components/nav-items.test.ts
-- [ ] T005 [P] Agregar llaves i18n EN/ES en src/i18n/messages/{en,es}.json: `nav.groups.{main,plan,debts,insights}`, `nav.create`, `nav.appearance`, `nav.moreTitle`; namespace `create` (`title`, `expense`, `income`, `cardPayment`, `noCards`, `newButton`, `shortcut`); `credit.lastStatement`, `credit.nextStatement`, `credit.statePaid`, `credit.statePending`, `credit.seeInCredit`; `dashboard.alertsLabel`
-- [ ] T006 [P] Implementar `cardStatementSummary(card, data, today): CardStatementSummary` en src/domain/credit.ts según data-model.md (`last.state`: `outstanding = 0` → paid; `today > due` → overdue; otro → pending; `next.amount = max(0, cumulative(next.cutOff) − last.outstanding)`; `headline = last.state === "paid" ? "next" : "last"`)
-- [ ] T007 [P] Pruebas de `cardStatementSummary` (pagado con compras posteriores = caso Gold Card, pendiente, vencido, pagado en parte, sin movimientos, MSI en el próximo estado, y que el monto `next` coincida con el `card_due` de `creditTimeline`) en tests/unit/domain/card-statement-summary.test.ts
-- [ ] T008 [P] Crear src/features/income/LazyRegisterIncomeDialog.tsx y src/features/expenses/LazyCardPaymentDialog.tsx con el patrón de LazyAddExpenseDialog.tsx (lazy + Suspense + `usePreload…`)
-- [ ] T009 Crear src/components/layout/DialogHost.tsx según contracts/ui-shell.md (un diálogo a la vez, `key` por entidad, `onOpenChange(false)` → `closeDialog`, precarga en idle; cierra el diálogo activo y la hoja ＋ cuando cambia `usePathname()`, para que un diálogo no sobreviva a la navegación con atrás) y montarlo una vez en src/components/layout/AppShell.tsx
+- [X] T002 Retipar el estado de diálogos en src/store/ui.ts: eliminar `DialogId`/`openDialog(id,payload)`; agregar `CreateDialog` (unión discriminada `{kind:"expense"; expense?: Expense|null} | {kind:"income"; income?: Income|null} | {kind:"card-payment"; cardId?: Uuid|null; suggestedAmount?: Cents|null}`), `activeDialog: CreateDialog|null`, `createSheetOpen`, `openCreate(d)` (cierra createSheet, sidebar y preferences antes de abrir), `closeDialog()`, `setCreateSheetOpen(open)`
+- [X] T003 [P] Agregar `group: "main"|"plan"|"debts"|"insights"|"footer"` a `NavItem`, `NAV_GROUPS` (main: dashboard, expenses, income, credit · plan: recurring, goals · debts: receivables · insights: ledger, netWorth · footer: settings), `MOBILE_BAR_ITEMS` (dashboard, expenses, credit), `isSecondaryRoute(pathname)` y `SECONDARY_NAV_GROUPS` (grupos sin los ítems de la barra) en src/components/layout/nav-items.ts; quitar `primary`, `PRIMARY_NAV_ITEMS` y `SECONDARY_NAV_ITEMS` y actualizar sus usos
+- [X] T004 [P] Pruebas de nav-items (orden de grupos, `isSecondaryRoute` para `/goals`, `/settings/rules`, `/expenses` y `/credit`) en tests/unit/components/nav-items.test.ts
+- [X] T005 [P] Agregar llaves i18n EN/ES en src/i18n/messages/{en,es}.json: `nav.groups.{main,plan,debts,insights}`, `nav.create`, `nav.appearance`, `nav.moreTitle`; namespace `create` (`title`, `expense`, `income`, `cardPayment`, `noCards`, `newButton`, `shortcut`); `credit.lastStatement`, `credit.nextStatement`, `credit.statePaid`, `credit.statePending`, `credit.seeInCredit`; `dashboard.alertsLabel`
+- [X] T006 [P] Implementar `cardStatementSummary(card, data, today): CardStatementSummary` en src/domain/credit.ts según data-model.md (`last.state`: `outstanding = 0` → paid; `today > due` → overdue; otro → pending; `next.amount = max(0, cumulative(next.cutOff) − last.outstanding)`; `headline = last.state === "paid" ? "next" : "last"`)
+- [X] T007 [P] Pruebas de `cardStatementSummary` (pagado con compras posteriores = caso Gold Card, pendiente, vencido, pagado en parte, sin movimientos, MSI en el próximo estado, y que el monto `next` coincida con el `card_due` de `creditTimeline`) en tests/unit/domain/card-statement-summary.test.ts
+- [X] T008 [P] Crear src/features/income/LazyRegisterIncomeDialog.tsx y src/features/expenses/LazyCardPaymentDialog.tsx con el patrón de LazyAddExpenseDialog.tsx (lazy + Suspense + `usePreload…`)
+- [X] T009 Crear src/components/layout/DialogHost.tsx según contracts/ui-shell.md (un diálogo a la vez, `key` por entidad, `onOpenChange(false)` → `closeDialog`, precarga en idle; cierra el diálogo activo y la hoja ＋ cuando cambia `usePathname()`, para que un diálogo no sobreviva a la navegación con atrás) y montarlo una vez en src/components/layout/AppShell.tsx
 
 **Checkpoint**: base lista; gate rápido (`pnpm typecheck && pnpm lint && pnpm test`) y commit.
 
@@ -44,9 +44,9 @@ description: "Task list for spec 008 — Navegación y consistencia del shell"
 
 **Independent Test**: quickstart A, B y D.
 
-- [ ] T010 [US1] Barra lateral agrupada en src/components/layout/AppShell.tsx: `NavLinks` recibe grupos, pinta encabezados discretos (`text-xs uppercase text-muted-foreground`), Configuración separada al fondo; `nav` sticky con `max-h-[calc(100dvh-5rem)] overflow-y-auto`
-- [ ] T011 [US1] Panel "Más" en src/components/layout/AppShell.tsx: `Sheet side="bottom"` (`rounded-t-2xl`, `max-h-[85dvh] overflow-y-auto`, padding safe-area), título `nav.moreTitle`, `data-testid="more-sheet"`, lista `SECONDARY_NAV_GROUPS` con encabezados; navegar cierra el panel
-- [ ] T012 [US1] Reescribir src/components/layout/MobileNav.tsx: Inicio · Gastos · ＋ (`mobile-nav-create`, `variant="cta"` elevado, `aria-haspopup="dialog"`, `aria-expanded`, `aria-label` `nav.create`, alterna `createSheetOpen`) · Crédito · Más (`aria-current="page"` y estilo activo si `isSecondaryRoute`); eliminar el FAB, `useFabHidden` y su diálogo
+- [X] T010 [US1] Barra lateral agrupada en src/components/layout/AppShell.tsx: `NavLinks` recibe grupos, pinta encabezados discretos (`text-xs uppercase text-muted-foreground`), Configuración separada al fondo; `nav` sticky con `max-h-[calc(100dvh-5rem)] overflow-y-auto`
+- [X] T011 [US1] Panel "Más" en src/components/layout/AppShell.tsx: `Sheet side="bottom"` (`rounded-t-2xl`, `max-h-[85dvh] overflow-y-auto`, padding safe-area), título `nav.moreTitle`, `data-testid="more-sheet"`, lista `SECONDARY_NAV_GROUPS` con encabezados; navegar cierra el panel
+- [X] T012 [US1] Reescribir src/components/layout/MobileNav.tsx: Inicio · Gastos · ＋ (`mobile-nav-create`, `variant="cta"` elevado, `aria-haspopup="dialog"`, `aria-expanded`, `aria-label` `nav.create`, alterna `createSheetOpen`) · Crédito · Más (`aria-current="page"` y estilo activo si `isSecondaryRoute`); eliminar el FAB, `useFabHidden` y su diálogo
 - [ ] T013 [US1] Actualizar tests/e2e/mobile.spec.ts (barra de 5 elementos, sin `fab-add-expense`, "Más" activo en `/goals`, panel inferior agrupado) y crear tests/e2e/navigation.spec.ts (grupos de la barra lateral, scroll a 768×600 (SC-003), `aria-current` en todas las APP_ROUTES)
 
 **Checkpoint**: gate rápido + commit.
@@ -59,12 +59,12 @@ description: "Task list for spec 008 — Navegación y consistencia del shell"
 
 **Independent Test**: quickstart C, E y F.
 
-- [ ] T014 [US2] Crear src/components/layout/CreateSheet.tsx: `Sheet side="bottom"` controlada por `createSheetOpen`, `data-testid="create-sheet"`, 3 acciones grandes (`create-expense`, `create-income`, `create-card-payment` deshabilitada con `create.noCards` sin tarjetas activas) → `openCreate`; debajo `QuickExpenseBar variant="dialog"` cargada al abrir y que cierra la hoja al registrar; montarla en AppShell.tsx
-- [ ] T015 [P] [US2] Crear src/components/layout/NewMenu.tsx (botón placeholder `new-menu`, `variant="cta"`, `hidden md:inline-flex`) y src/components/layout/NewMenuContent.tsx (DropdownMenu Radix cargado con `next/dynamic` `ssr:false`; ítems `new-expense`, `new-income` y `new-card-payment` con `<kbd>` N/I/P); colocarlo en la barra superior de AppShell.tsx
-- [ ] T016 [P] [US2] Crear src/components/layout/use-create-shortcuts.ts (N/I/P → `openCreate`; ignora modificadores, `repeat`, `defaultPrevented`, foco editable, paneles de `useUi` abiertos o `[role=dialog][data-state=open]`; P sin tarjetas no hace nada) y montarlo en AppShell.tsx
-- [ ] T017 [P] [US2] Pruebas del hook de atajos (abre con N/I/P; ignora en input, con Ctrl/Meta, con diálogo abierto) en tests/unit/components/create-shortcuts.test.tsx
-- [ ] T018 [US2] Quitar CTA y diálogos duplicados: src/features/safe-to-spend/Dashboard.tsx (sin botón "Agregar gasto" ni LazyAddExpenseDialog), src/features/expenses/ExpensesPage.tsx (sin "Agregar gasto" ni "Pagar tarjeta" en el encabezado; editar → `openCreate({kind:"expense", expense})`; sin AddExpenseDialog/CardPaymentDialog locales; estado vacío con botón outline → `openCreate({kind:"expense"})`), src/features/income/IncomePage.tsx (sin "Registrar ingreso"; editar → `openCreate({kind:"income", income})`; estado vacío con botón outline)
-- [ ] T019 [P] [US2] Sustituir `ResponsiveCtaButton` por `Button` (variant default) en src/features/goals/GoalsPage.tsx y src/features/receivables/ReceivablesPage.tsx; borrar src/components/ui/responsive-cta.tsx
+- [X] T014 [US2] Crear src/components/layout/CreateSheet.tsx: `Sheet side="bottom"` controlada por `createSheetOpen`, `data-testid="create-sheet"`, 3 acciones grandes (`create-expense`, `create-income`, `create-card-payment` deshabilitada con `create.noCards` sin tarjetas activas) → `openCreate`; debajo `QuickExpenseBar variant="dialog"` cargada al abrir y que cierra la hoja al registrar; montarla en AppShell.tsx
+- [X] T015 [P] [US2] Crear src/components/layout/NewMenu.tsx (botón placeholder `new-menu`, `variant="cta"`, `hidden md:inline-flex`) y src/components/layout/NewMenuContent.tsx (DropdownMenu Radix cargado con `next/dynamic` `ssr:false`; ítems `new-expense`, `new-income` y `new-card-payment` con `<kbd>` N/I/P); colocarlo en la barra superior de AppShell.tsx
+- [X] T016 [P] [US2] Crear src/components/layout/use-create-shortcuts.ts (N/I/P → `openCreate`; ignora modificadores, `repeat`, `defaultPrevented`, foco editable, paneles de `useUi` abiertos o `[role=dialog][data-state=open]`; P sin tarjetas no hace nada) y montarlo en AppShell.tsx
+- [X] T017 [P] [US2] Pruebas del hook de atajos (abre con N/I/P; ignora en input, con Ctrl/Meta, con diálogo abierto) en tests/unit/components/create-shortcuts.test.tsx
+- [X] T018 [US2] Quitar CTA y diálogos duplicados: src/features/safe-to-spend/Dashboard.tsx (sin botón "Agregar gasto" ni LazyAddExpenseDialog), src/features/expenses/ExpensesPage.tsx (sin "Agregar gasto" ni "Pagar tarjeta" en el encabezado; editar → `openCreate({kind:"expense", expense})`; sin AddExpenseDialog/CardPaymentDialog locales; estado vacío con botón outline → `openCreate({kind:"expense"})`), src/features/income/IncomePage.tsx (sin "Registrar ingreso"; editar → `openCreate({kind:"income", income})`; estado vacío con botón outline)
+- [X] T019 [P] [US2] Sustituir `ResponsiveCtaButton` por `Button` (variant default) en src/features/goals/GoalsPage.tsx y src/features/receivables/ReceivablesPage.tsx; borrar src/components/ui/responsive-cta.tsx
 - [ ] T020 [US2] Helper `openCreate(page, kind)` en tests/e2e/fixtures.ts (escritorio: `new-menu` → ítem; móvil: `mobile-nav-create` → acción) y migrar los usos de `add-expense`/`fab-add-expense` en tests/e2e/{us2-safe-to-spend,us4-expenses,us9-demo,us13-quick-expenses,cold-start,perf-budgets,a11y}.spec.ts; agregar a navigation.spec.ts los casos de hoja ＋, menú "＋ Nuevo", atajos y foco en input
 
 **Checkpoint**: gate rápido + commit.
@@ -134,4 +134,4 @@ MVP = Phase 2 + US1 (navegación agrupada). Luego US2 y US3 (P1) y después US4 
 
 ## Notas
 
-(Línea base del First Load: T001.)
+- Línea base First Load (T001, `node scripts/measure-first-load.mjs`, 2026-11-07): `/` 301.6 kB gzip (20 scripts); `/dashboard` 328.4 kB gzip (24 scripts). Presupuesto: `/dashboard` ≤ 348.4 kB gzip.

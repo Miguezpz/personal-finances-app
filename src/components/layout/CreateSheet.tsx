@@ -1,0 +1,83 @@
+"use client";
+
+/**
+ * Mobile "＋" sheet (spec 008, US2, FR-007/FR-008/FR-013): the three create actions as large
+ * buttons, then the owner's quick expenses. Each action closes the sheet and opens the app's single
+ * instance of that dialog (DialogHost).
+ */
+import { useTranslations } from "next-intl";
+import { lazy, Suspense } from "react";
+import {
+  Sheet,
+  SheetContent,
+  SheetDescription,
+  SheetHeader,
+  SheetTitle,
+} from "@/components/ui/sheet";
+import { cn } from "@/lib/utils";
+import { useUi } from "@/store/ui";
+import { CREATE_ACTIONS, useHasActiveCards } from "./create-actions";
+
+// Only needed once the sheet opens: its own chunk keeps it out of every route's First Load JS.
+const QuickExpenseBar = lazy(() =>
+  import("@/features/expenses/QuickExpenseBar").then((m) => ({ default: m.QuickExpenseBar })),
+);
+
+export function CreateSheet() {
+  const t = useTranslations("create");
+  const open = useUi((s) => s.createSheetOpen);
+  const setOpen = useUi((s) => s.setCreateSheetOpen);
+  const openCreate = useUi((s) => s.openCreate);
+  const hasCards = useHasActiveCards();
+
+  return (
+    <Sheet open={open} onOpenChange={setOpen}>
+      <SheetContent
+        side="bottom"
+        className="max-h-[85dvh] gap-3 overflow-y-auto rounded-t-2xl p-4 pb-[max(1rem,env(safe-area-inset-bottom))]"
+        data-testid="create-sheet"
+      >
+        <SheetHeader className="p-0">
+          <SheetTitle>{t("title")}</SheetTitle>
+          <SheetDescription className="sr-only">{t("title")}</SheetDescription>
+        </SheetHeader>
+        <ul className="grid grid-cols-3 gap-2">
+          {CREATE_ACTIONS.map(({ kind, labelKey, icon: Icon, testId }) => {
+            const disabled = kind === "card-payment" && !hasCards;
+            return (
+              <li key={kind} className="min-w-0">
+                <button
+                  type="button"
+                  data-testid={`create-${testId}`}
+                  disabled={disabled}
+                  aria-describedby={disabled ? "create-no-cards" : undefined}
+                  onClick={() => openCreate({ kind })}
+                  className={cn(
+                    "flex min-h-20 w-full flex-col items-center justify-center gap-2 rounded-xl border bg-card p-3 text-sm font-medium transition-colors duration-fast",
+                    "hover:bg-muted focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none",
+                    "disabled:pointer-events-none disabled:opacity-50",
+                  )}
+                >
+                  <span className="flex size-10 items-center justify-center rounded-full bg-accent text-accent-foreground">
+                    <Icon aria-hidden="true" className="size-5" />
+                  </span>
+                  <span className="max-w-full truncate">{t(labelKey)}</span>
+                </button>
+              </li>
+            );
+          })}
+        </ul>
+        {!hasCards && (
+          <p id="create-no-cards" className="text-xs text-muted-foreground">
+            {t("noCards")}
+          </p>
+        )}
+        {open && (
+          <Suspense fallback={null}>
+            <QuickExpenseBar variant="dialog" onApplied={() => setOpen(false)} />
+          </Suspense>
+        )}
+      </SheetContent>
+    </Sheet>
+  );
+}

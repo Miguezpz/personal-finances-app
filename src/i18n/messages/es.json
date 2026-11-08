@@ -44,7 +44,16 @@
     "signOut": "Cerrar sesión",
     "more": "Más",
     "preferences": "Preferencias",
-    "mobileLabel": "Navegación rápida"
+    "mobileLabel": "Navegación rápida",
+    "groups": {
+      "main": "Principal",
+      "plan": "Planear",
+      "debts": "Deudas",
+      "insights": "Análisis"
+    },
+    "create": "Crear",
+    "appearance": "Apariencia",
+    "moreTitle": "Más"
   },
   "theme": {
     "toggle": "Tema",
@@ -254,7 +263,8 @@
     "loadError": "No se pudieron cargar tus saldos.",
     "recurringTitle": "Fijos de esta quincena",
     "statusPending": "pendiente",
-    "statusApplied": "cobrado"
+    "statusApplied": "cobrado",
+    "alertsLabel": "Alertas"
   },
   "expenses": {
     "addTitle": "Registrar gasto",
@@ -741,7 +751,14 @@
     "cardDue": "Vence {card}",
     "nothingToPay": "Nada que pagar en este estado de cuenta",
     "collectFrom": "Cobrar a {name}",
-    "collectHint": "Mensualidad de terceros — destinada a la tarjeta"
+    "collectHint": "Mensualidad de terceros — destinada a la tarjeta",
+    "lastStatement": "Último estado",
+    "nextStatement": "Próximo estado",
+    "statePaid": "Pagado",
+    "statePending": "Pendiente",
+    "stateOverdue": "Vencido",
+    "dueShort": "vence {date}",
+    "seeInCredit": "Ver en Crédito"
   },
   "goals": {
     "title": "Metas",
@@ -811,5 +828,15 @@
     "historyTitle": "Historial",
     "noHistory": "La primera instantánea mensual se toma la próxima vez que abras la app.",
     "formulaHint": "Activos: saldos iniciales, inversiones, ahorro en metas, lo que te deben terceros y lo que queda en Necesidades y Deseos. Deudas: deuda total de tarjetas."
+  },
+  "create": {
+    "title": "Crear",
+    "expense": "Gasto",
+    "income": "Ingreso",
+    "cardPayment": "Pagar tarjeta",
+    "noCards": "Agrega una tarjeta de crédito en Configuración › Cuentas.",
+    "newButton": "Nuevo",
+    "shortcut": "Atajo: {key}",
+    "quickTitle": "Gastos rápidos"
   }
 }

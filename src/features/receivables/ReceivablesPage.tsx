@@ -11,7 +11,6 @@ import { useState } from "react";
 import { Money } from "@/components/money/Money";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { ResponsiveCtaButton } from "@/components/ui/responsive-cta";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 import { debtorBalance, receivableBalance } from "@/domain/installments";
@@ -57,14 +56,14 @@ export function ReceivablesPage() {
         description={t("description")}
         actions={
           <>
-            <ResponsiveCtaButton
+            <Button
               className="shrink-0"
               onClick={() => setAdding(true)}
               data-testid="add-receivable"
             >
               <Plus aria-hidden="true" />
               {t("addTitle")}
-            </ResponsiveCtaButton>
+            </Button>
           </>
         }
       />

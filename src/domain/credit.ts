@@ -15,8 +15,8 @@
  * above is identical on a fresh card (US10-1a: $5,000) and correct over any history. Future MSI
  * installments are never part of the "totalero" amount, but always part of the total debt.
  */
-import { cardTermsOf, dueDateFor, lastCutOffOn, type CardTerms } from "./card-terms";
-import { parseIsoDate } from "./dates";
+import { cardTermsOf, cutOffIn, dueDateFor, lastCutOffOn, type CardTerms } from "./card-terms";
+import { addMonthsToMonthStart, parseIsoDate } from "./dates";
 import { InvalidDateError } from "./errors";
 import { clampChargeDay } from "./periods";
 import type { Account, Cents, FinanceSnapshot, IsoDate } from "./types";
@@ -81,6 +81,51 @@ export function cardStatus(card: Account, data: CardData, today: IsoDate): CardS
     nextPaymentDue,
     payToAvoidInterest: payToAvoidInterest as Cents,
     overdue: today > nextPaymentDue && payToAvoidInterest > 0,
+  };
+}
+
+// ---------------------------------------------------------------------------
+// Statement summary (spec 008, US3, research.md R4): one answer for Credit and Expenses
+// ---------------------------------------------------------------------------
+export type StatementState = "paid" | "pending" | "overdue";
+
+export interface CardStatementSummary {
+  cardId: Account["id"];
+  /** The statement that closed on the latest cut-off ≤ today. */
+  last: { cutOff: IsoDate; due: IsoDate; outstanding: Cents; state: StatementState };
+  /** The following statement, projected with what is known today (same rule as the timeline). */
+  next: { cutOff: IsoDate; due: IsoDate; amount: Cents };
+  totalDebt: Cents;
+  /** Which statement leads: the last one until it's paid, then the next one. */
+  headline: "last" | "next";
+  /** What "Pay" suggests: the headline statement's amount. */
+  payAmount: Cents;
+}
+
+export function cardStatementSummary(
+  card: Account,
+  data: CardData,
+  today: IsoDate,
+): CardStatementSummary {
+  const terms = requireCard(card);
+  const status = cardStatus(card, data, today);
+  const outstanding = status.payToAvoidInterest;
+  const state: StatementState =
+    outstanding === 0 ? "paid" : today > status.nextPaymentDue ? "overdue" : "pending";
+
+  const nextCutOff = cutOffIn(terms.cutOffDay, addMonthsToMonthStart(status.lastCutOff, 1));
+  // Incremental, like creditTimeline: what the next statement adds, assuming this one is paid.
+  const cumulative = cardStatus(card, data, nextCutOff).payToAvoidInterest;
+  const nextAmount = Math.max(0, cumulative - outstanding) as Cents;
+
+  const headline = state === "paid" ? "next" : "last";
+  return {
+    cardId: card.id,
+    last: { cutOff: status.lastCutOff, due: status.nextPaymentDue, outstanding, state },
+    next: { cutOff: nextCutOff, due: dueDateFor(terms, nextCutOff), amount: nextAmount },
+    totalDebt: status.totalDebt,
+    headline,
+    payAmount: headline === "last" ? outstanding : nextAmount,
   };
 }
 

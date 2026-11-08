@@ -5,17 +5,12 @@
  * their semáforo, the quincena dates and the days to the next payday. Loading, empty and error
  * states; a clear warning when a bucket is overspent that never blocks recording (FR-021).
  */
-import { CircleAlert, Plus, TriangleAlert } from "lucide-react";
+import { CircleAlert, TriangleAlert } from "lucide-react";
 import { useTranslations } from "next-intl";
-import Link from "next/link";
-import { useEffect, useState } from "react";
+import { useEffect } from "react";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
-import {
-  LazyAddExpenseDialog,
-  usePreloadAddExpenseDialog,
-} from "@/features/expenses/LazyAddExpenseDialog";
 import { QuickExpenseBar } from "@/features/expenses/QuickExpenseBar";
 import { formatPeriodRange } from "@/features/income/format";
 import { useMediaQuery } from "@/lib/use-media-query";
@@ -40,8 +35,7 @@ export function Dashboard() {
   const tc = useTranslations("common");
   const locale = usePreferences(selectLocale);
   const { data, recurringItems, hasAllocations, isPending, isError, refetch } = useSafeToSpend();
-  const [adding, setAdding] = useState(false);
-  usePreloadAddExpenseDialog();
+  const openCreate = useUi((s) => s.openCreate);
   const introPlayed = useUi((s) => s.dashboardIntroPlayed);
   const markIntroPlayed = useUi((s) => s.markDashboardIntroPlayed);
   const reduced = useMediaQuery("(prefers-reduced-motion: reduce)");
@@ -77,21 +71,6 @@ export function Dashboard() {
             )}
           </>
         }
-        actions={
-          <>
-            <Button
-              variant="cta"
-              // Mobile: the floating CTA replaces it (FR-006).
-              className="max-md:hidden"
-              onClick={() => setAdding(true)}
-              disabled={!data}
-              data-testid="add-expense"
-            >
-              <Plus aria-hidden="true" />
-              {t("addExpense")}
-            </Button>
-          </>
-        }
       />
 
       {isPending ? (
@@ -120,8 +99,13 @@ export function Dashboard() {
               <AlertTitle>{t("emptyTitle")}</AlertTitle>
               <AlertDescription className="flex flex-col items-start gap-2">
                 {t("emptyHint")}
-                <Button asChild size="sm" variant="outline">
-                  <Link href="/income">{t("registerIncome")}</Link>
+                <Button
+                  size="sm"
+                  variant="outline"
+                  onClick={() => openCreate({ kind: "income" })}
+                  data-testid="empty-register-income"
+                >
+                  {t("registerIncome")}
                 </Button>
               </AlertDescription>
             </Alert>
@@ -164,8 +148,6 @@ export function Dashboard() {
           </div>
         </div>
       )}
-
-      {adding && <LazyAddExpenseDialog open={adding} onOpenChange={setAdding} />}
     </section>
   );
 }

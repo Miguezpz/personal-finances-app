@@ -44,7 +44,16 @@
     "signOut": "Sign out",
     "more": "More",
     "preferences": "Preferences",
-    "mobileLabel": "Quick navigation"
+    "mobileLabel": "Quick navigation",
+    "groups": {
+      "main": "Main",
+      "plan": "Plan",
+      "debts": "Debts",
+      "insights": "Insights"
+    },
+    "create": "Create",
+    "appearance": "Appearance",
+    "moreTitle": "More"
   },
   "theme": {
     "toggle": "Theme",
@@ -254,7 +263,8 @@
     "loadError": "Your balances couldn't be loaded.",
     "recurringTitle": "Recurring this quincena",
     "statusPending": "pending",
-    "statusApplied": "charged"
+    "statusApplied": "charged",
+    "alertsLabel": "Alerts"
   },
   "expenses": {
     "addTitle": "Add expense",
@@ -741,7 +751,14 @@
     "cardDue": "{card} due",
     "nothingToPay": "Nothing to pay on this statement",
     "collectFrom": "Collect from {name}",
-    "collectHint": "Third-party installment — earmarked for the card"
+    "collectHint": "Third-party installment — earmarked for the card",
+    "lastStatement": "Last statement",
+    "nextStatement": "Next statement",
+    "statePaid": "Paid",
+    "statePending": "Pending",
+    "stateOverdue": "Overdue",
+    "dueShort": "due {date}",
+    "seeInCredit": "See in Credit"
   },
   "goals": {
     "title": "Goals",
@@ -811,5 +828,15 @@
     "historyTitle": "History",
     "noHistory": "The first monthly snapshot is taken the next time you open the app.",
     "formulaHint": "Assets: opening balances, investments, goal savings, money third parties owe you and what's left in Needs and Wants. Liabilities: total card debt."
+  },
+  "create": {
+    "title": "Create",
+    "expense": "Expense",
+    "income": "Income",
+    "cardPayment": "Pay card",
+    "noCards": "Add a credit card in Settings › Accounts.",
+    "newButton": "New",
+    "shortcut": "Shortcut: {key}",
+    "quickTitle": "Quick expenses"
   }
 }

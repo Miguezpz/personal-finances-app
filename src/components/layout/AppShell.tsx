@@ -27,50 +27,96 @@ import { CurrencyToggle } from "./CurrencyToggle";
 import { DemoBanner } from "./DemoBanner";
 import { LanguageToggle } from "./LanguageToggle";
 import { MobileNav } from "./MobileNav";
-import { NAV_ITEMS, SECONDARY_NAV_ITEMS, type NavItem } from "./nav-items";
+import { CreateSheet } from "./CreateSheet";
+import { DialogHost } from "./DialogHost";
+import {
+  isActiveRoute,
+  NAV_GROUPS,
+  SECONDARY_NAV_GROUPS,
+  type NavGroup,
+  type NavItem,
+} from "./nav-items";
+import { NewMenu } from "./NewMenu";
 import { NavIndicator } from "./NavIndicator";
 import { PreferencesSheet } from "./PreferencesSheet";
 import { PrivacyToggle } from "./PrivacyToggle";
 import { ThemeToggle } from "./ThemeToggle";
 
-function NavLinks({
-  items = NAV_ITEMS,
+function NavList({
+  items,
+  pathname,
   onNavigate,
 }: {
-  items?: readonly NavItem[];
+  items: readonly NavItem[];
+  pathname: string;
+  onNavigate?: (() => void) | undefined;
+}) {
+  const t = useTranslations("nav");
+  return (
+    <ul className="flex flex-col gap-1">
+      {items.map(({ href, labelKey, icon: Icon }) => {
+        const active = isActiveRoute(pathname, href);
+        return (
+          <li key={href}>
+            <Link
+              href={href}
+              {...(onNavigate ? { onClick: onNavigate } : {})}
+              aria-current={active ? "page" : undefined}
+              className={cn(
+                "relative z-10 flex items-center gap-3 rounded-md px-3 py-2 text-sm transition-colors duration-fast pointer-coarse:min-h-11",
+                "focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none",
+                active
+                  ? // The sliding indicator paints the background once measured (NavIndicator).
+                    "bg-nav-active font-semibold text-nav-active-foreground group-data-[indicator=ready]/nav:bg-transparent"
+                  : "font-medium text-muted-foreground hover:bg-muted hover:text-foreground",
+              )}
+            >
+              <Icon aria-hidden="true" className="size-4 shrink-0" />
+              {t(labelKey)}
+            </Link>
+          </li>
+        );
+      })}
+    </ul>
+  );
+}
+
+/**
+ * Grouped destinations (spec 008, FR-001/FR-002/FR-006): a discreet heading per group; the footer
+ * group (Settings) has no heading and is pushed to the bottom by the sidebar's flex column.
+ */
+function NavGroups({
+  groups,
+  onNavigate,
+  pinFooter = false,
+}: {
+  groups: readonly NavGroup[];
   onNavigate?: () => void;
+  pinFooter?: boolean;
 }) {
   const t = useTranslations("nav");
   const pathname = usePathname();
   const listRef = useRef<HTMLDivElement>(null);
   return (
-    <div ref={listRef} className="group/nav relative">
+    <div ref={listRef} className="group/nav relative flex min-h-full flex-col gap-4">
       <NavIndicator listRef={listRef} className="rounded-md" />
-      <ul className="flex flex-col gap-1">
-        {items.map(({ href, labelKey, icon: Icon }) => {
-          const active = pathname === href || pathname.startsWith(`${href}/`);
-          return (
-            <li key={href}>
-              <Link
-                href={href}
-                {...(onNavigate ? { onClick: onNavigate } : {})}
-                aria-current={active ? "page" : undefined}
-                className={cn(
-                  "relative z-10 flex items-center gap-3 rounded-md px-3 py-2 text-sm transition-colors duration-fast pointer-coarse:min-h-11",
-                  "focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none",
-                  active
-                    ? // The sliding indicator paints the background once measured (NavIndicator).
-                      "bg-nav-active font-semibold text-nav-active-foreground group-data-[indicator=ready]/nav:bg-transparent"
-                    : "font-medium text-muted-foreground hover:bg-muted hover:text-foreground",
-                )}
-              >
-                <Icon aria-hidden="true" className="size-4 shrink-0" />
-                {t(labelKey)}
-              </Link>
-            </li>
-          );
-        })}
-      </ul>
+      {groups.map(({ id, items }) =>
+        id === "footer" ? (
+          <div key={id} className={cn("border-t pt-3", pinFooter && "mt-auto")}>
+            <NavList items={items} pathname={pathname} onNavigate={onNavigate} />
+          </div>
+        ) : (
+          <section key={id} aria-labelledby={`nav-group-${id}${onNavigate ? "-more" : ""}`}>
+            <h2
+              id={`nav-group-${id}${onNavigate ? "-more" : ""}`}
+              className="px-3 pb-1 text-xs font-medium tracking-wide text-muted-foreground uppercase"
+            >
+              {t(`groups.${id}`)}
+            </h2>
+            <NavList items={items} pathname={pathname} onNavigate={onNavigate} />
+          </section>
+        ),
+      )}
     </div>
   );
 }
@@ -147,15 +193,19 @@ export function AppShell({ children, toolbar }: { children: ReactNode; toolbar?:
       >
         {tc("skipToContent")}
       </a>
-      <header className="sticky top-0 z-30 flex h-14 items-center gap-2 border-b bg-background/95 px-4 backdrop-blur">
-        {/* Mobile "More" sheet (opened from the bottom bar): the sections the bar doesn't show. */}
+      <header className="sticky top-0 z-30 flex min-h-14 items-center gap-2 border-b bg-background/95 pt-[env(safe-area-inset-top)] pr-[max(1rem,env(safe-area-inset-right))] pl-[max(1rem,env(safe-area-inset-left))] backdrop-blur">
+        {/* Mobile "More" panel (opened from the bottom bar): the destinations the bar doesn't show. */}
         <Sheet open={sidebarOpen} onOpenChange={setSidebarOpen}>
-          <SheetContent side="left" className="w-72 p-4">
-            <SheetHeader className="p-0 pb-4">
-              <SheetTitle>{tc("appName")}</SheetTitle>
+          <SheetContent
+            side="bottom"
+            className="max-h-[85dvh] overflow-y-auto rounded-t-2xl p-4 pb-[max(1rem,env(safe-area-inset-bottom))]"
+            data-testid="more-sheet"
+          >
+            <SheetHeader className="p-0">
+              <SheetTitle>{t("moreTitle")}</SheetTitle>
             </SheetHeader>
             <nav aria-label={t("label")}>
-              <NavLinks items={SECONDARY_NAV_ITEMS} onNavigate={() => setSidebarOpen(false)} />
+              <NavGroups groups={SECONDARY_NAV_GROUPS} onNavigate={() => setSidebarOpen(false)} />
             </nav>
           </SheetContent>
         </Sheet>
@@ -177,6 +227,7 @@ export function AppShell({ children, toolbar }: { children: ReactNode; toolbar?:
           </div>
           <PrivacyToggle />
           {toolbar}
+          <NewMenu />
           {canSignOut && (
             <Button
               variant="ghost"
@@ -198,20 +249,26 @@ export function AppShell({ children, toolbar }: { children: ReactNode; toolbar?:
       <BackgroundProcesses />
 
       <div className="flex w-full flex-1">
-        <aside className="hidden w-60 shrink-0 border-r bg-sidebar p-4 md:block">
-          <nav aria-label={t("label")} className="sticky top-18">
-            <NavLinks />
+        <aside className="hidden w-60 shrink-0 border-r bg-sidebar md:block">
+          {/* Scrolls on its own when the window is short (FR-002); Settings stays at the bottom. */}
+          <nav
+            aria-label={t("label")}
+            className="sticky top-14 flex max-h-[calc(100dvh-3.5rem)] flex-col overflow-y-auto p-4"
+          >
+            <NavGroups groups={NAV_GROUPS} pinFooter />
           </nav>
         </aside>
         <main
           id="main"
           tabIndex={-1}
-          className="mx-auto w-full max-w-7xl min-w-0 flex-1 p-4 pb-[calc(5rem+env(safe-area-inset-bottom))] outline-none md:p-6"
+          className="mx-auto w-full max-w-7xl min-w-0 flex-1 p-4 pb-[calc(5rem+env(safe-area-inset-bottom))] outline-none md:p-6 md:pb-6"
         >
           {children}
         </main>
       </div>
       <MobileNav />
+      <CreateSheet />
+      <DialogHost />
     </div>
   );
 }

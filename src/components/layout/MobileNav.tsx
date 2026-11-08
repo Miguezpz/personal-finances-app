@@ -1,165 +1,139 @@
 "use client";
 
 /**
- * Mobile bottom navigation (spec 003, US2, FR-019/FR-020): the four main destinations + "More" (opens the side sheet
- * with the remaining sections) in the thumb zone, above the safe area, and the floating "Add expense" CTA — the only
- * highlighted call to action on mobile (FR-006). The CTA hides while scrolling down and while a field has focus, so
- * it never covers what's being edited.
+ * Mobile bottom navigation (spec 008, US1/US2, FR-003–FR-007): Home · Expenses · ＋ · Credit · More,
+ * in the thumb zone above the safe area. The raised "＋" is the screen's only highlighted call to
+ * action on mobile and toggles the create sheet; "More" opens the remaining destinations and is
+ * marked as the current page whenever the route is one of them. Replaces spec 003's bar and its
+ * floating "Add expense" button (FR-019/FR-020).
  */
 import { Ellipsis, Plus } from "lucide-react";
 import { useTranslations } from "next-intl";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { useEffect, useRef, useState } from "react";
-import { Button } from "@/components/ui/button";
-import {
-  LazyAddExpenseDialog,
-  usePreloadAddExpenseDialog,
-} from "@/features/expenses/LazyAddExpenseDialog";
+import { useRef, type ReactNode } from "react";
 import { cn } from "@/lib/utils";
 import { useUi } from "@/store/ui";
 import { NavIndicator } from "./NavIndicator";
-import { PRIMARY_NAV_ITEMS } from "./nav-items";
+import { isActiveRoute, isSecondaryRoute, MOBILE_BAR_ITEMS, type NavItem } from "./nav-items";
 
-/** Hide after a deliberate scroll down, show again after a short scroll up; always visible near the top. */
-const HIDE_AFTER_PX = 64;
-const SHOW_AFTER_PX = 24;
-const ALWAYS_VISIBLE_TOP_PX = 120;
-const FIELD_SELECTOR = "input, select, textarea, [contenteditable='true']";
+const ITEM_CLASS = cn(
+  "flex min-h-14 w-full flex-col items-center justify-center gap-0.5 px-1 text-[0.6875rem] leading-tight transition-colors duration-fast",
+  "focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none focus-visible:ring-inset",
+);
 
-/**
- * Hidden while scrolling down (once the scroll in that direction exceeds HIDE_AFTER_PX) or while a form field has
- * focus. Distances accumulate per direction, so small jitters (or iOS bounce) don't make it flicker.
- */
-function useFabHidden(): boolean {
-  const [scrolledDown, setScrolledDown] = useState(false);
-  const [editing, setEditing] = useState(false);
+function ItemBody({ active, icon, label }: { active: boolean; icon: ReactNode; label: string }) {
+  return (
+    <>
+      <span
+        data-nav-anchor
+        className={cn(
+          "relative z-10 flex h-7 w-12 items-center justify-center rounded-full transition-colors duration-fast",
+          active &&
+            "bg-nav-active text-nav-active-foreground group-data-[indicator=ready]/nav:bg-transparent",
+        )}
+      >
+        {icon}
+      </span>
+      <span className="relative z-10 max-w-full truncate">{label}</span>
+    </>
+  );
+}
 
-  useEffect(() => {
-    let last = window.scrollY;
-    let travelled = 0; // > 0: down, < 0: up, since the last change of direction
-    const onScroll = () => {
-      const y = window.scrollY;
-      const delta = y - last;
-      last = y;
-      if (y <= ALWAYS_VISIBLE_TOP_PX) {
-        travelled = 0;
-        setScrolledDown(false);
-        return;
-      }
-      if (delta === 0) return;
-      if (Math.sign(delta) !== Math.sign(travelled)) travelled = 0;
-      travelled += delta;
-      if (travelled > HIDE_AFTER_PX) setScrolledDown(true);
-      else if (travelled < -SHOW_AFTER_PX) setScrolledDown(false);
-    };
-    const onFocusIn = (e: FocusEvent) =>
-      setEditing(e.target instanceof Element && e.target.matches(FIELD_SELECTOR));
-    const onFocusOut = () => setEditing(false);
-    window.addEventListener("scroll", onScroll, { passive: true });
-    document.addEventListener("focusin", onFocusIn);
-    document.addEventListener("focusout", onFocusOut);
-    return () => {
-      window.removeEventListener("scroll", onScroll);
-      document.removeEventListener("focusin", onFocusIn);
-      document.removeEventListener("focusout", onFocusOut);
-    };
-  }, []);
-
-  return scrolledDown || editing;
+function BarLink({ item, pathname }: { item: NavItem; pathname: string }) {
+  const t = useTranslations("nav");
+  const active = isActiveRoute(pathname, item.href);
+  const Icon = item.icon;
+  return (
+    <li className="min-w-0">
+      <Link
+        href={item.href}
+        aria-current={active ? "page" : undefined}
+        data-testid={`mobile-nav-${item.href.slice(1)}`}
+        className={cn(
+          ITEM_CLASS,
+          active
+            ? "font-semibold text-foreground"
+            : "font-medium text-muted-foreground hover:text-foreground",
+        )}
+      >
+        <ItemBody
+          active={active}
+          icon={<Icon aria-hidden="true" className="size-5" />}
+          label={t(item.labelKey)}
+        />
+      </Link>
+    </li>
+  );
 }
 
 export function MobileNav() {
   const t = useTranslations("nav");
-  const tExpenses = useTranslations("expenses");
   const pathname = usePathname();
   const sidebarOpen = useUi((s) => s.sidebarOpen);
   const setSidebarOpen = useUi((s) => s.setSidebarOpen);
-  const [adding, setAdding] = useState(false);
-  usePreloadAddExpenseDialog();
-  const fabHidden = useFabHidden();
+  const createOpen = useUi((s) => s.createSheetOpen);
+  const setCreateOpen = useUi((s) => s.setCreateSheetOpen);
   const listRef = useRef<HTMLDivElement>(null);
+  const [home, expenses, credit] = MOBILE_BAR_ITEMS as [NavItem, NavItem, NavItem];
+  const moreActive = isSecondaryRoute(pathname);
 
   return (
-    <>
-      <Button
-        variant="cta"
-        size="fab"
-        aria-label={tExpenses("addTitle")}
-        data-testid="fab-add-expense"
-        onClick={() => setAdding(true)}
-        tabIndex={fabHidden ? -1 : 0}
-        aria-hidden={fabHidden || undefined}
-        className={cn(
-          "fixed right-4 bottom-[calc(4.5rem+env(safe-area-inset-bottom))] z-30 transition-[transform,box-shadow,background-color] duration-base ease-out-quint md:hidden",
-          fabHidden && "translate-y-[200%]",
-        )}
-      >
-        <Plus aria-hidden="true" />
-      </Button>
-
-      <nav
-        aria-label={t("mobileLabel")}
-        data-testid="mobile-nav"
-        className="fixed inset-x-0 bottom-0 z-30 border-t bg-background/95 pb-[env(safe-area-inset-bottom)] backdrop-blur md:hidden"
-      >
-        <div ref={listRef} className="group/nav relative">
-          <NavIndicator listRef={listRef} className="rounded-full" />
-          <ul className="grid grid-cols-5">
-            {PRIMARY_NAV_ITEMS.map(({ href, labelKey, icon: Icon }) => {
-              const active = pathname === href || pathname.startsWith(`${href}/`);
-              return (
-                <li key={href} className="min-w-0">
-                  <Link
-                    href={href}
-                    aria-current={active ? "page" : undefined}
-                    data-testid={`mobile-nav-${href.slice(1)}`}
-                    className={cn(
-                      "flex min-h-14 flex-col items-center justify-center gap-0.5 px-1 text-[0.6875rem] leading-tight transition-colors duration-fast",
-                      "focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none focus-visible:ring-inset",
-                      active
-                        ? "font-semibold text-foreground"
-                        : "font-medium text-muted-foreground hover:text-foreground",
-                    )}
-                  >
-                    <span
-                      data-nav-anchor
-                      className={cn(
-                        "relative z-10 flex h-7 w-12 items-center justify-center rounded-full transition-colors duration-fast",
-                        active &&
-                          "bg-nav-active text-nav-active-foreground group-data-[indicator=ready]/nav:bg-transparent",
-                      )}
-                    >
-                      <Icon aria-hidden="true" className="size-5" />
-                    </span>
-                    <span className="relative z-10 max-w-full truncate">{t(labelKey)}</span>
-                  </Link>
-                </li>
-              );
-            })}
-            <li className="min-w-0">
-              <button
-                type="button"
-                data-testid="mobile-nav-more"
-                aria-haspopup="dialog"
-                aria-expanded={sidebarOpen}
-                onClick={() => setSidebarOpen(true)}
-                className={cn(
-                  "flex min-h-14 w-full flex-col items-center justify-center gap-0.5 px-1 text-[0.6875rem] leading-tight font-medium text-muted-foreground transition-colors duration-fast hover:text-foreground",
-                  "focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none focus-visible:ring-inset",
-                )}
-              >
-                <span className="flex h-7 w-12 items-center justify-center">
-                  <Ellipsis aria-hidden="true" className="size-5" />
-                </span>
-                <span className="max-w-full truncate">{t("more")}</span>
-              </button>
-            </li>
-          </ul>
-        </div>
-      </nav>
-
-      {adding && <LazyAddExpenseDialog open={adding} onOpenChange={setAdding} />}
-    </>
+    <nav
+      aria-label={t("mobileLabel")}
+      data-testid="mobile-nav"
+      className="fixed inset-x-0 bottom-0 z-30 border-t bg-background/95 pb-[env(safe-area-inset-bottom)] backdrop-blur md:hidden"
+    >
+      <div ref={listRef} className="group/nav relative">
+        <NavIndicator listRef={listRef} className="rounded-full" />
+        <ul className="grid grid-cols-5">
+          <BarLink item={home} pathname={pathname} />
+          <BarLink item={expenses} pathname={pathname} />
+          <li className="flex min-w-0 items-center justify-center">
+            <button
+              type="button"
+              data-testid="mobile-nav-create"
+              aria-label={t("create")}
+              aria-haspopup="dialog"
+              aria-expanded={createOpen}
+              data-state={createOpen ? "open" : "closed"}
+              onClick={() => setCreateOpen(!createOpen)}
+              className={cn(
+                "group/create -mt-5 flex size-14 items-center justify-center rounded-full bg-cta text-cta-foreground shadow-[0_6px_18px_-4px] ring-4 shadow-cta/60 ring-background transition-[box-shadow,background-color] duration-fast",
+                "focus-visible:ring-ring focus-visible:outline-none active:shadow-[0_2px_8px_-2px]",
+              )}
+            >
+              <Plus
+                aria-hidden="true"
+                className="size-6 transition-transform duration-base ease-out-quint group-data-[state=open]/create:rotate-45"
+              />
+            </button>
+          </li>
+          <BarLink item={credit} pathname={pathname} />
+          <li className="min-w-0">
+            <button
+              type="button"
+              data-testid="mobile-nav-more"
+              aria-haspopup="dialog"
+              aria-expanded={sidebarOpen}
+              aria-current={moreActive ? "page" : undefined}
+              onClick={() => setSidebarOpen(true)}
+              className={cn(
+                ITEM_CLASS,
+                moreActive
+                  ? "font-semibold text-foreground"
+                  : "font-medium text-muted-foreground hover:text-foreground",
+              )}
+            >
+              <ItemBody
+                active={moreActive}
+                icon={<Ellipsis aria-hidden="true" className="size-5" />}
+                label={t("more")}
+              />
+            </button>
+          </li>
+        </ul>
+      </div>
+    </nav>
   );
 }

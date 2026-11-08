@@ -5,7 +5,7 @@
  * and delete. Automatic (recurring) charges are labelled; third-party MSI charges never appear
  * here — they aren't personal expenses (FR-020).
  */
-import { CreditCard, Pencil, Plus, Repeat, Trash2 } from "lucide-react";
+import { Pencil, Plus, Repeat, Trash2 } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { useMemo, useState } from "react";
 import { toast } from "sonner";
@@ -31,13 +31,12 @@ import { isNotifiedGlobally } from "@/data/errors";
 import { useFinanceSnapshot } from "@/data/useFinanceSnapshot";
 import { taxonomyIconFor } from "@/domain/icons";
 import { negateCents } from "@/domain/money";
-import type { CardPayment, Cents, Expense, FinanceSnapshot, IsoDate, Uuid } from "@/domain/types";
+import type { CardPayment, Expense, FinanceSnapshot, IsoDate } from "@/domain/types";
 import { useTaxonomyName } from "@/features/settings/taxonomy/useTaxonomyName";
 import { formatDate } from "@/i18n/format";
 import { selectLocale, usePreferences } from "@/store/preferences";
-import { AddExpenseDialog } from "./AddExpenseDialog";
+import { openCreate } from "@/store/ui";
 import { CardDebtSummary } from "./CardDebtSummary";
-import { CardPaymentDialog } from "./CardPaymentDialog";
 import { useDeleteCardPayment, useDeleteExpense } from "./hooks";
 import { QuickExpensesSection } from "./QuickExpensesSection";
 import { SpendingByMethod } from "./SpendingByMethod";
@@ -60,19 +59,6 @@ export function ExpensesPage() {
   const deleteExpense = useDeleteExpense();
   const deletePayment = useDeleteCardPayment();
   const [visible, setVisible] = useState(PAGE);
-  const [expenseDialog, setExpenseDialog] = useState<{ open: boolean; expense: Expense | null }>({
-    open: false,
-    expense: null,
-  });
-  const [payDialog, setPayDialog] = useState<{
-    open: boolean;
-    cardId: Uuid | null;
-    amount: Cents | null;
-  }>({
-    open: false,
-    cardId: null,
-    amount: null,
-  });
   const [toDelete, setToDelete] = useState<Row | null>(null);
 
   const rows = useMemo<Row[]>(() => {
@@ -119,36 +105,15 @@ export function ExpensesPage() {
 
   return (
     <section className="flex flex-col gap-6">
-      <PageHeader
-        icon={navIcon("/expenses")}
-        title={t("title")}
-        description={t("description")}
-        actions={
-          <>
-            <Button
-              variant="outline"
-              onClick={() => setPayDialog({ open: true, cardId: null, amount: null })}
-            >
-              <CreditCard aria-hidden="true" />
-              {t("payCard")}
-            </Button>
-            <Button
-              variant="cta"
-              // Mobile: the floating CTA replaces it (FR-006).
-              className="max-md:hidden"
-              onClick={() => setExpenseDialog({ open: true, expense: null })}
-              data-testid="add-expense"
-            >
-              <Plus aria-hidden="true" />
-              {t("addTitle")}
-            </Button>
-          </>
-        }
-      />
+      <PageHeader icon={navIcon("/expenses")} title={t("title")} description={t("description")} />
 
       <SpendingByMethod />
 
-      <CardDebtSummary onPay={(cardId, amount) => setPayDialog({ open: true, cardId, amount })} />
+      <CardDebtSummary
+        onPay={(cardId, amount) =>
+          openCreate({ kind: "card-payment", cardId, suggestedAmount: amount })
+        }
+      />
 
       <QuickExpensesSection />
 
@@ -163,7 +128,22 @@ export function ExpensesPage() {
             ))}
           </div>
         ) : rows.length === 0 ? (
-          <EmptyState icon={navIcon("/expenses")}>{t("empty")}</EmptyState>
+          <EmptyState
+            icon={navIcon("/expenses")}
+            action={
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => openCreate({ kind: "expense" })}
+                data-testid="empty-add-expense"
+              >
+                <Plus aria-hidden="true" />
+                {t("addTitle")}
+              </Button>
+            }
+          >
+            {t("empty")}
+          </EmptyState>
         ) : (
           <>
             <ul className="divide-y rounded-lg border">
@@ -227,7 +207,7 @@ export function ExpensesPage() {
                         variant="ghost"
                         size="icon"
                         aria-label={t("edit")}
-                        onClick={() => setExpenseDialog({ open: true, expense: row.item })}
+                        onClick={() => openCreate({ kind: "expense", expense: row.item })}
                       >
                         <Pencil aria-hidden="true" />
                       </Button>
@@ -256,24 +236,6 @@ export function ExpensesPage() {
           </>
         )}
       </section>
-
-      {expenseDialog.open && (
-        <AddExpenseDialog
-          key={expenseDialog.expense?.id ?? "new"}
-          open={expenseDialog.open}
-          expense={expenseDialog.expense}
-          onOpenChange={(open) => setExpenseDialog((d) => ({ ...d, open }))}
-        />
-      )}
-      {payDialog.open && (
-        <CardPaymentDialog
-          key={payDialog.cardId ?? "any"}
-          open={payDialog.open}
-          cardId={payDialog.cardId}
-          suggestedAmount={payDialog.amount}
-          onOpenChange={(open) => setPayDialog((d) => ({ ...d, open }))}
-        />
-      )}
 
       <Dialog open={toDelete !== null} onOpenChange={(open) => !open && setToDelete(null)}>
         <DialogContent>
