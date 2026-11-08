@@ -12,7 +12,13 @@
 
 ### Session 2026-11-07
 
-(Pendiente de `/speckit-clarify`.)
+Respondidas en modo autónomo con `docs/ux-roadmap.md`, el spec 003 y la opción recomendada (el usuario no estuvo disponible).
+
+- Q: ¿La transición de ruta distingue la dirección (adelante o atrás)? → A: No. Siempre es el mismo desvanecimiento con desplazamiento de 4 px, también con el botón atrás del navegador; los desplazamientos laterales grandes no encajan con el límite de 300 ms ni con el tono sobrio del spec 003.
+- Q: ¿Las filas se animan también en la primera carga de una lista? → A: No. Solo las que aparecen después de que la lista ya estaba en pantalla (altas y deshacer); la primera carga ya tiene el revelado (FR-003) y la transición de ruta.
+- Q: ¿Qué destella al guardar: el alta, la edición o ambas? → A: La edición destella su fila; un alta usa la animación de entrada de fila, para no duplicar efectos.
+- Q: ¿Qué cuenta como "gesto rápido" al arrastrar una hoja? → A: Soltar con una velocidad hacia abajo de al menos 0.5 px/ms, aunque no se hayan recorrido 80 px.
+- Q: ¿Qué elementos se revelan al terminar de cargar? → A: Solo los elementos que ocupan el lugar de un esqueleto (los que se insertan en el mismo cambio en que el esqueleto desaparece), no la página completa.
 
 ## User Scenarios & Testing *(mandatory)*
 
@@ -46,7 +52,7 @@ Como dueño, quiero que un movimiento nuevo entre suavemente a su lista, que uno
 
 1. **Given** una lista de movimientos (Gastos, Ingresos, Gastos fijos), **When** aparece una fila nueva, **Then** entra con desvanecimiento y desplazamiento de 4 px en ≤ 200 ms.
 2. **Given** una fila que el dueño borra, **When** confirma el borrado (sin diálogo, spec 009), **Then** la fila se desvanece en ≤ 200 ms y después deja de mostrarse; con movimiento reducido desaparece al instante.
-3. **Given** un gasto o un ingreso guardado con éxito, **When** su fila está en pantalla, **Then** su fondo destella brevemente con el realce de marca, sin animar el texto del monto.
+3. **Given** un gasto o un ingreso editado con éxito, **When** su fila está en pantalla, **Then** su fondo destella brevemente con el realce de marca, sin animar el texto del monto.
 4. **Given** el modo demo, **When** el dueño intenta borrar, **Then** no hay animación de salida (el borrado se rechaza antes).
 
 ---
@@ -95,7 +101,7 @@ Como dueño, quiero que los errores de validación aparezcan suavemente, que el 
 
 ### Edge Cases
 
-- **Navegación con el botón atrás del navegador**: la transición de salida y entrada también aplica, o es instantánea si el navegador no la soporta.
+- **Navegación con el botón atrás del navegador**: aplica la misma transición (sin dirección), o es instantánea si el navegador no la soporta.
 - **Clics durante una transición**: la página sigue respondiendo; la transición no bloquea interacciones.
 - **Varias filas borradas seguidas**: cada una hace su propia salida.
 - **Deshacer**: la fila restaurada entra con la animación de alta.
@@ -110,13 +116,13 @@ Como dueño, quiero que los errores de validación aparezcan suavemente, que el 
 
 - **FR-001**: Al navegar entre secciones, el contenido saliente MUST desvanecerse y el entrante MUST aparecer con desvanecimiento y desplazamiento de 4 px, usando la transición de vistas nativa del navegador cuando esté disponible; el total MUST ser ≤ 300 ms.
 - **FR-002**: El encabezado y la navegación MUST permanecer fijos durante la transición de ruta, y la página MUST seguir aceptando clics.
-- **FR-003**: El contenido que reemplaza a un esqueleto de carga MUST aparecer con un desvanecimiento de ≤ 200 ms.
-- **FR-004**: Las filas nuevas de Gastos, Ingresos y Gastos fijos MUST entrar con desvanecimiento y desplazamiento de 4 px en ≤ 200 ms.
+- **FR-003**: Los elementos que ocupan el lugar de un esqueleto de carga MUST aparecer con un desvanecimiento de ≤ 200 ms (no la página completa).
+- **FR-004**: Las filas que aparecen en Gastos, Ingresos y Gastos fijos después de la primera carga de la lista (altas y deshacer) MUST entrar con desvanecimiento y desplazamiento de 4 px en ≤ 200 ms; la primera carga no anima filas.
 - **FR-005**: Al borrar una fila de esas listas, la fila MUST desvanecerse en ≤ 200 ms antes de dejar de mostrarse.
-- **FR-006**: Tras guardar con éxito un gasto o un ingreso, su fila visible MUST destellar con el realce de marca.
+- **FR-006**: Tras editar con éxito un gasto o un ingreso, su fila visible MUST destellar con el realce de marca (un alta usa la entrada de fila).
 - **FR-007**: Las tarjetas de metas y de Patrimonio MUST destellar cuando cambia su monto, como los buckets.
 - **FR-008**: La barra de avance de cada meta MUST crecer desde cero al aparecer, como la de los buckets.
-- **FR-009**: Las hojas inferiores en móvil MUST mostrar un asa y cerrarse al arrastrarla hacia abajo más de 80 px o con un gesto rápido; un arrastre corto MUST regresar la hoja a su lugar.
+- **FR-009**: Las hojas inferiores en móvil MUST mostrar un asa y cerrarse al arrastrarla hacia abajo más de 80 px o al soltarla con una velocidad hacia abajo ≥ 0.5 px/ms; un arrastre corto MUST regresar la hoja a su lugar.
 - **FR-010**: Los mensajes de error de validación MUST aparecer con un desvanecimiento de ≤ 200 ms.
 - **FR-011**: El icono del botón ＋ MUST girar 45° mientras la hoja ＋ está abierta.
 - **FR-012**: Los elementos de menús, radios e interruptores MUST tener un área táctil de al menos 44 × 44 px en dispositivos táctiles, y los elementos de menú MUST mostrar foco visible con teclado.
