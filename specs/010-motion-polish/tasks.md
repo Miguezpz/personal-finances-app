@@ -56,9 +56,9 @@ description: "Task list for spec 010 — Animaciones y pulido"
 
 ## Phase 8: Polish
 
-- [ ] T020 Gate completo: `pnpm typecheck && pnpm lint && pnpm test`, `E2E_MODES=demo pnpm test:e2e`, `pnpm build`, First Load (≤ +20 kB vs T001), build demo + `pnpm check:demo-bundle`
-- [ ] T021 e2e `@live` de alta, baja y pulso y revisión visual en el deploy: **omitidos por decisión del usuario**
-- [ ] T022 Resumen final en docs/ux-roadmap.md (lo hecho por spec, lo omitido y los bloqueos) y marcar las tareas completadas
+- [X] T020 Gate completo: `pnpm typecheck && pnpm lint && pnpm test`, `E2E_MODES=demo pnpm test:e2e`, `pnpm build`, First Load (≤ +20 kB vs T001), build demo + `pnpm check:demo-bundle`
+- [X] T021 e2e `@live` de alta, baja y pulso y revisión visual en el deploy — **omitidos por decisión del usuario**
+- [X] T022 Resumen final en docs/ux-roadmap.md (lo hecho por spec, lo omitido y los bloqueos) y marcar las tareas completadas
 
 ## Dependencies & Execution Order
 
@@ -75,3 +75,6 @@ MVP = Phase 2 + US1. Commit + push por fase.
 ## Notas
 
 - Línea base First Load (T001, 2026-11-07, tras el spec 009): `/` 304.3 kB gzip; `/dashboard` 334.5 kB gzip. Presupuesto: `/dashboard` ≤ 354.5 kB.
+- Gate final (2026-11-07): `pnpm typecheck`, `pnpm lint`, `pnpm format:check`, `pnpm test` (705 ✓), `E2E_MODES=demo pnpm test:e2e` (156 ✓), `pnpm build` ✓, build demo + `pnpm check:demo-bundle` ✓ (355 archivos limpios).
+- First Load: `/` 304.4 kB gzip (+0.1), `/dashboard` 335.9 kB gzip (+1.4 kB; presupuesto +20 kB ✓).
+- Se confirmó en Chromium que la navegación llama `document.startViewTransition` (`motion.spec.ts`). Sin bloqueos pendientes.

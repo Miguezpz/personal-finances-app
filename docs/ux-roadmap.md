@@ -169,3 +169,69 @@ También entran los ajustes de accesibilidad que encontré:
 ## Flujo de trabajo
 
 Cada spec pasa por `/speckit-specify` → `clarify` → `plan` → `tasks` → `implement`, con commit + push a `main` en cada paso.
+
+---
+
+## Estado de implementación (2026-11-07)
+
+Los tres specs se ejecutaron en modo autónomo con el flujo speckit completo (specify → clarify → plan → tasks → analyze → implement), con commit + push a `main` por paso. Las decisiones abiertas se respondieron con la opción recomendada y quedaron en la sección **Clarifications/Assumptions** de cada `spec.md`.
+
+| Spec                                                           | Tareas | Gate final                                                 | First Load `/dashboard` |
+| -------------------------------------------------------------- | ------ | ---------------------------------------------------------- | ----------------------- |
+| [008 · Navegación y shell](../specs/008-navigation-shell/)     | 35/35  | unit 661 ✓ · e2e demo 128 ✓ · build ✓ · demo-bundle ✓      | 328.4 → 331.7 kB (+3.3) |
+| [009 · Flujos y formularios](../specs/009-low-friction-flows/) | 41/41  | unit 697 ✓ · e2e demo 144 + 18 ✓ · build ✓ · demo-bundle ✓ | 331.7 → 334.5 kB (+2.8) |
+| [010 · Animaciones y pulido](../specs/010-motion-polish/)      | 22/22  | unit 705 ✓ · e2e demo 156 ✓ · build ✓ · demo-bundle ✓      | 334.5 → 335.9 kB (+1.4) |
+
+En total, el First Load de `/dashboard` creció **+7.5 kB gzip** (cada spec tenía un presupuesto de +20 kB).
+
+### Lo hecho
+
+**008 · Navegación y shell**
+
+- Destinos agrupados (Principal, Planear, Deudas, Análisis y Configuración al pie). La barra lateral tiene secciones y scroll propio.
+- Barra móvil `Inicio · Gastos · ＋ · Crédito · Más`, sin FAB. "Más" queda activo en las rutas secundarias y su panel sube desde abajo.
+- Hoja ＋ (Gasto, Ingreso, Pagar tarjeta y gastos rápidos) y, en escritorio, "＋ Nuevo" con atajos N/I/P. Hay una sola instancia de cada diálogo (`DialogHost` + `useUi.openCreate`), que se cierra al navegar.
+- Estado de tarjeta unificado: `cardStatementSummary` + `CardStatementCard`, igual en Crédito y Gastos, con Pagar. Corrige la discrepancia de Gold Card.
+- `PageHeader` en todas las páginas (Configuración y Reglas con "‹ Configuración"). El panel de la barra superior pasa a llamarse "Apariencia". El header respeta la safe-area, el padding inferior aplica solo en móvil y las alertas del Dashboard móvil van arriba como franja.
+
+**009 · Flujos y formularios**
+
+- Los formularios recuerdan la última cuenta y subcategoría (en el dispositivo, solo ids, ignora cuentas archivadas).
+- Formulario de gasto: chips Hoy/Ayer/Otra, subcategorías recientes, "Guardar y agregar otro" (Shift+Enter) y Borrar dentro de la edición.
+- Montos con coma decimal ("250,5"), probados con fast-check.
+- "Reintentar" con lo escrito tras un guardado fallido (gasto, ingreso y cuenta por cobrar).
+- Borrar con Deshacer de 6 s en lugar de confirmar (gastos, pagos de tarjeta, ingresos y gastos fijos). El borrado se confirma al vencer el aviso o en `pagehide`; el demo lo rechaza antes de ocultar la fila.
+- Estado de error con Reintentar en las 8 páginas de datos.
+- Gastos: quincena en el header, chips de bucket y método de pago, filtros en la URL, filas agrupadas por día y tocables en móvil.
+- Bitácora: filtros en la URL, presets, búsqueda sin acentos y filas que abren la edición.
+- Menús ⋯ en plantillas y taxonomía. Cuotas como tarjetas en móvil.
+- Dashboard: enlace "Ver gastos" por bucket y alerta de tarjeta por vencer con Pagar.
+- Gastos rápidos se administran en Configuración → Gastos rápidos, con enlace "Administrar" en la hoja ＋.
+- Detalles: autofocus del monto, día de cargo = hoy, `inputMode` numérico y monto sugerido de metas como valor real.
+
+**010 · Animaciones y pulido**
+
+- Transición de ruta con `<ViewTransition>` de React 19.3 en `template.tsx`: el contenido sale y entra; el shell queda quieto y la página sigue interactiva.
+- Revelado suave de lo que reemplaza al esqueleto.
+- Las filas nuevas entran animadas; las borradas se desvanecen antes de ocultarse; la fila editada destella.
+- Las tarjetas de metas y Patrimonio destellan cuando cambia su monto; la barra de metas crece con `scaleX` (antes animaba el ancho).
+- Asa con arrastre para cerrar en las hojas inferiores (pointer events nativos).
+- Los errores de validación aparecen con un desvanecimiento.
+- 44 px táctiles en elementos de menú, radios y switches, y foco visible en los menús.
+- Todo dura ≤ 300 ms, anima solo opacidad, transform o fondo, y se apaga con movimiento reducido.
+
+### Desviaciones respecto a este roadmap (documentadas en cada spec)
+
+- **Revelado del esqueleto y salida de filas sin `<ViewTransition>`**: React solo activa las transiciones de vista con transiciones, Suspense o valores diferidos. Las actualizaciones de TanStack Query y de Zustand son síncronas, así que se usaron un `MutationObserver` con la API de animaciones del navegador (revelado) y CSS (filas).
+- **Errores de validación**: entran con desvanecimiento y desplazamiento, sin animar la altura con `interpolate-size`, porque el spec 003 solo permite opacidad, transform y color de fondo.
+- **Pagos de tarjeta en Bitácora**: no abren edición, porque no existe un diálogo para editar pagos.
+
+### Omitido por decisión del usuario
+
+- Ejecutar los e2e `live-en`/`live-es` (no se levantó Docker ni Supabase local). Los e2e `@live` nuevos (recordar lo último usado, deshacer) quedaron escritos, pero no se ejecutaron.
+- Revisión visual en el deploy de Vercel (390 px y 1440 px, temas claro, oscuro y neón, con movimiento reducido).
+- No se tocó el proyecto Supabase en la nube y no hubo migraciones.
+
+### Bloqueos pendientes
+
+- Ninguno. Todas las verificaciones locales (typecheck, lint, unit, e2e demo, build, demo-bundle) terminaron en verde. Para correr los flujos que escriben datos queda pendiente `pnpm test:e2e:local` con Supabase local.
