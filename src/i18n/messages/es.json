@@ -33,7 +33,8 @@
     "today": "Hoy",
     "yesterday": "Ayer",
     "deletedItem": "Borrado: {name}",
-    "actionsFor": "Acciones de {name}"
+    "actionsFor": "Acciones de {name}",
+    "dragToClose": "Arrastra hacia abajo para cerrar"
   },
   "nav": {
     "label": "Navegación principal",

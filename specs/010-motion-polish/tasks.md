@@ -16,16 +16,16 @@ description: "Task list for spec 010 — Animaciones y pulido"
 
 ## Phase 1: Setup
 
-- [ ] T001 Registrar la línea base del First Load (`pnpm build && node scripts/measure-first-load.mjs`) en "Notas" de specs/010-motion-polish/tasks.md
+- [X] T001 Registrar la línea base del First Load (`pnpm build && node scripts/measure-first-load.mjs`) en "Notas" de specs/010-motion-polish/tasks.md
 
 ## Phase 2: Foundational
 
-- [ ] T002 [P] Agregar en src/app/globals.css: clases de view transition `page-in`/`page-out` (120 ms de salida; 180 ms de entrada con 60 ms de retraso y 4 px), `::view-transition-old(root), ::view-transition-new(root) { animation: none }`, `::view-transition { pointer-events: none }`, las utilidades `animate-row-in` (200 ms), `animate-row-out` (180 ms, `forwards`) y `animate-field-error-in` (150 ms), y en el bloque de movimiento reducido las duraciones de view transition en 0
-- [ ] T003 [P] Crear src/components/motion/use-flash-on-change.ts (extraído de BucketCard: no destella en el primer render) y src/components/motion/use-new-row-ids.ts (ids presentes en la primera carga con datos → solo destacan los posteriores), con pruebas en tests/unit/motion/{flash-on-change,new-row-ids}.test.tsx
-- [ ] T004 [P] Crear src/components/motion/use-drag-to-dismiss.ts (pointer events; umbral "80 px o velocidad ≥ 0.5 px/ms"; regreso con `transition: transform var(--duration-base)`; sin regreso animado con movimiento reducido) con pruebas en tests/unit/motion/drag-to-dismiss.test.tsx
-- [ ] T005 [P] Crear src/components/motion/use-reveal-on-load.ts (MutationObserver + WAAPI 200 ms, opacidad y 4 px, solo nodos agregados en el lote donde desaparece `[aria-busy="true"]`; no hace nada con movimiento reducido)
-- [ ] T006 [P] Llave i18n `common.dragToClose` EN/ES en src/i18n/messages/{en,es}.json
-- [ ] T007 Gate rápido y commit + push
+- [X] T002 [P] Agregar en src/app/globals.css: clases de view transition `page-in`/`page-out` (120 ms de salida; 180 ms de entrada con 60 ms de retraso y 4 px), `::view-transition-old(root), ::view-transition-new(root) { animation: none }`, `::view-transition { pointer-events: none }`, las utilidades `animate-row-in` (200 ms), `animate-row-out` (180 ms, `forwards`) y `animate-field-error-in` (150 ms), y en el bloque de movimiento reducido las duraciones de view transition en 0
+- [X] T003 [P] Crear src/components/motion/use-flash-on-change.ts (extraído de BucketCard: no destella en el primer render) y src/components/motion/use-new-row-ids.ts (ids presentes en la primera carga con datos → solo destacan los posteriores), con pruebas en tests/unit/motion/{flash-on-change,new-row-ids}.test.tsx
+- [X] T004 [P] Crear src/components/motion/use-drag-to-dismiss.ts (pointer events; umbral "80 px o velocidad ≥ 0.5 px/ms"; regreso con `transition: transform var(--duration-base)`; sin regreso animado con movimiento reducido) con pruebas en tests/unit/motion/drag-to-dismiss.test.tsx
+- [X] T005 [P] Crear src/components/motion/use-reveal-on-load.ts (MutationObserver + WAAPI 200 ms, opacidad y 4 px, solo nodos agregados en el lote donde desaparece `[aria-busy="true"]`; no hace nada con movimiento reducido)
+- [X] T006 [P] Llave i18n `common.dragToClose` EN/ES en src/i18n/messages/{en,es}.json
+- [X] T007 Gate rápido y commit + push
 
 ## Phase 3: User Story 1 - Navegar y cargar con continuidad (Priority: P2) 🎯 MVP
 
@@ -74,3 +74,4 @@ MVP = Phase 2 + US1. Commit + push por fase.
 
 ## Notas
 
+- Línea base First Load (T001, 2026-11-07, tras el spec 009): `/` 304.3 kB gzip; `/dashboard` 334.5 kB gzip. Presupuesto: `/dashboard` ≤ 354.5 kB.

@@ -176,6 +176,67 @@
 }
 
 /*
+ * Spec 010 · route transition (React <ViewTransition> in src/app/(app)/template.tsx). The old page fades out
+ * quickly; the new one fades in shortly after, rising 4 px — 240 ms in all (spec 003: ≤ 300 ms). The root snapshot
+ * doesn't animate, so the header and the navigation stay still, and clicks pass through the overlay.
+ */
+@keyframes vt-fade-out {
+  to {
+    opacity: 0;
+  }
+}
+@keyframes vt-rise-in {
+  from {
+    opacity: 0;
+    transform: translateY(4px);
+  }
+}
+::view-transition-old(root),
+::view-transition-new(root) {
+  animation: none;
+}
+::view-transition {
+  pointer-events: none;
+}
+::view-transition-old(.page-out) {
+  animation: vt-fade-out 120ms var(--ease-out-quint) both;
+}
+::view-transition-new(.page-in) {
+  animation: vt-rise-in 180ms var(--ease-out-quint) 60ms both;
+}
+
+/* Spec 010 · rows that appear after the list was on screen (adds, Undo) and rows on their way out (delete). */
+@keyframes row-in {
+  from {
+    opacity: 0;
+    transform: translateY(4px);
+  }
+}
+@utility animate-row-in {
+  animation: row-in var(--duration-base) var(--ease-out-quint);
+}
+@keyframes row-out {
+  to {
+    opacity: 0;
+    transform: translateY(-4px);
+  }
+}
+@utility animate-row-out {
+  animation: row-out 180ms var(--ease-out-quint) forwards;
+}
+
+/* Spec 010 · validation messages fade in (opacity and transform only: spec 003 never animates height). */
+@keyframes field-error-in {
+  from {
+    opacity: 0;
+    transform: translateY(-2px);
+  }
+}
+@utility animate-field-error-in {
+  animation: field-error-in var(--duration-fast) var(--ease-out-quint);
+}
+
+/*
  * Privacy transition (FR-032, research R10). <Money> already renders "••••" in the same render that turns privacy
  * on, so `.money` can blur in and out smoothly. Amount INPUTS are only protected by the blur: their transition is
  * declared only in the "off" state — CSS uses the destination state's transition, so turning privacy on blurs them
@@ -206,5 +267,12 @@ html[data-privacy="off"] input[data-money] {
   }
   .animate-shimmer {
     animation: none !important;
+  }
+  /* Spec 010: route transitions swap instantly. */
+  ::view-transition-old(*),
+  ::view-transition-new(*),
+  ::view-transition-group(*) {
+    animation-duration: 0s !important;
+    animation-delay: 0s !important;
   }
 }
