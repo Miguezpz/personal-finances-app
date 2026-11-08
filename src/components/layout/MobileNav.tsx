@@ -99,7 +99,8 @@ export function MobileNav() {
               data-state={createOpen ? "open" : "closed"}
               onClick={() => setCreateOpen(!createOpen)}
               className={cn(
-                "group/create -mt-5 flex size-14 items-center justify-center rounded-full bg-cta text-cta-foreground shadow-[0_6px_18px_-4px] ring-4 shadow-cta/60 ring-background transition-[box-shadow,background-color] duration-fast",
+                // relative z-10: above the sliding indicator, which crosses it between Expenses and Credit.
+                "group/create relative z-10 -mt-5 flex size-14 items-center justify-center rounded-full bg-cta text-cta-foreground shadow-[0_6px_18px_-4px] ring-4 shadow-cta/60 ring-background transition-[box-shadow,background-color] duration-fast",
                 "focus-visible:ring-ring focus-visible:outline-none active:shadow-[0_2px_8px_-2px]",
               )}
             >
