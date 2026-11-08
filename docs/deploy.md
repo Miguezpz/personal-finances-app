@@ -113,6 +113,8 @@ NEXT_PUBLIC_DEMO_MODE=true pnpm build && pnpm check:demo-bundle
   `supabase/queries/preview-card-marks.sql`. El frontend lee la tabla nueva, así que la migración va
   **antes** del despliegue. Aplicada en la nube el 2026-11-08 (0 pagos que convertir); el MCP la
   registró con versión de fecha y se renombró a `0011` en `supabase_migrations.schema_migrations`.
+- **Migración 0012 (spec 011)**: quita UPDATE, TRUNCATE, REFERENCES y TRIGGER de `authenticated` en
+  `card_statement_marks`, que Supabase había dado por defecto. Aplicada en la nube el 2026-11-08 (versión renombrada a `0012`).
 - **Migración 0009 (spec 005: gastos rápidos)**: crea la tabla `expense_templates` con RLS
   forzado y la política de dueño. El frontend de la spec 005 lee esta tabla al cargar los datos,
   así que **la migración va antes del despliegue**: como Vercel despliega solo cada push a `main`,

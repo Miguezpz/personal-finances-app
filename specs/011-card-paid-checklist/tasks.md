@@ -237,7 +237,7 @@ description: "Task list for spec 011 — Pago de tarjeta como checklist y sesió
   - Las e2e `@live` del spec (us4, us15) pasan en EN y ES.
   - pgTAP descubrió que `authenticated` tenía UPDATE, TRUNCATE, REFERENCES y TRIGGER en `card_statement_marks` (privilegios por defecto de Supabase). Se corrige con la migración `0012`. `rls.test.sql` ahora cuenta 19 tablas.
 - T042: revisión visual en el demo a 1440 px, EN y ES (Crédito, Dashboard, aviso de sesión, aviso de solo lectura). La ventana de Chrome no se pudo redimensionar; a 390 px lo cubren los e2e `mobile.spec` y `us15` (hoja ＋ sin "Pagar tarjeta").
-- `0012` está en el repo, pero **no se ha aplicado en la nube**: falta la aprobación del dueño.
+- `0012` se aplicó en la nube con la aprobación del dueño (versión renombrada a `0012`). `authenticated` queda con SELECT, INSERT y DELETE.
 - First Load `/dashboard`: 336.2 → 340.5 kB gzip (+4.3), por encima de la meta de 3 kB del plan. El aviso de sesión del Dashboard importa `payment-sessions` y `PaymentSessionCard`. Se acepta: el presupuesto de los specs 008–010 era de +20 kB.
 - T037: un corte que todavía no cierra aparece en la sesión con "corta el {fecha}" y sin botón (FR-008). La e2e del demo lo descubrió.
 - T039: los nombres accesibles son "Ya la pagué: {tarjeta}" y "Desmarcar: {tarjeta}". axe exige que el texto visible esté dentro del nombre (label-content-name-mismatch).
