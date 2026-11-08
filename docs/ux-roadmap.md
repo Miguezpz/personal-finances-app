@@ -262,8 +262,8 @@ Gate: unit 715 ✓ · typecheck ✓ · lint ✓ · format ✓ · e2e demo `motio
 - **Se quitaron**: el diálogo de pago con monto, "Pagar tarjeta" de la hoja ＋, el atajo P y los pagos en Gastos y Bitácora.
 - **Sesión de pago del mes**: agrupa el corte vigente de cada tarjeta en el menor número de sesiones cuyos rangos de pago (del día siguiente al corte al día anterior al límite) se cruzan. Propone una ventana de 1–3 días junto al día de pago. Se ve en Crédito, y en el Dashboard desde 7 días antes ("Hoy toca pagar tus tarjetas" dentro de la ventana).
 - **Datos**: migración `0011` (tabla `card_statement_marks`, RLS, conversión de `card_payments`). Se aplicó en la nube después de revisar la conversión en solo lectura (0 pagos).
-- **Gate**: unit 748 ✓ · e2e demo 166 ✓ · build ✓ · demo-bundle ✓. First Load `/dashboard` 336.2 → 340.5 kB (+4.3).
-- **Pendiente**: pgTAP, el contrato contra Supabase y los e2e `@live` necesitan Docker; quedaron escritos pero no se ejecutaron.
+- **Gate**: unit 748 ✓ · e2e demo 166 ✓ · pgTAP 182 ✓ · contrato 45 ✓ · e2e live 69/72 (los 3 fallos ya existían antes del spec, en us13 y perf-budgets) · build ✓ · demo-bundle ✓. First Load `/dashboard` 336.2 → 340.5 kB (+4.3).
+- **Pendiente**: aplicar en la nube la migración `0012` (quita UPDATE, TRUNCATE, REFERENCES y TRIGGER de `authenticated` en `card_statement_marks`), con la aprobación del dueño.
 
 ### Bloqueos pendientes
 

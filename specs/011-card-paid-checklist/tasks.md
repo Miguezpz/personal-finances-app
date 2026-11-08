@@ -194,16 +194,16 @@ description: "Task list for spec 011 — Pago de tarjeta como checklist y sesió
 
 ## Phase 8: Polish & Cross-Cutting
 
-- [ ] T041 Verificación completa:
+- [X] T041 Verificación completa:
   - `pnpm typecheck && pnpm lint && pnpm format:check && pnpm test`;
   - `E2E_MODES=demo pnpm test:e2e`;
   - `NEXT_PUBLIC_DEMO_MODE=true pnpm build && pnpm check:demo-bundle`.
 
   Si Docker está disponible: `pnpm db:start && pnpm db:reset && pnpm db:test && pnpm test:contract:local && pnpm test:e2e:local` y `pnpm db:types` (regenera src/data/supabase/database.types.ts); si no, registrar en Notas que quedan pendientes
-- [ ] T042 [P] Revisión visual en el demo (`pnpm dev:demo`) a 390 px y 1440 px, EN y ES, tema neón: Crédito (sesión y tarjetas), Gastos (tarjetas compactas sin filas de pago), Dashboard (aviso de sesión), hoja ＋ sin "Pagar tarjeta"
+- [X] T042 [P] Revisión visual en el demo (`pnpm dev:demo`) a 390 px y 1440 px, EN y ES, tema neón: Crédito (sesión y tarjetas), Gastos (tarjetas compactas sin filas de pago), Dashboard (aviso de sesión), hoja ＋ sin "Pagar tarjeta"
 - [X] T043 [P] Documentación: sección del spec 011 en docs/ux-roadmap.md; README ("Expenses & cards": checklist "Mark as paid" y sesión de pago del mes)
 - [X] T044 Revisión con el dueño (FR-032): ejecutar en solo lectura supabase/queries/preview-card-marks.sql contra la nube, mostrar el resultado y **esperar aprobación** antes de aplicar 0011 a la nube (no se aplica sin un "sí" explícito)
-- [ ] T045 Commit + push final y actualizar Notas con el gate, el First Load y lo pendiente
+- [X] T045 Commit + push final y actualizar Notas con el gate, el First Load y lo pendiente
 
 ---
 
@@ -232,7 +232,12 @@ description: "Task list for spec 011 — Pago de tarjeta como checklist y sesió
 - T009: la vista SQL `ledger_entries` todavía tiene filas `card_payment`; el repositorio de bitácora de Supabase las excluye con `.neq("entry_type", "card_payment")` para coincidir con `buildLedger` (la app no usa ese repo; solo el contrato).
 - T010: la FK de la tarjeta no hace cascada (como el resto; las cuentas se archivan). Las marcas se borran con el usuario (`user_id … on delete cascade`).
 - T018/T024: `MarkPaidButton` y `UnmarkButton` (src/features/credit/MarkPaidButton.tsx) se comparten entre Crédito, Gastos, el Dashboard y la sesión.
-- T026/T041: los e2e `@live`, pgTAP y el contrato contra Supabase quedaron escritos, pero no se ejecutaron porque Docker no está levantado en esta sesión. Unitarias 748 ✓, e2e demo 166 ✓ (EN/ES), build demo ✓, `check:demo-bundle` ✓.
+- T041 (gate final): unitarias 748 ✓ · e2e demo 166 ✓ (EN/ES) · build demo ✓ · `check:demo-bundle` ✓ · pgTAP 182 ✓ · contrato mock + Supabase local 45 ✓ · e2e `@live` 69/72.
+  - Los 3 fallos `@live` ya existían en c270e99, antes del spec 011: `us13` "reorder, delete and an archived subcategory" (strict mode: dos `template-down` visibles) y `perf-budgets` live-es (SC-010, cambio de idioma de 4.3 s con el servidor de desarrollo). No tocan este spec.
+  - Las e2e `@live` del spec (us4, us15) pasan en EN y ES.
+  - pgTAP descubrió que `authenticated` tenía UPDATE, TRUNCATE, REFERENCES y TRIGGER en `card_statement_marks` (privilegios por defecto de Supabase). Se corrige con la migración `0012`. `rls.test.sql` ahora cuenta 19 tablas.
+- T042: revisión visual en el demo a 1440 px, EN y ES (Crédito, Dashboard, aviso de sesión, aviso de solo lectura). La ventana de Chrome no se pudo redimensionar; a 390 px lo cubren los e2e `mobile.spec` y `us15` (hoja ＋ sin "Pagar tarjeta").
+- `0012` está en el repo, pero **no se ha aplicado en la nube**: falta la aprobación del dueño.
 - First Load `/dashboard`: 336.2 → 340.5 kB gzip (+4.3), por encima de la meta de 3 kB del plan. El aviso de sesión del Dashboard importa `payment-sessions` y `PaymentSessionCard`. Se acepta: el presupuesto de los specs 008–010 era de +20 kB.
 - T037: un corte que todavía no cierra aparece en la sesión con "corta el {fecha}" y sin botón (FR-008). La e2e del demo lo descubrió.
 - T039: los nombres accesibles son "Ya la pagué: {tarjeta}" y "Desmarcar: {tarjeta}". axe exige que el texto visible esté dentro del nombre (label-content-name-mismatch).
