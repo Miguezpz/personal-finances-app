@@ -103,13 +103,13 @@ description: "Task list for spec 011 — Pago de tarjeta como checklist y sesió
 - [X] T021 [P] [US1] i18n en src/i18n/messages/{en,es}.json:
   - agregar `credit.markPaid`, `markPaidFor`, `marked`, `stateNothing`;
   - borrar las llaves de pago con monto listadas en contracts/ui.md, y que tests/unit/i18n/parity.test.ts siga verde.
-- [ ] T022 [US1] e2e demo en tests/e2e/us15-card-paid-checklist.spec.ts (EN/ES):
+- [X] T022 [US1] e2e demo en tests/e2e/us15-card-paid-checklist.spec.ts (EN/ES):
   - Crédito y Gastos muestran "Ya la pagué" y ningún "Pagar";
   - tocarlo muestra el aviso de solo lectura y el estado no cambia;
   - la hoja ＋ y "＋ Nuevo" no tienen "Pagar tarjeta", y la tecla P no abre nada.
 
   Actualizar tests/e2e/{navigation,mobile,us9-demo,a11y}.spec.ts y tests/e2e/fixtures.ts donde usaban el diálogo de pago
-- [ ] T023 [US1] Gate y commit + push
+- [X] T023 [US1] Gate y commit + push
 
 ---
 
@@ -121,8 +121,8 @@ description: "Task list for spec 011 — Pago de tarjeta como checklist y sesió
 
 - [X] T024 [US2] src/features/credit/CardStatementCard.tsx: con el último corte `paid` y `markId` propio, botón secundario "Desmarcar" (`data-testid="unmark-paid"`, `aria-label` con `credit.unmarkFor`) que usa `useStatementMarkActions().unmark` con aviso y "Deshacer"
 - [X] T025 [P] [US2] i18n `credit.unmark`, `unmarkFor`, `unmarked` EN/ES; pruebas de desmarcar y deshacer-desmarcar en tests/unit/features/statement-marks.test.tsx
-- [ ] T026 [US2] e2e `@live` en tests/e2e/us15-card-paid-checklist.spec.ts: marcar → Deshacer → pendiente; marcar → esperar el aviso → Desmarcar → pendiente o vencido; el disponible para gastar del Dashboard no cambia (SC-006)
-- [ ] T027 [US2] Gate y commit + push
+- [X] T026 [US2] e2e `@live` en tests/e2e/us15-card-paid-checklist.spec.ts: marcar → Deshacer → pendiente; marcar → esperar el aviso → Desmarcar → pendiente o vencido; el disponible para gastar del Dashboard no cambia (SC-006)
+- [X] T027 [US2] Gate y commit + push
 
 ---
 
@@ -132,15 +132,15 @@ description: "Task list for spec 011 — Pago de tarjeta como checklist y sesió
 
 **Independent Test**: con un corte marcado y compras nuevas, la deuda total coincide en Crédito y Patrimonio, y no hay filas "Pago de tarjeta".
 
-- [ ] T028 [P] [US3] src/features/expenses/ExpensesPage.tsx: quitar las filas `payment-row`, `deleteRow` de pagos, `cardPaymentLabel` y `debtSettlement`; `Row` solo de gastos. src/features/shared/use-deferred-delete.ts: quitar `card-payment`. Actualizar tests/unit/features/deferred-delete.test.tsx y tests/e2e/us4-expenses.spec.ts
-- [ ] T029 [P] [US3] Bitácora sin pagos:
+- [X] T028 [P] [US3] src/features/expenses/ExpensesPage.tsx: quitar las filas `payment-row`, `deleteRow` de pagos, `cardPaymentLabel` y `debtSettlement`; `Row` solo de gastos. src/features/shared/use-deferred-delete.ts: quitar `card-payment`. Actualizar tests/unit/features/deferred-delete.test.tsx y tests/e2e/us4-expenses.spec.ts
+- [X] T029 [P] [US3] Bitácora sin pagos:
   - src/domain/ledger.ts: quitar `card_payment` de `LedgerEntryType`, `TYPE_ORDER` y `buildLedger`;
   - src/features/ledger/filters.ts;
   - src/domain/csv.ts: bitácora sin pagos; el respaldo cambia `card_payments.csv` por `card_statement_marks.csv` con `id, card_account_id, cut_off, marked_at`.
 
   Actualizar tests/unit/domain/{ledger,csv}.test.ts
-- [ ] T030 [US3] Prueba en tests/unit/domain/net-worth.test.ts: la deuda en Patrimonio = `totalDebt` R3 con marcas; marcar no cambia `computeSafeToSpend` (SC-006)
-- [ ] T031 [US3] Gate y commit + push
+- [X] T030 [US3] Prueba en tests/unit/domain/net-worth.test.ts: la deuda en Patrimonio = `totalDebt` R3 con marcas; marcar no cambia `computeSafeToSpend` (SC-006)
+- [X] T031 [US3] Gate y commit + push
 
 ---
 
@@ -150,9 +150,9 @@ description: "Task list for spec 011 — Pago de tarjeta como checklist y sesió
 
 **Independent Test**: con pagos anteriores (incluido uno con excedente), tras la conversión cada corte cubierto aparece "Pagado" y ningún corte posterior está pagado por excedente.
 
-- [ ] T032 [US4] Prueba unitaria de extremo a extremo en tests/unit/domain/legacy-card-payments.test.ts: un historial con pagos (uno excedente) → marcas con `markForLegacyPayment` → `cardStatementSummary` muestra pagados los cortes cubiertos y pendiente el siguiente (SC-004, FR-019)
-- [ ] T033 [US4] Documentar en specs/011-card-paid-checklist/quickstart.md §4 el procedimiento exacto de revisión y aplicación a la nube (consulta T012 → aprobación del dueño → migración → `pnpm db:types`), sin ejecutarlo contra la nube en esta fase
-- [ ] T034 [US4] Gate y commit + push
+- [X] T032 [US4] Prueba unitaria de extremo a extremo en tests/unit/domain/legacy-card-payments.test.ts: un historial con pagos (uno excedente) → marcas con `markForLegacyPayment` → `cardStatementSummary` muestra pagados los cortes cubiertos y pendiente el siguiente (SC-004, FR-019)
+- [X] T033 [US4] Documentar en specs/011-card-paid-checklist/quickstart.md §4 el procedimiento exacto de revisión y aplicación a la nube (consulta T012 → aprobación del dueño → migración → `pnpm db:types`), sin ejecutarlo contra la nube en esta fase
+- [X] T034 [US4] Gate y commit + push
 
 ---
 
@@ -162,7 +162,7 @@ description: "Task list for spec 011 — Pago de tarjeta como checklist y sesió
 
 **Independent Test**: con A (corte 10, límite 30) y B (corte 25, límite 14), Crédito muestra la sesión del 11 al 13 de noviembre. Desde 7 días antes, el Dashboard avisa la sesión; dentro de la ventana muestra "Hoy toca pagar tus tarjetas".
 
-- [ ] T035 [US5] Pruebas primero en tests/unit/domain/payment-sessions.test.ts con los casos obligatorios de contracts/domain.md:
+- [X] T035 [US5] Pruebas primero en tests/unit/domain/payment-sessions.test.ts con los casos obligatorios de contracts/domain.md:
   - ejemplo de la spec;
   - día de pago dentro del cruce con y sin margen;
   - cruce de 1–2 días;
@@ -170,25 +170,25 @@ description: "Task list for spec 011 — Pago de tarjeta como checklist y sesió
   - tarjeta archivada o sin términos;
   - todas marcadas → `done` y ciclo siguiente;
   - `phase` upcoming/today/past.
-- [ ] T036 [US5] Implementar src/domain/payment-sessions.ts:
+- [X] T036 [US5] Implementar src/domain/payment-sessions.ts:
   - `sessionWindow` (FR-027, con `secondPayday` 31 = último día);
   - `paymentSessions` (estado de cuenta vigente por tarjeta, rango `[corte+1, due−1]`, agrupación voraz por fin de rango);
   - `nextPaymentSession` (FR-028/030).
-- [ ] T037 [US5] UI:
+- [X] T037 [US5] UI:
   - Crear src/features/credit/PaymentSessionCard.tsx (contracts/ui.md: `data-testid="payment-session"`, ventana, tarjetas con estado y acción, "Sesión completa" + siguiente) y montarlo arriba en src/features/credit/CreditPage.tsx.
   - Crear el hook `usePaymentSession()` junto a src/features/credit/use-card-statements.ts.
   - Agregar las llaves i18n `credit.session*` EN/ES.
-- [ ] T038 [US5] src/features/safe-to-spend/CardDueAlerts.tsx:
+- [X] T038 [US5] src/features/safe-to-spend/CardDueAlerts.tsx:
   - bloque `data-testid="session-alert"` desde 7 días antes del inicio ("Próxima sesión de pago: {ventana}") y dentro de la ventana ("Hoy toca pagar tus tarjetas" con "Ya la pagué" por tarjeta);
   - sin alertas individuales para las tarjetas de esa sesión, salvo las vencidas (FR-029).
 
   Agregar las llaves `dashboard.sessionUpcoming` y `sessionToday` EN/ES
-- [ ] T039 [US5] e2e demo en tests/e2e/us15-card-paid-checklist.spec.ts (EN/ES):
+- [X] T039 [US5] e2e demo en tests/e2e/us15-card-paid-checklist.spec.ts (EN/ES):
   - Crédito muestra `payment-session` con ventana y tarjetas;
   - con el reloj del navegador fijado dentro de la ventana (`page.clock`), el Dashboard muestra `session-alert` en modo "hoy" y no muestra `card-alert` de esas tarjetas.
 
   Más una prueba de a11y (axe) de Crédito con la sesión
-- [ ] T040 [US5] Gate y commit + push
+- [X] T040 [US5] Gate y commit + push
 
 ---
 
@@ -201,8 +201,8 @@ description: "Task list for spec 011 — Pago de tarjeta como checklist y sesió
 
   Si Docker está disponible: `pnpm db:start && pnpm db:reset && pnpm db:test && pnpm test:contract:local && pnpm test:e2e:local` y `pnpm db:types` (regenera src/data/supabase/database.types.ts); si no, registrar en Notas que quedan pendientes
 - [ ] T042 [P] Revisión visual en el demo (`pnpm dev:demo`) a 390 px y 1440 px, EN y ES, tema neón: Crédito (sesión y tarjetas), Gastos (tarjetas compactas sin filas de pago), Dashboard (aviso de sesión), hoja ＋ sin "Pagar tarjeta"
-- [ ] T043 [P] Documentación: sección del spec 011 en docs/ux-roadmap.md; README ("Expenses & cards": checklist "Mark as paid" y sesión de pago del mes)
-- [ ] T044 Revisión con el dueño (FR-032): ejecutar en solo lectura supabase/queries/preview-card-marks.sql contra la nube, mostrar el resultado y **esperar aprobación** antes de aplicar 0011 a la nube (no se aplica sin un "sí" explícito)
+- [X] T043 [P] Documentación: sección del spec 011 en docs/ux-roadmap.md; README ("Expenses & cards": checklist "Mark as paid" y sesión de pago del mes)
+- [X] T044 Revisión con el dueño (FR-032): ejecutar en solo lectura supabase/queries/preview-card-marks.sql contra la nube, mostrar el resultado y **esperar aprobación** antes de aplicar 0011 a la nube (no se aplica sin un "sí" explícito)
 - [ ] T045 Commit + push final y actualizar Notas con el gate, el First Load y lo pendiente
 
 ---
@@ -232,3 +232,9 @@ description: "Task list for spec 011 — Pago de tarjeta como checklist y sesió
 - T009: la vista SQL `ledger_entries` todavía tiene filas `card_payment`; el repositorio de bitácora de Supabase las excluye con `.neq("entry_type", "card_payment")` para coincidir con `buildLedger` (la app no usa ese repo; solo el contrato).
 - T010: la FK de la tarjeta no hace cascada (como el resto; las cuentas se archivan). Las marcas se borran con el usuario (`user_id … on delete cascade`).
 - T018/T024: `MarkPaidButton` y `UnmarkButton` (src/features/credit/MarkPaidButton.tsx) se comparten entre Crédito, Gastos, el Dashboard y la sesión.
+- T026/T041: los e2e `@live`, pgTAP y el contrato contra Supabase quedaron escritos, pero no se ejecutaron porque Docker no está levantado en esta sesión. Unitarias 748 ✓, e2e demo 166 ✓ (EN/ES), build demo ✓, `check:demo-bundle` ✓.
+- First Load `/dashboard`: 336.2 → 340.5 kB gzip (+4.3), por encima de la meta de 3 kB del plan. El aviso de sesión del Dashboard importa `payment-sessions` y `PaymentSessionCard`. Se acepta: el presupuesto de los specs 008–010 era de +20 kB.
+- T037: un corte que todavía no cierra aparece en la sesión con "corta el {fecha}" y sin botón (FR-008). La e2e del demo lo descubrió.
+- T039: los nombres accesibles son "Ya la pagué: {tarjeta}" y "Desmarcar: {tarjeta}". axe exige que el texto visible esté dentro del nombre (label-content-name-mismatch).
+- T044: la revisión en solo lectura dio 0 pagos que convertir. `0011` se aplicó en la nube con aprobación del dueño, y la versión se renombró a `0011`. **Desviación de orden**: el código llegó a `main` (70cf073) antes que la migración, así que producción no pudo leer la tabla entre ese push y la migración. Se guardó como lección en memoria.
+

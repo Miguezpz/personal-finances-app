@@ -64,23 +64,23 @@ test.describe("Spec 008 · navigation", { tag: "@demo" }, () => {
     for (const [id, key] of [
       ["new-expense", "N"],
       ["new-income", "I"],
-      ["new-card-payment", "P"],
     ] as const) {
       await expect(menu.getByTestId(id)).toContainText(key);
     }
-    await menu.getByTestId("new-card-payment").click();
+    // Spec 011: no "Pay card" entry; cards are marked as paid from the card itself.
+    await expect(menu.getByTestId("new-card-payment")).toHaveCount(0);
+    await menu.getByTestId("new-income").click();
     await expect(page.getByRole("dialog")).toBeVisible();
-    await expect(page.locator("#payment-amount")).toBeVisible();
+    await expect(page.locator("#income-amount")).toBeVisible();
     await expect(page.getByRole("dialog")).toHaveCount(1);
   });
 
-  test("N, I and P open the dialogs; typing in a field doesn't", async ({ page }) => {
+  test("N and I open the dialogs, P doesn't; typing in a field doesn't", async ({ page }) => {
     await page.goto("/goals");
     await expect(page.getByTestId("new-menu")).toBeEnabled();
     for (const [key, field] of [
       ["n", "#expense-amount"],
       ["i", "#income-amount"],
-      ["p", "#payment-amount"],
     ] as const) {
       await page.keyboard.press(key);
       await expect(page.locator(field)).toBeVisible();
@@ -91,6 +91,8 @@ test.describe("Spec 008 · navigation", { tag: "@demo" }, () => {
       await expect(page.getByRole("dialog")).toBeHidden();
     }
     await page.keyboard.press("Control+n").catch(() => {});
+    await expect(page.getByRole("dialog")).toBeHidden();
+    await page.keyboard.press("p");
     await expect(page.getByRole("dialog")).toBeHidden();
   });
 
@@ -103,7 +105,7 @@ test.describe("Spec 008 · navigation", { tag: "@demo" }, () => {
     await expect(page.getByRole("dialog")).toBeHidden();
   });
 
-  test("Credit and Expenses show the same statement for every card; Pay prefills it", async ({
+  test("Credit and Expenses show the same statement for every card, with one-tap actions", async ({
     page,
   }) => {
     await page.goto("/credit");
@@ -128,10 +130,11 @@ test.describe("Spec 008 · navigation", { tag: "@demo" }, () => {
     }
     await expect(page.getByTestId("cards-see-credit")).toHaveAttribute("href", "/credit");
 
-    const first = compact.first();
-    const cardId = (await first.getAttribute("data-card")) as string;
-    await first.getByTestId("pay-card").click();
-    await expect(page.locator("#payment-card")).toHaveValue(cardId);
+    // No amount form anywhere: "Ya la pagué" / "Desmarcar" act on the card itself (spec 011).
+    await expect(page.getByTestId("pay-card")).toHaveCount(0);
+    await expect(
+      page.getByTestId("mark-paid").or(page.getByTestId("unmark-paid")).first(),
+    ).toBeVisible();
   });
 
   test("page headers have an icon; Rules links back to Settings", async ({ page }, testInfo) => {

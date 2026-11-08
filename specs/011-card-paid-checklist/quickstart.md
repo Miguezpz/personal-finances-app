@@ -34,6 +34,13 @@ NEXT_PUBLIC_DEMO_MODE=true pnpm build && pnpm check:demo-bundle
 
 ## 4. Conversión en la nube (con el dueño)
 
-1. Ejecutar `supabase/queries/preview-card-marks.sql` en solo lectura contra el proyecto de la nube y mostrar la tabla tarjeta → cortes marcados.
-2. Con aprobación, aplicar `0011_card_statement_marks.sql` y regenerar tipos.
-3. En la app personal, verificar que los cortes liquidados aparecen "Pagado" y que ninguno cambió a Vencido (SC-004).
+**Orden obligatorio: la migración va antes de subir el código que lee la tabla**, porque Vercel despliega cada push a `main`.
+
+1. Ejecutar `supabase/queries/preview-card-marks.sql` en solo lectura contra el proyecto `potodtpkgadgsmeuuafx` (MCP `execute_sql` o el SQL editor) y mostrar la tabla tarjeta → corte que queda marcado.
+2. Con la aprobación explícita del dueño:
+   - aplicar el contenido de `0011_card_statement_marks.sql` (MCP `apply_migration` o `pnpm exec supabase db push`);
+   - si se usó el MCP, renombrar en `supabase_migrations.schema_migrations` la versión de fecha a `0011`.
+3. Verificar con SQL de solo lectura: la tabla existe con RLS, una política y las marcas esperadas.
+4. En la app personal, verificar que los cortes liquidados aparecen "Pagado" y que ninguno cambió a Vencido (SC-004).
+
+**Registro (2026-11-08)**: la revisión dio 0 pagos que convertir, así que la conversión no creó marcas. Se aplicó `0011` con aprobación del dueño y la versión se renombró a `0011`. El código ya estaba en `main` (orden invertido por error); producción no pudo leer la tabla desde ese push hasta que se aplicó la migración.

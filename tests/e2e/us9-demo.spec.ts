@@ -64,10 +64,8 @@ test.describe("US9 · read-only demo", { tag: "@demo" }, () => {
     await page.getByTestId("save-expense").click();
     await expectReadOnly(page, locale);
 
-    await page.goto("/expenses");
-    await page.getByTestId("pay-card").first().click();
-    await page.locator("#payment-amount").fill("100");
-    await page.getByTestId("save-card-payment").click();
+    await page.goto("/credit");
+    await page.getByTestId("mark-paid").first().click();
     await expectReadOnly(page, locale);
 
     await page.goto("/receivables");

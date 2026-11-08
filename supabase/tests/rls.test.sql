@@ -29,8 +29,8 @@ end $$;
 select is(
   (select count(*)::int from pg_class c join pg_namespace n on n.oid = c.relnamespace
     where n.nspname = 'public' and c.relkind = 'r' and c.relrowsecurity and c.relforcerowsecurity),
-  18,
-  'all 18 tables have RLS enabled and forced'
+  19,
+  'all 19 tables have RLS enabled and forced'
 );
 select is(
   (select count(*)::int from pg_class c join pg_namespace n on n.oid = c.relnamespace
@@ -41,7 +41,7 @@ select is(
 select is(
   (select count(*)::int from pg_policies where schemaname = 'public' and policyname = tablename || '_owner'
       and roles = '{authenticated}' and cmd = 'ALL'),
-  18,
+  19,
   'every table has one owner policy for authenticated'
 );
 

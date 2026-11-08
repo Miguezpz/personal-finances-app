@@ -97,7 +97,7 @@ export function nextFifteenth(now = new Date()): { received: string; fundedStart
  */
 export async function openCreate(
   page: import("@playwright/test").Page,
-  kind: "expense" | "income" | "card-payment",
+  kind: "expense" | "income",
 ) {
   const plus = page.getByTestId("mobile-nav-create");
   if (await plus.isVisible()) {

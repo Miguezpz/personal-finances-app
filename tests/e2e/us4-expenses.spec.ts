@@ -1,23 +1,24 @@
 /**
  * T094 · US4 end to end (live-en, live-es): an expense in Wants lowers the Safe-to-Spend and changes
- * the semáforo; paid with a credit card it raises the card's debt (US4-4); paying the card lowers
- * the debt and does NOT touch the Safe-to-Spend (US4-5, FR-013b).
+ * the semáforo; paid with a credit card it raises the card's debt (US4-4); marking its statement as
+ * paid ("Ya la pagué", spec 011) settles the debt and does NOT touch the Safe-to-Spend (SC-006).
  */
-import { addDays } from "../../src/domain/dates";
+import { addDays, parseIsoDate } from "../../src/domain/dates";
 import { periodOf, todayIn } from "../../src/domain/periods";
 import { expect, openCreate, test } from "./fixtures";
 
 const TZ = "America/Mexico_City";
 
-test.describe("US4 · expenses and card payments", { tag: "@live" }, () => {
-  test("a card purchase moves the budget and the debt; paying the card only moves the debt", async ({
+test.describe("US4 · expenses and card statements", { tag: "@live" }, () => {
+  test("a card purchase moves the budget and the debt; marking the statement paid only moves the debt", async ({
     ownerPage: page,
     admin,
     owner,
     userClient,
   }) => {
     // Seed as the owner: $1,000 in Needs and in Wants for the current quincena, and a credit card.
-    const period = periodOf(todayIn(TZ, new Date()));
+    const today = todayIn(TZ, new Date());
+    const period = periodOf(today);
     const received = addDays(period.start, -1);
     const { data: ruleId } = await userClient.rpc("save_distribution_rule", {
       p_rule: { effective_from: received, needs_bps: 5000, wants_bps: 5000, investment_bps: 0 },
@@ -41,7 +42,8 @@ test.describe("US4 · expenses and card payments", { tag: "@live" }, () => {
       .insert({
         kind: "credit_card",
         name: "Test Card",
-        cut_off_day: 10,
+        // The statement closes today, so today's purchase is on a closed statement that can be marked.
+        cut_off_day: parseIsoDate(today).day,
         payment_due_offset_days: 20,
       })
       .select("id")
@@ -76,16 +78,16 @@ test.describe("US4 · expenses and card payments", { tag: "@live" }, () => {
 
     await page.goto("/expenses");
     const debt = page.locator(`[data-testid="card-debt"][data-card="${cardId}"]`);
-    // $600 bought today: the statement that closes on the next cut-off (spec 008, US3).
+    // $600 bought today, on the statement that closed today (spec 008, US3).
     await expect(debt.getByTestId("statement-amount")).toContainText("$600.00");
+    await expect(debt).toHaveAttribute("data-state", "pending");
     await expect(page.getByTestId("expense-row")).toHaveCount(1);
 
-    // --- Paying the card lowers its debt ------------------------------------------------
-    await debt.getByTestId("pay-card").click();
-    await page.locator("#payment-amount").fill("600");
-    await page.getByTestId("save-card-payment").click();
+    // --- "Ya la pagué" settles it with one tap, no form -----------------------------------
+    await debt.getByTestId("mark-paid").click();
+    await expect(page.getByRole("dialog")).toHaveCount(0);
+    await expect(debt).toHaveAttribute("data-state", "paid");
     await expect(debt.getByTestId("statement-amount")).toContainText("$0.00");
-    await expect(page.getByTestId("payment-row")).toHaveCount(1);
 
     // --- …and leaves the Safe-to-Spend exactly where it was ------------------------------
     await page.goto("/dashboard");
@@ -94,21 +96,21 @@ test.describe("US4 · expenses and card payments", { tag: "@live" }, () => {
 
     await expect
       .poll(async () => {
-        const [{ data: expenses }, { data: payments }] = await Promise.all([
+        const [{ data: expenses }, { data: marks }] = await Promise.all([
           admin
             .from("expenses")
             .select("amount_cents, bucket, payment_account_id")
             .eq("user_id", owner.id),
           admin
-            .from("card_payments")
-            .select("amount_cents, card_account_id")
+            .from("card_statement_marks")
+            .select("cut_off, card_account_id")
             .eq("user_id", owner.id),
         ]);
-        return { expenses, payments };
+        return { expenses, marks };
       })
       .toEqual({
         expenses: [{ amount_cents: 60_000, bucket: "wants", payment_account_id: cardId }],
-        payments: [{ amount_cents: 60_000, card_account_id: cardId }],
+        marks: [{ cut_off: today, card_account_id: cardId }],
       });
   });
 });

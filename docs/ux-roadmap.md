@@ -253,6 +253,18 @@ Cambios hechos fuera de speckit, con commit + push a `main`:
 
 Gate: unit 715 ✓ · typecheck ✓ · lint ✓ · format ✓ · e2e demo `motion.spec.ts` 22 ✓ (5 corridas). No se corrió el resto de los e2e. Las capturas de `docs/screenshots/` son anteriores a estos cambios.
 
+### Spec 011 · Pago de tarjeta como checklist y sesión de pago (2026-11-08)
+
+[specs/011-card-paid-checklist](../specs/011-card-paid-checklist/), con el flujo speckit completo.
+
+- **Por qué**: la familia del dueño usa sus tarjetas y le paga a él. Él solo registra sus compras y paga el total al banco. Registrar el monto real como pago dejaba saldo a favor y ocultaba los cortes siguientes.
+- **"Ya la pagué"**: una marca por corte, sin monto, con Deshacer de 6 s y "Desmarcar". Está en Crédito, Gastos y el Dashboard. Marcar el último corte liquida los anteriores y el siguiente empieza limpio. El disponible para gastar no cambia.
+- **Se quitaron**: el diálogo de pago con monto, "Pagar tarjeta" de la hoja ＋, el atajo P y los pagos en Gastos y Bitácora.
+- **Sesión de pago del mes**: agrupa el corte vigente de cada tarjeta en el menor número de sesiones cuyos rangos de pago (del día siguiente al corte al día anterior al límite) se cruzan. Propone una ventana de 1–3 días junto al día de pago. Se ve en Crédito, y en el Dashboard desde 7 días antes ("Hoy toca pagar tus tarjetas" dentro de la ventana).
+- **Datos**: migración `0011` (tabla `card_statement_marks`, RLS, conversión de `card_payments`). Se aplicó en la nube después de revisar la conversión en solo lectura (0 pagos).
+- **Gate**: unit 748 ✓ · e2e demo 166 ✓ · build ✓ · demo-bundle ✓. First Load `/dashboard` 336.2 → 340.5 kB (+4.3).
+- **Pendiente**: pgTAP, el contrato contra Supabase y los e2e `@live` necesitan Docker; quedaron escritos pero no se ejecutaron.
+
 ### Bloqueos pendientes
 
 - Ninguno. Todas las verificaciones locales (typecheck, lint, unit, e2e demo, build, demo-bundle) terminaron en verde. Para correr los flujos que escriben datos queda pendiente `pnpm test:e2e:local` con Supabase local.

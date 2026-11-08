@@ -106,6 +106,13 @@ NEXT_PUBLIC_DEMO_MODE=true pnpm build && pnpm check:demo-bundle
   app en varias pestañas no duplica nada.
 - **Nuevas migraciones**: después de agregar un archivo en `supabase/migrations`, probar en local
   (`pnpm db:reset && pnpm db:test && pnpm test:contract:local`) y luego `pnpm exec supabase db push`.
+- **Migración 0011 (spec 011: "Ya la pagué")**: crea `card_statement_marks` con RLS forzado, la
+  política de dueño y sin `update`. Agrega `private.legacy_statement_cut_off` y convierte cada
+  `card_payments` existente en la marca del corte que pagaba. `card_payments` no se toca, pero la app
+  deja de leerla. Antes de aplicarla se revisa la conversión en solo lectura con
+  `supabase/queries/preview-card-marks.sql`. El frontend lee la tabla nueva, así que la migración va
+  **antes** del despliegue. Aplicada en la nube el 2026-11-08 (0 pagos que convertir); el MCP la
+  registró con versión de fecha y se renombró a `0011` en `supabase_migrations.schema_migrations`.
 - **Migración 0009 (spec 005: gastos rápidos)**: crea la tabla `expense_templates` con RLS
   forzado y la política de dueño. El frontend de la spec 005 lee esta tabla al cargar los datos,
   así que **la migración va antes del despliegue**: como Vercel despliega solo cada push a `main`,

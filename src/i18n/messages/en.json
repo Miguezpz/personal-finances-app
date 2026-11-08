@@ -785,9 +785,9 @@
     "dueShort": "due {date}",
     "seeInCredit": "See in Credit",
     "markPaid": "Mark as paid",
-    "markPaidFor": "Mark {card} as paid",
+    "markPaidFor": "Mark as paid: {card}",
     "unmark": "Unmark",
-    "unmarkFor": "Unmark {card}",
+    "unmarkFor": "Unmark: {card}",
     "marked": "{card} marked as paid.",
     "unmarked": "{card} unmarked.",
     "stateNothing": "Nothing to pay",
@@ -797,7 +797,8 @@
     "sessionNext": "Next session: {window}",
     "sessionHint": "Pay all your cards in one go between these dates.",
     "sessionCardDue": "due {date}",
-    "sessionNone": "Add the cut-off and due dates of your cards to get a payment session."
+    "sessionNone": "Add the cut-off and due dates of your cards to get a payment session.",
+    "sessionClosesOn": "closes {date}"
   },
   "goals": {
     "title": "Goals",

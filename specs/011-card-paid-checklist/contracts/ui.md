@@ -46,9 +46,9 @@ Todo texto viene de `src/i18n/messages/{en,es}.json`; las llaves nuevas se lista
 | Llave                         | EN                                 | ES                                    |
 | ----------------------------- | ---------------------------------- | ------------------------------------- |
 | `credit.markPaid`             | Mark as paid                       | Ya la pagué                           |
-| `credit.markPaidFor`          | Mark {card} as paid                | Ya pagué {card}                       |
+| `credit.markPaidFor`          | Mark as paid: {card}               | Ya la pagué: {card}                   |
 | `credit.unmark`               | Unmark                             | Desmarcar                             |
-| `credit.unmarkFor`            | Unmark {card}                      | Desmarcar {card}                      |
+| `credit.unmarkFor`            | Unmark: {card}                     | Desmarcar: {card}                     |
 | `credit.marked`               | {card} marked as paid.             | {card} marcada como pagada.           |
 | `credit.unmarked`             | {card} unmarked.                   | {card} desmarcada.                    |
 | `credit.stateNothing`         | Nothing to pay                     | Nada que pagar                        |

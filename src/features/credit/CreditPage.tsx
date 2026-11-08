@@ -1,9 +1,9 @@
 "use client";
 
 /**
- * Credit management (T144, FR-028/029, US10-1/1a): each card's last and next statements with
- * "Pay" (spec 008, US3: the same CardStatementCard as Expenses) and the timeline of paydays, due
- * dates and collections.
+ * Credit management (T144, FR-028/029, US10-1/1a): the monthly payment session (spec 011, US5),
+ * each card's last and next statements with "Ya la pagué" (spec 008, US3: the same
+ * CardStatementCard as Expenses) and the timeline of paydays, due dates and collections.
  */
 import Link from "next/link";
 import { useTranslations } from "next-intl";
@@ -11,6 +11,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { useToday } from "@/lib/use-today";
 import { CardStatementCard } from "./CardStatementCard";
 import { CreditTimeline, TIMELINE_DAYS, useCreditTimeline } from "./CreditTimeline";
+import { PaymentSessionCard } from "./PaymentSessionCard";
 import { useCardStatements } from "./use-card-statements";
 import { PageHeader } from "@/components/layout/PageHeader";
 import { navIcon } from "@/components/layout/nav-items";
@@ -52,13 +53,16 @@ export function CreditPage() {
               })}
             </EmptyState>
           ) : (
-            <ul className="grid gap-4 md:grid-cols-2">
-              {cards.map((statement) => (
-                <li key={statement.card.id}>
-                  <CardStatementCard statement={statement} variant="full" />
-                </li>
-              ))}
-            </ul>
+            <>
+              <PaymentSessionCard />
+              <ul className="grid gap-4 md:grid-cols-2">
+                {cards.map((statement) => (
+                  <li key={statement.card.id}>
+                    <CardStatementCard statement={statement} variant="full" />
+                  </li>
+                ))}
+              </ul>
+            </>
           )}
 
           <section aria-labelledby="timeline-title" className="flex flex-col gap-3">

@@ -785,9 +785,9 @@
     "dueShort": "vence {date}",
     "seeInCredit": "Ver en Crédito",
     "markPaid": "Ya la pagué",
-    "markPaidFor": "Ya pagué {card}",
+    "markPaidFor": "Ya la pagué: {card}",
     "unmark": "Desmarcar",
-    "unmarkFor": "Desmarcar {card}",
+    "unmarkFor": "Desmarcar: {card}",
     "marked": "{card} marcada como pagada.",
     "unmarked": "{card} desmarcada.",
     "stateNothing": "Nada que pagar",
@@ -797,7 +797,8 @@
     "sessionNext": "Siguiente sesión: {window}",
     "sessionHint": "Paga todas tus tarjetas en una sola sesión entre estas fechas.",
     "sessionCardDue": "vence {date}",
-    "sessionNone": "Agrega las fechas de corte y de pago de tus tarjetas para tener una sesión de pago."
+    "sessionNone": "Agrega las fechas de corte y de pago de tus tarjetas para tener una sesión de pago.",
+    "sessionClosesOn": "corta el {date}"
   },
   "goals": {
     "title": "Metas",

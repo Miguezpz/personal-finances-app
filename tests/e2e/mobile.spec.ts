@@ -79,7 +79,7 @@ test.describe("US2 · mobile", { tag: "@demo" }, () => {
     const sheet = page.getByTestId("create-sheet");
     await expect(sheet).toBeVisible();
     await expect(plus).toHaveAttribute("aria-expanded", "true");
-    for (const id of ["create-expense", "create-income", "create-card-payment"]) {
+    for (const id of ["create-expense", "create-income"]) {
       await expect(sheet.getByTestId(id)).toBeVisible();
     }
     await sheet.getByTestId("create-income").click();

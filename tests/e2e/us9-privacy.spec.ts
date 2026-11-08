@@ -3,7 +3,7 @@
  * readable amount — balances, tables, cards, chart axes and tooltips — and the choice survives a
  * reload. Masked amounts read "••••" (screen readers hear "Hidden amount").
  */
-import { expect, test } from "./fixtures";
+import { expect, openCreate, test } from "./fixtures";
 import { APP_ROUTES, READABLE_AMOUNT } from "./app-routes";
 
 async function settledText(page: import("@playwright/test").Page): Promise<string> {
@@ -47,13 +47,13 @@ test.describe("US9 · privacy mode", { tag: "@demo" }, () => {
     await expect(tooltip).toContainText("••••");
     expect(await tooltip.textContent()).not.toMatch(READABLE_AMOUNT);
 
-    // Amount fields (prefilled when editing, or a suggested card payment) are hidden unless focused.
+    // Amount fields (e.g. prefilled when editing) are hidden unless focused.
     await page.goto("/expenses");
-    await page.getByTestId("pay-card").first().click();
-    const amount = page.locator("#payment-amount");
+    await openCreate(page, "expense");
+    const amount = page.locator("#expense-amount");
     await amount.fill("1234.56");
     await expect(amount).toHaveCSS("filter", "none");
-    await page.locator("#payment-note").focus();
+    await page.locator("#expense-note").focus();
     await expect(amount).toHaveCSS("filter", /blur/);
     await page.keyboard.press("Escape");
 
@@ -74,10 +74,10 @@ test.describe("US9 · privacy mode", { tag: "@demo" }, () => {
   // very same frame (no transition); turning it off may clear them smoothly.
   test("amount fields blur instantly when privacy turns on", async ({ page }) => {
     await page.goto("/expenses");
-    await page.getByTestId("pay-card").first().click();
-    const amount = page.locator("#payment-amount");
+    await openCreate(page, "expense");
+    const amount = page.locator("#expense-amount");
     await amount.fill("1234.56");
-    await page.locator("#payment-note").focus();
+    await page.locator("#expense-note").focus();
     await expect(amount).toHaveCSS("filter", "none");
 
     // The header toggle sits behind the modal: flip the same <html> attribute <PreferencesEffects /> writes, and

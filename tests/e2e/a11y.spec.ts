@@ -48,7 +48,7 @@ async function useTheme(page: Page, theme: "light" | "dark" | "neon" | "system")
 /** Opens a dialog, sheet or menu by test id; "create:<kind>" uses the app-wide create flow (spec 008). */
 async function openPanel(page: Page, open: string) {
   if (open.startsWith("create:")) {
-    await openCreate(page, open.slice("create:".length) as "expense" | "income" | "card-payment");
+    await openCreate(page, open.slice("create:".length) as "expense" | "income");
     // The tap on the ＋ sheet's action leaves the pointer over whatever the dialog shows there
     // (a quick expense button): move it away so axe doesn't sample a hover transition.
     await page.mouse.move(0, 0);
@@ -84,7 +84,6 @@ test.describe("Accessibility", { tag: "@demo" }, () => {
     for (const [route, open] of [
       ["/dashboard", "create:expense"],
       ["/income", "create:income"],
-      ["/credit", "create:card-payment"],
       ["/dashboard", "new-menu"],
       ["/recurring", "add-recurring"],
       ["/goals", "add-goal"],

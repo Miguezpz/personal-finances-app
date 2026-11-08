@@ -81,7 +81,6 @@ test.describe("Spec 009 · flows in the demo", { tag: "@demo" }, () => {
     await page.getByTestId("filter-bucket-wants").click();
     await expect(page).toHaveURL(/bucket=wants/);
     await expect(page.getByTestId("filter-bucket-wants")).toHaveAttribute("aria-pressed", "true");
-    await expect(page.getByTestId("payment-row")).toHaveCount(0);
     await page.reload();
     await expect(page.getByTestId("filter-bucket-wants")).toHaveAttribute("aria-pressed", "true");
     await page.getByTestId("clear-filters").click();
