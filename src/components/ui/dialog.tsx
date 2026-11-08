@@ -7,6 +7,7 @@ import { Dialog as DialogPrimitive } from "radix-ui";
 import { Button } from "@/components/ui/button";
 import { CloseLabel } from "@/components/ui/close-label";
 import { XIcon } from "lucide-react";
+import { SheetHandle, useSheetHandleRefs } from "@/components/ui/sheet-handle";
 
 function Dialog({ ...props }: React.ComponentProps<typeof DialogPrimitive.Root>) {
   return <DialogPrimitive.Root data-slot="dialog" {...props} />;
@@ -44,10 +45,18 @@ function DialogContent({
   className,
   children,
   showCloseButton = true,
+  ref,
   ...props
 }: React.ComponentProps<typeof DialogPrimitive.Content> & {
   showCloseButton?: boolean;
 }) {
+  // Spec 010 (FR-009): presented as a bottom sheet (< sm), it gets a handle that closes it when dragged down.
+  const { contentRef, closeRef } = useSheetHandleRefs();
+  const setRef = (node: HTMLDivElement | null) => {
+    contentRef.current = node;
+    if (typeof ref === "function") ref(node);
+    else if (ref) ref.current = node;
+  };
   return (
     <DialogPortal>
       <DialogOverlay />
@@ -60,9 +69,12 @@ function DialogContent({
           "sm:inset-x-auto sm:top-1/2 sm:bottom-auto sm:left-1/2 sm:max-h-[calc(100dvh-2rem)] sm:max-w-sm sm:-translate-x-1/2 sm:-translate-y-1/2 sm:rounded-xl sm:pb-4 sm:data-open:slide-in-from-bottom-0 sm:data-open:zoom-in-95 sm:data-closed:slide-out-to-bottom-0 sm:data-closed:zoom-out-95",
           className,
         )}
+        ref={setRef}
         {...props}
       >
+        <SheetHandle contentRef={contentRef} closeRef={closeRef} className="sm:hidden" />
         {children}
+        <DialogPrimitive.Close ref={closeRef} tabIndex={-1} aria-hidden="true" className="hidden" />
         {showCloseButton && (
           <DialogPrimitive.Close data-slot="dialog-close" asChild>
             <Button variant="ghost" className="absolute top-2 right-2" size="icon-sm">

@@ -45,14 +45,14 @@ description: "Task list for spec 010 — Animaciones y pulido"
 
 ## Phase 6: User Story 4 - Hojas con asa y arrastre (Priority: P3)
 
-- [ ] T015 [US4] `SheetHandle` (asa visual de 44 px de alto, `data-testid="sheet-handle"`, `aria-hidden`) con `useDragToDismiss` en src/components/ui/sheet.tsx (`side="bottom"`) y src/components/ui/dialog.tsx (solo `max-sm`), que cierra con un `Close` oculto
-- [ ] T016 [US4] e2e a 390 px: arrastrar el asa de la hoja ＋ 120 px la cierra; 30 px la deja abierta (tests/e2e/motion.spec.ts)
+- [X] T015 [US4] `SheetHandle` (asa visual de 44 px de alto, `data-testid="sheet-handle"`, `aria-hidden`) con `useDragToDismiss` en src/components/ui/sheet.tsx (`side="bottom"`) y src/components/ui/dialog.tsx (solo `max-sm`), que cierra con un `Close` oculto
+- [X] T016 [US4] e2e a 390 px: arrastrar el asa de la hoja ＋ 120 px la cierra; 30 px la deja abierta (tests/e2e/motion.spec.ts)
 
 ## Phase 7: User Story 5 - Detalles y accesibilidad (Priority: P3)
 
-- [ ] T017 [P] [US5] `FieldError` con `animate-field-error-in` (src/components/ui/field.tsx)
-- [ ] T018 [P] [US5] `DropdownMenuItem` `pointer-coarse:min-h-11` + `focus-visible:ring-2 focus-visible:ring-ring`; radio `pointer-coarse:after:-inset-[14px]`; switch `pointer-coarse:after:-inset-y-[13px]` (src/components/ui/{dropdown-menu,radio-group,switch}.tsx)
-- [ ] T019 [US5] e2e: el icono ＋ gira con la hoja abierta (`rotate` en el estilo calculado) y el error de validación aparece con su animación (tests/e2e/motion.spec.ts); a 375 px, los elementos del menú "＋ Nuevo"/⋯ y los radios del formulario de ingreso miden ≥ 44 px (FR-012)
+- [X] T017 [P] [US5] `FieldError` con `animate-field-error-in` (src/components/ui/field.tsx)
+- [X] T018 [P] [US5] `DropdownMenuItem` `pointer-coarse:min-h-11` + `focus-visible:ring-2 focus-visible:ring-ring`; radio `pointer-coarse:after:-inset-[14px]`; switch `pointer-coarse:after:-inset-y-[13px]` (src/components/ui/{dropdown-menu,radio-group,switch}.tsx)
+- [X] T019 [US5] e2e: el icono ＋ gira con la hoja abierta (`rotate` en el estilo calculado) y el error de validación aparece con su animación (tests/e2e/motion.spec.ts); a 375 px, los elementos del menú "＋ Nuevo"/⋯ y los radios del formulario de ingreso miden ≥ 44 px (FR-012)
 
 ## Phase 8: Polish
 

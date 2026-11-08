@@ -202,7 +202,8 @@ function FieldError({
     <div
       role="alert"
       data-slot="field-error"
-      className={cn("text-sm font-normal text-destructive", className)}
+      // Spec 010 (FR-010): fades in (opacity/transform only).
+      className={cn("animate-field-error-in text-sm font-normal text-destructive", className)}
       {...props}
     >
       {content}

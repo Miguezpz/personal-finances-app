@@ -181,3 +181,67 @@ test.describe("US4 · motion", { tag: "@demo" }, () => {
     expect(leaks).toBe(0);
   });
 });
+
+test.describe("Spec 010 · bottom sheets on a phone", { tag: "@demo" }, () => {
+  test.use({ viewport: { width: 390, height: 844 }, hasTouch: true });
+
+  async function drag(page: Page, dy: number, steps: number) {
+    const box = await page.getByTestId("create-sheet").getByTestId("sheet-handle").boundingBox();
+    if (!box) throw new Error("no handle");
+    const x = box.x + box.width / 2;
+    const y = box.y + box.height / 2;
+    await page.mouse.move(x, y);
+    await page.mouse.down();
+    await page.mouse.move(x, y + dy, { steps });
+    await page.mouse.up();
+  }
+
+  test("dragging the handle down closes the sheet; a short drag springs back", async ({ page }) => {
+    await page.goto("/dashboard");
+    await expect(page.locator("main [aria-busy='true']")).toHaveCount(0);
+    const sheet = page.getByTestId("create-sheet");
+
+    await page.getByTestId("mobile-nav-create").click();
+    await expect(sheet).toBeVisible();
+    await page.waitForTimeout(300); // let the slide-in finish
+    await drag(page, 30, 15); // short and slow
+    await page.waitForTimeout(300);
+    await expect(sheet).toBeVisible();
+
+    await drag(page, 140, 10);
+    await expect(sheet).toBeHidden();
+  });
+});
+
+test.describe("Spec 010 · polish on a phone", { tag: "@demo" }, () => {
+  test.use({ viewport: { width: 375, height: 812 }, hasTouch: true, isMobile: true });
+
+  test("＋ rotates while its sheet is open; errors fade in; menu items and radios are 44 px", async ({
+    page,
+  }) => {
+    await page.goto("/dashboard");
+    await expect(page.locator("main [aria-busy='true']")).toHaveCount(0);
+    const plus = page.getByTestId("mobile-nav-create").locator("svg");
+    await page.getByTestId("mobile-nav-create").click();
+    await expect.poll(() => plus.evaluate((el) => getComputedStyle(el).rotate)).toBe("45deg");
+
+    // A validation error fades in.
+    await page.getByTestId("create-income").click();
+    const dialog = page.getByRole("dialog");
+    await dialog.getByTestId("save-income").click();
+    const error = dialog.locator('[data-slot="field-error"]').first();
+    await expect(error).toBeVisible();
+    expect(await error.evaluate((el) => getComputedStyle(el).animationName)).toBe("field-error-in");
+    // Radios get a 44 px touch area (16 px + 14 px on each side).
+    const radio = dialog.locator('[data-slot="radio-group-item"]').first();
+    expect(await radio.evaluate((el) => getComputedStyle(el, "::after").top)).toBe("-14px");
+    await page.keyboard.press("Escape");
+
+    // Menu items are at least 44 px tall on touch screens.
+    await page.goto("/settings/quick-expenses");
+    await page.getByTestId("template-menu").first().click();
+    const item = page.getByRole("menuitem").first();
+    const box = await item.boundingBox();
+    expect(box?.height ?? 0).toBeGreaterThanOrEqual(44);
+  });
+});
