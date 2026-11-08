@@ -12,7 +12,13 @@
 
 ### Session 2026-11-07
 
-(Pendiente de `/speckit-clarify`.)
+Respondidas en modo autónomo con `docs/ux-roadmap.md` y la opción recomendada (el usuario no estuvo disponible).
+
+- Q: ¿El selector de quincena del encabezado de Gastos filtra solo el resumen por método de pago o también la lista de movimientos? → A: Ambos. La lista muestra los movimientos de la quincena elegida (por defecto la actual); el historial completo vive en Bitácora.
+- Q: ¿La quincena y los chips de filtro de Gastos se guardan en el enlace? → A: Sí (quincena, bucket y método), para que el enlace del Dashboard y la recarga los conserven.
+- Q: ¿De dónde salen las subcategorías recientes del formulario de gasto? → A: Del historial de gastos (las últimas distintas por fecha, hasta 6, sin archivadas); así funcionan igual en cualquier dispositivo.
+- Q: ¿"Borrar" dentro de la edición de un gasto pide confirmación? → A: No. Cierra el diálogo y usa el mismo flujo de "Deshacer".
+- Q: ¿Qué opciones tienen los chips de método de pago? → A: Una por cuenta de pago usada en la quincena, más "Sin especificar", en el mismo orden que el resumen por método de pago.
 
 ## User Scenarios & Testing *(mandatory)*
 
@@ -30,7 +36,7 @@ Como dueño, cuando registro un gasto, un ingreso, un pago de tarjeta o un gasto
 2. **Given** que el dueño guardó un ingreso en una cuenta de depósito, o un pago de tarjeta desde una cuenta, **When** abre otro, **Then** esa cuenta viene preseleccionada.
 3. **Given** que la cuenta o la subcategoría recordada se archivó o se borró, **When** abre el formulario, **Then** no se preselecciona y el campo queda como si no hubiera nada recordado.
 4. **Given** el formulario de gasto, **When** se abre, **Then** la fecha muestra los chips "Hoy" (seleccionado), "Ayer" y "Otra"; "Otra" muestra el selector de fecha, que no permite fechas futuras.
-5. **Given** el formulario de gasto, **When** el dueño ya registró gastos antes, **Then** sobre el selector de categoría aparecen como chips sus 4 a 6 subcategorías más recientes, y tocar una la selecciona.
+5. **Given** el formulario de gasto, **When** el dueño ya registró gastos antes, **Then** sobre el selector de categoría aparecen como chips hasta 6 de sus subcategorías más recientes, y tocar una la selecciona.
 6. **Given** un monto escrito como "250,5", "250,50" o "1,250.50", **When** se guarda, **Then** se interpreta como $250.50, $250.50 y $1,250.50 respectivamente.
 7. **Given** el escritorio, **When** el dueño usa "Guardar y agregar otro" (o Shift+Enter), **Then** el gasto se guarda y el formulario queda abierto, vacío salvo la cuenta, la subcategoría y la fecha, con el foco en el monto.
 8. **Given** los formularios de ingreso y de gasto fijo, **When** se abren para crear, **Then** el foco está en el monto; en un gasto fijo nuevo, el día de cargo por defecto es el día de hoy.
@@ -104,7 +110,7 @@ Como dueño, quiero cambiar de quincena en Gastos desde el encabezado, filtrar p
 
 **Acceptance Scenarios**:
 
-1. **Given** la página de Gastos, **When** se ve el encabezado, **Then** incluye el selector de quincena, y cambiarlo actualiza la página.
+1. **Given** la página de Gastos, **When** se ve el encabezado, **Then** incluye el selector de quincena, y cambiarlo actualiza el resumen y la lista de movimientos a esa quincena.
 2. **Given** la lista de Gastos, **When** el dueño activa el chip de un bucket (Necesidades o Gustos) o de un método de pago, **Then** la lista muestra solo lo que coincide; con varios chips activos se aplican todos (bucket Y método); "Quitar filtros" los limpia.
 3. **Given** la Bitácora, **When** el dueño cambia un filtro, un preset o la búsqueda, **Then** el enlace de la página refleja el estado y recargar lo conserva.
 4. **Given** los presets "Esta quincena", "Quincena pasada", "Este mes" y "Mes pasado", **When** se elige uno, **Then** el rango de fechas se ajusta a ese periodo.
@@ -169,7 +175,7 @@ Como dueño, quiero administrar mis gastos rápidos en Configuración, con un en
 **Formulario de gasto**
 
 - **FR-004**: La fecha del gasto MUST ofrecer los chips "Hoy" (por defecto), "Ayer" y "Otra"; "Otra" muestra un selector de fecha con máximo hoy.
-- **FR-005**: El formulario MUST mostrar como chips las 4 a 6 subcategorías usadas más recientemente (sin repetir y sin archivadas), que seleccionan la subcategoría con un toque.
+- **FR-005**: El formulario MUST mostrar como chips hasta 6 subcategorías usadas más recientemente según el historial de gastos (sin repetir y sin archivadas), que seleccionan la subcategoría con un toque.
 - **FR-006**: En escritorio, el formulario de gasto nuevo MUST ofrecer "Guardar y agregar otro" (también con Shift+Enter), que guarda y reinicia el formulario conservando cuenta, subcategoría y fecha, con el foco en el monto.
 
 **Montos**
@@ -191,15 +197,15 @@ Como dueño, quiero administrar mis gastos rápidos en Configuración, con un en
 
 **Listas**
 
-- **FR-015**: En móvil, tocar una fila de gasto MUST abrir su edición, y la edición de un gasto existente MUST incluir "Borrar"; las filas MUST NOT mostrar iconos de editar ni borrar en móvil. En escritorio, las acciones aparecen al pasar el puntero o al recibir el foco.
+- **FR-015**: En móvil, tocar una fila de gasto MUST abrir su edición, y la edición de un gasto existente MUST incluir "Borrar" (que cierra el diálogo y usa el flujo de "Deshacer", sin confirmación); las filas MUST NOT mostrar iconos de editar ni borrar en móvil. En escritorio, las acciones aparecen al pasar el puntero o al recibir el foco.
 - **FR-016**: La lista de Gastos MUST agruparse por día con encabezados "Hoy", "Ayer" y fecha corta con día de la semana.
 - **FR-017**: Las filas de plantillas de gasto rápido y de taxonomía MUST agrupar sus acciones en un menú "⋯".
 - **FR-018**: En móvil, las cuotas de Por cobrar MUST mostrarse como tarjetas; en escritorio, como tabla.
 
 **Filtros**
 
-- **FR-019**: El selector de quincena de Gastos MUST estar en el encabezado de la página.
-- **FR-020**: Gastos MUST ofrecer chips de filtro por bucket (Necesidades, Gustos) y por método de pago, combinables, con "Quitar filtros"; el filtro de bucket MUST poder llegar en el enlace (desde el Dashboard).
+- **FR-019**: El selector de quincena de Gastos MUST estar en el encabezado de la página y filtrar tanto el resumen por método de pago como la lista de movimientos (por defecto, la quincena actual).
+- **FR-020**: Gastos MUST ofrecer chips de filtro por bucket (Necesidades, Gustos) y por método de pago (una opción por cuenta usada en la quincena, más "Sin especificar"), combinables, con "Quitar filtros". La quincena y los filtros MUST reflejarse en el enlace, de modo que el Dashboard pueda abrir Gastos filtrado y la recarga los conserve.
 - **FR-021**: Los filtros de Bitácora MUST reflejarse en el enlace y restaurarse desde él; valores inválidos se ignoran.
 - **FR-022**: Bitácora MUST ofrecer los presets "Esta quincena", "Quincena pasada", "Este mes" y "Mes pasado", y búsqueda por texto en nota y descripción, sin distinguir mayúsculas ni acentos.
 - **FR-023**: Las filas de Bitácora de gastos, ingresos y pagos de tarjeta MUST abrir la edición del movimiento.
