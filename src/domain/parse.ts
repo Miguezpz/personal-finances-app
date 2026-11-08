@@ -1,17 +1,21 @@
 /**
  * Parsing of user-typed amounts and percentages into exact integers — string arithmetic only,
  * never floating point (Principle II). Inputs use "." as the decimal separator and optional ","
- * thousands separators (MXN convention in both EN and ES-MX).
+ * thousands separators (MXN convention in both EN and ES-MX). A lone decimal comma is accepted
+ * too (spec 009, FR-007): "250,5" → 250.50 when there is exactly one comma followed by 1–2 digits
+ * and no dot; "1,250" (three digits) stays one thousand two hundred fifty.
  */
 import { BPS_TOTAL } from "./money";
 import type { BasisPoints, Cents } from "./types";
 
 const MONEY_RE = /^\$?\s*(\d{1,3}(?:,\d{3})+|\d+)(?:\.(\d{1,2}))?$/;
+const DECIMAL_COMMA_RE = /^(\$?\s*\d+),(\d{1,2})$/;
 const PERCENT_RE = /^(\d{1,3})(?:\.(\d{1,2}))?\s*%?$/;
 
 /** "20,000.50" → 2000050 cents. Null if malformed, negative or too large. */
 export function parseMoneyInput(input: string): Cents | null {
-  const m = MONEY_RE.exec(input.trim());
+  const trimmed = input.trim();
+  const m = MONEY_RE.exec(trimmed.replace(DECIMAL_COMMA_RE, "$1.$2"));
   if (!m) return null;
   const whole = (m[1] as string).replace(/,/g, "");
   const fraction = (m[2] ?? "").padEnd(2, "0");

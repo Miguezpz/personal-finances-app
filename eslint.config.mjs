@@ -59,6 +59,7 @@ const eslintConfig = defineConfig([
     "next-env.d.ts",
     // Project:
     ".next-e2e-*/**", // e2e builds, one per mode (playwright.config.ts)
+    ".next-demo-check/**", // demo build checked by check:demo-bundle
     "coverage/**",
     "playwright-report/**",
     "test-results/**",

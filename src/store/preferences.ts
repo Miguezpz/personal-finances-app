@@ -26,8 +26,45 @@ export interface PreferencesState {
   privacyMode: boolean;
   /** Light / dark / neon / follow the OS. Default "neon": a first visit opens in the neon theme. */
   theme: ThemePreference;
+  /**
+   * The last account and subcategory used in each form (spec 009, FR-001): identifiers only, never
+   * amounts. Validated against the current data before prefilling (features/shared/last-used.ts).
+   */
+  lastUsed: LastUsed;
   /** false until rehydrated from storage; <Money> masks meanwhile outside the demo. */
   hydrated: boolean;
+}
+
+export interface LastUsed {
+  /** Expense / recurring expense payment account. */
+  paymentAccountId: string | null;
+  /** Expense / recurring expense subcategory. */
+  subcategoryId: string | null;
+  /** Income deposit account. */
+  depositAccountId: string | null;
+  /** Card payment source account. */
+  sourceAccountId: string | null;
+}
+
+export const EMPTY_LAST_USED: LastUsed = {
+  paymentAccountId: null,
+  subcategoryId: null,
+  depositAccountId: null,
+  sourceAccountId: null,
+};
+
+const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+
+/** Keeps only well-formed identifiers (tampered or older storage is ignored field by field). */
+export function sanitizeLastUsed(value: unknown): LastUsed {
+  const v = (value && typeof value === "object" ? value : {}) as Record<string, unknown>;
+  const id = (x: unknown) => (typeof x === "string" && UUID_RE.test(x) ? x : null);
+  return {
+    paymentAccountId: id(v.paymentAccountId),
+    subcategoryId: id(v.subcategoryId),
+    depositAccountId: id(v.depositAccountId),
+    sourceAccountId: id(v.sourceAccountId),
+  };
 }
 
 export interface PreferencesActions {
@@ -36,13 +73,15 @@ export interface PreferencesActions {
   togglePrivacy(): void;
   setPrivacy(on: boolean): void;
   setTheme(theme: ThemePreference): void;
+  /** Merges the given fields (a successful save); `undefined` fields are left as they were. */
+  setLastUsed(patch: Partial<LastUsed>): void;
   markHydrated(): void;
 }
 
 export type PreferencesStore = PreferencesState & PreferencesActions;
 export type PersistedPreferences = Pick<
   PreferencesState,
-  "locale" | "displayCurrency" | "privacyMode" | "theme"
+  "locale" | "displayCurrency" | "privacyMode" | "theme" | "lastUsed"
 >;
 
 export const PREFERENCES_STORAGE_KEY = "pfa:prefs:v1" as const;
@@ -53,6 +92,7 @@ export const DEFAULT_PREFERENCES: PersistedPreferences = {
   displayCurrency: "MXN",
   privacyMode: false,
   theme: "neon",
+  lastUsed: EMPTY_LAST_USED,
 };
 
 export const LOCALES: readonly Locale[] = ["en", "es"];
@@ -99,6 +139,13 @@ export const usePreferences = create<PreferencesStore>()(
       togglePrivacy: () => set((s) => ({ privacyMode: !s.privacyMode })),
       setPrivacy: (privacyMode) => set({ privacyMode }),
       setTheme: (theme) => set({ theme }),
+      setLastUsed: (patch) =>
+        set((s) => ({
+          lastUsed: sanitizeLastUsed({
+            ...s.lastUsed,
+            ...Object.fromEntries(Object.entries(patch).filter(([, v]) => v !== undefined)),
+          }),
+        })),
       markHydrated: () => set({ hydrated: true }),
     }),
     {
@@ -111,6 +158,7 @@ export const usePreferences = create<PreferencesStore>()(
         displayCurrency: s.displayCurrency,
         privacyMode: s.privacyMode,
         theme: s.theme,
+        lastUsed: s.lastUsed,
       }),
       // Never trust stored values blindly (tampering, older versions).
       merge: (persisted, current) => {
@@ -122,6 +170,7 @@ export const usePreferences = create<PreferencesStore>()(
           ...(typeof p.privacyMode === "boolean" && { privacyMode: p.privacyMode }),
           // An unknown stored theme is ignored: the default ("neon") stays (data-model.md §1).
           ...(isThemePreference(p.theme) && { theme: p.theme }),
+          lastUsed: sanitizeLastUsed(p.lastUsed),
         };
       },
     },

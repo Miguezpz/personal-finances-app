@@ -60,6 +60,11 @@ export interface SnapshotMutationOptions<TVariables, TData> {
    * row in place of the optimistic one that used `context.tempId`.
    */
   created?: (snapshot: FinanceSnapshot, data: TData, context: OptimisticContext) => FinanceSnapshot;
+  /**
+   * Called after the rollback when the write fails (spec 009, FR-008). Mutation-level, so it runs
+   * even when the dialog that started the save has already closed — "Retry" needs that.
+   */
+  onFailure?: (error: Error, variables: TVariables) => void;
 }
 
 interface MutationContext extends OptimisticContext {
@@ -76,7 +81,7 @@ export function useSnapshotMutation<TVariables, TData = unknown>(
 ): UseMutationResult<TData, Error, TVariables, MutationContext> {
   const provider = useDataProvider();
   const queryClient = useQueryClient();
-  const { mutationFn, optimistic, created } = options;
+  const { mutationFn, optimistic, created, onFailure } = options;
 
   return useMutation<TData, Error, TVariables, MutationContext>({
     mutationFn: (variables) =>
@@ -103,8 +108,9 @@ export function useSnapshotMutation<TVariables, TData = unknown>(
         );
       }
     },
-    onError: (_error, _variables, context) => {
+    onError: (error, variables, context) => {
       context?.rollback();
+      onFailure?.(error, variables);
     },
     onSettled: () => queryClient.invalidateQueries({ queryKey: queryKeys.snapshot }),
   });

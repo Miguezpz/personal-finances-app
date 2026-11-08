@@ -2,6 +2,7 @@
  * Parsing user-typed amounts and percentages into integers WITHOUT floating point
  * (Principle II). Used by the income, rule and (later) expense forms.
  */
+import fc from "fast-check";
 import { describe, expect, it } from "vitest";
 import {
   formatBpsAsPercentInput,
@@ -24,12 +25,44 @@ describe("parseMoneyInput", () => {
     expect(parseMoneyInput(input)).toBe(expected);
   });
 
-  it.each([[""], ["abc"], ["1.234"], ["1,23"], ["-5"], ["1e5"], ["12.3.4"], ["1,,000"]])(
-    "rejects %j",
-    (input) => {
-      expect(parseMoneyInput(input)).toBeNull();
-    },
-  );
+  it.each([
+    [""],
+    ["abc"],
+    ["1.234"],
+    ["-5"],
+    ["1e5"],
+    ["12.3.4"],
+    ["1,,000"],
+    ["1.234,50"],
+    ["1,2,3"],
+  ])("rejects %j", (input) => {
+    expect(parseMoneyInput(input)).toBeNull();
+  });
+
+  // Spec 009 · FR-007: a lone decimal comma.
+  it.each([
+    ["250,5", 25_050],
+    ["250,50", 25_050],
+    ["1,23", 123],
+    ["$ 99,9", 9_990],
+    ["0,01", 1],
+  ])("decimal comma %s → %d cents", (input, expected) => {
+    expect(parseMoneyInput(input)).toBe(expected);
+  });
+
+  it("keeps a comma followed by three digits as thousands", () => {
+    expect(parseMoneyInput("1,250")).toBe(125_000);
+    expect(parseMoneyInput("1,250.50")).toBe(125_050);
+  });
+
+  it("property: writing the decimal point as a comma gives the same cents", () => {
+    fc.assert(
+      fc.property(fc.integer({ min: 0, max: 99_999_999_999 }), (c) => {
+        const dotted = formatCentsAsInput(c as never);
+        expect(parseMoneyInput(dotted.replace(".", ","))).toBe(c);
+      }),
+    );
+  });
 
   it("never uses floating point (0.1 + 0.2 style inputs stay exact)", () => {
     expect(parseMoneyInput("0.29")).toBe(29);

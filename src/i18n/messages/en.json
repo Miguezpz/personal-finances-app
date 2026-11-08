@@ -25,7 +25,13 @@
       "es": "Español"
     },
     "appShortName": "Finances",
-    "appDescription": "Zero-cost personal finance tracker with automatic income splitting and a semi-monthly Safe-to-Spend."
+    "appDescription": "Zero-cost personal finance tracker with automatic income splitting and a semi-monthly Safe-to-Spend.",
+    "undo": "Undo",
+    "loadError": "We couldn't load your data. Check your connection and try again.",
+    "saveFailedRetry": "Couldn't save. Your entries are still here.",
+    "deleteFailed": "Couldn't delete it; we restored it.",
+    "today": "Today",
+    "yesterday": "Yesterday"
   },
   "nav": {
     "label": "Main navigation",
@@ -264,7 +270,11 @@
     "recurringTitle": "Recurring this quincena",
     "statusPending": "pending",
     "statusApplied": "charged",
-    "alertsLabel": "Alerts"
+    "alertsLabel": "Alerts",
+    "seeExpenses": "See expenses",
+    "cardDueIn": "{card} is {days, plural, =0 {due today} one {due in # day} other {due in # days}}",
+    "cardOverdue": "{card} is overdue",
+    "pay": "Pay"
   },
   "expenses": {
     "addTitle": "Add expense",
@@ -320,7 +330,19 @@
     "paymentSaved": "Card payment saved.",
     "cardPaymentLabel": "Payment · {card}",
     "debtSettlement": "Debt settlement",
-    "cardRequired": "Choose a card."
+    "cardRequired": "Choose a card.",
+    "deletedItem": "Deleted: {name}",
+    "dateToday": "Today",
+    "dateYesterday": "Yesterday",
+    "dateOther": "Other",
+    "recent": "Recent",
+    "saveAndAdd": "Save and add another",
+    "savedAddAnother": "Saved. Add the next one.",
+    "filtersLabel": "Filters",
+    "filterNoMethod": "Not specified",
+    "clearFilters": "Clear filters",
+    "noMatches": "No movements match the filters.",
+    "openEdit": "Edit {name}"
   },
   "quickExpenses": {
     "title": "Quick expenses",
@@ -674,7 +696,10 @@
       "store": "Store",
       "briefcase": "Briefcase",
       "piggy-bank": "Piggy bank"
-    }
+    },
+    "quickExpensesTitle": "Quick expenses",
+    "quickExpensesLinkHint": "Create, order and edit your one-tap expenses.",
+    "quickExpensesDescription": "The expenses you record with one tap from the Dashboard and the ＋ sheet."
   },
   "ledger": {
     "title": "Ledger",
@@ -720,7 +745,16 @@
     "exportLedgerCsv": "Ledger (CSV)",
     "exportFilteredCsv": "Filtered ledger (CSV)",
     "exportBackupZip": "Full backup (ZIP)",
-    "exported": "Download started."
+    "exported": "Download started.",
+    "presets": {
+      "this-period": "This quincena",
+      "last-period": "Last quincena",
+      "this-month": "This month",
+      "last-month": "Last month"
+    },
+    "presetsLabel": "Quick periods",
+    "search": "Search notes",
+    "searchPlaceholder": "Search…"
   },
   "privacy": {
     "toggle": "Privacy mode",
@@ -838,6 +872,7 @@
     "noCards": "Add a credit card in Settings › Accounts.",
     "newButton": "New",
     "shortcut": "Shortcut: {key}",
-    "quickTitle": "Quick expenses"
+    "quickTitle": "Quick expenses",
+    "manageQuick": "Manage"
   }
 }

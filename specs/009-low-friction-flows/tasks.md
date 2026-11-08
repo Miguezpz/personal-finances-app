@@ -16,22 +16,22 @@ description: "Task list for spec 009 — Flujos y formularios con menos fricció
 
 ## Phase 1: Setup
 
-- [ ] T001 Registrar la línea base del First Load (`pnpm build && node scripts/measure-first-load.mjs`) en "Notas" al final de specs/009-low-friction-flows/tasks.md
+- [X] T001 Registrar la línea base del First Load (`pnpm build && node scripts/measure-first-load.mjs`) en "Notas" al final de specs/009-low-friction-flows/tasks.md
 
 ---
 
 ## Phase 2: Foundational
 
-- [ ] T002 [P] Coma decimal en `parseMoneyInput` (src/domain/parse.ts): una sola coma seguida de 1–2 dígitos y sin punto → decimal; "1,250" sigue siendo miles; actualizar el comentario del módulo
-- [ ] T003 [P] Pruebas de coma decimal y propiedad fast-check (`parse(format(c).replace(".", ","))` = c) en tests/unit/domain/parse.test.ts
-- [ ] T004 [P] Crear src/domain/recent.ts (`recentSubcategories(expenses, subcategories, n = 6)`: distintas, por `spentOn` desc y luego `createdAt`, sin archivadas) y src/domain/day-groups.ts (`groupByDay(rows, today)` con etiquetas `today`/`yesterday`/`date`), con pruebas en tests/unit/domain/{recent,day-groups}.test.ts
-- [ ] T005 [P] Crear src/domain/ledger-presets.ts (`presetRange` para `this-period`|`last-period`|`this-month`|`last-month`, `normalizeSearch` sin acentos ni mayúsculas, `matchesSearch`) con pruebas en tests/unit/domain/ledger-presets.test.ts
-- [ ] T006 [P] Agregar `lastUsed` `{paymentAccountId, subcategoryId, depositAccountId, sourceAccountId}` (Uuid | null, validado en `merge`) y `setLastUsed(patch)` a src/store/preferences.ts, incluido en `partialize`; pruebas en tests/unit/preferences-theme.test.ts o un archivo nuevo tests/unit/store/last-used.test.ts
-- [ ] T007 [P] Crear src/store/pending-deletes.ts (zustand en memoria: `entries: Map<key, {apply}>`, `version`, `add`, `remove`) y componer los `apply` pendientes en `useFinanceSnapshot` (src/data/useFinanceSnapshot.ts), memoizado por versión y sin envolver el selector si no hay pendientes; agregar `useSnapshotStatus()`
-- [ ] T008 [P] Opción `onFailure(error, variables)` en `useSnapshotMutation` (src/data/snapshot-cache.ts), llamada en el `onError` de nivel mutación tras el rollback
-- [ ] T009 [P] Crear src/components/data/PageQueryState.tsx (skeleton / error con `page-error` y `page-retry` / children) y src/components/ui/chip.tsx (toggle con `aria-pressed`, `pointer-coarse:min-h-11`, foco visible)
-- [ ] T010 [P] Llaves i18n EN/ES en src/i18n/messages/{en,es}.json: `common.undo`, `common.loadError`, `common.saveFailed`, `common.deleted`, chips de fecha (`expenses.dateToday|dateYesterday|dateOther`), `expenses.recent`, `expenses.saveAndAdd`, `expenses.filters.*`, `expenses.clearFilters`, `ledger.presets.*`, `ledger.search`, `dashboard.seeExpenses`, `dashboard.cardDueIn`, `dashboard.cardOverdue`, `create.manageQuick`, `settings.quickExpensesTitle|quickExpensesLinkHint`, `common.today|yesterday`
-- [ ] T011 Gate rápido (`pnpm typecheck && pnpm lint && pnpm test`) y commit + push
+- [X] T002 [P] Coma decimal en `parseMoneyInput` (src/domain/parse.ts): una sola coma seguida de 1–2 dígitos y sin punto → decimal; "1,250" sigue siendo miles; actualizar el comentario del módulo
+- [X] T003 [P] Pruebas de coma decimal y propiedad fast-check (`parse(format(c).replace(".", ","))` = c) en tests/unit/domain/parse.test.ts
+- [X] T004 [P] Crear src/domain/recent.ts (`recentSubcategories(expenses, subcategories, n = 6)`: distintas, por `spentOn` desc y luego `createdAt`, sin archivadas) y src/domain/day-groups.ts (`groupByDay(rows, today)` con etiquetas `today`/`yesterday`/`date`), con pruebas en tests/unit/domain/{recent,day-groups}.test.ts
+- [X] T005 [P] Crear src/domain/ledger-presets.ts (`presetRange` para `this-period`|`last-period`|`this-month`|`last-month`, `normalizeSearch` sin acentos ni mayúsculas, `matchesSearch`) con pruebas en tests/unit/domain/ledger-presets.test.ts
+- [X] T006 [P] Agregar `lastUsed` `{paymentAccountId, subcategoryId, depositAccountId, sourceAccountId}` (Uuid | null, validado en `merge`) y `setLastUsed(patch)` a src/store/preferences.ts, incluido en `partialize`; pruebas en tests/unit/preferences-theme.test.ts o un archivo nuevo tests/unit/store/last-used.test.ts
+- [X] T007 [P] Crear src/store/pending-deletes.ts (zustand en memoria: `entries: Map<key, {apply}>`, `version`, `add`, `remove`) y componer los `apply` pendientes en `useFinanceSnapshot` (src/data/useFinanceSnapshot.ts), memoizado por versión y sin envolver el selector si no hay pendientes; agregar `useSnapshotStatus()`
+- [X] T008 [P] Opción `onFailure(error, variables)` en `useSnapshotMutation` (src/data/snapshot-cache.ts), llamada en el `onError` de nivel mutación tras el rollback
+- [X] T009 [P] Crear src/components/data/PageQueryState.tsx (skeleton / error con `page-error` y `page-retry` / children) y src/components/ui/chip.tsx (toggle con `aria-pressed`, `pointer-coarse:min-h-11`, foco visible)
+- [X] T010 [P] Llaves i18n EN/ES en src/i18n/messages/{en,es}.json: `common.undo`, `common.loadError`, `common.saveFailed`, `common.deleted`, chips de fecha (`expenses.dateToday|dateYesterday|dateOther`), `expenses.recent`, `expenses.saveAndAdd`, `expenses.filters.*`, `expenses.clearFilters`, `ledger.presets.*`, `ledger.search`, `dashboard.seeExpenses`, `dashboard.cardDueIn`, `dashboard.cardOverdue`, `create.manageQuick`, `settings.quickExpensesTitle|quickExpensesLinkHint`, `common.today|yesterday`
+- [X] T011 Gate rápido (`pnpm typecheck && pnpm lint && pnpm test`) y commit + push
 
 ---
 
@@ -122,3 +122,4 @@ MVP = Phase 2 + US1. Commit + push al cerrar cada fase con el gate rápido.
 
 ## Notas
 
+- Línea base First Load (T001, 2026-11-07, tras el spec 008): `/` 301.9 kB gzip; `/dashboard` 331.7 kB gzip. Presupuesto: `/dashboard` ≤ 351.7 kB.

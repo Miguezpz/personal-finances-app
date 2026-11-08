@@ -25,7 +25,13 @@
       "es": "Español"
     },
     "appShortName": "Finanzas",
-    "appDescription": "Control de finanzas personales sin costo, con reparto automático de ingresos y un Safe-to-Spend quincenal."
+    "appDescription": "Control de finanzas personales sin costo, con reparto automático de ingresos y un Safe-to-Spend quincenal.",
+    "undo": "Deshacer",
+    "loadError": "No pudimos cargar tus datos. Revisa tu conexión e inténtalo de nuevo.",
+    "saveFailedRetry": "No se pudo guardar. Tus datos siguen aquí.",
+    "deleteFailed": "No se pudo borrar; lo restauramos.",
+    "today": "Hoy",
+    "yesterday": "Ayer"
   },
   "nav": {
     "label": "Navegación principal",
@@ -264,7 +270,11 @@
     "recurringTitle": "Fijos de esta quincena",
     "statusPending": "pendiente",
     "statusApplied": "cobrado",
-    "alertsLabel": "Alertas"
+    "alertsLabel": "Alertas",
+    "seeExpenses": "Ver gastos",
+    "cardDueIn": "{card} vence {days, plural, =0 {el día de hoy} one {en # día} other {en # días}}",
+    "cardOverdue": "{card} está vencida",
+    "pay": "Pagar"
   },
   "expenses": {
     "addTitle": "Registrar gasto",
@@ -320,7 +330,19 @@
     "paymentSaved": "Pago de tarjeta guardado.",
     "cardPaymentLabel": "Pago · {card}",
     "debtSettlement": "Liquidación de deuda",
-    "cardRequired": "Elige una tarjeta."
+    "cardRequired": "Elige una tarjeta.",
+    "deletedItem": "Borrado: {name}",
+    "dateToday": "Hoy",
+    "dateYesterday": "Ayer",
+    "dateOther": "Otra",
+    "recent": "Recientes",
+    "saveAndAdd": "Guardar y agregar otro",
+    "savedAddAnother": "Guardado. Agrega el siguiente.",
+    "filtersLabel": "Filtros",
+    "filterNoMethod": "Sin especificar",
+    "clearFilters": "Quitar filtros",
+    "noMatches": "Ningún movimiento coincide con los filtros.",
+    "openEdit": "Editar {name}"
   },
   "quickExpenses": {
     "title": "Gastos rápidos",
@@ -674,7 +696,10 @@
       "store": "Tienda",
       "briefcase": "Maletín",
       "piggy-bank": "Alcancía"
-    }
+    },
+    "quickExpensesTitle": "Gastos rápidos",
+    "quickExpensesLinkHint": "Crea, ordena y edita tus gastos de un toque.",
+    "quickExpensesDescription": "Los gastos que registras con un toque desde el Dashboard y la hoja ＋."
   },
   "ledger": {
     "title": "Bitácora",
@@ -720,7 +745,16 @@
     "exportLedgerCsv": "Bitácora (CSV)",
     "exportFilteredCsv": "Bitácora filtrada (CSV)",
     "exportBackupZip": "Respaldo completo (ZIP)",
-    "exported": "Descarga iniciada."
+    "exported": "Descarga iniciada.",
+    "presets": {
+      "this-period": "Esta quincena",
+      "last-period": "Quincena pasada",
+      "this-month": "Este mes",
+      "last-month": "Mes pasado"
+    },
+    "presetsLabel": "Periodos rápidos",
+    "search": "Buscar en notas",
+    "searchPlaceholder": "Buscar…"
   },
   "privacy": {
     "toggle": "Modo privacidad",
@@ -838,6 +872,7 @@
     "noCards": "Agrega una tarjeta de crédito en Configuración › Cuentas.",
     "newButton": "Nuevo",
     "shortcut": "Atajo: {key}",
-    "quickTitle": "Gastos rápidos"
+    "quickTitle": "Gastos rápidos",
+    "manageQuick": "Administrar"
   }
 }
