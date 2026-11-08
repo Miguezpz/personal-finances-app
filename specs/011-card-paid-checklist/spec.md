@@ -142,7 +142,7 @@ Como dueño, quiero que la app me diga en qué días del mes puedo pagar todas m
 - **FR-004**: Marcar un corte MUST cubrir todo lo registrado en esa tarjeta con fecha ≤ su fecha de corte (compras propias y cuotas MSI que le tocan) y MUST dejar como pagados los cortes anteriores sin marcar.
 - **FR-005**: Una marca MUST NOT cubrir nada posterior a su fecha de corte: el siguiente corte MUST incluir solo lo registrado después, y ningún corte futuro MUST aparecer pagado por una marca anterior.
 - **FR-006**: Tras marcar, MUST aparecer un aviso con "Deshacer" durante 6 s; deshacer MUST devolver el corte (y los anteriores que cubría) a su estado previo.
-- **FR-007**: Un corte marcado MUST ofrecer "Desmarcar" (EN "Unmark") en su tarjeta; desmarcar MUST ser inmediato, con aviso y "Deshacer".
+- **FR-007**: El corte pagado más reciente de una tarjeta, si tiene marca propia, MUST ofrecer "Desmarcar" (EN "Unmark"); desmarcar MUST ser inmediato, con aviso y "Deshacer". Un corte anterior se reabre desmarcando primero los posteriores.
 - **FR-008**: Solo los cortes cerrados (fecha de corte ≤ hoy) MUST poder marcarse; un corte sin deuda registrada MUST mostrarse como "Nada que pagar" sin acción.
 - **FR-009**: Un corte no marcado cuya fecha límite ya pasó MUST mostrarse como "Vencido" y su alerta MUST permanecer en el Dashboard hasta que se marque.
 
@@ -156,7 +156,7 @@ Como dueño, quiero que la app me diga en qué días del mes puedo pagar todas m
 
 - **FR-013**: El monto "para no generar intereses" de un corte MUST ser lo registrado en esa tarjeta desde el último corte marcado (exclusivo) hasta ese corte (inclusivo): compras propias más cuotas MSI cuyo límite de pago es el de ese corte o anterior.
 - **FR-014**: La deuda total de una tarjeta MUST ser todo lo registrado después del último corte marcado (incluido el periodo abierto) más las cuotas MSI futuras aún no cubiertas por una marca.
-- **FR-015**: El patrimonio (deudas) y su historial mensual MUST usar la deuda total de FR-014.
+- **FR-015**: El patrimonio (deudas) MUST usar la deuda total de FR-014, y también las instantáneas mensuales que se tomen desde ahora; las instantáneas ya guardadas se conservan tal cual.
 - **FR-016**: Marcar o desmarcar MUST NOT cambiar el disponible para gastar de ninguna quincena ni ningún otro cálculo de presupuesto.
 - **FR-017**: La línea de tiempo de Crédito MUST mostrar cada fecha límite con el monto del corte según FR-013, o como pagado si está marcado.
 

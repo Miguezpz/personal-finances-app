@@ -33,7 +33,7 @@ description: "Task list for spec 011 — Pago de tarjeta como checklist y sesió
   - corte pagado por marca propia o posterior;
   - estado `nothing`;
   - fórmulas R3 de `payToAvoidInterest` y `totalDebt`;
-  - cuotas MSI cubiertas por `cardDueOn ≤ due(L)`;
+  - cuotas MSI cubiertas por `cardDueOn ≤ due(L)`, marca cuya fecha ya no coincide con un corte tras cambiar los términos (sigue cubriendo hasta su fecha), `creditTimeline` muestra pagado el corte marcado (FR-017);
   - `markId` del último corte;
   - compra tardía dentro de un corte pagado, que queda cubierta.
 - [ ] T005 Implementar en src/domain/credit.ts: `CardData` con `statementMarks`, `paidThrough`, `statementOf`, `StatementState` con `"nothing"`, las fórmulas R3 en `cardStatus`, y `cardStatementSummary` con `headline: "next"` cuando el último corte es `paid` o `nothing`. Se quita `payAmount`. `creditTimeline` usa `statementOf` (FR-017). Actualizar el encabezado del módulo
@@ -61,6 +61,7 @@ description: "Task list for spec 011 — Pago de tarjeta como checklist y sesió
 - [ ] T013 Seed del demo en src/data/mock/seed.ts:
   - Reemplazar la generación de `cardPayments` por marcas: una por estado de cuenta cuyo `due − 2 ≤ today`.
   - El más reciente posterior queda sin marcar (FR-021).
+  - Las deudas de `netWorthSnapshots` del seed usan la fórmula R3 con marcas, sin restar pagos.
   - Actualizar el encabezado y tests/unit/data/mock-seed-consistency.test.ts: las marcas existen, ninguna con `cutOff > today`, y al menos un corte cerrado está pendiente en algún `today`.
 - [ ] T014 Contrato: reemplazar los casos de `cardPayments` por `statementMarks` en tests/contract/data-provider.contract.ts y tests/contract/schemas.ts, según la tabla de contracts/data-provider.md
 - [ ] T015 Gate rápido (`pnpm typecheck && pnpm lint && pnpm test`) y commit + push
