@@ -14,6 +14,12 @@
 
 - Q: Cuando los rangos de pago de las tarjetas se cruzan en más de 3 días, ¿dónde va la ventana de la sesión? → A: Junto a la quincena: la primera ventana válida que empiece en o después de un día de pago (los de Preferencias, por defecto el 15 y el último día del mes), para que el dinero ya esté disponible. Si ningún día de pago cae en el cruce, empieza el día siguiente al último corte.
 - Q: Si las fechas de las tarjetas no permiten pagarlas todas en una sola sesión, ¿qué hace la app? → A: Propone el menor número de sesiones posible (normalmente 2), cada una con su ventana y sus tarjetas.
+- Q: ¿Marcar el corte más reciente liquida también los cortes anteriores sin marcar? → A: Sí; el estado de cuenta del banco incluye el saldo anterior (FR-004).
+- Q: ¿Se conservan "Pagar tarjeta" en la hoja ＋ y el atajo P? → A: No; marcar solo se hace desde las tarjetas (FR-011).
+- Q: ¿Los pagos de tarjeta siguen apareciendo en Gastos y en la Bitácora? → A: No; ya no son movimientos con monto (FR-012).
+- Q: ¿Qué pasa con los pagos con monto ya registrados? → A: Cada uno se convierte en la marca del corte que pagaba y se descarta cualquier excedente; antes de aplicarlo a los datos reales se le muestra al dueño qué cortes quedarían marcados (FR-018, FR-032).
+- Q: ¿Qué muestra un corte cerrado sin compras propias registradas? → A: "Nada que pagar", sin botón ni alerta (FR-008).
+- Q: ¿Desde cuándo avisa el Dashboard de la sesión de pago? → A: Desde 7 días antes de que empiece la ventana: "Próxima sesión de pago" con sus fechas y tarjetas, en lugar de las alertas individuales de esas tarjetas; dentro de la ventana cambia a "Hoy toca pagar tus tarjetas" con sus "Ya la pagué" (FR-029).
 
 ## User Scenarios & Testing *(mandatory)*
 
@@ -98,9 +104,10 @@ Como dueño, quiero que la app me diga en qué días del mes puedo pagar todas m
 2. **Given** el cruce incluye un día de pago, **When** se calcula la ventana, **Then** la ventana incluye ese día de pago y empieza en él, salvo que no quepan 3 días antes del fin del cruce; en ese caso termina el último día del cruce.
 3. **Given** el cruce no incluye ningún día de pago, **When** se calcula la ventana, **Then** empieza el día siguiente al último corte.
 4. **Given** los rangos no se cruzan para todas las tarjetas, **When** el dueño abre Crédito, **Then** ve el menor número de sesiones posible, cada una con su ventana y sus tarjetas.
-5. **Given** hoy está dentro de la ventana de una sesión con tarjetas pendientes, **When** el dueño abre el Dashboard, **Then** ve un aviso "Hoy toca pagar tus tarjetas" con cada tarjeta pendiente y su "Ya la pagué".
-6. **Given** el dueño marcó todas las tarjetas de la sesión, **When** la vuelve a ver, **Then** aparece como completada y Crédito muestra la fecha de la siguiente sesión.
-7. **Given** la ventana ya pasó y quedan tarjetas sin marcar, **When** se ven Crédito y el Dashboard, **Then** esas tarjetas siguen con su propia alerta (pendiente o vencida) como en US1.
+5. **Given** faltan 7 días o menos para que empiece la ventana de una sesión con tarjetas pendientes, **When** el dueño abre el Dashboard, **Then** ve "Próxima sesión de pago" con las fechas de la ventana y sus tarjetas, en lugar de una alerta por cada una de esas tarjetas.
+6. **Given** hoy está dentro de la ventana de una sesión con tarjetas pendientes, **When** el dueño abre el Dashboard, **Then** ve un aviso "Hoy toca pagar tus tarjetas" con cada tarjeta pendiente y su "Ya la pagué".
+7. **Given** el dueño marcó todas las tarjetas de la sesión, **When** la vuelve a ver, **Then** aparece como completada y Crédito muestra la fecha de la siguiente sesión.
+8. **Given** la ventana ya pasó y quedan tarjetas sin marcar, **When** se ven Crédito y el Dashboard, **Then** esas tarjetas siguen con su propia alerta (pendiente o vencida) como en US1.
 
 ---
 
@@ -159,6 +166,7 @@ Como dueño, quiero que la app me diga en qué días del mes puedo pagar todas m
 - **FR-019**: Tras la conversión, los montos de los pagos anteriores MUST NOT intervenir en ningún cálculo; un excedente anterior MUST NOT cubrir cortes posteriores.
 - **FR-020**: El respaldo completo (exportación) MUST incluir las marcas de corte pagado; la bitácora en CSV MUST NOT incluir pagos de tarjeta.
 - **FR-021**: El demo MUST mostrar cortes pasados pagados mediante marcas y al menos un corte reciente pendiente, y MUST bloquear marcar y desmarcar con el aviso de solo lectura.
+- **FR-032**: Antes de aplicar la conversión de FR-018 a los datos reales, MUST poder revisarse qué cortes de cada tarjeta quedarían marcados como pagados.
 - **FR-022**: Las marcas MUST pertenecer solo a su dueño, con el mismo aislamiento por usuario que el resto de los datos.
 
 **Calidad**
@@ -169,7 +177,7 @@ Como dueño, quiero que la app me diga en qué días del mes puedo pagar todas m
 - **FR-026**: La app MUST agrupar los estados de cuenta próximos de todas las tarjetas activas con términos completos en el menor número de sesiones tal que, en cada sesión, los rangos de pago de sus estados de cuenta se crucen al menos un día.
 - **FR-027**: La ventana de cada sesión MUST durar 3 días (o todo el cruce si es más corto) y quedar completa dentro del cruce. Si algún día de pago (Preferencias) cae en el cruce, la ventana MUST incluir el primero de ellos, empezando en él o, si no caben 3 días antes del fin del cruce, terminando el último día del cruce. Si ningún día de pago cae en el cruce, MUST empezar el primer día del cruce.
 - **FR-028**: Crédito MUST mostrar la próxima sesión (la primera cuya ventana termina hoy o después y tiene estados de cuenta sin marcar, o la siguiente si la actual ya está completa), con su ventana, cada tarjeta, su fecha límite, su estado y la acción "Ya la pagué" en las pendientes.
-- **FR-029**: Cuando hoy cae dentro de la ventana de una sesión con tarjetas pendientes, el Dashboard MUST mostrar un aviso de sesión con las tarjetas pendientes y su "Ya la pagué"; mientras dure ese aviso, MUST NOT duplicarse con la alerta individual de esas mismas tarjetas.
+- **FR-029**: Desde 7 días antes del inicio de la ventana de una sesión con tarjetas pendientes, el Dashboard MUST mostrar "Próxima sesión de pago" con las fechas de la ventana y sus tarjetas; dentro de la ventana MUST cambiar a "Hoy toca pagar tus tarjetas" con cada tarjeta pendiente y su "Ya la pagué". Mientras se muestre el aviso de sesión, las tarjetas de esa sesión MUST NOT tener además su alerta individual; una tarjeta vencida conserva su alerta de vencida.
 - **FR-030**: Una sesión con todas sus tarjetas marcadas o sin deuda registrada MUST mostrarse como completada, junto con la ventana de la siguiente sesión.
 - **FR-031**: La sesión MUST calcularse en el cliente a partir de los términos de las tarjetas y las Preferencias, sin datos nuevos guardados ni recordatorios fuera de la app.
 
@@ -203,7 +211,7 @@ Como dueño, quiero que la app me diga en qué días del mes puedo pagar todas m
 - El dueño es totalero: cuando paga, paga el estado de cuenta completo, así que una marca siempre significa "corte liquidado". El pago mínimo o parcial queda fuera de alcance.
 - Lo que la familia compra con la tarjeta no se registra y no forma parte de la deuda que muestra la app; la app refleja solo las compras propias.
 - La fecha en que se marcó se guarda como referencia, pero no se muestra ni afecta cálculos.
-- La alerta del Dashboard conserva su ventana actual (7 días antes de la fecha límite, o vencida).
+- La alerta individual de tarjeta del Dashboard conserva su ventana actual (7 días antes de la fecha límite, o vencida) para las tarjetas que no están cubiertas por un aviso de sesión (FR-029).
 - La conversión de pagos anteriores se aplica una sola vez a los datos reales y al demo; los pagos con monto no se borran hasta que la conversión se verifica, pero dejan de usarse.
 - La sesión de pago no envía notificaciones fuera de la app (Principio I: sin servidor ni tareas programadas); el aviso aparece al abrir el Dashboard.
 - Los días de pago de la sesión son los de Preferencias (por defecto el 15 y el último día del mes); el spec 006 (quincena por día de pago real) podrá ajustarlos después.
