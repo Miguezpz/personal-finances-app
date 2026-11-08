@@ -12,7 +12,13 @@
 
 ### Session 2026-11-07
 
-(Pendiente de `/speckit-clarify`.)
+Respondidas en modo autónomo con `docs/ux-roadmap.md` y la opción recomendada (el usuario no estuvo disponible).
+
+- Q: ¿Qué acciones propias de cada página se quitan y cuáles solo pierden el estilo destacado? → A: Se quitan las que repiten una acción global: "Agregar gasto" (Dashboard y Gastos) y "Registrar ingreso" (Ingresos). Las demás altas (meta, gasto fijo, cuenta por cobrar, regla, etc.) se quedan con estilo secundario. "Pagar" dentro de una tarjeta se queda porque precarga datos. Los estados vacíos conservan un enlace secundario que abre el diálogo global.
+- Q: ¿El menú "＋ Nuevo" de escritorio también muestra los gastos rápidos? → A: No. Solo muestra las 3 acciones; en escritorio los gastos rápidos siguen en el Dashboard.
+- Q: ¿Los atajos N/I/P funcionan solo en escritorio o en cualquier ancho con teclado físico? → A: En cualquier ancho, con las mismas exclusiones (campo editable, diálogo o panel abierto, modificadores). Solo se anuncian en el menú de escritorio.
+- Q: ¿Tocar ＋ con la hoja abierta la cierra? → A: Sí. ＋ alterna la hoja y anuncia si está abierta; el icono indica el estado.
+- Q: ¿La franja compacta de alertas del Dashboard también se aplica en escritorio? → A: No. Solo en móvil (< 768 px); en escritorio las alertas se quedan en su lugar dentro de la cuadrícula.
 
 ## User Scenarios & Testing *(mandatory)*
 
@@ -50,7 +56,7 @@ Como dueño, quiero registrar un gasto, un ingreso o pagar una tarjeta desde don
 2. **Given** la hoja ＋, **When** el dueño elige una acción, **Then** la hoja se cierra y se abre el diálogo correspondiente, el mismo que existe hoy en su página.
 3. **Given** la hoja ＋, **When** el dueño toca un gasto rápido, **Then** se registra igual que hoy (con Deshacer) y la hoja se cierra.
 4. **Given** el escritorio, **When** se ve la barra superior, **Then** hay un botón destacado "＋ Nuevo" que abre un menú con Gasto, Ingreso y Pagar tarjeta, cada uno con su atajo de teclado visible (N, I, P).
-5. **Given** el escritorio sin foco en un campo editable ni un diálogo abierto, **When** el dueño pulsa N, I o P (sin modificadores), **Then** se abre el diálogo de gasto, ingreso o pago de tarjeta, respectivamente.
+5. **Given** un teclado físico (en cualquier ancho), sin foco en un campo editable ni un diálogo abierto, **When** el dueño pulsa N, I o P (sin modificadores), **Then** se abre el diálogo de gasto, ingreso o pago de tarjeta, respectivamente.
 6. **Given** el foco en un campo de texto, un área de texto, un selector o un elemento editable, o un diálogo ya abierto, **When** el dueño pulsa N, I o P, **Then** no se abre ningún diálogo.
 7. **Given** cualquier página que ofrezca la acción (por ejemplo, "Pagar" en una tarjeta de Crédito), **When** el dueño la usa, **Then** se abre la única instancia de ese diálogo, prellenada con lo que la página aporte (tarjeta y monto).
 8. **Given** cualquier pantalla, **When** se cuenta cuántas veces está montado cada diálogo de creación, **Then** hay exactamente una instancia de cada uno.
@@ -141,12 +147,12 @@ Como dueño, quiero que el encabezado no quede bajo la muesca o la barra de esta
 
 **Creación global**
 
-- **FR-007**: El botón ＋ MUST abrir una hoja inferior con tres acciones: Gasto, Ingreso y Pagar tarjeta, más los gastos rápidos del dueño debajo cuando existan.
+- **FR-007**: El botón ＋ MUST abrir y cerrar (alternar) una hoja inferior con tres acciones: Gasto, Ingreso y Pagar tarjeta, más los gastos rápidos del dueño debajo cuando existan.
 - **FR-008**: Cada acción MUST abrir el diálogo existente de esa operación (mismos campos, validación y comportamiento) y cerrar la hoja.
 - **FR-009**: Cada diálogo de creación (gasto, ingreso, pago de tarjeta) MUST montarse una sola vez en toda la app, y cualquier página MUST poder abrirlo, opcionalmente con datos iniciales (por ejemplo, tarjeta y monto).
-- **FR-010**: En escritorio, la barra superior MUST incluir un botón destacado "＋ Nuevo" con un menú de Gasto, Ingreso y Pagar tarjeta, que muestra el atajo de cada opción.
-- **FR-011**: En escritorio, las teclas N, I y P (sin modificadores) MUST abrir los diálogos de gasto, ingreso y pago de tarjeta, salvo que el foco esté en un campo editable o haya un diálogo o panel abierto.
-- **FR-012**: Cada pantalla MUST tener como máximo una llamada a la acción destacada; en escritorio es "＋ Nuevo" (reemplaza la asignación por página de spec 003 FR-006). Las acciones propias de cada página MUST usar un estilo secundario, y las que repiten una acción global MUST quitarse.
+- **FR-010**: En escritorio, la barra superior MUST incluir un botón destacado "＋ Nuevo" con un menú de solo tres opciones (Gasto, Ingreso y Pagar tarjeta, sin gastos rápidos), que muestra el atajo de cada opción.
+- **FR-011**: Con teclado físico (en cualquier ancho), las teclas N, I y P (sin modificadores) MUST abrir los diálogos de gasto, ingreso y pago de tarjeta, salvo que el foco esté en un campo editable o haya un diálogo o panel abierto.
+- **FR-012**: Cada pantalla MUST tener como máximo una llamada a la acción destacada; en escritorio es "＋ Nuevo" (reemplaza la asignación por página de spec 003 FR-006). Las acciones que repiten una acción global ("Agregar gasto" en Dashboard y Gastos, "Registrar ingreso" en Ingresos) MUST quitarse; las demás acciones de página MUST usar estilo secundario. Los estados vacíos MAY ofrecer un enlace secundario que abre el diálogo global.
 - **FR-013**: "Pagar tarjeta" MUST mostrarse deshabilitado, con explicación, cuando no hay tarjetas de crédito activas.
 
 **Encabezados y paneles**
@@ -159,7 +165,7 @@ Como dueño, quiero que el encabezado no quede bajo la muesca o la barra de esta
 
 - **FR-017**: El encabezado MUST respetar las áreas seguras superior y laterales del dispositivo.
 - **FR-018**: El espacio inferior reservado para la barra móvil MUST aplicarse solo en móvil.
-- **FR-019**: En el Dashboard móvil, las alertas activas MUST aparecer arriba como una franja compacta y tocable que lleva a la sección correspondiente; los saldos de los buckets MUST seguir siendo el primer bloque de contenido destacado (ajusta spec 003 FR-027).
+- **FR-019**: En el Dashboard móvil, las alertas activas MUST aparecer arriba como una franja compacta y tocable que lleva a la sección correspondiente; los saldos de los buckets MUST seguir siendo el primer bloque de contenido destacado (ajusta spec 003 FR-027). En escritorio, las alertas conservan su lugar en la cuadrícula.
 
 **Estado de tarjetas**
 
@@ -200,7 +206,7 @@ Como dueño, quiero que el encabezado no quede bajo la muesca o la barra de esta
 - Es trabajo solo de interfaz: no cambian datos, esquema ni cálculos financieros. El "estado de tarjeta" reutiliza los cálculos existentes de corte, límite ajustado (spec 007) y pago para no generar intereses.
 - El "próximo estado" proyectado es el mismo que hoy muestra el calendario de crédito para el siguiente límite de esa tarjeta: compras posteriores al último corte, más las mensualidades MSI de ese estado.
 - Cuando el último estado está pendiente o vencido, ese es el dato principal; cuando está pagado, el próximo estado es el principal. Así se resuelve la inconsistencia de Gold Card.
-- Los atajos N/I/P solo se anuncian en escritorio (menú "＋ Nuevo"); en móvil no aplican.
+- Los atajos N/I/P funcionan con teclado físico en cualquier ancho, pero solo se anuncian en el menú "＋ Nuevo" de escritorio.
 - La hoja ＋ y "＋ Nuevo" no incluyen "Por cobrar" ni "Gasto fijo"; esas altas siguen en sus páginas (decisión del roadmap: las 3 acciones más frecuentes).
 - La gestión de plantillas de gasto rápido no cambia en este spec; el enlace "Administrar" en la hoja ＋ llega con el spec 009.
 - El indicador animado de la navegación (spec 003 FR-028) se conserva en la barra lateral, en la barra inferior y en el panel "Más".
