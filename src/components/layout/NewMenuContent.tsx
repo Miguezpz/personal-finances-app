@@ -22,7 +22,8 @@ export default function NewMenuContent({ hasCards }: { hasCards: boolean }) {
   const openCreate = useUi((s) => s.openCreate);
 
   return (
-    <DropdownMenu>
+    // Non-modal: the page stays in the accessibility tree (a modal menu hides it while focus could still reach it).
+    <DropdownMenu modal={false}>
       <DropdownMenuTrigger asChild>
         <Button variant="cta" size="sm" data-testid="new-menu">
           <Plus aria-hidden="true" />

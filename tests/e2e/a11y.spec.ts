@@ -6,15 +6,21 @@
 import AxeBuilder from "@axe-core/playwright";
 import type { Page } from "@playwright/test";
 import { APP_ROUTES } from "./app-routes";
-import { expect, test } from "./fixtures";
+import { expect, openCreate, test } from "./fixtures";
 
 async function audit(page: Page, where: string) {
-  // Let enter transitions (dialogs, sheets) finish: axe would sample half-faded colors.
-  await page.waitForFunction(() =>
-    document
-      .getAnimations()
-      .every((a) => a.playState !== "running" || a.effect?.getTiming().iterations === Infinity),
-  );
+  // Let enter transitions (dialogs, sheets) finish: axe would sample half-faded colors. Checked
+  // twice, 150 ms apart: a lazily mounted dialog can start a transition (e.g. a button turning
+  // enabled once its data is read) right after the first check.
+  const settledAnimations = () =>
+    page.waitForFunction(() =>
+      document
+        .getAnimations()
+        .every((a) => a.playState !== "running" || a.effect?.getTiming().iterations === Infinity),
+    );
+  await settledAnimations();
+  await page.waitForTimeout(150);
+  await settledAnimations();
   const { violations } = await new AxeBuilder({ page })
     .withTags(["wcag2a", "wcag2aa", "wcag21a", "wcag21aa"])
     // The Next.js dev-tools badge is not part of the app.
@@ -39,6 +45,26 @@ async function useTheme(page: Page, theme: "light" | "dark" | "neon" | "system")
   }, theme);
 }
 
+/** Opens a dialog, sheet or menu by test id; "create:<kind>" uses the app-wide create flow (spec 008). */
+async function openPanel(page: Page, open: string) {
+  if (open.startsWith("create:")) {
+    await openCreate(page, open.slice("create:".length) as "expense" | "income" | "card-payment");
+    // The tap on the ＋ sheet's action leaves the pointer over whatever the dialog shows there
+    // (a quick expense button): move it away so axe doesn't sample a hover transition.
+    await page.mouse.move(0, 0);
+    return;
+  }
+  if (open === "new-menu") {
+    const trigger = page.getByTestId("new-menu");
+    await expect(trigger).toBeEnabled();
+    await trigger.click();
+    await expect(page.getByRole("menu")).toBeVisible();
+    return;
+  }
+  await page.getByTestId(open).click();
+  await expect(page.getByRole("dialog")).toBeVisible();
+}
+
 test.describe("Accessibility", { tag: "@demo" }, () => {
   test.beforeEach(async ({ page }) => {
     await useTheme(page, "light");
@@ -56,15 +82,17 @@ test.describe("Accessibility", { tag: "@demo" }, () => {
   test("main dialogs are accessible too", async ({ page }) => {
     test.setTimeout(60_000);
     for (const [route, open] of [
-      ["/dashboard", "add-expense"],
-      ["/income", "register-income"],
+      ["/dashboard", "create:expense"],
+      ["/income", "create:income"],
+      ["/credit", "create:card-payment"],
+      ["/dashboard", "new-menu"],
       ["/recurring", "add-recurring"],
       ["/goals", "add-goal"],
     ] as const) {
       await page.goto(route);
-      await page.getByTestId(open).click();
-      await expect(page.getByRole("dialog")).toBeVisible();
-      await audit(page, `${route} dialog`);
+      await expect(page.locator("main [aria-busy='true']")).toHaveCount(0);
+      await openPanel(page, open);
+      await audit(page, `${route} ${open}`);
     }
   });
 
@@ -147,7 +175,7 @@ test.describe("Accessibility", { tag: "@demo" }, () => {
   });
 });
 
-// Spec 003 · FR-038 / SC-002: the same audit on a phone viewport (bottom bar, floating CTA, bottom sheets).
+// Spec 003 · FR-038 / SC-002: the same audit on a phone viewport (bottom bar, ＋ sheet, More panel, bottom sheets).
 test.describe("Accessibility · mobile", { tag: "@demo" }, () => {
   test.use({ viewport: { width: 375, height: 812 }, hasTouch: true, isMobile: true });
   test.beforeEach(async ({ page }) => {
@@ -166,17 +194,17 @@ test.describe("Accessibility · mobile", { tag: "@demo" }, () => {
   test("main dialogs and panels are accessible too", async ({ page }) => {
     test.setTimeout(60_000);
     for (const [route, open] of [
-      ["/dashboard", "fab-add-expense"],
+      ["/dashboard", "mobile-nav-create"],
+      ["/dashboard", "create:expense"],
       ["/dashboard", "preferences-open"],
       ["/dashboard", "mobile-nav-more"],
-      ["/income", "register-income"],
+      ["/income", "create:income"],
       ["/recurring", "add-recurring"],
       ["/goals", "add-goal"],
     ] as const) {
       await page.goto(route);
       await expect(page.locator("main [aria-busy='true']")).toHaveCount(0);
-      await page.getByTestId(open).click();
-      await expect(page.getByRole("dialog")).toBeVisible();
+      await openPanel(page, open);
       await audit(page, `${route} ${open} (mobile)`);
     }
   });
@@ -204,15 +232,16 @@ for (const theme of ["dark", "neon"] as const) {
     test("main dialogs are accessible too", async ({ page }) => {
       test.setTimeout(60_000);
       for (const [route, open] of [
-        ["/dashboard", "add-expense"],
-        ["/income", "register-income"],
+        ["/dashboard", "create:expense"],
+        ["/income", "create:income"],
+        ["/dashboard", "new-menu"],
         ["/recurring", "add-recurring"],
         ["/goals", "add-goal"],
       ] as const) {
         await page.goto(route);
-        await page.getByTestId(open).click();
-        await expect(page.getByRole("dialog")).toBeVisible();
-        await audit(page, `${route} dialog (${theme})`);
+        await expect(page.locator("main [aria-busy='true']")).toHaveCount(0);
+        await openPanel(page, open);
+        await audit(page, `${route} ${open} (${theme})`);
       }
     });
   });

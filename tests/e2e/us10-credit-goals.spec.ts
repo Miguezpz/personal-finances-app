@@ -22,18 +22,30 @@ test.describe("US10 · credit, goals and net worth", { tag: "@demo" }, () => {
     await page.goto("/credit");
     const cards = page.getByTestId("credit-card");
     await expect(cards.first()).toBeVisible();
-    await expect(cards.first()).toContainText(m.credit.payToAvoidInterest);
+    await expect(cards.first().getByTestId("last-statement")).toBeVisible();
+    await expect(cards.first().getByTestId("next-statement")).toBeVisible();
     const timeline = page.getByTestId("credit-timeline");
     await expect(timeline.locator('[data-kind="payday"]').first()).toBeVisible();
     const due = timeline.locator('[data-kind="card_due"]');
     await expect(due.first()).toBeVisible();
     await expect(timeline.locator('[data-kind="collection_due"]').first()).toBeVisible();
-    // Each card's headline is its next statement on the timeline.
-    const cardName = (await cards.first().locator("[data-slot=card-title]").innerText()).trim();
-    const firstDue = due.filter({ hasText: cardName }).first();
-    expect(await cards.first().locator(".money").first().innerText()).toBe(
-      await firstDue.locator(".money").innerText(),
-    );
+    // Spec 008 · US3: a paid card leads with its next statement — the same as on the timeline;
+    // an unpaid one leads with the amount to pay to avoid interest.
+    const count = await cards.count();
+    for (let i = 0; i < count; i++) {
+      const card = cards.nth(i);
+      const headline = card.getByTestId("statement-amount");
+      if ((await card.getAttribute("data-state")) === "paid") {
+        await expect(card).toContainText(m.credit.nextStatement);
+        const name =
+          (await card.locator("[data-slot=card-title]").innerText()).split("\n")[0] ?? "";
+        const onTimeline = due.filter({ hasText: name.trim() }).first();
+        if ((await onTimeline.count()) > 0)
+          expect(await headline.innerText()).toBe(await onTimeline.locator(".money").innerText());
+      } else {
+        await expect(card).toContainText(m.credit.payToAvoidInterest);
+      }
+    }
     expect((await page.locator("main").innerText()).toLowerCase()).not.toMatch(
       locale === "en" ? /minimum payment/ : /pago mínimo/,
     );

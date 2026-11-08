@@ -2,7 +2,7 @@
 
 /**
  * The new-expense dialog in its own chunk (spec 005, plan: Dashboard First Load JS < +5 KB gzip).
- * The Dashboard and the mobile floating button only need it once it's opened, so its form stack
+ * DialogHost (spec 008) mounts it for every route only once it's opened, so its form stack
  * (react-hook-form, zod, quick expense row) stays out of First Load JS — the same approach as the
  * theme menu (spec 003). `usePreloadAddExpenseDialog` fetches it right after hydration, so the
  * first open doesn't wait for the network.

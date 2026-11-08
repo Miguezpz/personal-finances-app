@@ -12,7 +12,7 @@ import { addDays } from "../../src/domain/dates";
 import { periodOf, todayIn } from "../../src/domain/periods";
 import type { Locale } from "../../src/domain/types";
 import { APP_ROUTES, READABLE_AMOUNT } from "./app-routes";
-import { expect, test } from "./fixtures";
+import { expect, openCreate, test } from "./fixtures";
 
 const MESSAGES = { en, es } as const;
 const TZ = "America/Mexico_City";
@@ -167,7 +167,7 @@ test.describe("Matrix · P1 flows and global toggles", () => {
 
       // P1: register an income through the app and read it back.
       await page.goto("/income");
-      await page.getByTestId("register-income").click();
+      await openCreate(page, "income");
       // The income type is mandatory (spec 004).
       await page.getByTestId("income-type-salary").click();
       await page.locator("#income-label").fill("Salary");

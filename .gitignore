@@ -6,6 +6,7 @@ node_modules/
 # Next.js build output
 /.next/
 /.next-e2e-*/
+/.next-demo-check/
 /out/
 build/
 dist/

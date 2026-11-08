@@ -39,6 +39,27 @@ test.describe("US4 · motion", { tag: "@demo" }, () => {
     }
   });
 
+  test("spec 008: with reduced motion the ＋ sheet and the More panel open without animating", async ({
+    page,
+  }) => {
+    await page.setViewportSize({ width: 375, height: 812 });
+    await page.emulateMedia({ reducedMotion: "reduce" });
+    await page.goto("/dashboard");
+    await expect(page.locator("main [aria-busy='true']")).toHaveCount(0);
+    for (const [open, panel] of [
+      ["mobile-nav-create", "create-sheet"],
+      ["mobile-nav-more", "more-sheet"],
+    ] as const) {
+      await page.getByTestId(open).click();
+      await expect(page.getByTestId(panel)).toBeVisible();
+      await expect
+        .poll(() => runningAnimations(page), { message: panel, timeout: 1_000 })
+        .toEqual([]);
+      await page.keyboard.press("Escape");
+      await expect(page.getByTestId(panel)).toBeHidden();
+    }
+  });
+
   test("the staggered entrance never delays the balances", async ({ page }) => {
     await page.goto("/dashboard");
     await expect(page.locator("main [aria-busy='true']")).toHaveCount(0);

@@ -36,8 +36,10 @@ async function dashboardBudget(page: Page) {
 
 /** Opens the dialog and fills it with the keyboard only; returns when the save was submitted. */
 async function recordExpenseWithKeyboard(page: Page, amount: string) {
-  await page.getByTestId("add-expense").focus();
-  await page.keyboard.press("Enter");
+  // The N shortcut opens the expense dialog (spec 008, FR-011).
+  await page.evaluate(() => (document.activeElement as HTMLElement | null)?.blur());
+  await page.keyboard.press("n");
+  await expect(page.getByRole("dialog")).toBeVisible();
   await page.locator("#expense-amount").focus();
   await page.keyboard.type(amount);
   // Type-ahead on the native select: the first letters of an option pick it.

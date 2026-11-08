@@ -4,7 +4,7 @@
  * funding the 16th–end quincena, both in the UI and in the database.
  * Locale-agnostic: it drives the UI by ids/test ids and asserts persisted data via `admin`.
  */
-import { expect, nextFifteenth, test } from "./fixtures";
+import { expect, nextFifteenth, openCreate, test } from "./fixtures";
 
 test.describe("US1 · automatic income split", { tag: "@live" }, () => {
   test("rules are validated, and a $20,000 income is split exactly", async ({
@@ -62,7 +62,7 @@ test.describe("US1 · automatic income split", { tag: "@live" }, () => {
     // --- Register $20,000 received on the 15th -------------------------------------------
     const { received, fundedStart } = nextFifteenth();
     await page.goto("/income");
-    await page.getByTestId("register-income").click();
+    await openCreate(page, "income");
     // The income type is mandatory (spec 004).
     await page.getByTestId("income-type-salary").click();
     await page.locator("#income-label").fill("Salary");

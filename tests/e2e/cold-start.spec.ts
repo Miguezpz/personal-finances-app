@@ -8,7 +8,7 @@
 import en from "../../src/i18n/messages/en.json";
 import es from "../../src/i18n/messages/es.json";
 import type { Locale } from "../../src/domain/types";
-import { expect, test } from "./fixtures";
+import { expect, openCreate, test } from "./fixtures";
 
 const MESSAGES = { en, es } as const;
 
@@ -59,13 +59,13 @@ test.describe("Cold start and offline", { tag: "@live" }, () => {
       .toBeGreaterThan(0);
 
     await page.goto("/expenses");
-    await expect(page.getByTestId("add-expense")).toBeEnabled();
+    await expect(page.getByTestId("new-menu")).toBeEnabled();
 
     await context.setOffline(true);
     await expect(page.getByRole("status").filter({ hasText: m.common.offline })).toBeVisible();
     await expect(page.getByRole("heading", { level: 1 })).toBeVisible();
 
-    await page.getByTestId("add-expense").click();
+    await openCreate(page, "expense");
     await page.locator("#expense-amount").fill("250");
     await page.locator("#expense-subcategory").selectOption({ index: 1 });
     await page.getByTestId("save-expense").click();

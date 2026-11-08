@@ -4,7 +4,7 @@
  * editing changes the type without touching the amount. The demo side (a type change is a blocked
  * write) is covered by us9-demo.spec.ts.
  */
-import { expect, test } from "./fixtures";
+import { expect, openCreate, test } from "./fixtures";
 
 const TEXT = {
   en: { required: "Choose an income type", salary: "Salary", gift: "Gift", edit: "Edit" },
@@ -20,7 +20,7 @@ test.describe("Spec 004 · income type", { tag: "@live" }, () => {
     const text = TEXT[(testInfo.project.metadata.locale as "en" | "es") ?? "en"];
 
     await page.goto("/income");
-    await page.getByTestId("register-income").click();
+    await openCreate(page, "income");
     await page.locator("#income-amount").fill("1,500");
     // No rule configured: record it without splitting.
     await page.locator("#income-split-no").click();

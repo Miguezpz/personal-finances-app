@@ -1,12 +1,12 @@
 /**
- * Spec 003 · US2 one-handed mobile use (demo-en, demo-es): bottom navigation + "More" (FR-019), the floating
- * "Add expense" CTA as the only highlighted call to action (FR-006, FR-020, SC-007), compact header with the
- * preferences panel (FR-021), forms as bottom sheets with the numeric keyboard (FR-022, FR-025, SC-003), the ledger
- * as cards (FR-023), 44 px touch targets (FR-025) and no horizontal scroll from 320 px (FR-024).
+ * Spec 003 · US2 one-handed mobile use, updated by spec 008 (demo-en, demo-es): bottom bar Home · Expenses · ＋ ·
+ * Credit · More, "More" marked on secondary routes (spec 008 FR-003/FR-005), the "＋" as the only highlighted call to
+ * action (FR-012), compact header with the appearance panel (FR-016), forms as bottom sheets with the numeric keyboard
+ * (spec 003 FR-022, FR-025), the ledger as cards (FR-023), 44 px touch targets and no horizontal scroll from 320 px.
  */
 import type { Page } from "@playwright/test";
 import { APP_ROUTES } from "./app-routes";
-import { expect, test } from "./fixtures";
+import { expect, openCreate, test } from "./fixtures";
 
 const PHONE = { width: 375, height: 812 };
 
@@ -18,15 +18,17 @@ async function settled(page: Page) {
 test.describe("US2 · mobile", { tag: "@demo" }, () => {
   test.use({ viewport: PHONE, hasTouch: true, isMobile: true });
 
-  test("bottom navigation: four destinations + More, with the active one marked", async ({
+  test("bottom navigation: Home, Expenses, ＋, Credit and More, with the active one marked", async ({
     page,
   }) => {
     await page.goto("/dashboard");
     const nav = page.getByTestId("mobile-nav");
     await expect(nav).toBeVisible();
-    for (const id of ["dashboard", "expenses", "income", "goals", "more"]) {
+    await expect(nav.locator(":scope > div > ul > li")).toHaveCount(5);
+    for (const id of ["dashboard", "expenses", "create", "credit", "more"]) {
       await expect(nav.getByTestId(`mobile-nav-${id}`)).toBeVisible();
     }
+    await expect(page.getByTestId("fab-add-expense")).toHaveCount(0);
     await expect(nav.getByTestId("mobile-nav-dashboard")).toHaveAttribute("aria-current", "page");
 
     await nav.getByTestId("mobile-nav-expenses").click();
@@ -37,74 +39,96 @@ test.describe("US2 · mobile", { tag: "@demo" }, () => {
       "page",
     );
 
-    // "More" opens the remaining sections.
+    // "More" slides up from the bottom with the remaining destinations, grouped.
     await nav.getByTestId("mobile-nav-more").click();
-    const sheet = page.getByRole("dialog");
+    const sheet = page.getByTestId("more-sheet");
     await expect(sheet).toBeVisible();
-    for (const href of ["/recurring", "/receivables", "/credit", "/net-worth", "/ledger"]) {
+    await expect(sheet.locator("nav h2")).toHaveCount(4);
+    for (const href of [
+      "/income",
+      "/recurring",
+      "/goals",
+      "/receivables",
+      "/ledger",
+      "/net-worth",
+      "/settings",
+    ]) {
       await expect(sheet.locator(`a[href="${href}"]`)).toBeVisible();
     }
-    await sheet.locator('a[href="/ledger"]').click();
-    await page.waitForURL("**/ledger");
-    await expect(sheet).toBeHidden();
-  });
-
-  test("the floating CTA opens the expense form as a bottom sheet with a numeric keyboard", async ({
-    page,
-  }) => {
-    await page.goto("/ledger");
-    await settled(page);
-    await page.getByTestId("fab-add-expense").click();
-    const dialog = page.getByRole("dialog");
-    await expect(dialog).toBeVisible();
-    // Anchored to the bottom edge (wait for the slide-in to finish).
+    await expect(sheet.locator('a[href="/credit"]')).toHaveCount(0);
     await expect
       .poll(async () => {
-        const box = await dialog.boundingBox();
+        const box = await sheet.boundingBox();
         return box ? Math.round(box.y + box.height) : 0;
       })
       .toBe(PHONE.height);
-    await expect(dialog.locator("input[data-money]")).toHaveAttribute("inputmode", "decimal");
+    await sheet.locator('a[href="/goals"]').click();
+    await page.waitForURL("**/goals");
+    await expect(sheet).toBeHidden();
+    // A destination only "More" lists marks "More" as the current page.
+    await expect(nav.getByTestId("mobile-nav-more")).toHaveAttribute("aria-current", "page");
   });
 
-  test("the floating CTA ignores small scrolls, hides on a real scroll down, returns on scroll up", async ({
+  test("＋ opens the create sheet; an action opens its form as a bottom sheet with a numeric keyboard", async ({
     page,
   }) => {
     await page.goto("/ledger");
     await settled(page);
-    const fab = page.getByTestId("fab-add-expense");
-    const scrollTo = (y: number) => page.evaluate((top) => window.scrollTo({ top }), y);
-    const hidden = () => fab.getAttribute("aria-hidden").then((v) => v === "true");
+    const plus = page.getByTestId("mobile-nav-create");
+    await plus.click();
+    const sheet = page.getByTestId("create-sheet");
+    await expect(sheet).toBeVisible();
+    await expect(plus).toHaveAttribute("aria-expanded", "true");
+    for (const id of ["create-expense", "create-income", "create-card-payment"]) {
+      await expect(sheet.getByTestId(id)).toBeVisible();
+    }
+    await sheet.getByTestId("create-income").click();
+    await expect(sheet).toBeHidden();
+    const dialog = page.getByRole("dialog");
+    await expect(dialog).toBeVisible();
+    await expect(dialog.locator("input[data-money]")).toHaveAttribute("inputmode", "decimal");
 
-    await scrollTo(100); // inside the always-visible top zone…
-    await scrollTo(150); // …then a small nudge down (50 px): stays visible
-    await page.waitForTimeout(100);
-    expect(await hidden()).toBe(false);
-
-    await scrollTo(400); // a deliberate scroll down hides it
-    await expect.poll(hidden).toBe(true);
-    await scrollTo(390); // a tiny scroll back up doesn't bring it back yet
-    await page.waitForTimeout(100);
-    expect(await hidden()).toBe(true);
-    await scrollTo(340); // a real scroll up does
-    await expect.poll(hidden).toBe(false);
+    await page.keyboard.press("Escape");
+    await expect(dialog).toBeHidden();
+    const expense = await openCreate(page, "expense");
+    // Anchored to the bottom edge (wait for the slide-in to finish).
+    await expect
+      .poll(async () => {
+        const box = await expense.boundingBox();
+        return box ? Math.round(box.y + box.height) : 0;
+      })
+      .toBe(PHONE.height);
+    await expect(expense.locator("input[data-money]")).toHaveAttribute("inputmode", "decimal");
   });
 
-  test("the floating CTA is the only highlighted call to action on every route", async ({
-    page,
-  }) => {
+  test("＋ is the only highlighted call to action on every route", async ({ page }) => {
     test.setTimeout(90_000);
     for (const route of APP_ROUTES) {
       await page.goto(route);
       await settled(page);
-      const ctas = page.locator('[data-variant="cta"]:visible');
+      const ctas = page.locator('[data-variant="cta"]:visible, [data-testid="mobile-nav-create"]');
       await expect(ctas, route).toHaveCount(1);
-      await expect(ctas.first(), route).toHaveAttribute("data-testid", "fab-add-expense");
-      await expect(page.getByTestId("add-expense"), route).toBeHidden();
+      await expect(page.getByTestId("new-menu"), route).toBeHidden();
     }
   });
 
-  test("the preferences panel groups language and currency", async ({ page }) => {
+  test("the Dashboard shows its alerts as a strip above the buckets", async ({ page }) => {
+    await page.goto("/dashboard");
+    await settled(page);
+    const strip = page.getByTestId("dashboard-alert-strip");
+    if ((await strip.count()) === 0) {
+      // The demo seed may have no alert today; then nothing empty is rendered.
+      await expect(page.getByTestId("collection-alerts")).toBeHidden();
+      return;
+    }
+    const stripBox = await strip.boundingBox();
+    const bucketBox = await page.getByTestId("bucket-needs").boundingBox();
+    expect(stripBox?.y ?? 0).toBeLessThan(bucketBox?.y ?? 0);
+    await strip.locator("a").first().click();
+    await expect(page).toHaveURL(/\/(expenses|receivables)$/);
+  });
+
+  test("the appearance panel groups language and currency", async ({ page }) => {
     await page.goto("/dashboard");
     await settled(page);
     // Inline toggles are desktop-only.

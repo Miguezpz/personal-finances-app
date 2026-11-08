@@ -90,3 +90,27 @@ export function nextFifteenth(now = new Date()): { received: string; fundedStart
   const mm = String(month + 1).padStart(2, "0");
   return { received: `${year}-${mm}-15`, fundedStart: `${year}-${mm}-16` };
 }
+
+/**
+ * Opens one of the app-wide create dialogs (spec 008): the "＋ New" menu on desktop, the bottom
+ * bar's "＋" sheet on a phone. Returns the dialog.
+ */
+export async function openCreate(
+  page: import("@playwright/test").Page,
+  kind: "expense" | "income" | "card-payment",
+) {
+  const plus = page.getByTestId("mobile-nav-create");
+  if (await plus.isVisible()) {
+    await plus.click();
+    await page.getByTestId(`create-${kind}`).click();
+  } else {
+    // The menu loads right after hydration; until then its trigger is a disabled placeholder.
+    const trigger = page.getByTestId("new-menu");
+    await expect(trigger).toBeEnabled();
+    await trigger.click();
+    await page.getByTestId(`new-${kind}`).click();
+  }
+  const dialog = page.getByRole("dialog");
+  await expect(dialog).toBeVisible();
+  return dialog;
+}

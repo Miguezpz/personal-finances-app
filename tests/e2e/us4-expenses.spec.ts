@@ -5,7 +5,7 @@
  */
 import { addDays } from "../../src/domain/dates";
 import { periodOf, todayIn } from "../../src/domain/periods";
-import { expect, test } from "./fixtures";
+import { expect, openCreate, test } from "./fixtures";
 
 const TZ = "America/Mexico_City";
 
@@ -66,7 +66,7 @@ test.describe("US4 · expenses and card payments", { tag: "@live" }, () => {
     await page.goto("/dashboard");
     const wants = page.getByTestId("bucket-wants");
     await expect(wants).toHaveAttribute("data-light", "green");
-    await page.getByTestId("add-expense").click();
+    await openCreate(page, "expense");
     await page.locator("#expense-amount").fill("600");
     await page.locator("#expense-subcategory").selectOption(restaurants ?? "");
     await page.locator("#expense-account").selectOption(cardId);
@@ -76,14 +76,15 @@ test.describe("US4 · expenses and card payments", { tag: "@live" }, () => {
 
     await page.goto("/expenses");
     const debt = page.locator(`[data-testid="card-debt"][data-card="${cardId}"]`);
-    await expect(debt.getByTestId("card-total-debt")).toContainText("$600.00");
+    // $600 bought today: the statement that closes on the next cut-off (spec 008, US3).
+    await expect(debt.getByTestId("statement-amount")).toContainText("$600.00");
     await expect(page.getByTestId("expense-row")).toHaveCount(1);
 
     // --- Paying the card lowers its debt ------------------------------------------------
     await debt.getByTestId("pay-card").click();
     await page.locator("#payment-amount").fill("600");
     await page.getByTestId("save-card-payment").click();
-    await expect(debt.getByTestId("card-total-debt")).toContainText("$0.00");
+    await expect(debt.getByTestId("statement-amount")).toContainText("$0.00");
     await expect(page.getByTestId("payment-row")).toHaveCount(1);
 
     // --- …and leaves the Safe-to-Spend exactly where it was ------------------------------

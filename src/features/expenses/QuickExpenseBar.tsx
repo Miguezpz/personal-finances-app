@@ -5,8 +5,8 @@
  * for today; the "⋯" menu records it for yesterday or with another amount or date (FR-007a).
  *  - variant "dashboard": between the header and the bucket cards; without templates it shows a
  *    discreet link to create the first one (US2-6).
- *  - variant "dialog": on top of the new-expense dialog (which the mobile floating button opens on
- *    every page); nothing without templates. `onApplied` lets the dialog close itself.
+ *  - variant "dialog": on top of the new-expense dialog and in the mobile "＋" sheet (spec 008);
+ *    nothing without templates. `onApplied` lets the dialog or sheet close itself.
  * The row scrolls on its own, so the page never scrolls sideways at 360 px (SC-005).
  */
 import { Plus } from "lucide-react";

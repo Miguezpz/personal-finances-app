@@ -18,7 +18,7 @@ import { periodOf, todayIn } from "../../src/domain/periods";
 import type { Locale } from "../../src/domain/types";
 import en from "../../src/i18n/messages/en.json";
 import es from "../../src/i18n/messages/es.json";
-import { expect, test, type Owner } from "./fixtures";
+import { expect, openCreate, test, type Owner } from "./fixtures";
 
 const MESSAGES = { en, es } as const;
 const TZ = "America/Mexico_City";
@@ -216,8 +216,7 @@ test.describe("US13 · quick expenses", { tag: "@live" }, () => {
     await page.setViewportSize({ width: 390, height: 844 });
     await page.goto("/goals");
 
-    await page.getByTestId("fab-add-expense").click();
-    const dialog = page.getByRole("dialog");
+    const dialog = await openCreate(page, "expense");
     await expect(dialog.getByTestId("quick-expense-bar")).toBeVisible();
     await dialog.getByTestId(`quick-expense-${templateId}`).click();
     await expect(dialog).toBeHidden();
@@ -379,8 +378,7 @@ test.describe("US13 · managing quick expenses", { tag: "@live" }, () => {
     await expect(page.getByTestId("quick-expenses-section")).toBeVisible();
 
     const addWithSwitch = async (amount: string, note: string) => {
-      await page.getByTestId("add-expense").click();
-      const dialog = page.getByRole("dialog");
+      const dialog = await openCreate(page, "expense");
       await dialog.locator("#expense-amount").fill(amount);
       await dialog.locator("#expense-subcategory").selectOption(subcategoryId);
       await dialog.locator("#expense-note").fill(note);

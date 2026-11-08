@@ -7,7 +7,7 @@
  */
 import { addDays } from "../../src/domain/dates";
 import { periodOf, todayIn } from "../../src/domain/periods";
-import { expect, test } from "./fixtures";
+import { expect, openCreate, test } from "./fixtures";
 
 const TZ = "America/Mexico_City";
 
@@ -25,7 +25,7 @@ test.describe("US2 · Safe-to-Spend (demo)", { tag: "@demo" }, () => {
     await expect(page.getByTestId("period-info")).toBeVisible();
 
     const before = await wants.innerText();
-    await page.getByTestId("add-expense").click();
+    await openCreate(page, "expense");
     await page.locator("#expense-amount").fill("500");
     const firstOption = await page
       .locator("#expense-subcategory option:not([value=''])")
@@ -92,7 +92,7 @@ test.describe("US2 · Safe-to-Spend (live)", { tag: "@live" }, () => {
     await expect(wants).toContainText("10,000.00");
 
     // Spend $9,000 of Wants: 10% left → red, with no reload.
-    await page.getByTestId("add-expense").click();
+    await openCreate(page, "expense");
     await page.locator("#expense-amount").fill("9,000");
     await page.locator("#expense-subcategory").selectOption(restaurants ?? "");
     await expect(page.getByTestId("expense-bucket")).toBeVisible();

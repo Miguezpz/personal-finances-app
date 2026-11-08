@@ -7,7 +7,7 @@ import type { Page } from "@playwright/test";
 import en from "../../src/i18n/messages/en.json";
 import es from "../../src/i18n/messages/es.json";
 import type { Locale } from "../../src/domain/types";
-import { expect, test } from "./fixtures";
+import { expect, openCreate, test } from "./fixtures";
 
 const MESSAGES = { en, es } as const;
 const SUPABASE = /\.supabase\.(co|in|net)|:54321\b/;
@@ -48,7 +48,7 @@ test.describe("US9 · read-only demo", { tag: "@demo" }, () => {
     await page.goto("/income");
     await expect(page.getByTestId("income-card").first()).toBeVisible();
     const incomes = await page.getByTestId("income-card").count();
-    await page.getByTestId("register-income").click();
+    await openCreate(page, "income");
     // The income type is mandatory (spec 004).
     await page.getByTestId("income-type-extra").click();
     await page.locator("#income-label").fill("Bonus");
@@ -58,7 +58,7 @@ test.describe("US9 · read-only demo", { tag: "@demo" }, () => {
     await expect(page.getByTestId("income-card")).toHaveCount(incomes);
 
     await page.goto("/expenses");
-    await page.getByTestId("add-expense").click();
+    await openCreate(page, "expense");
     await page.locator("#expense-amount").fill("250");
     await page.locator("#expense-subcategory").selectOption({ index: 1 });
     await page.getByTestId("save-expense").click();

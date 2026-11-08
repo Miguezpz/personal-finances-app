@@ -47,7 +47,7 @@ description: "Task list for spec 008 — Navegación y consistencia del shell"
 - [X] T010 [US1] Barra lateral agrupada en src/components/layout/AppShell.tsx: `NavLinks` recibe grupos, pinta encabezados discretos (`text-xs uppercase text-muted-foreground`), Configuración separada al fondo; `nav` sticky con `max-h-[calc(100dvh-5rem)] overflow-y-auto`
 - [X] T011 [US1] Panel "Más" en src/components/layout/AppShell.tsx: `Sheet side="bottom"` (`rounded-t-2xl`, `max-h-[85dvh] overflow-y-auto`, padding safe-area), título `nav.moreTitle`, `data-testid="more-sheet"`, lista `SECONDARY_NAV_GROUPS` con encabezados; navegar cierra el panel
 - [X] T012 [US1] Reescribir src/components/layout/MobileNav.tsx: Inicio · Gastos · ＋ (`mobile-nav-create`, `variant="cta"` elevado, `aria-haspopup="dialog"`, `aria-expanded`, `aria-label` `nav.create`, alterna `createSheetOpen`) · Crédito · Más (`aria-current="page"` y estilo activo si `isSecondaryRoute`); eliminar el FAB, `useFabHidden` y su diálogo
-- [ ] T013 [US1] Actualizar tests/e2e/mobile.spec.ts (barra de 5 elementos, sin `fab-add-expense`, "Más" activo en `/goals`, panel inferior agrupado) y crear tests/e2e/navigation.spec.ts (grupos de la barra lateral, scroll a 768×600 (SC-003), `aria-current` en todas las APP_ROUTES)
+- [X] T013 [US1] Actualizar tests/e2e/mobile.spec.ts (barra de 5 elementos, sin `fab-add-expense`, "Más" activo en `/goals`, panel inferior agrupado) y crear tests/e2e/navigation.spec.ts (grupos de la barra lateral, scroll a 768×600 (SC-003), `aria-current` en todas las APP_ROUTES)
 
 **Checkpoint**: gate rápido + commit.
 
@@ -65,7 +65,7 @@ description: "Task list for spec 008 — Navegación y consistencia del shell"
 - [X] T017 [P] [US2] Pruebas del hook de atajos (abre con N/I/P; ignora en input, con Ctrl/Meta, con diálogo abierto) en tests/unit/components/create-shortcuts.test.tsx
 - [X] T018 [US2] Quitar CTA y diálogos duplicados: src/features/safe-to-spend/Dashboard.tsx (sin botón "Agregar gasto" ni LazyAddExpenseDialog), src/features/expenses/ExpensesPage.tsx (sin "Agregar gasto" ni "Pagar tarjeta" en el encabezado; editar → `openCreate({kind:"expense", expense})`; sin AddExpenseDialog/CardPaymentDialog locales; estado vacío con botón outline → `openCreate({kind:"expense"})`), src/features/income/IncomePage.tsx (sin "Registrar ingreso"; editar → `openCreate({kind:"income", income})`; estado vacío con botón outline)
 - [X] T019 [P] [US2] Sustituir `ResponsiveCtaButton` por `Button` (variant default) en src/features/goals/GoalsPage.tsx y src/features/receivables/ReceivablesPage.tsx; borrar src/components/ui/responsive-cta.tsx
-- [ ] T020 [US2] Helper `openCreate(page, kind)` en tests/e2e/fixtures.ts (escritorio: `new-menu` → ítem; móvil: `mobile-nav-create` → acción) y migrar los usos de `add-expense`/`fab-add-expense` en tests/e2e/{us2-safe-to-spend,us4-expenses,us9-demo,us13-quick-expenses,cold-start,perf-budgets,a11y}.spec.ts; agregar a navigation.spec.ts los casos de hoja ＋, menú "＋ Nuevo", atajos y foco en input
+- [X] T020 [US2] Helper `openCreate(page, kind)` en tests/e2e/fixtures.ts (escritorio: `new-menu` → ítem; móvil: `mobile-nav-create` → acción) y migrar los usos de `add-expense`/`fab-add-expense` en tests/e2e/{us2-safe-to-spend,us4-expenses,us9-demo,us13-quick-expenses,cold-start,perf-budgets,a11y}.spec.ts; agregar a navigation.spec.ts los casos de hoja ＋, menú "＋ Nuevo", atajos y foco en input
 
 **Checkpoint**: gate rápido + commit.
 
@@ -80,7 +80,7 @@ description: "Task list for spec 008 — Navegación y consistencia del shell"
 - [X] T021 [US3] Crear src/features/credit/use-card-statements.ts (hook: tarjetas activas + `cardStatementSummary` con `useToday`) y mover allí `useCardStatuses` desde src/features/expenses/CardDebtSummary.tsx
 - [X] T022 [US3] Crear src/features/credit/CardStatementCard.tsx (`variant="full"|"compact"` según contracts/ui-shell.md; `<Money>` para todo monto; Badge "Vencido" con icono; `pay-card` → `openCreate({kind:"card-payment", cardId, suggestedAmount: payAmount})`)
 - [X] T023 [US3] Usar `CardStatementCard variant="full"` en src/features/credit/CreditPage.tsx (eliminar la selección por timeline de las líneas 60-66) y `variant="compact"` en src/features/expenses/CardDebtSummary.tsx con enlace `cards-see-credit` a `/credit`
-- [ ] T024 [US3] Actualizar tests/e2e/us10-credit-goals.spec.ts, tests/e2e/us4-expenses.spec.ts y tests/e2e/us9-privacy.spec.ts a la nueva tarjeta; agregar en navigation.spec.ts (demo) que Crédito y Gastos muestran el mismo monto y fecha por tarjeta
+- [X] T024 [US3] Actualizar tests/e2e/us10-credit-goals.spec.ts, tests/e2e/us4-expenses.spec.ts y tests/e2e/us9-privacy.spec.ts a la nueva tarjeta; agregar en navigation.spec.ts (demo) que Crédito y Gastos muestran el mismo monto y fecha por tarjeta
 
 **Checkpoint**: gate rápido + commit.
 
@@ -93,7 +93,7 @@ description: "Task list for spec 008 — Navegación y consistencia del shell"
 - [X] T025 [P] [US4] Agregar prop `back?: {href, label}` a src/components/layout/PageHeader.tsx
 - [X] T026 [US4] Crear src/features/settings/settings-sections.ts (SECTIONS compartido con iconos); `SettingsIndex.tsx` usa PageHeader con `navIcon("/settings")`; `SettingsHeader.tsx` delega en PageHeader con el icono de su sección y `back`; src/features/settings/rules/RulesSettings.tsx usa SettingsHeader
 - [X] T027 [P] [US4] Renombrar el panel en src/components/layout/PreferencesSheet.tsx a `nav.appearance` con icono `Palette` (conservar testids)
-- [ ] T028 [US4] e2e: encabezado con icono y "‹ Configuración" en `/settings/rules`; panel "Apariencia" en móvil, en tests/e2e/navigation.spec.ts
+- [X] T028 [US4] e2e: encabezado con icono y "‹ Configuración" en `/settings/rules`; panel "Apariencia" en móvil, en tests/e2e/navigation.spec.ts
 
 ---
 
@@ -103,16 +103,16 @@ description: "Task list for spec 008 — Navegación y consistencia del shell"
 
 - [X] T029 [US5] En src/components/layout/AppShell.tsx: header con `pt-[env(safe-area-inset-top)]`, padding lateral con `max(1rem, env(safe-area-inset-left/right))` y altura mínima en lugar de `h-14`; `main` con `pb-[calc(5rem+env(safe-area-inset-bottom))] md:pb-6`
 - [X] T030 [US5] Crear src/features/safe-to-spend/DashboardAlertStrip.tsx (`md:hidden`; filas compactas tocables: sobregiro → `/expenses`, cobros por vencer → `/receivables` usando el hook expuesto desde src/features/receivables/CollectionAlerts.tsx; nada si no hay alertas) y usarla arriba en Dashboard.tsx; el bloque de alertas completo pasa a `max-md:hidden`
-- [ ] T031 [US5] e2e móvil: franja de alertas antes de los buckets cuando hay alertas (demo), en tests/e2e/mobile.spec.ts
+- [X] T031 [US5] e2e móvil: franja de alertas antes de los buckets cuando hay alertas (demo), en tests/e2e/mobile.spec.ts
 
 ---
 
 ## Phase 8: Polish & Cross-Cutting Concerns
 
-- [ ] T032 Actualizar tests/e2e/a11y.spec.ts (hoja ＋, panel "Más" y menú "＋ Nuevo" abiertos, en claro, oscuro y móvil) y tests/e2e/motion.spec.ts (los paneles nuevos sin animación con `prefers-reduced-motion`, FR-027); verificar 44 px táctiles en ＋, "Más" y las acciones de la hoja (FR-029)
-- [ ] T033 Gate completo: `pnpm typecheck && pnpm lint && pnpm test`, `E2E_MODES=demo pnpm test:e2e`, `pnpm build`, build demo + `pnpm check:demo-bundle`; comparar First Load con T001 (≤ +20 kB)
-- [ ] T034 Verificación e2e live (`live-en`, `live-es`) y revisión visual en el deploy: **omitidas por decisión del usuario** (sin Supabase local)
-- [ ] T035 Actualizar comentarios de spec 003 obsoletos (FR-019/020/021/027) en los archivos tocados y marcar las tareas completadas
+- [X] T032 Actualizar tests/e2e/a11y.spec.ts (hoja ＋, panel "Más" y menú "＋ Nuevo" abiertos, en claro, oscuro y móvil) y tests/e2e/motion.spec.ts (los paneles nuevos sin animación con `prefers-reduced-motion`, FR-027); verificar 44 px táctiles en ＋, "Más" y las acciones de la hoja (FR-029)
+- [X] T033 Gate completo: `pnpm typecheck && pnpm lint && pnpm test`, `E2E_MODES=demo pnpm test:e2e`, `pnpm build`, build demo + `pnpm check:demo-bundle`; comparar First Load con T001 (≤ +20 kB)
+- [X] T034 Verificación e2e live (`live-en`, `live-es`) y revisión visual en el deploy — **omitidas por decisión del usuario** (sin Supabase local)
+- [X] T035 Actualizar comentarios de spec 003 obsoletos (FR-019/020/021/027) en los archivos tocados y marcar las tareas completadas
 
 ---
 
@@ -135,3 +135,7 @@ MVP = Phase 2 + US1 (navegación agrupada). Luego US2 y US3 (P1) y después US4 
 ## Notas
 
 - Línea base First Load (T001, `node scripts/measure-first-load.mjs`, 2026-11-07): `/` 301.6 kB gzip (20 scripts); `/dashboard` 328.4 kB gzip (24 scripts). Presupuesto: `/dashboard` ≤ 348.4 kB gzip.
+- Gate final (2026-11-07): `pnpm typecheck`, `pnpm lint`, `pnpm test` (661 ✓), `E2E_MODES=demo pnpm test:e2e` (128 ✓), `pnpm build` ✓, build demo + `pnpm check:demo-bundle` ✓ (337 archivos limpios).
+- First Load tras el spec: `/` 301.9 kB gzip (+0.3), `/dashboard` 331.7 kB gzip (+3.3 kB; presupuesto +20 kB ✓). Los tres diálogos y el menú "＋ Nuevo" van en chunks propios.
+- Estabilidad e2e: `a11y.spec.ts` medía colores durante transiciones que empiezan justo después de abrir un diálogo lazy. `audit()` ahora espera animaciones estables (dos comprobaciones separadas 150 ms), y el menú "＋ Nuevo" es no modal (con el menú modal, axe marcaba `aria-hidden-focus`).
+- Verificaciones `live-en`/`live-es` y revisión visual en el deploy: omitidas por decisión del usuario.
