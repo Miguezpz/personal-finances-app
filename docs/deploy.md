@@ -12,7 +12,7 @@ pruebas, semillas ni `db reset` contra la nube.
 ## 1. Supabase en la nube (una sola vez)
 
 1. Crear el proyecto en [supabase.com](https://supabase.com) (plan Free) y anotar el _Project ref_.
-2. Aplicar las migraciones del repositorio (`supabase/migrations/0001…0009`):
+2. Aplicar las migraciones del repositorio (`supabase/migrations/0001…0010`):
 
    ```bash
    pnpm exec supabase login
@@ -23,7 +23,9 @@ pruebas, semillas ni `db reset` contra la nube.
 3. **Deshabilitar el registro de usuarios** en el panel: _Authentication → Sign In / Providers →
    "Allow new users to sign up"_ desactivado. (`supabase/config.toml` solo aplica a Supabase local.)
 4. **Crear el único usuario**: _Authentication → Users → Add user_, con correo y contraseña
-   (≥ 8 caracteres) y "Auto confirm user". Esa es tu cuenta; nadie más puede registrarse.
+   larga y única (≥ 16 caracteres, de un gestor de contraseñas) y "Auto confirm user". Esa es tu
+   cuenta; nadie más puede registrarse. Después de vincular Google, el proveedor Email se desactiva
+   (§ 5, endurecimiento).
 5. Copiar de _Project Settings → API_: la **URL del proyecto** y la **clave publicable**
    (`sb_publishable_…`). La clave secreta / `service_role` **nunca** va a Vercel ni al navegador.
 6. Revisar los asesores de seguridad y rendimiento:
@@ -71,12 +73,13 @@ Framework: Next.js; comando de build por defecto (`pnpm build`); Node.js 22.
 
 **Proyecto personal** — variables de entorno (Production):
 
-| Variable                               | Valor                                                               |
-| -------------------------------------- | ------------------------------------------------------------------- |
-| `NEXT_PUBLIC_DEMO_MODE`                | `false`                                                             |
-| `NEXT_PUBLIC_SUPABASE_URL`             | URL del proyecto de Supabase                                        |
-| `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY` | clave publicable                                                    |
-| `NEXT_PUBLIC_DEMO_URL`                 | `https://personal-finances-demo.vercel.app` (botón "Explorar demo") |
+| Variable                               | Valor                                                                  |
+| -------------------------------------- | ---------------------------------------------------------------------- |
+| `NEXT_PUBLIC_DEMO_MODE`                | `false`                                                                |
+| `NEXT_PUBLIC_SUPABASE_URL`             | URL del proyecto de Supabase                                           |
+| `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY` | clave publicable                                                       |
+| `NEXT_PUBLIC_DEMO_URL`                 | `https://personal-finances-demo.vercel.app` (botón "Explorar demo")    |
+| `NEXT_PUBLIC_PASSWORD_SIGN_IN`         | `false` (oculta el formulario de contraseña: solo se entra con Google) |
 
 **Proyecto demo** — solo:
 
@@ -146,10 +149,29 @@ legible para consultar o reconstruir datos manualmente.
 - [ ] El proyecto demo no tiene variables de Supabase.
 - [ ] `supabase db advisors --linked` sin avisos de nivel `warn` o superior, salvo
       `auth_leaked_password_protection`: la comprobación contra HaveIBeenPwned solo existe en el
-      plan Pro de Supabase, y la app debe operar en Free (constitución, principio I). Se compensa con
-      el registro deshabilitado, un único usuario, el inicio con Google y una contraseña de respaldo
-      fuerte; en _Authentication → Sign In / Providers → Email_ conviene exigir longitud mínima ≥ 12
-      y dígitos, minúsculas, mayúsculas y símbolos (disponible en Free).
+      plan Pro de Supabase, y la app debe operar en Free (constitución, principio I). Deja de
+      importar con el proveedor Email desactivado (abajo): no hay contraseña que filtrar.
 - [ ] `.env.local` nunca se versiona (solo `.env.example`).
 - [ ] La app de Google está en modo **Testing** con un único _test user_ (el dueño) y su Client Secret
       solo existe en el panel de Supabase.
+
+### Endurecimiento (app personal)
+
+Orden: primero confirma que entras con Google; luego cierra la puerta de la contraseña.
+
+- [ ] Cuenta de Google del dueño con 2FA o passkey (es la única llave de la app).
+- [ ] Supabase → _Authentication → Sign In / Providers → Email_: **desactivado**. Comprobar con
+      `curl -s https://<project-ref>.supabase.co/auth/v1/settings -H "apikey: <clave publicable>"`
+      → `"email": false`. Recuperación si se pierde Google: reactivar Email en el panel.
+- [ ] Vercel (proyecto personal): `NEXT_PUBLIC_PASSWORD_SIGN_IN=false` y redeploy.
+- [ ] Cerrar sesión en la app (cierra **todas** las sesiones: alcance global) y volver a entrar con Google.
+- [ ] _Authentication → URL Configuration_: sin `localhost` en las Redirect URLs si el dev no usa la nube.
+- [ ] _Database → Settings_: **Enforce SSL** activado y **Network restrictions** cerradas (abrir solo
+      tu IP, temporalmente, para `supabase db push`). No afecta a la API REST que usa la app.
+- [ ] _Settings → API Keys_: con la app usando `sb_publishable_…`, **desactivar las claves JWT legacy**
+      (`anon` / `service_role`).
+- [ ] 2FA en las cuentas de Supabase, Vercel y GitHub (tienen acceso total: service role, variables,
+      código). Deployment Protection activa para los previews de Vercel.
+- [ ] Headers: `curl -sI https://miguezpz-personal-finances.vercel.app/` muestra
+      `content-security-policy`, `x-frame-options: DENY`, `x-content-type-options`, `referrer-policy`,
+      `permissions-policy` y `x-robots-tag` (definidos en `src/lib/security-headers.ts`).
