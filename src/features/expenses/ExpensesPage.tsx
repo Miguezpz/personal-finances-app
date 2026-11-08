@@ -8,7 +8,6 @@
 import { Pencil, Plus, Repeat, Trash2 } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { useMemo, useState } from "react";
-import { toast } from "sonner";
 import { CategoryIcon } from "@/components/icons/CategoryIcon";
 import { AccountMark } from "@/components/icons/AccountMark";
 import { BUCKET_ICONS } from "@/components/icons/domain-icons";
@@ -18,16 +17,7 @@ import { Money } from "@/components/money/Money";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { EmptyState } from "@/components/ui/empty-state";
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-} from "@/components/ui/dialog";
 import { Skeleton } from "@/components/ui/skeleton";
-import { isNotifiedGlobally } from "@/data/errors";
 import { useFinanceSnapshot } from "@/data/useFinanceSnapshot";
 import { taxonomyIconFor } from "@/domain/icons";
 import { negateCents } from "@/domain/money";
@@ -37,7 +27,7 @@ import { formatDate } from "@/i18n/format";
 import { selectLocale, usePreferences } from "@/store/preferences";
 import { openCreate } from "@/store/ui";
 import { CardDebtSummary } from "./CardDebtSummary";
-import { useDeleteCardPayment, useDeleteExpense } from "./hooks";
+import { useDeferredDelete } from "@/features/shared/use-deferred-delete";
 import { QuickExpensesSection } from "./QuickExpensesSection";
 import { SpendingByMethod } from "./SpendingByMethod";
 
@@ -56,10 +46,8 @@ export function ExpensesPage() {
   const locale = usePreferences(selectLocale);
   const nameOf = useTaxonomyName();
   const { data } = useFinanceSnapshot(selectData);
-  const deleteExpense = useDeleteExpense();
-  const deletePayment = useDeleteCardPayment();
+  const { remove } = useDeferredDelete();
   const [visible, setVisible] = useState(PAGE);
-  const [toDelete, setToDelete] = useState<Row | null>(null);
 
   const rows = useMemo<Row[]>(() => {
     if (!data) return [];
@@ -84,24 +72,22 @@ export function ExpensesPage() {
       </span>
     );
   };
-  const onError = (e: Error) => {
-    if (!isNotifiedGlobally(e)) toast.error(tc("unexpectedError"));
-  };
 
-  function confirmDelete() {
-    if (!toDelete) return;
-    if (toDelete.kind === "expense")
-      deleteExpense.mutate(toDelete.item.id, {
-        onSuccess: () => toast.success(t("deleted")),
-        onError,
-      });
-    else
-      deletePayment.mutate(toDelete.item.id, {
-        onSuccess: () => toast.success(t("deleted")),
-        onError,
-      });
-    setToDelete(null);
-  }
+  // Spec 009 (FR-009): deleted at once, with Undo instead of a confirmation.
+  const deleteRow = (row: Row) =>
+    row.kind === "expense"
+      ? remove({
+          kind: "expense",
+          id: row.item.id,
+          label: tc("deletedItem", { name: row.item.note ?? subName(row.item.subcategoryId) }),
+        })
+      : remove({
+          kind: "card-payment",
+          id: row.item.id,
+          label: tc("deletedItem", {
+            name: t("cardPaymentLabel", { card: accountName(row.item.cardAccountId) ?? "" }),
+          }),
+        });
 
   return (
     <section className="flex flex-col gap-6">
@@ -212,7 +198,7 @@ export function ExpensesPage() {
                       variant="ghost"
                       size="icon"
                       aria-label={t("delete")}
-                      onClick={() => setToDelete(row)}
+                      onClick={() => deleteRow(row)}
                     >
                       <Trash2 aria-hidden="true" />
                     </Button>
@@ -232,25 +218,6 @@ export function ExpensesPage() {
           </>
         )}
       </section>
-
-      <Dialog open={toDelete !== null} onOpenChange={(open) => !open && setToDelete(null)}>
-        <DialogContent>
-          <DialogHeader>
-            <DialogTitle>
-              {toDelete?.kind === "payment" ? t("deletePaymentTitle") : t("deleteTitle")}
-            </DialogTitle>
-            <DialogDescription>{t("deleteHint")}</DialogDescription>
-          </DialogHeader>
-          <DialogFooter>
-            <Button variant="outline" onClick={() => setToDelete(null)}>
-              {tc("cancel")}
-            </Button>
-            <Button variant="destructive" onClick={confirmDelete}>
-              {t("delete")}
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
     </section>
   );
 }

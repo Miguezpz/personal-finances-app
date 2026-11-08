@@ -11,6 +11,7 @@ import { useTranslations } from "next-intl";
 import { useMemo } from "react";
 import { useForm, useWatch } from "react-hook-form";
 import { toast } from "sonner";
+import { notifySaveFailed } from "@/features/shared/retry-toast";
 import { Money } from "@/components/money/Money";
 import { Button } from "@/components/ui/button";
 import {
@@ -24,7 +25,6 @@ import {
 import { Field, FieldDescription, FieldError, FieldGroup, FieldLabel } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
 import { NativeSelect, NativeSelectOption } from "@/components/ui/native-select";
-import { isNotifiedGlobally } from "@/data/errors";
 import { useFinanceSnapshot } from "@/data/useFinanceSnapshot";
 import { isIsoDate } from "@/domain/dates";
 import {
@@ -55,9 +55,11 @@ const selectFormData = (s: FinanceSnapshot) => ({
 interface Props {
   open: boolean;
   onOpenChange: (open: boolean) => void;
+  /** What was typed when a save failed (spec 009, "Retry"). */
+  draft?: Partial<ReceivableFormInput>;
 }
 
-export function AddReceivableDialog({ open, onOpenChange }: Props) {
+export function AddReceivableDialog({ open, onOpenChange, draft }: Props) {
   const t = useTranslations("receivables");
   const tc = useTranslations("common");
   const locale = usePreferences(selectLocale);
@@ -76,6 +78,7 @@ export function AddReceivableDialog({ open, onOpenChange }: Props) {
       termMonths: "6",
       cardAccountId: "",
       purchaseDate: today,
+      ...draft,
     },
   });
   const [debtorId, total, termMonths, cardAccountId, purchaseDate] = useWatch({
@@ -107,6 +110,7 @@ export function AddReceivableDialog({ open, onOpenChange }: Props) {
   }, [data, cardAccountId, total, termMonths, purchaseDate]);
 
   async function onSubmit(values: ReceivableFormOutput) {
+    const typed = form.getValues();
     const card = data?.cards.find((c) => c.id === values.cardAccountId);
     if (!card) return;
     const schedule = buildCollectionSchedule(
@@ -135,7 +139,11 @@ export function AddReceivableDialog({ open, onOpenChange }: Props) {
       });
       toast.success(t("saved"));
     } catch (e) {
-      if (!isNotifiedGlobally(e)) toast.error(t("saveFailed"));
+      notifySaveFailed(
+        e,
+        { kind: "receivable", draft: typed },
+        { failed: t("saveFailed"), retry: tc("retry") },
+      );
     }
   }
 

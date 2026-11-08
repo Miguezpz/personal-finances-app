@@ -1,15 +1,21 @@
 /** Ephemeral UI state (T045, contracts/ui-store.ts; spec 008 contracts/ui-shell.md). Never persisted. */
 import { create } from "zustand";
 import type { Cents, Expense, Income, Uuid } from "@/domain/types";
+import type { ExpenseFormInput } from "@/features/expenses/schemas";
+import type { IncomeFormInput } from "@/features/income/schemas";
+import type { ReceivableFormInput } from "@/features/receivables/schemas";
 
 /**
  * The app-wide create/edit dialogs (spec 008, FR-009): each one is mounted once, by DialogHost, and
  * any screen opens it here — optionally with the entity to edit or the values to prefill.
+ * `draft` (spec 009, FR-008) holds what the owner had typed when a save failed ("Retry"); it lives
+ * only in memory.
  */
 export type CreateDialog =
-  | { kind: "expense"; expense?: Expense | null }
-  | { kind: "income"; income?: Income | null }
-  | { kind: "card-payment"; cardId?: Uuid | null; suggestedAmount?: Cents | null };
+  | { kind: "expense"; expense?: Expense | null; draft?: Partial<ExpenseFormInput> }
+  | { kind: "income"; income?: Income | null; draft?: Partial<IncomeFormInput> }
+  | { kind: "card-payment"; cardId?: Uuid | null; suggestedAmount?: Cents | null }
+  | { kind: "receivable"; draft?: Partial<ReceivableFormInput> };
 
 export type CreateDialogKind = CreateDialog["kind"];
 

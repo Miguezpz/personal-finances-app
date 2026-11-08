@@ -18,14 +18,6 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { EmptyState } from "@/components/ui/empty-state";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-} from "@/components/ui/dialog";
 import { Skeleton } from "@/components/ui/skeleton";
 import { isNotifiedGlobally } from "@/data/errors";
 import { useFinanceSnapshot } from "@/data/useFinanceSnapshot";
@@ -37,7 +29,8 @@ import { useTaxonomyName } from "@/features/settings/taxonomy/useTaxonomyName";
 import { formatDate } from "@/i18n/format";
 import { useToday } from "@/lib/use-today";
 import { selectLocale, usePreferences } from "@/store/preferences";
-import { useDeleteRecurring, usePauseRecurring, useRecurring, useResumeRecurring } from "./hooks";
+import { usePauseRecurring, useRecurring, useResumeRecurring } from "./hooks";
+import { useDeferredDelete } from "@/features/shared/use-deferred-delete";
 import { RecurringForm } from "./RecurringForm";
 
 const selectLookups = (s: FinanceSnapshot) => ({
@@ -57,12 +50,11 @@ export function RecurringPage() {
   const { data: lookups } = useFinanceSnapshot(selectLookups);
   const pause = usePauseRecurring();
   const resume = useResumeRecurring();
-  const remove = useDeleteRecurring();
+  const { remove } = useDeferredDelete();
   const [form, setForm] = useState<{ open: boolean; recurring: RecurringExpense | null }>({
     open: false,
     recurring: null,
   });
-  const [toDelete, setToDelete] = useState<RecurringExpense | null>(null);
 
   const onError = (e: Error) => {
     if (!isNotifiedGlobally(e)) toast.error(tc("unexpectedError"));
@@ -82,12 +74,6 @@ export function RecurringPage() {
     } else {
       resume.mutate({ id: r.id, today }, { onSuccess: () => toast.success(t("resumed")), onError });
     }
-  }
-
-  function confirmDelete() {
-    if (!toDelete) return;
-    remove.mutate(toDelete.id, { onSuccess: () => toast.success(t("deleted")), onError });
-    setToDelete(null);
   }
 
   return (
@@ -196,7 +182,17 @@ export function RecurringPage() {
                         {paused ? <Play aria-hidden="true" /> : <Pause aria-hidden="true" />}
                         {paused ? t("resume") : t("pause")}
                       </Button>
-                      <Button variant="ghost" size="sm" onClick={() => setToDelete(r)}>
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={() =>
+                          remove({
+                            kind: "recurring",
+                            id: r.id,
+                            label: tc("deletedItem", { name: r.name }),
+                          })
+                        }
+                      >
                         <Trash2 aria-hidden="true" />
                         {t("delete")}
                       </Button>
@@ -217,23 +213,6 @@ export function RecurringPage() {
           onOpenChange={(open) => setForm((f) => ({ ...f, open }))}
         />
       )}
-
-      <Dialog open={toDelete !== null} onOpenChange={(open) => !open && setToDelete(null)}>
-        <DialogContent>
-          <DialogHeader>
-            <DialogTitle>{t("deleteTitle")}</DialogTitle>
-            <DialogDescription>{t("deleteHint")}</DialogDescription>
-          </DialogHeader>
-          <DialogFooter>
-            <Button variant="outline" onClick={() => setToDelete(null)}>
-              {tc("cancel")}
-            </Button>
-            <Button variant="destructive" onClick={confirmDelete}>
-              {t("delete")}
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
     </section>
   );
 }

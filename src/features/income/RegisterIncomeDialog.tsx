@@ -16,6 +16,8 @@ import Link from "next/link";
 import { useMemo, useRef } from "react";
 import { Controller, useForm, useWatch } from "react-hook-form";
 import { toast } from "sonner";
+import { rememberLastUsed, useLastUsedDefaults } from "@/features/shared/last-used";
+import { notifySaveFailed } from "@/features/shared/retry-toast";
 import { Money } from "@/components/money/Money";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
@@ -40,7 +42,6 @@ import { NativeSelect, NativeSelectOption } from "@/components/ui/native-select"
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Label } from "@/components/ui/label";
 import { useFinanceSnapshot } from "@/data/useFinanceSnapshot";
-import { isNotifiedGlobally } from "@/data/errors";
 import { isIsoDate } from "@/domain/dates";
 import { isIncomeType } from "@/domain/income-types";
 import { formatCentsAsInput, parseMoneyInput } from "@/domain/parse";
@@ -67,6 +68,8 @@ interface Props {
   onOpenChange: (open: boolean) => void;
   /** Present when editing. */
   income?: Income | null;
+  /** What was typed when a save failed ("Retry", spec 009). */
+  draft?: Partial<IncomeFormInput>;
 }
 
 function defaultsFor(income: Income | null | undefined, today: IsoDate): IncomeFormInput {
@@ -118,7 +121,7 @@ function safeSplit(
   }
 }
 
-export function RegisterIncomeDialog({ open, onOpenChange, income }: Props) {
+export function RegisterIncomeDialog({ open, onOpenChange, income, draft }: Props) {
   const t = useTranslations("income");
   const tb = useTranslations("buckets");
   const tc = useTranslations("common");
@@ -126,11 +129,17 @@ export function RegisterIncomeDialog({ open, onOpenChange, income }: Props) {
   const today = useToday();
   const { data } = useFinanceSnapshot(selectFormData);
   const register = useRegisterIncome();
+  const lastUsed = useLastUsedDefaults();
   const replace = useReplaceIncome();
 
   const form = useForm<IncomeFormInput, unknown, IncomeFormOutput>({
     resolver: zodResolver(incomeFormSchema),
-    defaultValues: defaultsFor(income, today),
+    defaultValues: {
+      ...defaultsFor(income, today),
+      // Spec 009 (FR-002): the last deposit account for a new income.
+      ...(income ? {} : { depositAccountId: lastUsed.depositAccountId }),
+      ...draft,
+    },
   });
   const [amount, receivedOn, fundedPeriodStart, kind, split] = useWatch({
     control: form.control,
@@ -169,14 +178,23 @@ export function RegisterIncomeDialog({ open, onOpenChange, income }: Props) {
       income: { ...values, ruleId: values.distributed && rule ? rule.id : null },
       allocations,
     };
-    const callbacks = {
-      onSuccess: () => toast.success(t("saved")),
-      onError: (e: Error) => {
-        if (!isNotifiedGlobally(e)) toast.error(t("saveFailed"));
+    const typed = form.getValues();
+    // Promises, not per-call callbacks: the dialog unmounts right after submitting.
+    const saved = income
+      ? replace.mutateAsync({ id: income.id, input })
+      : register.mutateAsync(input);
+    saved.then(
+      () => {
+        toast.success(t("saved"));
+        rememberLastUsed({ depositAccountId: values.depositAccountId });
       },
-    };
-    if (income) replace.mutate({ id: income.id, input }, callbacks);
-    else register.mutate(input, callbacks);
+      (e: unknown) =>
+        notifySaveFailed(
+          e,
+          { kind: "income", income: income ?? null, draft: typed },
+          { failed: t("saveFailed"), retry: tc("retry") },
+        ),
+    );
     // Optimistic: the list already shows it; errors roll back and toast.
     onOpenChange(false);
   }
@@ -231,6 +249,7 @@ export function RegisterIncomeDialog({ open, onOpenChange, income }: Props) {
               <FieldLabel htmlFor="income-amount">{t("amount")}</FieldLabel>
               <Input
                 id="income-amount"
+                autoFocus={!income}
                 data-money
                 inputMode="decimal"
                 autoComplete="off"

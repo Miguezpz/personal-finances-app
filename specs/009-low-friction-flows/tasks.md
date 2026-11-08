@@ -39,12 +39,12 @@ description: "Task list for spec 009 — Flujos y formularios con menos fricció
 
 **Independent Test**: quickstart A; con escritura real, lo recordado (e2e `@live`, omitido).
 
-- [ ] T012 [US1] Crear src/features/shared/last-used.ts (`useLastUsedDefaults()` validado contra cuentas no archivadas y subcategorías activas)
-- [ ] T013 [US1] AddExpenseDialog (src/features/expenses/AddExpenseDialog.tsx): defaults de `lastUsed` (los valores de la página tienen prioridad), `setLastUsed` en `onSuccess`, chips de fecha Hoy/Ayer/Otra con `max={today}` (`date-chip-*`), chips de subcategorías recientes (`recent-subcategory`), "Guardar y agregar otro" + Shift+Enter (solo altas, escritorio, `save-and-add`)
-- [ ] T014 [P] [US1] RegisterIncomeDialog: default `depositAccountId` de `lastUsed`, `setLastUsed` en éxito y autofocus del monto al crear (src/features/income/RegisterIncomeDialog.tsx)
-- [ ] T015 [P] [US1] CardPaymentDialog: default `fromAccountId` = `sourceAccountId` y `setLastUsed` en éxito (src/features/expenses/CardPaymentDialog.tsx)
-- [ ] T016 [P] [US1] RecurringForm: defaults `lastUsed` (cuenta y subcategoría), día de cargo = día de hoy en altas y autofocus del monto (src/features/recurring/RecurringForm.tsx)
-- [ ] T017 [P] [US1] GoalForm: el monto mensual sugerido como valor del campo cuando está vacío (src/features/goals/GoalForm.tsx); PreferencesForm: `inputMode="numeric"` en los enteros (src/features/settings/preferences/PreferencesForm.tsx)
+- [X] T012 [US1] Crear src/features/shared/last-used.ts (`useLastUsedDefaults()` validado contra cuentas no archivadas y subcategorías activas)
+- [X] T013 [US1] AddExpenseDialog (src/features/expenses/AddExpenseDialog.tsx): defaults de `lastUsed` (los valores de la página tienen prioridad), `setLastUsed` en `onSuccess`, chips de fecha Hoy/Ayer/Otra con `max={today}` (`date-chip-*`), chips de subcategorías recientes (`recent-subcategory`), "Guardar y agregar otro" + Shift+Enter (solo altas, escritorio, `save-and-add`)
+- [X] T014 [P] [US1] RegisterIncomeDialog: default `depositAccountId` de `lastUsed`, `setLastUsed` en éxito y autofocus del monto al crear (src/features/income/RegisterIncomeDialog.tsx)
+- [X] T015 [P] [US1] CardPaymentDialog: default `fromAccountId` = `sourceAccountId` y `setLastUsed` en éxito (src/features/expenses/CardPaymentDialog.tsx)
+- [X] T016 [P] [US1] RecurringForm: defaults `lastUsed` (cuenta y subcategoría), día de cargo = día de hoy en altas y autofocus del monto (src/features/recurring/RecurringForm.tsx)
+- [X] T017 [P] [US1] GoalForm: el monto mensual sugerido como valor del campo cuando está vacío (src/features/goals/GoalForm.tsx); PreferencesForm: `inputMode="numeric"` en los enteros (src/features/settings/preferences/PreferencesForm.tsx)
 - [ ] T018 [US1] e2e demo en tests/e2e/flows.spec.ts: chips de fecha (Otra muestra el input con `max` = hoy), recientes visibles con historial, "250,5" válido sin error de campo, `save-and-add` visible en escritorio y oculto en móvil; e2e `@live` de lo recordado (ejecución omitida por decisión del usuario)
 
 ---
@@ -53,10 +53,10 @@ description: "Task list for spec 009 — Flujos y formularios con menos fricció
 
 **Independent Test**: borrar en demo muestra solo lectura sin quitar la fila; deshacer y reintentar con e2e `@live` (omitido) y pruebas unitarias.
 
-- [ ] T019 [US2] Crear src/features/shared/use-deferred-delete.ts según research R3 (demo y sin conexión primero; registro de timers a nivel módulo; `pagehide`; commit con `updateSnapshot` + `provider.<repo>.remove` + rollback y error; Deshacer) con especificaciones por tipo: expense, card-payment, income (usa `withoutIncome`, exportarla de src/features/income/hooks.ts), recurring
-- [ ] T020 [P] [US2] Pruebas de `useDeferredDelete` con proveedor en memoria (oculta al instante, Deshacer restaura sin llamar `remove`, commit a 6 s con timers falsos, rollback si falla, demo no oculta) en tests/unit/features/deferred-delete.test.tsx
-- [ ] T021 [US2] Usar `useDeferredDelete` y quitar el diálogo de confirmación en src/features/expenses/ExpensesPage.tsx (gastos y pagos), src/features/income/IncomePage.tsx y src/features/recurring/RecurringPage.tsx; "Borrar" dentro de la edición de un gasto (`delete-expense`) en AddExpenseDialog
-- [ ] T022 [US2] Crear src/features/shared/retry-toast.ts (`notifySaveFailed`) y ampliar `CreateDialog` en src/store/ui.ts (`draft` en expense/income, kind `receivable`); los diálogos aceptan `draft` como valores iniciales y pasan `onFailure`: AddExpenseDialog, RegisterIncomeDialog y AddReceivableDialog (que se monta lazy en src/components/layout/DialogHost.tsx; ReceivablesPage abre `openCreate({kind:"receivable"})`)
+- [X] T019 [US2] Crear src/features/shared/use-deferred-delete.ts según research R3 (demo y sin conexión primero; registro de timers a nivel módulo; `pagehide`; commit con `updateSnapshot` + `provider.<repo>.remove` + rollback y error; Deshacer) con especificaciones por tipo: expense, card-payment, income (usa `withoutIncome`, exportarla de src/features/income/hooks.ts), recurring
+- [X] T020 [P] [US2] Pruebas de `useDeferredDelete` con proveedor en memoria (oculta al instante, Deshacer restaura sin llamar `remove`, commit a 6 s con timers falsos, rollback si falla, demo no oculta) en tests/unit/features/deferred-delete.test.tsx
+- [X] T021 [US2] Usar `useDeferredDelete` y quitar el diálogo de confirmación en src/features/expenses/ExpensesPage.tsx (gastos y pagos), src/features/income/IncomePage.tsx y src/features/recurring/RecurringPage.tsx; "Borrar" dentro de la edición de un gasto (`delete-expense`) en AddExpenseDialog
+- [X] T022 [US2] Crear src/features/shared/retry-toast.ts (`notifySaveFailed`) y ampliar `CreateDialog` en src/store/ui.ts (`draft` en expense/income, kind `receivable`); los diálogos aceptan `draft` como valores iniciales y pasan `onFailure`: AddExpenseDialog, RegisterIncomeDialog y AddReceivableDialog (que se monta lazy en src/components/layout/DialogHost.tsx; ReceivablesPage abre `openCreate({kind:"receivable"})`)
 - [ ] T023 [US2] e2e demo: borrar un gasto o un ingreso muestra solo lectura y la fila sigue; sin diálogo de confirmación. e2e `@live`: deshacer y reintentar (ejecución omitida por decisión del usuario) — tests/e2e/flows.spec.ts; ajustar los specs existentes que esperaban el diálogo de confirmación (us9-demo, us4-expenses, us8-settings-ledger si aplica)
 
 ---

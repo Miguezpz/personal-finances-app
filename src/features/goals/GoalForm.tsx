@@ -7,6 +7,7 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useTranslations } from "next-intl";
 import { useForm, useWatch } from "react-hook-form";
+import { useEffect, useRef } from "react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import {
@@ -72,6 +73,18 @@ export function GoalForm({ open, onOpenChange, goal }: Props) {
   });
   const [kind, annualText] = useWatch({ control: form.control, name: ["kind", "annual"] });
   const annual = parseMoneyInput(annualText);
+  // Spec 009 (FR-028): the suggested monthly hold-back becomes the field's value while the owner
+  // hasn't typed one, so it's saved as shown.
+  const autoMonthly = useRef<string | null>(null);
+  useEffect(() => {
+    if (kind !== "sinking_fund" || annual === null || annual <= 0) return;
+    const current = form.getValues("monthly");
+    // Only an empty field or our own previous suggestion: never what the owner typed or saved.
+    if (current && current !== autoMonthly.current) return;
+    const suggestion = formatCentsAsInput(suggestedMonthly(annual));
+    autoMonthly.current = suggestion;
+    form.setValue("monthly", suggestion, { shouldValidate: true });
+  }, [kind, annual, form]);
   const errors = form.formState.errors;
   const errorText = (key: string | undefined) => (key ? t(key as GoalsMessageKey) : null);
 
@@ -190,11 +203,6 @@ export function GoalForm({ open, onOpenChange, goal }: Props) {
                 inputMode="decimal"
                 autoComplete="off"
                 className="tabular-nums"
-                placeholder={
-                  kind === "sinking_fund" && annual !== null && annual > 0
-                    ? formatCentsAsInput(suggestedMonthly(annual))
-                    : undefined
-                }
                 {...form.register("monthly")}
               />
               {errors.monthly ? (

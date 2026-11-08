@@ -91,13 +91,15 @@ function PreferencesForm({ settings }: { settings: UserSettings }) {
     label: string,
     hint: string,
     suffix?: string,
+    integer = false,
   ) => (
     <Field data-invalid={Boolean(errors[name])}>
       <FieldLabel htmlFor={id}>{label}</FieldLabel>
       <div className="flex items-center gap-2">
         <Input
           id={id}
-          inputMode="decimal"
+          // Spec 009 (FR-027): whole numbers open the numeric keypad.
+          inputMode={integer ? "numeric" : "decimal"}
           autoComplete="off"
           className="w-24 tabular-nums"
           {...form.register(name)}
@@ -140,12 +142,21 @@ function PreferencesForm({ settings }: { settings: UserSettings }) {
           </CardHeader>
           <CardContent>
             <FieldGroup className="sm:grid sm:grid-cols-2">
-              {numberField("firstPayday", "pref-payday-1", t("firstPayday"), t("firstPaydayHint"))}
+              {numberField(
+                "firstPayday",
+                "pref-payday-1",
+                t("firstPayday"),
+                t("firstPaydayHint"),
+                undefined,
+                true,
+              )}
               {numberField(
                 "secondPayday",
                 "pref-payday-2",
                 t("secondPayday"),
                 t("secondPaydayHint"),
+                undefined,
+                true,
               )}
             </FieldGroup>
           </CardContent>
@@ -163,6 +174,7 @@ function PreferencesForm({ settings }: { settings: UserSettings }) {
                 t("leadDays"),
                 t("leadDaysHint"),
                 t("daysUnit"),
+                true,
               )}
               {numberField(
                 "emergencyFundMonths",
@@ -170,6 +182,7 @@ function PreferencesForm({ settings }: { settings: UserSettings }) {
                 t("fundMonths"),
                 t("fundMonthsHint"),
                 t("monthsUnit"),
+                true,
               )}
             </FieldGroup>
           </CardContent>

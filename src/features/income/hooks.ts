@@ -39,7 +39,7 @@ function withIncome(s: FinanceSnapshot, id: Uuid, input: RegisterIncomeInput): F
   };
 }
 
-function withoutIncome(s: FinanceSnapshot, id: Uuid): FinanceSnapshot {
+export function withoutIncome(s: FinanceSnapshot, id: Uuid): FinanceSnapshot {
   return {
     ...s,
     incomes: s.incomes.filter((i) => i.id !== id),

@@ -31,7 +31,8 @@
     "saveFailedRetry": "Couldn't save. Your entries are still here.",
     "deleteFailed": "Couldn't delete it; we restored it.",
     "today": "Today",
-    "yesterday": "Yesterday"
+    "yesterday": "Yesterday",
+    "deletedItem": "Deleted: {name}"
   },
   "nav": {
     "label": "Main navigation",
@@ -331,7 +332,6 @@
     "cardPaymentLabel": "Payment · {card}",
     "debtSettlement": "Debt settlement",
     "cardRequired": "Choose a card.",
-    "deletedItem": "Deleted: {name}",
     "dateToday": "Today",
     "dateYesterday": "Yesterday",
     "dateOther": "Other",

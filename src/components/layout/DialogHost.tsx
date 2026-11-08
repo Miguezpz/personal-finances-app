@@ -16,6 +16,7 @@ import {
   LazyCardPaymentDialog,
   usePreloadCardPaymentDialog,
 } from "@/features/expenses/LazyCardPaymentDialog";
+import { LazyAddReceivableDialog } from "@/features/receivables/LazyAddReceivableDialog";
 import {
   LazyRegisterIncomeDialog,
   usePreloadRegisterIncomeDialog,
@@ -50,18 +51,20 @@ export function DialogHost() {
     case "expense":
       return (
         <LazyAddExpenseDialog
-          key={dialog.expense?.id ?? "new"}
+          key={`${dialog.expense?.id ?? "new"}-${dialog.draft ? "draft" : ""}`}
           open
           expense={dialog.expense ?? null}
+          {...(dialog.draft ? { draft: dialog.draft } : {})}
           onOpenChange={onOpenChange}
         />
       );
     case "income":
       return (
         <LazyRegisterIncomeDialog
-          key={dialog.income?.id ?? "new"}
+          key={`${dialog.income?.id ?? "new"}-${dialog.draft ? "draft" : ""}`}
           open
           income={dialog.income ?? null}
+          {...(dialog.draft ? { draft: dialog.draft } : {})}
           onOpenChange={onOpenChange}
         />
       );
@@ -72,6 +75,14 @@ export function DialogHost() {
           open
           cardId={dialog.cardId ?? null}
           suggestedAmount={dialog.suggestedAmount ?? null}
+          onOpenChange={onOpenChange}
+        />
+      );
+    case "receivable":
+      return (
+        <LazyAddReceivableDialog
+          open
+          {...(dialog.draft ? { draft: dialog.draft } : {})}
           onOpenChange={onOpenChange}
         />
       );

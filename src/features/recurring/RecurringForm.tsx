@@ -33,6 +33,8 @@ import {
   useHasSubcategories,
 } from "@/features/settings/taxonomy/SubcategoryOptions";
 import { useToday } from "@/lib/use-today";
+import { parseIsoDate } from "@/domain/dates";
+import { useLastUsedDefaults } from "@/features/shared/last-used";
 import { PaymentAccountOptions } from "@/features/settings/accounts/PaymentAccountOptions";
 import { useCreateRecurring, useUpdateRecurring } from "./hooks";
 import { recurringFormSchema, type RecurringFormInput, type RecurringFormOutput } from "./schemas";
@@ -88,6 +90,7 @@ export function RecurringForm({ open, onOpenChange, recurring }: Props) {
   const create = useCreateRecurring();
   const update = useUpdateRecurring();
   const editing = Boolean(recurring);
+  const lastUsed = useLastUsedDefaults();
 
   const form = useForm<RecurringFormInput, unknown, RecurringFormOutput>({
     resolver: zodResolver(recurringFormSchema),
@@ -103,9 +106,10 @@ export function RecurringForm({ open, onOpenChange, recurring }: Props) {
       : {
           name: "",
           amount: "",
-          chargeDay: "1",
-          subcategoryId: "",
-          paymentAccountId: "",
+          // Spec 009 (FR-026, FR-002): today's day and the last account and subcategory used.
+          chargeDay: String(parseIsoDate(today).day),
+          subcategoryId: lastUsed.subcategoryId,
+          paymentAccountId: lastUsed.paymentAccountId,
           startsOn: today,
         },
   });
@@ -181,6 +185,7 @@ export function RecurringForm({ open, onOpenChange, recurring }: Props) {
                 <FieldLabel htmlFor="recurring-amount">{t("amount")}</FieldLabel>
                 <Input
                   id="recurring-amount"
+                  autoFocus={!editing}
                   data-money
                   inputMode="decimal"
                   autoComplete="off"

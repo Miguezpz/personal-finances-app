@@ -7,8 +7,6 @@
 import { Pencil, Plus, Settings2, Trash2 } from "lucide-react";
 import { useTranslations } from "next-intl";
 import Link from "next/link";
-import { useState } from "react";
-import { toast } from "sonner";
 import { AccountMark } from "@/components/icons/AccountMark";
 import { BUCKET_ICONS } from "@/components/icons/domain-icons";
 import { INCOME_TYPE_ICONS } from "@/components/icons/income-type-icons";
@@ -19,23 +17,15 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { EmptyState } from "@/components/ui/empty-state";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-} from "@/components/ui/dialog";
 import { Skeleton } from "@/components/ui/skeleton";
-import { isNotifiedGlobally } from "@/data/errors";
 import { useFinanceSnapshot } from "@/data/useFinanceSnapshot";
 import type { Account, FinanceSnapshot, Income, IncomeAllocation } from "@/domain/types";
 import { formatDate } from "@/i18n/format";
 import { selectLocale, usePreferences } from "@/store/preferences";
 import { openCreate } from "@/store/ui";
 import { formatPeriodRange } from "./format";
-import { useDeleteIncome, useIncomes } from "./hooks";
+import { useIncomes } from "./hooks";
+import { useDeferredDelete } from "@/features/shared/use-deferred-delete";
 
 const selectAccounts = (s: FinanceSnapshot) => s.accounts;
 const BUCKET_ORDER = { needs: 0, wants: 1, investment: 2 } as const;
@@ -136,25 +126,13 @@ export function IncomePage() {
   const tc = useTranslations("common");
   const { data } = useIncomes();
   const { data: accounts } = useFinanceSnapshot(selectAccounts);
-  const deleteIncome = useDeleteIncome();
-  const [toDelete, setToDelete] = useState<Income | null>(null);
+  const { remove } = useDeferredDelete();
 
   const accountName = (id: string | null) => accounts?.find((a) => a.id === id)?.name ?? "";
   const accountOf = (id: string | null) => accounts?.find((a) => a.id === id) ?? null;
   const incomes = data
     ? [...data.incomes].sort((a, b) => (a.receivedOn < b.receivedOn ? 1 : -1))
     : [];
-
-  function confirmDelete() {
-    if (!toDelete) return;
-    deleteIncome.mutate(toDelete.id, {
-      onSuccess: () => toast.success(t("deleted")),
-      onError: (e) => {
-        if (!isNotifiedGlobally(e)) toast.error(tc("unexpectedError"));
-      },
-    });
-    setToDelete(null);
-  }
 
   return (
     <section className="flex flex-col gap-6">
@@ -206,29 +184,18 @@ export function IncomePage() {
                 accountName={accountName}
                 accountOf={accountOf}
                 onEdit={() => openCreate({ kind: "income", income })}
-                onDelete={() => setToDelete(income)}
+                onDelete={() =>
+                  remove({
+                    kind: "income",
+                    id: income.id,
+                    label: tc("deletedItem", { name: income.label }),
+                  })
+                }
               />
             </li>
           ))}
         </ul>
       )}
-
-      <Dialog open={toDelete !== null} onOpenChange={(open) => !open && setToDelete(null)}>
-        <DialogContent>
-          <DialogHeader>
-            <DialogTitle>{t("deleteTitle")}</DialogTitle>
-            <DialogDescription>{t("deleteHint")}</DialogDescription>
-          </DialogHeader>
-          <DialogFooter>
-            <Button variant="outline" onClick={() => setToDelete(null)}>
-              {tc("cancel")}
-            </Button>
-            <Button variant="destructive" onClick={confirmDelete}>
-              {t("delete")}
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
     </section>
   );
 }

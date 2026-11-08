@@ -18,7 +18,7 @@ import type { Installment } from "@/domain/types";
 import { formatDate } from "@/i18n/format";
 import { cn } from "@/lib/utils";
 import { selectLocale, usePreferences } from "@/store/preferences";
-import { AddReceivableDialog } from "./AddReceivableDialog";
+import { openCreate } from "@/store/ui";
 import { CollectionDialog } from "./CollectionDialog";
 import { useReceivables } from "./hooks";
 import { PageHeader } from "@/components/layout/PageHeader";
@@ -36,7 +36,6 @@ export function ReceivablesPage() {
   const t = useTranslations("receivables");
   const locale = usePreferences(selectLocale);
   const { data } = useReceivables();
-  const [adding, setAdding] = useState(false);
   const [collecting, setCollecting] = useState<Installment | null>(null);
 
   const debtorName = (id: string) => data?.debtors.find((d) => d.id === id)?.name ?? "";
@@ -58,7 +57,7 @@ export function ReceivablesPage() {
           <>
             <Button
               className="shrink-0"
-              onClick={() => setAdding(true)}
+              onClick={() => openCreate({ kind: "receivable" })}
               data-testid="add-receivable"
             >
               <Plus aria-hidden="true" />
@@ -204,7 +203,6 @@ export function ReceivablesPage() {
         </>
       )}
 
-      {adding && <AddReceivableDialog open={adding} onOpenChange={setAdding} />}
       {collecting && collectingReceivable && (
         <CollectionDialog
           key={collecting.id}

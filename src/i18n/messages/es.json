@@ -31,7 +31,8 @@
     "saveFailedRetry": "No se pudo guardar. Tus datos siguen aquí.",
     "deleteFailed": "No se pudo borrar; lo restauramos.",
     "today": "Hoy",
-    "yesterday": "Ayer"
+    "yesterday": "Ayer",
+    "deletedItem": "Borrado: {name}"
   },
   "nav": {
     "label": "Navegación principal",
@@ -331,7 +332,6 @@
     "cardPaymentLabel": "Pago · {card}",
     "debtSettlement": "Liquidación de deuda",
     "cardRequired": "Elige una tarjeta.",
-    "deletedItem": "Borrado: {name}",
     "dateToday": "Hoy",
     "dateYesterday": "Ayer",
     "dateOther": "Otra",

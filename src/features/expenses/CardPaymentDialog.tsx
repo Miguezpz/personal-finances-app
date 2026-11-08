@@ -26,6 +26,7 @@ import { useFinanceSnapshot } from "@/data/useFinanceSnapshot";
 import { formatCentsAsInput } from "@/domain/parse";
 import type { Cents, FinanceSnapshot, Uuid } from "@/domain/types";
 import { useToday } from "@/lib/use-today";
+import { rememberLastUsed, useLastUsedDefaults } from "@/features/shared/last-used";
 import { PaymentAccountOptions } from "@/features/settings/accounts/PaymentAccountOptions";
 import { useCreateCardPayment } from "./hooks";
 import {
@@ -54,6 +55,7 @@ export function CardPaymentDialog({ open, onOpenChange, cardId, suggestedAmount 
   const today = useToday();
   const { data } = useFinanceSnapshot(selectAccounts);
   const createPayment = useCreateCardPayment();
+  const lastUsed = useLastUsedDefaults();
 
   const form = useForm<CardPaymentFormInput, unknown, CardPaymentFormOutput>({
     resolver: zodResolver(cardPaymentFormSchema),
@@ -61,7 +63,8 @@ export function CardPaymentDialog({ open, onOpenChange, cardId, suggestedAmount 
       cardAccountId: cardId ?? "",
       amount: suggestedAmount ? formatCentsAsInput(suggestedAmount) : "",
       paidOn: today,
-      fromAccountId: "",
+      // Spec 009 (FR-002): the account the last payment came from.
+      fromAccountId: lastUsed.sourceAccountId,
       note: "",
     },
   });
@@ -69,12 +72,16 @@ export function CardPaymentDialog({ open, onOpenChange, cardId, suggestedAmount 
   const errorText = (key: string | undefined) => (key ? t(key as ExpensesMessageKey) : null);
 
   function onSubmit(values: CardPaymentFormOutput) {
-    createPayment.mutate(values, {
-      onSuccess: () => toast.success(t("paymentSaved")),
-      onError: (e) => {
+    // A promise, not per-call callbacks: the dialog unmounts right after submitting.
+    createPayment.mutateAsync(values).then(
+      () => {
+        toast.success(t("paymentSaved"));
+        rememberLastUsed({ sourceAccountId: values.fromAccountId });
+      },
+      (e: unknown) => {
         if (!isNotifiedGlobally(e)) toast.error(t("saveFailed"));
       },
-    });
+    );
     onOpenChange(false);
   }
 
