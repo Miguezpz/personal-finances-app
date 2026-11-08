@@ -254,6 +254,48 @@ test.describe("Spec 010 · bottom sheets on a phone", { tag: "@demo" }, () => {
     await drag(page, 140, 10);
     await expect(sheet).toBeHidden();
   });
+
+  test("closing by drag keeps moving down from the finger — it never bounces back up", async ({
+    page,
+  }) => {
+    await page.goto("/dashboard");
+    await expect(page.locator("main [aria-busy='true']")).toHaveCount(0);
+    const sheet = page.getByTestId("create-sheet");
+    await page.getByTestId("mobile-nav-create").click();
+    await expect(sheet).toBeVisible();
+    await page.waitForTimeout(300); // let the slide-in finish
+
+    const box = await sheet.getByTestId("sheet-handle").boundingBox();
+    if (!box) throw new Error("no handle");
+    const x = box.x + box.width / 2;
+    const y = box.y + box.height / 2;
+    await page.mouse.move(x, y);
+    await page.mouse.down();
+    await page.mouse.move(x, y + 140, { steps: 10 });
+    const releasedTop = await sheet.evaluate((el) => el.getBoundingClientRect().top);
+    // Sample the sheet's top on every frame from the release until it's gone.
+    const samples = sheet.evaluate(
+      (el) =>
+        new Promise<number[]>((resolve) => {
+          const tops: number[] = [];
+          const t0 = performance.now();
+          const tick = () => {
+            if (el.isConnected) tops.push(el.getBoundingClientRect().top);
+            if (el.isConnected && performance.now() - t0 < 600) requestAnimationFrame(tick);
+            else resolve(tops);
+          };
+          requestAnimationFrame(tick);
+        }),
+    );
+    await page.mouse.up();
+    const tops = await samples;
+    await expect(sheet).toBeHidden();
+    expect(tops.length).toBeGreaterThan(0);
+    for (const [i, top] of tops.entries()) {
+      expect(top, `frame ${i}`).toBeGreaterThanOrEqual(releasedTop - 1);
+      if (i > 0) expect(top, `frame ${i}`).toBeGreaterThanOrEqual((tops[i - 1] ?? 0) - 1);
+    }
+  });
 });
 
 test.describe("Spec 010 · polish on a phone", { tag: "@demo" }, () => {

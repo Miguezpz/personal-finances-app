@@ -239,6 +239,7 @@ En total, el First Load de `/dashboard` creció **+7.5 kB gzip** (cada spec ten�
 Cambios hechos fuera de speckit, con commit + push a `main`:
 
 - **Shell**: el header, la barra inferior y la hoja "Más" ya no se tapan durante la navegación. El botón ＋ queda encima del indicador deslizante de la barra.
+- **Cerrar una hoja arrastrándola**: antes rebotaba. La animación de salida de tw-animate solo define el final (40 px abajo) y arranca desde donde quedó el dedo, así que una hoja arrastrada más de 40 px subía de regreso al cerrarse. Ahora la salida continúa hacia abajo hasta salir de la pantalla, sin desvanecerse, con una duración de 120–260 ms según la velocidad del dedo. La velocidad al soltar se mide sobre los últimos 100 ms en lugar de un solo evento, así que un arrastre corto ya no se cierra por accidente. Lo cubren la e2e "never bounces back up" (falla con el código anterior) y pruebas unitarias de `releaseVelocity` y `exitDurationMs`.
 - **Datos del demo** (`src/data/mock/`):
   - Las cuentas usan bancos conocidos para que se vean sus logos: BBVA Debit, Nu Credit, Amex Gold, GBM+, Finsus y Cash. Los saldos siguen siendo ficticios.
   - Cada gasto tiene un título corto tipo comercio (Walmart, Pemex, Starbucks…) en lugar de repetir la subcategoría.
@@ -250,7 +251,7 @@ Cambios hechos fuera de speckit, con commit + push a `main`:
   - EN: "quincena" → "pay period" (17 cadenas), "recognise" → "recognize", MSI explicado una vez y "safe-to-spend balance" dentro de las oraciones.
   - ES: "Deseos" → "Gustos" (el nombre de la bolsa), "Safe-to-Spend" → "disponible para gastar", "Dashboard"/"ledger" → "Inicio"/"bitácora", "el demo" en todos lados, "Último/Próximo corte" y "vence hoy mismo".
 
-Gate: unit 707 ✓ · typecheck ✓ · lint ✓ · format ✓. No se corrieron los e2e. Las capturas de `docs/screenshots/` son anteriores a estos cambios.
+Gate: unit 715 ✓ · typecheck ✓ · lint ✓ · format ✓ · e2e demo `motion.spec.ts` 22 ✓ (5 corridas). No se corrió el resto de los e2e. Las capturas de `docs/screenshots/` son anteriores a estos cambios.
 
 ### Bloqueos pendientes
 
