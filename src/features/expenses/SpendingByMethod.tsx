@@ -1,24 +1,24 @@
 "use client";
 
 /**
- * How much was spent with each payment method in a quincena (current by default, ‹ › to move):
+ * How much was spent with each payment method in the quincena chosen in the page header (spec 009):
  * cash and credit cards always show, even at $0; any other account (debit, savings, archived…)
  * only when it was used; "unspecified" when some expense has no method. Cards' debt lives in
  * CardDebtSummary; this is spending, so card payments never count.
  */
 import { ChevronLeft, ChevronRight, CircleHelp } from "lucide-react";
 import { useTranslations } from "next-intl";
-import { useMemo, useState } from "react";
+import { useMemo } from "react";
 import { AccountMark } from "@/components/icons/AccountMark";
 import { Money } from "@/components/money/Money";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useFinanceSnapshot } from "@/data/useFinanceSnapshot";
-import { nextPeriod, periodFromKey, periodOf, previousPeriod } from "@/domain/periods";
+import { nextPeriod, periodOf, previousPeriod } from "@/domain/periods";
 import { spendingByPaymentMethod } from "@/domain/spending-by-method";
 import { ZERO_CENTS } from "@/domain/money";
-import type { FinanceSnapshot, PeriodKey } from "@/domain/types";
+import type { FinanceSnapshot, Period } from "@/domain/types";
 import { formatPeriodRange } from "@/features/income/format";
 import { groupPaymentAccounts } from "@/features/settings/accounts/PaymentAccountOptions";
 import { useToday } from "@/lib/use-today";
@@ -26,16 +26,50 @@ import { selectLocale, usePreferences } from "@/store/preferences";
 
 const selectData = (s: FinanceSnapshot) => ({ expenses: s.expenses, accounts: s.accounts });
 
-export function SpendingByMethod() {
+/** Previous / next quincena (spec 009, FR-019): lives in the Expenses page header. */
+export function PeriodNavigator({
+  period,
+  onChange,
+}: {
+  period: Period;
+  onChange: (period: Period) => void;
+}) {
   const t = useTranslations("expenses");
   const locale = usePreferences(selectLocale);
   const today = useToday();
+  const isCurrent = period.start >= periodOf(today).start;
+  return (
+    <div className="flex items-center gap-1 text-sm" data-testid="expenses-period">
+      <Button
+        variant="outline"
+        size="icon-sm"
+        aria-label={t("previousQuincena")}
+        onClick={() => onChange(previousPeriod(period))}
+        data-testid="spending-previous"
+      >
+        <ChevronLeft aria-hidden="true" />
+      </Button>
+      <span className="px-2 tabular-nums" data-testid="spending-period">
+        {t("spendingPeriod", formatPeriodRange(period.start, locale))}
+      </span>
+      <Button
+        variant="outline"
+        size="icon-sm"
+        aria-label={t("nextQuincena")}
+        disabled={isCurrent}
+        onClick={() => onChange(nextPeriod(period))}
+        data-testid="spending-next"
+      >
+        <ChevronRight aria-hidden="true" />
+      </Button>
+    </div>
+  );
+}
+
+export function SpendingByMethod({ period }: { period: Period }) {
+  const t = useTranslations("expenses");
+  const locale = usePreferences(selectLocale);
   const { data } = useFinanceSnapshot(selectData);
-  // null = follow the current quincena (also after midnight rolls it over).
-  const [selected, setSelected] = useState<PeriodKey | null>(null);
-  const current = periodOf(today);
-  const period = selected ? periodFromKey(selected) : current;
-  const isCurrent = period.start >= current.start;
 
   const summary = useMemo(() => {
     if (!data) return null;
@@ -49,9 +83,6 @@ export function SpendingByMethod() {
     return { spending, rows };
   }, [data, period, locale]);
 
-  const range = formatPeriodRange(period.start, locale);
-  const go = (key: PeriodKey) => setSelected(key === current.key ? null : key);
-
   return (
     <section
       aria-labelledby="spending-by-method"
@@ -63,30 +94,6 @@ export function SpendingByMethod() {
         <h2 id="spending-by-method" className="text-lg font-semibold tracking-tight">
           {t("spendingByMethodTitle")}
         </h2>
-        <div className="flex items-center gap-1 text-sm">
-          <Button
-            variant="outline"
-            size="icon-sm"
-            aria-label={t("previousQuincena")}
-            onClick={() => go(previousPeriod(period).key)}
-            data-testid="spending-previous"
-          >
-            <ChevronLeft aria-hidden="true" />
-          </Button>
-          <span className="px-2 tabular-nums" data-testid="spending-period">
-            {t("spendingPeriod", range)}
-          </span>
-          <Button
-            variant="outline"
-            size="icon-sm"
-            aria-label={t("nextQuincena")}
-            disabled={isCurrent}
-            onClick={() => go(nextPeriod(period).key)}
-            data-testid="spending-next"
-          >
-            <ChevronRight aria-hidden="true" />
-          </Button>
-        </div>
       </div>
 
       <Card className="py-0">

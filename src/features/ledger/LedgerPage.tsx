@@ -26,11 +26,14 @@ import { LedgerTable } from "./LedgerTable";
 import { PageHeader } from "@/components/layout/PageHeader";
 import { navIcon } from "@/components/layout/nav-items";
 import { EmptyState } from "@/components/ui/empty-state";
+import { PageLoadError } from "@/components/data/PageQueryState";
+import { useSnapshotStatus } from "@/data/useFinanceSnapshot";
 
 export const LEDGER_PAGE_SIZE = 25;
 
 export function LedgerPage() {
   const t = useTranslations("ledger");
+  const snapshotStatus = useSnapshotStatus();
   const { data: ledger } = useLedger();
   const { data: lookups } = useLedgerLookups();
   const [filters, setFilters] = useState<LedgerFilterState>(EMPTY_LEDGER_FILTERS);
@@ -73,7 +76,9 @@ export function LedgerPage() {
         }
       />
 
-      {!ledger || !lookups ? (
+      {snapshotStatus.isError ? (
+        <PageLoadError onRetry={snapshotStatus.refetch} />
+      ) : !ledger || !lookups ? (
         <div className="flex flex-col gap-4" aria-busy="true">
           <Skeleton className="h-32" />
           <Skeleton className="h-96" />

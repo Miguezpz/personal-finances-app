@@ -32,7 +32,8 @@
     "deleteFailed": "Couldn't delete it; we restored it.",
     "today": "Today",
     "yesterday": "Yesterday",
-    "deletedItem": "Deleted: {name}"
+    "deletedItem": "Deleted: {name}",
+    "actionsFor": "Actions for {name}"
   },
   "nav": {
     "label": "Main navigation",
@@ -393,7 +394,8 @@
     "subcategoryRequired": "Choose a category.",
     "empty": "No quick expenses yet. Save the ones you repeat, like your daily commute.",
     "note": "Note",
-    "saveAsTemplate": "Save as quick expense"
+    "saveAsTemplate": "Save as quick expense",
+    "actionsFor": "Actions for {name}"
   },
   "recurring": {
     "title": "Recurring expenses",

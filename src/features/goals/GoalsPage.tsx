@@ -27,6 +27,8 @@ import { PageHeader } from "@/components/layout/PageHeader";
 import { navIcon } from "@/components/layout/nav-items";
 import { EmptyState } from "@/components/ui/empty-state";
 import { GOAL_KIND_ICONS } from "@/components/icons/domain-icons";
+import { PageLoadError } from "@/components/data/PageQueryState";
+import { useSnapshotStatus } from "@/data/useFinanceSnapshot";
 
 function ProgressBar({ value, label }: { value: number; label: string }) {
   const pct = Math.max(0, Math.min(100, Math.round(value * 100)));
@@ -46,6 +48,7 @@ function ProgressBar({ value, label }: { value: number; label: string }) {
 
 export function GoalsPage() {
   const t = useTranslations("goals");
+  const snapshotStatus = useSnapshotStatus();
   const tb = useTranslations("buckets");
   const tc = useTranslations("common");
   const locale = usePreferences(selectLocale);
@@ -113,7 +116,9 @@ export function GoalsPage() {
         }
       />
 
-      {!data ? (
+      {snapshotStatus.isError ? (
+        <PageLoadError onRetry={snapshotStatus.refetch} />
+      ) : !data ? (
         <div className="grid gap-4 md:grid-cols-2" aria-busy="true">
           <Skeleton className="h-44" />
           <Skeleton className="h-44" />

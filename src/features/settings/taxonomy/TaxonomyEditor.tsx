@@ -9,13 +9,19 @@
  * category's unless they get their own.
  */
 import { zodResolver } from "@hookform/resolvers/zod";
-import { Archive, ArchiveRestore, Pencil, Plus, Trash2 } from "lucide-react";
+import { Archive, ArchiveRestore, Ellipsis, Pencil, Plus, Trash2 } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import {
   Dialog,
@@ -171,35 +177,45 @@ export function TaxonomyEditor() {
     );
   }
 
+  // Spec 009 (FR-017): the row's actions in one "⋯" menu.
   const itemActions = (kind: TaxonomyKind, item: Category | Subcategory, label: string) => (
-    <div className="flex shrink-0 items-center">
-      <Button
-        variant="ghost"
-        size="icon-sm"
-        aria-label={t("renameItem", { name: label })}
-        onClick={() => setNameDialog({ mode: "rename", kind, item })}
-      >
-        <Pencil aria-hidden="true" />
-      </Button>
-      <Button
-        variant="ghost"
-        size="icon-sm"
-        aria-label={
-          item.archived ? t("restoreItem", { name: label }) : t("archiveItem", { name: label })
-        }
-        onClick={() => toggleArchived(kind, item)}
-      >
-        {item.archived ? <ArchiveRestore aria-hidden="true" /> : <Archive aria-hidden="true" />}
-      </Button>
-      <Button
-        variant="ghost"
-        size="icon-sm"
-        aria-label={t("deleteItem", { name: label })}
-        onClick={() => askDelete(kind, item)}
-      >
-        <Trash2 aria-hidden="true" />
-      </Button>
-    </div>
+    <DropdownMenu modal={false}>
+      <DropdownMenuTrigger asChild>
+        <Button
+          variant="ghost"
+          size="icon-sm"
+          className="shrink-0 pointer-coarse:size-11"
+          aria-label={tc("actionsFor", { name: label })}
+          data-testid="taxonomy-menu"
+        >
+          <Ellipsis aria-hidden="true" />
+        </Button>
+      </DropdownMenuTrigger>
+      <DropdownMenuContent align="end">
+        <DropdownMenuItem
+          onSelect={() => setNameDialog({ mode: "rename", kind, item })}
+          data-testid="taxonomy-rename"
+        >
+          <Pencil aria-hidden="true" />
+          {t("renameItem", { name: label })}
+        </DropdownMenuItem>
+        <DropdownMenuItem
+          onSelect={() => toggleArchived(kind, item)}
+          data-testid="taxonomy-archive"
+        >
+          {item.archived ? <ArchiveRestore aria-hidden="true" /> : <Archive aria-hidden="true" />}
+          {item.archived ? t("restoreItem", { name: label }) : t("archiveItem", { name: label })}
+        </DropdownMenuItem>
+        <DropdownMenuItem
+          variant="destructive"
+          onSelect={() => askDelete(kind, item)}
+          data-testid="taxonomy-delete"
+        >
+          <Trash2 aria-hidden="true" />
+          {t("deleteItem", { name: label })}
+        </DropdownMenuItem>
+      </DropdownMenuContent>
+    </DropdownMenu>
   );
 
   return (

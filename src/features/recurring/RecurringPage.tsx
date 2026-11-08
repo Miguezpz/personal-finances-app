@@ -32,6 +32,8 @@ import { selectLocale, usePreferences } from "@/store/preferences";
 import { usePauseRecurring, useRecurring, useResumeRecurring } from "./hooks";
 import { useDeferredDelete } from "@/features/shared/use-deferred-delete";
 import { RecurringForm } from "./RecurringForm";
+import { PageLoadError } from "@/components/data/PageQueryState";
+import { useSnapshotStatus } from "@/data/useFinanceSnapshot";
 
 const selectLookups = (s: FinanceSnapshot) => ({
   categories: s.categories,
@@ -41,6 +43,7 @@ const selectLookups = (s: FinanceSnapshot) => ({
 
 export function RecurringPage() {
   const t = useTranslations("recurring");
+  const snapshotStatus = useSnapshotStatus();
   const tb = useTranslations("buckets");
   const tc = useTranslations("common");
   const locale = usePreferences(selectLocale);
@@ -93,7 +96,9 @@ export function RecurringPage() {
         }
       />
 
-      {!recurring || !lookups ? (
+      {snapshotStatus.isError ? (
+        <PageLoadError onRetry={snapshotStatus.refetch} />
+      ) : !recurring || !lookups ? (
         <div className="flex flex-col gap-4" aria-busy="true">
           <Skeleton className="h-28" />
           <Skeleton className="h-28" />

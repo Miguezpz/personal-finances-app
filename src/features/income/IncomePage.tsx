@@ -26,6 +26,8 @@ import { openCreate } from "@/store/ui";
 import { formatPeriodRange } from "./format";
 import { useIncomes } from "./hooks";
 import { useDeferredDelete } from "@/features/shared/use-deferred-delete";
+import { PageLoadError } from "@/components/data/PageQueryState";
+import { useSnapshotStatus } from "@/data/useFinanceSnapshot";
 
 const selectAccounts = (s: FinanceSnapshot) => s.accounts;
 const BUCKET_ORDER = { needs: 0, wants: 1, investment: 2 } as const;
@@ -122,6 +124,7 @@ function IncomeCard({
 
 export function IncomePage() {
   const t = useTranslations("income");
+  const snapshotStatus = useSnapshotStatus();
   const tr = useTranslations("rules");
   const tc = useTranslations("common");
   const { data } = useIncomes();
@@ -152,7 +155,9 @@ export function IncomePage() {
         }
       />
 
-      {!data ? (
+      {snapshotStatus.isError ? (
+        <PageLoadError onRetry={snapshotStatus.refetch} />
+      ) : !data ? (
         <div className="flex flex-col gap-4" aria-busy="true">
           <Skeleton className="h-32" />
           <Skeleton className="h-32" />

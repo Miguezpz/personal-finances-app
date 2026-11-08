@@ -17,9 +17,12 @@ import { PageHeader } from "@/components/layout/PageHeader";
 import { navIcon } from "@/components/layout/nav-items";
 import { EmptyState } from "@/components/ui/empty-state";
 import { ArrowDownRight, ArrowUpRight, Scale } from "lucide-react";
+import { PageLoadError } from "@/components/data/PageQueryState";
+import { useSnapshotStatus } from "@/data/useFinanceSnapshot";
 
 export function NetWorthPage() {
   const t = useTranslations("netWorth");
+  const snapshotStatus = useSnapshotStatus();
   const today = useToday();
   const { data } = useFinanceSnapshot();
   const now = useMemo(() => (data ? computeNetWorth(data, today) : undefined), [data, today]);
@@ -52,7 +55,9 @@ export function NetWorthPage() {
     <section className="flex flex-col gap-6">
       <PageHeader icon={navIcon("/net-worth")} title={t("title")} description={t("description")} />
 
-      {!data || !tiles ? (
+      {snapshotStatus.isError ? (
+        <PageLoadError onRetry={snapshotStatus.refetch} />
+      ) : !data || !tiles ? (
         <div className="flex flex-col gap-4" aria-busy="true">
           <Skeleton className="h-24" />
           <Skeleton className="h-80" />

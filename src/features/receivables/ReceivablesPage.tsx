@@ -25,6 +25,8 @@ import { PageHeader } from "@/components/layout/PageHeader";
 import { navIcon } from "@/components/layout/nav-items";
 import { EmptyState } from "@/components/ui/empty-state";
 import { RECEIVABLE_STATUS_ICONS } from "@/components/icons/domain-icons";
+import { PageLoadError } from "@/components/data/PageQueryState";
+import { useSnapshotStatus } from "@/data/useFinanceSnapshot";
 
 const STATUS_STYLE: Record<Installment["status"], string> = {
   collected: "bg-surface-highlight text-success",
@@ -34,6 +36,7 @@ const STATUS_STYLE: Record<Installment["status"], string> = {
 
 export function ReceivablesPage() {
   const t = useTranslations("receivables");
+  const snapshotStatus = useSnapshotStatus();
   const locale = usePreferences(selectLocale);
   const { data } = useReceivables();
   const [collecting, setCollecting] = useState<Installment | null>(null);
@@ -67,7 +70,9 @@ export function ReceivablesPage() {
         }
       />
 
-      {!data ? (
+      {snapshotStatus.isError ? (
+        <PageLoadError onRetry={snapshotStatus.refetch} />
+      ) : !data ? (
         <div className="flex flex-col gap-4" aria-busy="true">
           <Skeleton className="h-20" />
           <Skeleton className="h-64" />
@@ -139,60 +144,104 @@ export function ReceivablesPage() {
                           </span>
                         </div>
                       </CardHeader>
-                      <CardContent className="overflow-x-auto">
-                        <table className="w-full min-w-[34rem] text-sm">
-                          <thead className="text-left text-xs text-muted-foreground">
-                            <tr>
-                              <th className="py-1 font-normal">#</th>
-                              <th className="py-1 font-normal">{t("collectBy")}</th>
-                              <th className="py-1 font-normal">{t("cardDue")}</th>
-                              <th className="py-1 text-right font-normal">{t("amount")}</th>
-                              <th className="py-1 pl-3 font-normal">{t("statusLabel")}</th>
-                              <th className="py-1" />
-                            </tr>
-                          </thead>
-                          <tbody>
-                            {rows.map((i) => (
-                              <tr
-                                key={i.id}
-                                className="border-t"
-                                data-testid="installment-row"
-                                data-status={i.status}
+                      <CardContent>
+                        {/* Spec 009 (FR-018): stacked cards on a phone, the table from md up. */}
+                        <ul className="flex flex-col gap-2 md:hidden">
+                          {rows.map((i) => (
+                            <li
+                              key={i.id}
+                              className="flex flex-col gap-2 rounded-lg border p-3 text-sm"
+                              data-testid="installment-card"
+                              data-status={i.status}
+                            >
+                              <div className="flex items-center justify-between gap-3">
+                                <span className="font-medium">
+                                  #{i.seq} · {formatDate(i.dueOn, locale, "short")}
+                                </span>
+                                <Money cents={i.amount} className="font-semibold" />
+                              </div>
+                              <div className="flex flex-wrap items-center justify-between gap-2">
+                                <span className="text-xs text-muted-foreground">
+                                  {t("cardDue")}: {formatDate(i.cardDueOn, locale, "short")}
+                                </span>
+                                <Badge className={cn("font-normal", STATUS_STYLE[i.status])}>
+                                  <StatusIcon status={i.status} />
+                                  {t(`status.${i.status}`)}
+                                  {i.status === "partial" && (
+                                    <>
+                                      {" "}
+                                      · <Money cents={i.collected} />
+                                    </>
+                                  )}
+                                </Badge>
+                              </div>
+                              <Button
+                                variant="outline"
+                                size="sm"
+                                className="self-start pointer-coarse:min-h-11"
+                                onClick={() => setCollecting(i)}
+                                data-testid="record-collection-card"
                               >
-                                <td className="py-2">{i.seq}</td>
-                                <td className="py-2">{formatDate(i.dueOn, locale, "short")}</td>
-                                <td className="py-2 text-muted-foreground">
-                                  {formatDate(i.cardDueOn, locale, "short")}
-                                </td>
-                                <td className="py-2 text-right">
-                                  <Money cents={i.amount} />
-                                </td>
-                                <td className="py-2 pl-3">
-                                  <Badge className={cn("font-normal", STATUS_STYLE[i.status])}>
-                                    <StatusIcon status={i.status} />
-                                    {t(`status.${i.status}`)}
-                                    {i.status === "partial" && (
-                                      <>
-                                        {" "}
-                                        · <Money cents={i.collected} />
-                                      </>
-                                    )}
-                                  </Badge>
-                                </td>
-                                <td className="py-2 text-right">
-                                  <Button
-                                    variant="ghost"
-                                    size="sm"
-                                    onClick={() => setCollecting(i)}
-                                    data-testid="record-collection"
-                                  >
-                                    {t("record")}
-                                  </Button>
-                                </td>
+                                {t("record")}
+                              </Button>
+                            </li>
+                          ))}
+                        </ul>
+                        <div className="overflow-x-auto max-md:hidden">
+                          <table className="w-full min-w-[34rem] text-sm">
+                            <thead className="text-left text-xs text-muted-foreground">
+                              <tr>
+                                <th className="py-1 font-normal">#</th>
+                                <th className="py-1 font-normal">{t("collectBy")}</th>
+                                <th className="py-1 font-normal">{t("cardDue")}</th>
+                                <th className="py-1 text-right font-normal">{t("amount")}</th>
+                                <th className="py-1 pl-3 font-normal">{t("statusLabel")}</th>
+                                <th className="py-1" />
                               </tr>
-                            ))}
-                          </tbody>
-                        </table>
+                            </thead>
+                            <tbody>
+                              {rows.map((i) => (
+                                <tr
+                                  key={i.id}
+                                  className="border-t"
+                                  data-testid="installment-row"
+                                  data-status={i.status}
+                                >
+                                  <td className="py-2">{i.seq}</td>
+                                  <td className="py-2">{formatDate(i.dueOn, locale, "short")}</td>
+                                  <td className="py-2 text-muted-foreground">
+                                    {formatDate(i.cardDueOn, locale, "short")}
+                                  </td>
+                                  <td className="py-2 text-right">
+                                    <Money cents={i.amount} />
+                                  </td>
+                                  <td className="py-2 pl-3">
+                                    <Badge className={cn("font-normal", STATUS_STYLE[i.status])}>
+                                      <StatusIcon status={i.status} />
+                                      {t(`status.${i.status}`)}
+                                      {i.status === "partial" && (
+                                        <>
+                                          {" "}
+                                          · <Money cents={i.collected} />
+                                        </>
+                                      )}
+                                    </Badge>
+                                  </td>
+                                  <td className="py-2 text-right">
+                                    <Button
+                                      variant="ghost"
+                                      size="sm"
+                                      onClick={() => setCollecting(i)}
+                                      data-testid="record-collection"
+                                    >
+                                      {t("record")}
+                                    </Button>
+                                  </td>
+                                </tr>
+                              ))}
+                            </tbody>
+                          </table>
+                        </div>
                       </CardContent>
                     </Card>
                   </li>

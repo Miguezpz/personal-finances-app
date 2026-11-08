@@ -32,7 +32,8 @@
     "deleteFailed": "No se pudo borrar; lo restauramos.",
     "today": "Hoy",
     "yesterday": "Ayer",
-    "deletedItem": "Borrado: {name}"
+    "deletedItem": "Borrado: {name}",
+    "actionsFor": "Acciones de {name}"
   },
   "nav": {
     "label": "Navegación principal",
@@ -393,7 +394,8 @@
     "subcategoryRequired": "Elige una categoría.",
     "empty": "Aún no tienes gastos rápidos. Guarda los que repites, como tu transporte diario.",
     "note": "Nota",
-    "saveAsTemplate": "Guardar como gasto rápido"
+    "saveAsTemplate": "Guardar como gasto rápido",
+    "actionsFor": "Acciones de {name}"
   },
   "recurring": {
     "title": "Gastos fijos",

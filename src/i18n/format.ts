@@ -49,7 +49,7 @@ export function formatMoney(
   return currency === "MXN" || currency === "EUR" ? text : `${text} ${currency}`;
 }
 
-export type DateStyle = "short" | "medium" | "long";
+export type DateStyle = "short" | "medium" | "long" | "day";
 
 export function formatDate(date: IsoDate, locale: Locale, style: DateStyle = "medium"): string {
   const { year, month, day } = parseIsoDate(date);
@@ -60,6 +60,8 @@ export function formatDate(date: IsoDate, locale: Locale, style: DateStyle = "me
         // Business dates have no time: format the calendar date in UTC so it never shifts.
         timeZone: "UTC",
         ...(style === "short" && { day: "numeric", month: "short" }),
+        // Day headers of movement lists (spec 009): "Wed, Nov 5".
+        ...(style === "day" && { weekday: "short", day: "numeric", month: "short" }),
         ...(style === "medium" && { day: "numeric", month: "short", year: "numeric" }),
         ...(style === "long" && {
           weekday: "long",

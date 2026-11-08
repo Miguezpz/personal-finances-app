@@ -16,6 +16,23 @@ export interface QueryStatus {
   refetch: () => void;
 }
 
+/** The error state on its own, for pages whose skeleton/content branches are already inline. */
+export function PageLoadError({ onRetry }: { onRetry: () => void }) {
+  const tc = useTranslations("common");
+  return (
+    <Alert variant="destructive" data-testid="page-error">
+      <CircleAlert aria-hidden="true" />
+      <AlertTitle>{tc("unexpectedError")}</AlertTitle>
+      <AlertDescription className="flex flex-col items-start gap-2">
+        {tc("loadError")}
+        <Button variant="outline" size="sm" onClick={onRetry} data-testid="page-retry">
+          {tc("retry")}
+        </Button>
+      </AlertDescription>
+    </Alert>
+  );
+}
+
 export function PageQueryState({
   status,
   skeleton,
@@ -25,20 +42,7 @@ export function PageQueryState({
   skeleton: ReactNode;
   children: ReactNode;
 }) {
-  const tc = useTranslations("common");
-  if (status.isError)
-    return (
-      <Alert variant="destructive" data-testid="page-error">
-        <CircleAlert aria-hidden="true" />
-        <AlertTitle>{tc("unexpectedError")}</AlertTitle>
-        <AlertDescription className="flex flex-col items-start gap-2">
-          {tc("loadError")}
-          <Button variant="outline" size="sm" onClick={status.refetch} data-testid="page-retry">
-            {tc("retry")}
-          </Button>
-        </AlertDescription>
-      </Alert>
-    );
+  if (status.isError) return <PageLoadError onRetry={status.refetch} />;
   if (status.isPending) return <>{skeleton}</>;
   return <>{children}</>;
 }

@@ -6,13 +6,19 @@
  * whose subcategory is archived is flagged unavailable (FR-011); one whose payment method is
  * archived says it's recorded without one. `#quick-expenses` is the Dashboard's "create" anchor.
  */
-import { ArrowDown, ArrowUp, CircleAlert, Pencil, Plus, Trash2, Zap } from "lucide-react";
+import { ArrowDown, ArrowUp, CircleAlert, Ellipsis, Pencil, Plus, Trash2, Zap } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { useState } from "react";
 import { toast } from "sonner";
 import { CategoryIcon } from "@/components/icons/CategoryIcon";
 import { Money } from "@/components/money/Money";
 import { Button } from "@/components/ui/button";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 import {
   Dialog,
   DialogContent,
@@ -153,46 +159,52 @@ export function QuickExpensesSection() {
                     </span>
                   )}
                 </span>
-                <span className="flex items-center justify-end gap-1">
-                  <Button
-                    variant="ghost"
-                    size="icon"
-                    aria-label={t("moveUp", { name: template.name })}
-                    disabled={index === 0}
-                    onClick={() => move(template.id, "up")}
-                    data-testid="template-up"
-                  >
-                    <ArrowUp aria-hidden="true" />
-                  </Button>
-                  <Button
-                    variant="ghost"
-                    size="icon"
-                    aria-label={t("moveDown", { name: template.name })}
-                    disabled={index === templates.length - 1}
-                    onClick={() => move(template.id, "down")}
-                    data-testid="template-down"
-                  >
-                    <ArrowDown aria-hidden="true" />
-                  </Button>
-                  <Button
-                    variant="ghost"
-                    size="icon"
-                    aria-label={`${t("edit")} ${template.name}`}
-                    onClick={() => setEditing({ open: true, template })}
-                    data-testid="template-edit"
-                  >
-                    <Pencil aria-hidden="true" />
-                  </Button>
-                  <Button
-                    variant="ghost"
-                    size="icon"
-                    aria-label={`${t("delete")} ${template.name}`}
-                    onClick={() => setToDelete(template)}
-                    data-testid="template-delete"
-                  >
-                    <Trash2 aria-hidden="true" />
-                  </Button>
-                </span>
+                {/* Spec 009 (FR-017): the row's actions in one "⋯" menu. */}
+                <DropdownMenu modal={false}>
+                  <DropdownMenuTrigger asChild>
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      aria-label={t("actionsFor", { name: template.name })}
+                      data-testid="template-menu"
+                    >
+                      <Ellipsis aria-hidden="true" />
+                    </Button>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent align="end">
+                    <DropdownMenuItem
+                      disabled={index === 0}
+                      onSelect={() => move(template.id, "up")}
+                      data-testid="template-up"
+                    >
+                      <ArrowUp aria-hidden="true" />
+                      {t("moveUp", { name: template.name })}
+                    </DropdownMenuItem>
+                    <DropdownMenuItem
+                      disabled={index === templates.length - 1}
+                      onSelect={() => move(template.id, "down")}
+                      data-testid="template-down"
+                    >
+                      <ArrowDown aria-hidden="true" />
+                      {t("moveDown", { name: template.name })}
+                    </DropdownMenuItem>
+                    <DropdownMenuItem
+                      onSelect={() => setEditing({ open: true, template })}
+                      data-testid="template-edit"
+                    >
+                      <Pencil aria-hidden="true" />
+                      {t("edit")}
+                    </DropdownMenuItem>
+                    <DropdownMenuItem
+                      variant="destructive"
+                      onSelect={() => setToDelete(template)}
+                      data-testid="template-delete"
+                    >
+                      <Trash2 aria-hidden="true" />
+                      {t("delete")}
+                    </DropdownMenuItem>
+                  </DropdownMenuContent>
+                </DropdownMenu>
               </li>
             );
           })}

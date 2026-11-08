@@ -63,23 +63,23 @@ description: "Task list for spec 009 — Flujos y formularios con menos fricció
 
 ## Phase 5: User Story 3 - Toda página se recupera de un error (Priority: P1)
 
-- [ ] T024 [US3] Aplicar `PageQueryState` + `useSnapshotStatus` en ExpensesPage, LedgerPage, IncomePage, CreditPage, ReceivablesPage, RecurringPage, GoalsPage y NetWorthPage (src/features/*), conservando sus esqueletos actuales
-- [ ] T025 [P] [US3] Prueba de componente de `PageQueryState` (cargando, error con Reintentar → `refetch`, contenido) en tests/unit/components/page-query-state.test.tsx
+- [X] T024 [US3] Aplicar `PageQueryState` + `useSnapshotStatus` en ExpensesPage, LedgerPage, IncomePage, CreditPage, ReceivablesPage, RecurringPage, GoalsPage y NetWorthPage (src/features/*), conservando sus esqueletos actuales
+- [X] T025 [P] [US3] Prueba de componente de `PageQueryState` (cargando, error con Reintentar → `refetch`, contenido) en tests/unit/components/page-query-state.test.tsx
 
 ---
 
 ## Phase 6: User Story 4 - Listas cómodas en el teléfono (Priority: P2)
 
-- [ ] T026 [US4] ExpensesPage: agrupar por día con `groupByDay` (`day-group`, `data-label`); en móvil la fila completa es un botón que abre la edición (gasto) o el pago; en escritorio, acciones visibles al hover o al foco
-- [ ] T027 [P] [US4] Menú ⋯ (DropdownMenu) para las acciones de las filas de plantillas en src/features/expenses/QuickExpensesSection.tsx y de taxonomía en src/features/settings/taxonomy/TaxonomyEditor.tsx (conservar testids de cada acción como ítems del menú)
-- [ ] T028 [P] [US4] ReceivablesPage: cuotas como tarjetas `installment-card` en móvil (`md:hidden`) y tabla solo en escritorio (src/features/receivables/ReceivablesPage.tsx)
+- [X] T026 [US4] ExpensesPage: agrupar por día con `groupByDay` (`day-group`, `data-label`); en móvil la fila completa es un botón que abre la edición (gasto) o el pago; en escritorio, acciones visibles al hover o al foco
+- [X] T027 [P] [US4] Menú ⋯ (DropdownMenu) para las acciones de las filas de plantillas en src/features/expenses/QuickExpensesSection.tsx y de taxonomía en src/features/settings/taxonomy/TaxonomyEditor.tsx (conservar testids de cada acción como ítems del menú)
+- [X] T028 [P] [US4] ReceivablesPage: cuotas como tarjetas `installment-card` en móvil (`md:hidden`) y tabla solo en escritorio (src/features/receivables/ReceivablesPage.tsx)
 - [ ] T029 [US4] e2e demo a 390 px: fila tocable abre la edición con `delete-expense`, grupos por día, cuotas como tarjetas sin overflow; actualizar specs que usaban los iconos de fila o de taxonomía/plantillas (tests/e2e/flows.spec.ts y los afectados)
 
 ---
 
 ## Phase 7: User Story 5 - Encontrar y filtrar (Priority: P2)
 
-- [ ] T030 [US5] Gastos: selector de quincena en el `PageHeader` (`expenses-period`), que filtra el resumen (`SpendingByMethod` recibe `period`) y la lista; chips de bucket y método + `clear-filters`; estado en la URL (`periodo`, `bucket`, `metodo`) con `useSearchParams`/`router.replace`; `<Suspense>` en src/app/(app)/expenses/page.tsx
+- [X] T030 [US5] Gastos: selector de quincena en el `PageHeader` (`expenses-period`), que filtra el resumen (`SpendingByMethod` recibe `period`) y la lista; chips de bucket y método + `clear-filters`; estado en la URL (`periodo`, `bucket`, `metodo`) con `useSearchParams`/`router.replace`; `<Suspense>` en src/app/(app)/expenses/page.tsx
 - [ ] T031 [US5] Bitácora: filtros en la URL (`desde`, `hasta`, `tipo`, `categoria`, `cuenta`, `terceros`, `q` ≤ 100 caracteres, `preset`) con validación, presets `ledger-preset-*`, búsqueda `ledger-search` (src/features/ledger/{filters.ts,LedgerFilters.tsx,LedgerPage.tsx}); `<Suspense>` en src/app/(app)/ledger/page.tsx
 - [ ] T032 [US5] Filas de Bitácora de gasto, ingreso y pago de tarjeta abren la edición (`data-editable`) en src/features/ledger/LedgerTable.tsx
 - [ ] T033 [US5] e2e demo: chips de Gastos y URL; preset + búsqueda de Bitácora en la URL y conservados al recargar; fila de Bitácora abre la edición (tests/e2e/flows.spec.ts; ajustar us8-settings-ledger si cambia)

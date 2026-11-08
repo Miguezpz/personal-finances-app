@@ -15,9 +15,12 @@ import { useCardStatements } from "./use-card-statements";
 import { PageHeader } from "@/components/layout/PageHeader";
 import { navIcon } from "@/components/layout/nav-items";
 import { EmptyState } from "@/components/ui/empty-state";
+import { PageLoadError } from "@/components/data/PageQueryState";
+import { useSnapshotStatus } from "@/data/useFinanceSnapshot";
 
 export function CreditPage() {
   const t = useTranslations("credit");
+  const snapshotStatus = useSnapshotStatus();
   const today = useToday();
   const cards = useCardStatements();
   const events = useCreditTimeline(today);
@@ -26,7 +29,9 @@ export function CreditPage() {
     <section className="flex flex-col gap-6">
       <PageHeader icon={navIcon("/credit")} title={t("title")} description={t("description")} />
 
-      {!cards || !events ? (
+      {snapshotStatus.isError ? (
+        <PageLoadError onRetry={snapshotStatus.refetch} />
+      ) : !cards || !events ? (
         <div className="flex flex-col gap-4" aria-busy="true">
           <Skeleton className="h-36" />
           <Skeleton className="h-96" />
