@@ -10,7 +10,7 @@ import { useFinanceSnapshot } from "@/data/useFinanceSnapshot";
 import { cents } from "@/domain/money";
 import type { FinanceSnapshot } from "@/domain/types";
 import { UNDO_TOAST_MS } from "@/features/expenses/quick-expense-hooks";
-import { useDeferredDelete } from "@/features/shared/use-deferred-delete";
+import { ROW_EXIT_MS, useDeferredDelete } from "@/features/shared/use-deferred-delete";
 import { usePendingDeletes } from "@/store/pending-deletes";
 import { emptySnapshot, makeExpense } from "../../utils/fixtures";
 import { createMemoryProvider } from "../../utils/memory-provider";
@@ -28,17 +28,25 @@ function useHarness() {
 
 beforeEach(() => {
   vi.useFakeTimers({ toFake: ["setTimeout", "clearTimeout"], shouldAdvanceTime: true });
-  usePendingDeletes.setState({ entries: [] });
+  usePendingDeletes.setState({ entries: [], leaving: new Set() });
 });
 afterEach(() => vi.useRealTimers());
 
 describe("useDeferredDelete", () => {
-  it("hides at once, Undo restores without calling the server", async () => {
+  it("fades the row out, hides it, and Undo restores it without calling the server", async () => {
     const provider = createMemoryProvider(snapshot());
     const { result } = renderHookWithProviders(useHarness, { provider });
     await waitFor(() => expect(result.current.ids).toEqual([coffee.id]));
 
     act(() => result.current.remove({ kind: "expense", id: coffee.id, label: "Deleted" }));
+    // Spec 010: first the exit animation…
+    expect(usePendingDeletes.getState().leaving.has(`expense:${coffee.id}`)).toBe(true);
+    expect(result.current.ids).toEqual([coffee.id]);
+    // …then hidden.
+    act(() => {
+      vi.advanceTimersByTime(ROW_EXIT_MS);
+    });
+    expect(usePendingDeletes.getState().leaving.size).toBe(0);
     expect(result.current.ids).toEqual([]);
 
     // Undo = dropping the pending entry (what the toast's action does).

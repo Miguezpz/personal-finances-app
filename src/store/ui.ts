@@ -33,6 +33,8 @@ export interface UiState {
   dashboardIntroPlayed: boolean;
   /** Mobile appearance panel (spec 003, FR-021; renamed in spec 008, FR-016). */
   preferencesOpen: boolean;
+  /** The row just edited successfully, for its highlight (spec 010, FR-006); `at` replays it. */
+  flashed: { id: string; at: number } | null;
 }
 
 export interface UiActions {
@@ -45,6 +47,7 @@ export interface UiActions {
   setOffline(offline: boolean): void;
   markDashboardIntroPlayed(): void;
   setPreferencesOpen(open: boolean): void;
+  flash(id: string): void;
 }
 
 export type UiStore = UiState & UiActions;
@@ -57,6 +60,7 @@ export const useUi = create<UiStore>()((set) => ({
   offline: false,
   dashboardIntroPlayed: false,
   preferencesOpen: false,
+  flashed: null,
   setSidebarOpen: (sidebarOpen) => set({ sidebarOpen }),
   setCreateSheetOpen: (createSheetOpen) => set({ createSheetOpen }),
   openCreate: (activeDialog) =>
@@ -66,6 +70,7 @@ export const useUi = create<UiStore>()((set) => ({
   setOffline: (offline) => set({ offline }),
   markDashboardIntroPlayed: () => set({ dashboardIntroPlayed: true }),
   setPreferencesOpen: (preferencesOpen) => set({ preferencesOpen }),
+  flash: (id) => set({ flashed: { id, at: Date.now() } }),
 }));
 
 /** Opens a create/edit dialog from anywhere (event handlers, shortcuts). */

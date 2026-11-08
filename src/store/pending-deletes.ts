@@ -14,12 +14,25 @@ export interface PendingDelete {
 
 interface PendingDeletesStore {
   entries: readonly PendingDelete[];
+  /** Rows playing their exit animation before they're hidden (spec 010, FR-005). */
+  leaving: ReadonlySet<string>;
   add(entry: PendingDelete): void;
   remove(key: string): void;
+  markLeaving(key: string): void;
+  clearLeaving(key: string): void;
 }
 
 export const usePendingDeletes = create<PendingDeletesStore>()((set) => ({
   entries: [],
+  leaving: new Set(),
+  markLeaving: (key) => set((s) => ({ leaving: new Set([...s.leaving, key]) })),
+  clearLeaving: (key) =>
+    set((s) => {
+      if (!s.leaving.has(key)) return s;
+      const leaving = new Set(s.leaving);
+      leaving.delete(key);
+      return { leaving };
+    }),
   add: (entry) =>
     set((s) => ({ entries: [...s.entries.filter((e) => e.key !== entry.key), entry] })),
   remove: (key) => set((s) => ({ entries: s.entries.filter((e) => e.key !== key) })),

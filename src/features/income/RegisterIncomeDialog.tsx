@@ -18,6 +18,7 @@ import { Controller, useForm, useWatch } from "react-hook-form";
 import { toast } from "sonner";
 import { rememberLastUsed, useLastUsedDefaults } from "@/features/shared/last-used";
 import { notifySaveFailed } from "@/features/shared/retry-toast";
+import { useUi } from "@/store/ui";
 import { Money } from "@/components/money/Money";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
@@ -187,6 +188,8 @@ export function RegisterIncomeDialog({ open, onOpenChange, income, draft }: Prop
       () => {
         toast.success(t("saved"));
         rememberLastUsed({ depositAccountId: values.depositAccountId });
+        // Spec 010 (FR-006): the edited income's card highlights.
+        if (income) useUi.getState().flash(income.id);
       },
       (e: unknown) =>
         notifySaveFailed(

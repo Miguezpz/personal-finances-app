@@ -48,6 +48,7 @@ import { useDeferredDelete } from "@/features/shared/use-deferred-delete";
 import { formatDate } from "@/i18n/format";
 import { useToday } from "@/lib/use-today";
 import { cn } from "@/lib/utils";
+import { useRowMotion } from "@/components/motion/use-row-motion";
 import { selectLocale, usePreferences } from "@/store/preferences";
 import { openCreate } from "@/store/ui";
 import { CardDebtSummary } from "./CardDebtSummary";
@@ -160,6 +161,11 @@ export function ExpensesPage() {
     [inPeriod, filtering, bucket, method],
   );
   const groups = useMemo(() => groupByDay(rows.slice(0, visible), today), [rows, visible, today]);
+  // Spec 010: rows that appear later animate in, deleted ones fade out, an edited one highlights.
+  const rowKey = (row: Row) =>
+    `${row.kind === "expense" ? "expense" : "card-payment"}:${row.item.id}`;
+  const rowKeys = useMemo(() => (data ? inPeriod.map(rowKey) : undefined), [data, inPeriod]);
+  const motion = useRowMotion(rowKeys, period.key);
 
   const subName = (id: string) => {
     const sub = data?.subcategories.find((x) => x.id === id);
@@ -325,8 +331,20 @@ export function ExpensesPage() {
                       <li
                         key={`${row.kind}-${row.item.id}`}
                         data-testid={row.kind === "expense" ? "expense-row" : "payment-row"}
-                        className="group/row relative grid grid-cols-[1fr_auto] items-center gap-x-3 px-4 py-3 text-sm"
+                        data-row-state={motion.state(rowKey(row), row.item.id)}
+                        className={cn(
+                          "group/row relative isolate grid grid-cols-[1fr_auto] items-center gap-x-3 px-4 py-3 text-sm",
+                          motion.className(rowKey(row), row.item.id),
+                        )}
                       >
+                        {motion.flashKey(row.item.id) !== null && (
+                          <span
+                            key={motion.flashKey(row.item.id)}
+                            aria-hidden="true"
+                            className="pointer-events-none absolute inset-0 -z-10 animate-balance-highlight bg-transparent"
+                            data-testid="row-flash"
+                          />
+                        )}
                         {row.kind === "expense" && (
                           // Mobile: the whole row opens its edit dialog (delete is inside it).
                           <button

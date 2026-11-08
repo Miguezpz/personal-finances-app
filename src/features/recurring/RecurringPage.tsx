@@ -34,6 +34,7 @@ import { useDeferredDelete } from "@/features/shared/use-deferred-delete";
 import { RecurringForm } from "./RecurringForm";
 import { PageLoadError } from "@/components/data/PageQueryState";
 import { useSnapshotStatus } from "@/data/useFinanceSnapshot";
+import { useRowMotion } from "@/components/motion/use-row-motion";
 
 const selectLookups = (s: FinanceSnapshot) => ({
   categories: s.categories,
@@ -66,6 +67,8 @@ export function RecurringPage() {
   const sorted = [...(recurring ?? [])].sort((a, b) =>
     isPaused(a) === isPaused(b) ? a.chargeDay - b.chargeDay : isPaused(a) ? 1 : -1,
   );
+  // Spec 010: added recurring expenses animate in; deleted ones fade out.
+  const motion = useRowMotion(recurring ? sorted.map((r) => `recurring:${r.id}`) : undefined);
 
   function togglePause(r: RecurringExpense) {
     if (r.endedOn === null) {
@@ -114,7 +117,11 @@ export function RecurringPage() {
             const account = lookups.accounts.find((a) => a.id === r.paymentAccountId);
             const BucketIcon = BUCKET_ICONS[r.bucket];
             return (
-              <li key={r.id}>
+              <li
+                key={r.id}
+                data-row-state={motion.state(`recurring:${r.id}`, r.id)}
+                className={motion.className(`recurring:${r.id}`, r.id)}
+              >
                 <Card
                   data-testid="recurring-card"
                   data-status={paused ? "paused" : "active"}

@@ -8,12 +8,17 @@ import { useMemo, useState } from "react";
 
 const EMPTY: ReadonlySet<string> = new Set();
 
-export function useNewRowIds(ids: readonly string[] | undefined): ReadonlySet<string> {
-  const [initial, setInitial] = useState<ReadonlySet<string> | null>(null);
+/** `scope`: when it changes (e.g. another quincena), the list counts as freshly loaded again. */
+export function useNewRowIds(
+  ids: readonly string[] | undefined,
+  scope: string = "",
+): ReadonlySet<string> {
+  const [initial, setInitial] = useState<{ scope: string; ids: ReadonlySet<string> } | null>(null);
   // Adjusting state while rendering (React's documented pattern): remember the first loaded ids.
-  if (ids && initial === null) setInitial(new Set(ids));
+  if (ids && (initial === null || initial.scope !== scope))
+    setInitial({ scope, ids: new Set(ids) });
   return useMemo(() => {
-    if (!ids || !initial) return EMPTY;
-    return new Set(ids.filter((id) => !initial.has(id)));
-  }, [ids, initial]);
+    if (!ids || !initial || initial.scope !== scope) return EMPTY;
+    return new Set(ids.filter((id) => !initial.ids.has(id)));
+  }, [ids, initial, scope]);
 }

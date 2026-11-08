@@ -34,9 +34,9 @@ description: "Task list for spec 010 — Animaciones y pulido"
 
 ## Phase 4: User Story 2 - Ver qué cambió en las listas (Priority: P2)
 
-- [ ] T010 [US2] `pending-deletes`: conjunto `leaving` con `markLeaving`/`clearLeaving`; `useDeferredDelete` marca `leaving`, espera 180 ms (0 con movimiento reducido) y luego oculta; Deshacer limpia ambos (src/store/pending-deletes.ts, src/features/shared/use-deferred-delete.ts); actualizar tests/unit/features/deferred-delete.test.tsx
-- [ ] T011 [US2] `useUi.flash(id)` / `flashed` (src/store/ui.ts); llamarlo tras editar con éxito en AddExpenseDialog y RegisterIncomeDialog
-- [ ] T012 [US2] Filas de ExpensesPage, IncomePage (tarjetas) y RecurringPage: `animate-row-in` para ids nuevos (`useNewRowIds`), `animate-row-out` si están en `leaving`, capa de pulso con `key={flashed.at}` cuando `flashed.id` coincide; `data-row-state` para las pruebas
+- [X] T010 [US2] `pending-deletes`: conjunto `leaving` con `markLeaving`/`clearLeaving`; `useDeferredDelete` marca `leaving`, espera 180 ms (0 con movimiento reducido) y luego oculta; Deshacer limpia ambos (src/store/pending-deletes.ts, src/features/shared/use-deferred-delete.ts); actualizar tests/unit/features/deferred-delete.test.tsx
+- [X] T011 [US2] `useUi.flash(id)` / `flashed` (src/store/ui.ts); llamarlo tras editar con éxito en AddExpenseDialog y RegisterIncomeDialog
+- [X] T012 [US2] Filas de ExpensesPage, IncomePage (tarjetas) y RecurringPage: `animate-row-in` para ids nuevos (`useNewRowIds`), `animate-row-out` si están en `leaving`, capa de pulso con `key={flashed.at}` cuando `flashed.id` coincide; `data-row-state` para las pruebas
 
 ## Phase 5: User Story 3 - Montos y metas (Priority: P3)
 

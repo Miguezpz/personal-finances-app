@@ -23,6 +23,7 @@ import type { Account, FinanceSnapshot, Income, IncomeAllocation } from "@/domai
 import { formatDate } from "@/i18n/format";
 import { selectLocale, usePreferences } from "@/store/preferences";
 import { openCreate } from "@/store/ui";
+import { useRowMotion } from "@/components/motion/use-row-motion";
 import { formatPeriodRange } from "./format";
 import { useIncomes } from "./hooks";
 import { useDeferredDelete } from "@/features/shared/use-deferred-delete";
@@ -39,7 +40,9 @@ function IncomeCard({
   accountOf,
   onEdit,
   onDelete,
+  highlight = false,
 }: {
+  highlight?: boolean;
   income: Income;
   allocations: readonly IncomeAllocation[];
   accountName: (id: string | null) => string;
@@ -54,7 +57,7 @@ function IncomeCard({
   const TypeIcon = INCOME_TYPE_ICONS[income.incomeType];
 
   return (
-    <Card data-testid="income-card">
+    <Card data-testid="income-card" className={highlight ? "animate-balance-highlight" : undefined}>
       <CardHeader className="flex flex-row items-start justify-between gap-4">
         <div className="flex min-w-0 flex-col gap-1">
           <CardTitle className="flex flex-wrap items-center gap-2 text-base">
@@ -136,6 +139,8 @@ export function IncomePage() {
   const incomes = data
     ? [...data.incomes].sort((a, b) => (a.receivedOn < b.receivedOn ? 1 : -1))
     : [];
+  // Spec 010: added incomes animate in, deleted ones fade out, an edited one highlights.
+  const motion = useRowMotion(data ? incomes.map((i) => `income:${i.id}`) : undefined);
 
   return (
     <section className="flex flex-col gap-6">
@@ -182,8 +187,14 @@ export function IncomePage() {
       ) : (
         <ul className="flex flex-col gap-4">
           {incomes.map((income) => (
-            <li key={income.id}>
+            <li
+              key={income.id}
+              data-row-state={motion.state(`income:${income.id}`, income.id)}
+              className={motion.className(`income:${income.id}`, income.id)}
+            >
               <IncomeCard
+                key={motion.flashKey(income.id) ?? "static"}
+                highlight={motion.flashKey(income.id) !== null}
                 income={income}
                 allocations={data.allocations.filter((a) => a.incomeId === income.id)}
                 accountName={accountName}

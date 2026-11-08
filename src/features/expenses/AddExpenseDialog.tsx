@@ -47,6 +47,7 @@ import { PaymentAccountOptions } from "@/features/settings/accounts/PaymentAccou
 import { rememberLastUsed, useLastUsedDefaults } from "@/features/shared/last-used";
 import { notifySaveFailed } from "@/features/shared/retry-toast";
 import { useDeferredDelete } from "@/features/shared/use-deferred-delete";
+import { useUi } from "@/store/ui";
 import { bucketOfSubcategory, useCreateExpense, useUpdateExpense } from "./hooks";
 import { QuickExpenseBar } from "./QuickExpenseBar";
 import { useCreateTemplate } from "./quick-expense-hooks";
@@ -145,6 +146,8 @@ export function AddExpenseDialog({ open, onOpenChange, expense, draft }: Props) 
     const typed = form.getValues();
     const onSuccess = () => {
       toast.success(keepOpen ? t("savedAddAnother") : t("saved"));
+      // Spec 010 (FR-006): the edited row highlights; a new one has its own entrance.
+      if (expense) useUi.getState().flash(expense.id);
       rememberLastUsed({
         paymentAccountId: values.paymentAccountId,
         subcategoryId: values.subcategoryId,

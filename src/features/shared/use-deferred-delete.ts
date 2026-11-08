@@ -64,6 +64,12 @@ interface Scheduled {
   commit: () => void;
 }
 const scheduled = new Map<string, Scheduled>();
+const leavingTimers = new Map<string, ReturnType<typeof setTimeout>>();
+/** How long a deleted row fades out before it's hidden (spec 010, FR-005). */
+export const ROW_EXIT_MS = 180;
+const prefersReducedMotion = () =>
+  typeof window !== "undefined" &&
+  window.matchMedia?.("(prefers-reduced-motion: reduce)").matches === true;
 let pagehideBound = false;
 
 function bindPagehide() {
@@ -120,13 +126,28 @@ export function useDeferredDelete(): {
       bindPagehide();
       const key = `${kind}:${id}`;
       const spec = SPECS[kind];
-      usePendingDeletes.getState().add({ key, apply: (s) => spec.apply(s, id) });
+      const hide = () => {
+        usePendingDeletes.getState().clearLeaving(key);
+        usePendingDeletes.getState().add({ key, apply: (s) => spec.apply(s, id) });
+      };
+      // Spec 010 (FR-005): the row fades out first, then it's hidden (at once under reduced motion).
+      if (prefersReducedMotion()) hide();
+      else {
+        usePendingDeletes.getState().markLeaving(key);
+        leavingTimers.set(key, setTimeout(hide, ROW_EXIT_MS));
+      }
 
       const commit = () => {
         const entry = scheduled.get(key);
         if (!entry) return;
         clearTimeout(entry.timer);
         scheduled.delete(key);
+        const exit = leavingTimers.get(key);
+        if (exit !== undefined) {
+          clearTimeout(exit);
+          leavingTimers.delete(key);
+          usePendingDeletes.getState().clearLeaving(key);
+        }
         void commitDelete(queryClient, provider, kind, id, () => toast.error(tc("deleteFailed")));
       };
       scheduled.set(key, { timer: setTimeout(commit, UNDO_TOAST_MS), commit });
@@ -140,6 +161,9 @@ export function useDeferredDelete(): {
             if (!entry) return; // already committed
             clearTimeout(entry.timer);
             scheduled.delete(key);
+            clearTimeout(leavingTimers.get(key));
+            leavingTimers.delete(key);
+            usePendingDeletes.getState().clearLeaving(key);
             usePendingDeletes.getState().remove(key);
             toast.dismiss(toastId);
           },
