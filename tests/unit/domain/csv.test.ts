@@ -94,7 +94,7 @@ describe("snapshotToCsvBundle", () => {
     expect(Object.keys(bundle).sort()).toEqual(
       [
         "accounts.csv",
-        "card_payments.csv",
+        "card_statement_marks.csv",
         "categories.csv",
         "debtors.csv",
         "distribution_rules.csv",

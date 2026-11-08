@@ -47,7 +47,6 @@ export const LEDGER_TYPE_ICONS = {
   expense: ArrowUpRight,
   recurring_expense: ArrowUpRight,
   income: ArrowDownLeft,
-  card_payment: CreditCard,
   installment_collection: HandCoins,
 } as const satisfies Record<LedgerEntryType, LucideIcon>;
 

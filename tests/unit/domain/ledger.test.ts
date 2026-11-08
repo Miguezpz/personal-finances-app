@@ -9,10 +9,10 @@ import { cents } from "@/domain/money";
 import {
   d,
   emptySnapshot,
-  makeCardPayment,
   makeExpense,
   makeIncome,
   makeInstallment,
+  makeMark,
   makeReceivable,
   testId,
 } from "../../utils/fixtures";
@@ -45,12 +45,6 @@ const rent = makeExpense({
   paymentAccountId: debit,
   note: "Rent",
 });
-const payment = makeCardPayment({
-  cardAccountId: card,
-  amount: cents(30_000),
-  paidOn: d("2026-11-10"),
-  note: null,
-});
 const receivable = makeReceivable({ description: "Phone", cardAccountId: card });
 const collected = makeInstallment({
   receivableId: receivable.id,
@@ -64,19 +58,23 @@ const pending = makeInstallment({ receivableId: receivable.id, seq: 2, amount: c
 const snapshot = emptySnapshot({
   incomes: [income],
   expenses: [manual, rent],
-  cardPayments: [payment],
   receivables: [receivable],
   installments: [collected, pending],
 });
 
 describe("buildLedger", () => {
+  it('has no card payments: they are "paid" marks, not movements (spec 011, FR-012)', () => {
+    const marked = { ...snapshot, statementMarks: [makeMark({ cardAccountId: card })] };
+    expect(buildLedger(marked).map((e) => e.type)).not.toContain("card_payment");
+    expect(buildLedger(marked)).toHaveLength(buildLedger(snapshot).length);
+  });
+
   const ledger = buildLedger(snapshot);
 
   it("unifies every movement with signed MXN amounts, newest first", () => {
     expect(ledger.map((e) => [e.type, e.occurredOn, e.amount])).toEqual([
       ["income", "2026-11-15", 2_000_000],
       ["installment_collection", "2026-11-12", 200_000],
-      ["card_payment", "2026-11-10", -30_000],
       ["expense", "2026-11-03", -50_000],
       ["recurring_expense", "2026-11-01", -800_000],
     ]);
@@ -119,7 +117,6 @@ describe("filterLedger", () => {
   it("filters by inclusive date range", () => {
     expect(types({ from: d("2026-11-03"), to: d("2026-11-12") })).toEqual([
       "installment_collection",
-      "card_payment",
       "expense",
     ]);
   });
@@ -146,10 +143,7 @@ describe("filterLedger", () => {
   });
 
   it("combines filters, and an empty filter returns everything", () => {
-    expect(types({ accountId: card, from: d("2026-11-04") })).toEqual([
-      "installment_collection",
-      "card_payment",
-    ]);
+    expect(types({ accountId: card, from: d("2026-11-04") })).toEqual(["installment_collection"]);
     expect(filterLedger(ledger, {})).toHaveLength(ledger.length);
   });
 });

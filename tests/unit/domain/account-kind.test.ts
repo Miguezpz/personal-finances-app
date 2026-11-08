@@ -1,6 +1,6 @@
 /**
- * Changing an account's kind: free while no recorded history depends on it; card payments / MSI
- * keep a card a card, income or card payments from it keep it from becoming a card, and a
+ * Changing an account's kind: free while no recorded history depends on it; statements marked as
+ * paid (spec 011) / MSI keep a card a card, income keeps an account from becoming a card, and a
  * distribution rule keeps an investment account an investment.
  */
 import { describe, expect, it } from "vitest";
@@ -9,14 +9,14 @@ import type { FinanceSnapshot, Uuid } from "@/domain/types";
 
 const ID = "acc-1" as Uuid;
 const empty = {
-  cardPayments: [],
+  statementMarks: [],
   receivables: [],
   incomes: [],
   allocations: [],
   rules: [],
 } as unknown as Pick<
   FinanceSnapshot,
-  "cardPayments" | "receivables" | "incomes" | "allocations" | "rules"
+  "statementMarks" | "receivables" | "incomes" | "allocations" | "rules"
 >;
 const withData = (patch: Partial<Record<keyof typeof empty, unknown[]>>) =>
   ({ ...empty, ...patch }) as typeof empty;
@@ -29,12 +29,12 @@ describe("kindChangeBlocker", () => {
   });
 
   it("never blocks keeping the same kind", () => {
-    const s = withData({ cardPayments: [{ cardAccountId: ID, fromAccountId: null }] });
+    const s = withData({ statementMarks: [{ cardAccountId: ID }] });
     expect(kindChangeBlocker({ id: ID, kind: "credit_card" }, "credit_card", s)).toBeNull();
   });
 
-  it("keeps a card with payments or MSI purchases a card", () => {
-    const paid = withData({ cardPayments: [{ cardAccountId: ID, fromAccountId: null }] });
+  it("keeps a card with marked statements or MSI purchases a card", () => {
+    const paid = withData({ statementMarks: [{ cardAccountId: ID }] });
     const msi = withData({ receivables: [{ cardAccountId: ID }] });
     expect(kindChangeBlocker({ id: ID, kind: "credit_card" }, "checking", paid)).toBe(
       "cardHistory",
@@ -43,10 +43,9 @@ describe("kindChangeBlocker", () => {
   });
 
   it("keeps an account that held money from becoming a card", () => {
-    const from = withData({ cardPayments: [{ cardAccountId: "other", fromAccountId: ID }] });
     const deposit = withData({ incomes: [{ depositAccountId: ID }] });
     const allocation = withData({ allocations: [{ accountId: ID }] });
-    for (const s of [from, deposit, allocation]) {
+    for (const s of [deposit, allocation]) {
       expect(kindChangeBlocker({ id: ID, kind: "checking" }, "credit_card", s)).toBe(
         "moneyHistory",
       );

@@ -53,4 +53,4 @@ export const selectAccounts = (s: FinanceSnapshot) => s.accounts;
 export const selectRules = (s: FinanceSnapshot) => s.rules;
 export const selectRecurring = (s: FinanceSnapshot) => s.recurring;
 export const selectExpenses = (s: FinanceSnapshot) => s.expenses;
-export const selectCardPayments = (s: FinanceSnapshot) => s.cardPayments;
+export const selectStatementMarks = (s: FinanceSnapshot) => s.statementMarks;

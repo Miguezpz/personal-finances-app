@@ -1,26 +1,32 @@
 "use client";
 
 /**
- * A card's statements (spec 008, US3, contracts/ui-shell.md): the last one (paid / pending /
- * overdue) and the next one, with "Pay". The headline is the last statement until it's paid, then
- * the next one — the same answer on Credit (`full`) and Expenses (`compact`).
+ * A card's statements (spec 008, US3; spec 011): the last one (paid / nothing to pay / pending /
+ * overdue) and the next one, with "Ya la pagué" — or "Desmarcar" when the last one carries its own
+ * mark. The headline is the last statement until it's paid (or has nothing to pay), then the next
+ * one — the same answer on Credit (`full`) and Expenses (`compact`).
  */
-import { CalendarClock, CircleCheck, Clock, TriangleAlert } from "lucide-react";
+import { CalendarClock, CircleCheck, CircleMinus, Clock, TriangleAlert } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { AccountMark } from "@/components/icons/AccountMark";
 import { Money } from "@/components/money/Money";
 import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import type { StatementState } from "@/domain/credit";
 import { formatDate } from "@/i18n/format";
 import { selectLocale, usePreferences } from "@/store/preferences";
-import { openCreate } from "@/store/ui";
+import { MarkPaidButton, UnmarkButton } from "./MarkPaidButton";
 import type { CardStatement } from "./use-card-statements";
 
-const STATE_ICONS = { paid: CircleCheck, pending: Clock, overdue: TriangleAlert } as const;
+const STATE_ICONS = {
+  paid: CircleCheck,
+  nothing: CircleMinus,
+  pending: Clock,
+  overdue: TriangleAlert,
+} as const;
 const STATE_KEYS = {
   paid: "statePaid",
+  nothing: "stateNothing",
   pending: "statePending",
   overdue: "stateOverdue",
 } as const;
@@ -30,7 +36,13 @@ function StateBadge({ state }: { state: StatementState }) {
   const Icon = STATE_ICONS[state];
   return (
     <Badge
-      variant={state === "overdue" ? "destructive" : state === "paid" ? "secondary" : "outline"}
+      variant={
+        state === "overdue"
+          ? "destructive"
+          : state === "paid" || state === "nothing"
+            ? "secondary"
+            : "outline"
+      }
       className="gap-1"
       data-testid="statement-state"
     >
@@ -40,22 +52,15 @@ function StateBadge({ state }: { state: StatementState }) {
   );
 }
 
-function PayButton({ statement, size }: { statement: CardStatement; size: "sm" | "default" }) {
-  const t = useTranslations("credit");
+/** "Ya la pagué" while the last statement is pending/overdue; "Desmarcar" when it has its own mark. */
+function StatementAction({ statement }: { statement: CardStatement }) {
   const { card, summary } = statement;
-  return (
-    <Button
-      variant="outline"
-      size={size}
-      data-testid="pay-card"
-      aria-label={`${t("pay")} ${card.name}`}
-      onClick={() =>
-        openCreate({ kind: "card-payment", cardId: card.id, suggestedAmount: summary.payAmount })
-      }
-    >
-      {t("pay")}
-    </Button>
-  );
+  const { last } = summary;
+  if (last.state === "pending" || last.state === "overdue")
+    return <MarkPaidButton card={card} cutOff={last.cutOff} />;
+  if (last.state === "paid" && last.markId !== null)
+    return <UnmarkButton card={card} mark={{ id: last.markId, cutOff: last.cutOff }} />;
+  return null;
 }
 
 export function CardStatementCard({
@@ -95,7 +100,7 @@ export function CardStatementCard({
         <span data-testid="statement-amount">
           <Money cents={headlineAmount} className="font-semibold whitespace-nowrap" />
         </span>
-        <PayButton statement={statement} size="sm" />
+        <StatementAction statement={statement} />
       </div>
     );
   }
@@ -124,7 +129,11 @@ export function CardStatementCard({
           <div className="flex flex-wrap items-center justify-between gap-x-3">
             <dt className="text-muted-foreground">{t("lastStatement")}</dt>
             <dd className="flex items-center gap-1.5" data-testid="last-statement">
-              {last.state === "paid" ? t("statePaid") : <Money cents={last.outstanding} />}
+              {last.state === "paid" || last.state === "nothing" ? (
+                t(STATE_KEYS[last.state])
+              ) : (
+                <Money cents={last.outstanding} />
+              )}
               <span className="text-muted-foreground">
                 · {t("dueShort", { date: formatDate(last.due, locale) })}
               </span>
@@ -143,8 +152,8 @@ export function CardStatementCard({
         <p className="text-sm text-muted-foreground">
           {t.rich("totalDebt", { amount: () => <Money cents={summary.totalDebt} /> })}
         </p>
-        <div>
-          <PayButton statement={statement} size="sm" />
+        <div className="empty:hidden">
+          <StatementAction statement={statement} />
         </div>
       </CardContent>
     </Card>

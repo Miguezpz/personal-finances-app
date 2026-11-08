@@ -244,16 +244,9 @@ export function snapshotToCsvBundle(
         t.archived,
       ]),
     ),
-    "card_payments.csv": toCsv(
-      ["id", "card_account_id", "from_account_id", "amount_mxn", "paid_on", "note"],
-      s.cardPayments.map((p) => [
-        p.id,
-        p.cardAccountId,
-        p.fromAccountId,
-        money(p.amount),
-        p.paidOn,
-        p.note,
-      ]),
+    "card_statement_marks.csv": toCsv(
+      ["id", "card_account_id", "cut_off"],
+      s.statementMarks.map((m) => [m.id, m.cardAccountId, m.cutOff]),
     ),
     "debtors.csv": toCsv(
       ["id", "name"],

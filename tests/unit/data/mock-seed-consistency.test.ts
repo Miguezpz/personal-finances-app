@@ -4,6 +4,7 @@
  */
 import { describe, expect, it } from "vitest";
 import { generateDemoSnapshot } from "@/data/mock/seed";
+import { cardStatementSummary } from "@/domain/credit";
 import { isCategoryIconKey } from "@/domain/icons";
 import { isIncomeType } from "@/domain/income-types";
 import { installmentStatusFor } from "@/domain/installments";
@@ -46,7 +47,7 @@ describe.each(TODAYS)("demo snapshot for %s", (today) => {
     expect(new Set(keys).size).toBe(keys.length);
     expect(s.expenses.every((e) => e.spentOn <= today)).toBe(true);
     expect(s.incomes.every((i) => i.receivedOn <= today)).toBe(true);
-    expect(s.cardPayments.every((p) => p.paidOn <= today)).toBe(true);
+    expect(s.statementMarks.every((m) => m.cutOff <= today)).toBe(true);
     expect(s.contributions.every((c) => c.periodStart <= today)).toBe(true);
   });
 
@@ -81,5 +82,21 @@ describe.each(TODAYS)("demo snapshot for %s", (today) => {
   it("gives every income a valid type (spec 004)", () => {
     expect(s.incomes.every((i) => isIncomeType(i.incomeType))).toBe(true);
     expect(s.incomes.find((i) => i.label === "Salary")?.incomeType).toBe("salary");
+  });
+});
+
+describe("demo statement marks (spec 011, FR-021)", () => {
+  it("marks past statements and leaves a closed one pending on some day of the month", () => {
+    const pendingSomewhere = ["2026-11-03", "2026-11-12", "2026-11-20", "2026-11-28"].some((t) => {
+      const s = generateDemoSnapshot({ today: t as IsoDate });
+      expect(s.statementMarks.length).toBeGreaterThan(0);
+      return s.accounts
+        .filter((a) => a.kind === "credit_card")
+        .some((card) => {
+          const state = cardStatementSummary(card, s, t as IsoDate).last.state;
+          return state === "pending" || state === "overdue";
+        });
+    });
+    expect(pendingSomewhere).toBe(true);
   });
 });

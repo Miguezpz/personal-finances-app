@@ -1,7 +1,8 @@
 /**
  * Unified ledger (FR-012, FR-027, FR-042): every cash movement in one list, signed MXN amounts
  * (incomes and third-party collections positive, outflows negative), newest first. Built on the
- * client from the snapshot; the SQL view `ledger_entries` has the same shape.
+ * client from the snapshot. Card payments are not movements since spec 011 (they are "paid" marks),
+ * so they never appear here; the old SQL view `ledger_entries` is not used by the app.
  */
 import type { Bucket, FinanceSnapshot, IsoDate, LedgerEntry, LedgerEntryType, Uuid } from "./types";
 
@@ -20,18 +21,14 @@ export interface LedgerFilter {
 const TYPE_ORDER: Record<LedgerEntryType, number> = {
   income: 0,
   installment_collection: 1,
-  card_payment: 2,
-  expense: 3,
-  recurring_expense: 4,
+  expense: 2,
+  recurring_expense: 3,
 };
 
 const negate = (n: number) => (n === 0 ? 0 : -n) as LedgerEntry["amount"];
 
 export function buildLedger(
-  s: Pick<
-    FinanceSnapshot,
-    "incomes" | "expenses" | "cardPayments" | "receivables" | "installments"
-  >,
+  s: Pick<FinanceSnapshot, "incomes" | "expenses" | "receivables" | "installments">,
 ): LedgerEntry[] {
   const receivableById = new Map(s.receivables.map((r) => [r.id, r]));
   const entries: LedgerEntry[] = [];
@@ -59,19 +56,6 @@ export function buildLedger(
       accountId: e.paymentAccountId,
       bucket: e.bucket,
       subcategoryId: e.subcategoryId,
-      isThirdParty: false,
-    });
-  }
-  for (const p of s.cardPayments) {
-    entries.push({
-      id: p.id,
-      type: "card_payment",
-      occurredOn: p.paidOn,
-      amount: negate(p.amount),
-      description: p.note ?? "",
-      accountId: p.cardAccountId,
-      bucket: null,
-      subcategoryId: null,
       isThirdParty: false,
     });
   }

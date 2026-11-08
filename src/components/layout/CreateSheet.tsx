@@ -1,7 +1,7 @@
 "use client";
 
 /**
- * Mobile "＋" sheet (spec 008, US2, FR-007/FR-008/FR-013): the three create actions as large
+ * Mobile "＋" sheet (spec 008, US2, FR-007/FR-008): the create actions (expense, income) as large
  * buttons, then the owner's quick expenses. Each action closes the sheet and opens the app's single
  * instance of that dialog (DialogHost).
  */
@@ -18,7 +18,7 @@ import {
 } from "@/components/ui/sheet";
 import { cn } from "@/lib/utils";
 import { useUi } from "@/store/ui";
-import { CREATE_ACTIONS, useHasActiveCards } from "./create-actions";
+import { CREATE_ACTIONS } from "./create-actions";
 
 // Only needed once the sheet opens: its own chunk keeps it out of every route's First Load JS.
 const QuickExpenseBar = lazy(() =>
@@ -30,7 +30,6 @@ export function CreateSheet() {
   const open = useUi((s) => s.createSheetOpen);
   const setOpen = useUi((s) => s.setCreateSheetOpen);
   const openCreate = useUi((s) => s.openCreate);
-  const hasCards = useHasActiveCards();
 
   return (
     <Sheet open={open} onOpenChange={setOpen}>
@@ -43,16 +42,13 @@ export function CreateSheet() {
           <SheetTitle>{t("title")}</SheetTitle>
           <SheetDescription className="sr-only">{t("title")}</SheetDescription>
         </SheetHeader>
-        <ul className="grid grid-cols-3 gap-2">
+        <ul className="grid grid-cols-2 gap-2">
           {CREATE_ACTIONS.map(({ kind, labelKey, icon: Icon, testId }) => {
-            const disabled = kind === "card-payment" && !hasCards;
             return (
               <li key={kind} className="min-w-0">
                 <button
                   type="button"
                   data-testid={`create-${testId}`}
-                  disabled={disabled}
-                  aria-describedby={disabled ? "create-no-cards" : undefined}
                   onClick={() => openCreate({ kind })}
                   className={cn(
                     "flex min-h-20 w-full flex-col items-center justify-center gap-2 rounded-xl border bg-card p-3 text-sm font-medium transition-colors duration-fast",
@@ -69,11 +65,6 @@ export function CreateSheet() {
             );
           })}
         </ul>
-        {!hasCards && (
-          <p id="create-no-cards" className="text-xs text-muted-foreground">
-            {t("noCards")}
-          </p>
-        )}
         {open && (
           <Suspense fallback={null}>
             <QuickExpenseBar variant="dialog" onApplied={() => setOpen(false)} />

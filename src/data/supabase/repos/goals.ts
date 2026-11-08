@@ -100,7 +100,12 @@ export function createLedgerRepository(db: AppSupabaseClient): LedgerRepository 
   return {
     async list(range) {
       const rows = await selectAll((from, to) =>
-        withinRange(db.from("ledger_entries").select("*"), "occurred_on", range)
+        // Spec 011: card payments are not movements anymore; the view still has the old rows.
+        withinRange(
+          db.from("ledger_entries").select("*").neq("entry_type", "card_payment"),
+          "occurred_on",
+          range,
+        )
           .order("occurred_on", { ascending: false })
           .order("id")
           .range(from, to),

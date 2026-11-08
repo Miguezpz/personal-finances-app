@@ -27,7 +27,7 @@ import { notifyDemoReadOnly, notifyOffline } from "@/lib/demo-notice";
 import { usePendingDeletes } from "@/store/pending-deletes";
 import { UNDO_TOAST_MS } from "@/features/expenses/quick-expense-hooks";
 
-export type DeletableKind = "expense" | "card-payment" | "income" | "recurring";
+export type DeletableKind = "expense" | "income" | "recurring";
 
 interface Spec {
   remove: (provider: DataProvider, id: Uuid) => Promise<void>;
@@ -38,10 +38,6 @@ const SPECS: Record<DeletableKind, Spec> = {
   expense: {
     remove: (p, id) => p.expenses.remove(id),
     apply: (s, id) => ({ ...s, expenses: s.expenses.filter((e) => e.id !== id) }),
-  },
-  "card-payment": {
-    remove: (p, id) => p.cardPayments.remove(id),
-    apply: (s, id) => ({ ...s, cardPayments: s.cardPayments.filter((x) => x.id !== id) }),
   },
   income: {
     remove: (p, id) => p.incomes.remove(id),

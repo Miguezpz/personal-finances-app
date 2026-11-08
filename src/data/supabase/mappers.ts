@@ -6,7 +6,6 @@ import { toIsoDate } from "@/domain/dates";
 import { bps, cents } from "@/domain/money";
 import type {
   Account,
-  CardPayment,
   Category,
   Debtor,
   DistributionRule,
@@ -26,6 +25,7 @@ import type {
   Subcategory,
   UserSettings,
   Uuid,
+  StatementMark,
 } from "@/domain/types";
 import { ProviderError, type ProviderErrorCode } from "../provider";
 import type { Database } from "./database.types";
@@ -162,13 +162,10 @@ export const toExpenseTemplate = (r: Row<"expense_templates">): ExpenseTemplate 
   archived: r.archived,
 });
 
-export const toCardPayment = (r: Row<"card_payments">): CardPayment => ({
+export const toStatementMark = (r: Row<"card_statement_marks">): StatementMark => ({
   id: uuid(r.id),
   cardAccountId: uuid(r.card_account_id),
-  fromAccountId: uuidOrNull(r.from_account_id),
-  amount: cents(r.amount_cents),
-  paidOn: date(r.paid_on),
-  note: r.note,
+  cutOff: date(r.cut_off),
 });
 
 export const toDebtor = (r: Row<"debtors">): Debtor => ({ id: uuid(r.id), name: r.name });
@@ -227,7 +224,6 @@ const LEDGER_TYPES: readonly LedgerEntryType[] = [
   "income",
   "expense",
   "recurring_expense",
-  "card_payment",
   "installment_collection",
 ];
 

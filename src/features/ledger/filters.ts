@@ -11,7 +11,6 @@ export const LEDGER_TYPES = [
   "income",
   "expense",
   "recurring_expense",
-  "card_payment",
   "installment_collection",
 ] as const satisfies readonly LedgerEntryType[];
 

@@ -3,7 +3,8 @@
  *   assets      = Σ opening balances of non-card accounts + Σ allocations to Investment
  *               + Σ goal contributions from Needs/Wants + Σ third-party installments still owed
  *               + current available Needs and Wants (signed)
- *   liabilities = Σ total card debt (including the full outstanding MSI)
+ *   liabilities = Σ total card debt: what is recorded after the latest statement marked as paid
+ *                 (spec 011), MSI installments included
  * The monthly snapshot is taken once per month (idempotent).
  */
 import { describe, expect, it } from "vitest";
@@ -16,7 +17,6 @@ import {
   makeAccount,
   makeAllocation,
   makeCard,
-  makeCardPayment,
   makeExpense,
   makeGoal,
   makeInstallment,
@@ -49,9 +49,7 @@ const snapshot = emptySnapshot({
       paymentAccountId: card.id,
     }),
   ],
-  cardPayments: [
-    makeCardPayment({ cardAccountId: card.id, amount: cents(30_000), paidOn: d("2026-11-06") }),
-  ],
+  statementMarks: [],
   receivables: [receivable],
   installments: [
     makeInstallment({
@@ -92,12 +90,24 @@ describe("computeNetWorth", () => {
   it("adds every asset and subtracts the total card debt", () => {
     // assets: 1,500,000 opening + 300,000 investment + 100,000 contributions + 150,000 owed
     //         + needs available (500,000 − 120,000 − 100,000) + wants available (200,000 − 80,000)
-    // liabilities: 80,000 purchases + 400,000 MSI − 30,000 paid
+    // liabilities: 80,000 purchases + 400,000 MSI (nothing marked as paid)
     expect(computeNetWorth(snapshot, d("2026-11-12"))).toEqual({
       assets: 2_450_000,
-      liabilities: 450_000,
-      netWorth: 2_000_000,
+      liabilities: 480_000,
+      netWorth: 1_970_000,
     });
+  });
+
+  it("marking a statement settles its purchases and installments, and only the liabilities move (FR-015, SC-006)", () => {
+    const marked = {
+      ...snapshot,
+      statementMarks: [{ id: testId(), cardAccountId: card.id, cutOff: d("2026-11-10") }],
+    };
+    const before = computeNetWorth(snapshot, d("2026-11-12"));
+    const after = computeNetWorth(marked, d("2026-11-12"));
+    // Nov 10 statement (due Nov 30) covers the Nov 4 purchase and both installments due Nov 30.
+    expect(after.liabilities).toBe(0);
+    expect(after.assets).toBe(before.assets);
   });
 
   it("an overspent bucket lowers the assets (signed available)", () => {

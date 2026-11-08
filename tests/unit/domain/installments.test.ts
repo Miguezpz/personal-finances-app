@@ -113,7 +113,7 @@ describe("buildCollectionSchedule", () => {
     ).map((i) => makeInstallment({ ...i, receivableId: receivable.id }));
     const status = cardStatus(
       card,
-      { expenses: [], cardPayments: [], receivables: [receivable], installments },
+      { expenses: [], statementMarks: [], receivables: [receivable], installments },
       d("2026-11-12"),
     );
     expect(status.payToAvoidInterest).toBe(200_000); // only the first installment is in this statement

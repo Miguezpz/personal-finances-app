@@ -12,10 +12,6 @@ import {
   LazyAddExpenseDialog,
   usePreloadAddExpenseDialog,
 } from "@/features/expenses/LazyAddExpenseDialog";
-import {
-  LazyCardPaymentDialog,
-  usePreloadCardPaymentDialog,
-} from "@/features/expenses/LazyCardPaymentDialog";
 import { LazyAddReceivableDialog } from "@/features/receivables/LazyAddReceivableDialog";
 import {
   LazyRegisterIncomeDialog,
@@ -40,7 +36,6 @@ export function DialogHost() {
   const closeDialog = useUi((s) => s.closeDialog);
   usePreloadAddExpenseDialog();
   usePreloadRegisterIncomeDialog();
-  usePreloadCardPaymentDialog();
   useCloseOnNavigation();
 
   const onOpenChange = (open: boolean) => {
@@ -65,16 +60,6 @@ export function DialogHost() {
           open
           income={dialog.income ?? null}
           {...(dialog.draft ? { draft: dialog.draft } : {})}
-          onOpenChange={onOpenChange}
-        />
-      );
-    case "card-payment":
-      return (
-        <LazyCardPaymentDialog
-          key={`${dialog.cardId ?? "any"}-${dialog.suggestedAmount ?? ""}`}
-          open
-          cardId={dialog.cardId ?? null}
-          suggestedAmount={dialog.suggestedAmount ?? null}
           onOpenChange={onOpenChange}
         />
       );

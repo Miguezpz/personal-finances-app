@@ -10,7 +10,6 @@
  */
 import type {
   Account,
-  CardPayment,
   Category,
   Debtor,
   DistributionRule,
@@ -30,6 +29,7 @@ import type {
   Subcategory,
   Uuid,
   UserSettings,
+  StatementMark,
 } from "@/domain/types";
 import type { InstallmentDates } from "@/domain/card-terms";
 
@@ -195,9 +195,11 @@ export interface ExpenseTemplatesRepository {
   reorder(ids: readonly Uuid[]): Promise<void>;
 }
 
-export interface CardPaymentsRepository {
-  list(range?: { from: IsoDate; to: IsoDate }): Promise<CardPayment[]>;
-  create(input: NewEntity<CardPayment>): Promise<CardPayment>;
+/** "Ya la pagué" marks (spec 011, contracts/data-provider.md). */
+export interface StatementMarksRepository {
+  list(): Promise<StatementMark[]>;
+  /** Idempotent: marking the same cut-off twice returns the existing mark. */
+  create(input: { cardAccountId: Uuid; cutOff: IsoDate }): Promise<StatementMark>;
   remove(id: Uuid): Promise<void>;
 }
 
@@ -289,7 +291,7 @@ export interface DataProvider {
   readonly expenses: ExpensesRepository;
   readonly recurring: RecurringRepository;
   readonly expenseTemplates: ExpenseTemplatesRepository;
-  readonly cardPayments: CardPaymentsRepository;
+  readonly statementMarks: StatementMarksRepository;
   readonly receivables: ReceivablesRepository;
   readonly goals: GoalsRepository;
   readonly netWorth: NetWorthRepository;

@@ -1,6 +1,6 @@
 /** Ephemeral UI state (T045, contracts/ui-store.ts; spec 008 contracts/ui-shell.md). Never persisted. */
 import { create } from "zustand";
-import type { Cents, Expense, Income, Uuid } from "@/domain/types";
+import type { Expense, Income } from "@/domain/types";
 import type { ExpenseFormInput } from "@/features/expenses/schemas";
 import type { IncomeFormInput } from "@/features/income/schemas";
 import type { ReceivableFormInput } from "@/features/receivables/schemas";
@@ -14,7 +14,6 @@ import type { ReceivableFormInput } from "@/features/receivables/schemas";
 export type CreateDialog =
   | { kind: "expense"; expense?: Expense | null; draft?: Partial<ExpenseFormInput> }
   | { kind: "income"; income?: Income | null; draft?: Partial<IncomeFormInput> }
-  | { kind: "card-payment"; cardId?: Uuid | null; suggestedAmount?: Cents | null }
   | { kind: "receivable"; draft?: Partial<ReceivableFormInput> };
 
 export type CreateDialogKind = CreateDialog["kind"];

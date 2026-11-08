@@ -1,8 +1,9 @@
 "use client";
 
 /**
- * Expenses (T092): spending by payment method, card statements, and the expenses and card payments
- * of a quincena, newest first. Automatic (recurring) charges are labelled; third-party MSI charges
+ * Expenses (T092): spending by payment method, card statements, and the expenses of a quincena,
+ * newest first. Card payments are not movements since spec 011 ("Ya la pagué" marks live on the
+ * card statements). Automatic (recurring) charges are labelled; third-party MSI charges
  * never appear here — they aren't personal expenses (FR-020).
  *
  * Spec 009: the quincena is chosen in the header and drives the summary and the list (FR-019);
@@ -34,7 +35,6 @@ import { taxonomyIconFor } from "@/domain/icons";
 import { negateCents } from "@/domain/money";
 import { periodFromKey, periodOf } from "@/domain/periods";
 import type {
-  CardPayment,
   Expense,
   FinanceSnapshot,
   IsoDate,
@@ -59,9 +59,7 @@ const BUCKETS: readonly SpendBucket[] = ["needs", "wants"];
 const PERIOD_KEY_RE = /^\d{4}-(0[1-9]|1[0-2])-[12]$/;
 const NO_METHOD = "none";
 
-type Row =
-  | { kind: "expense"; date: IsoDate; item: Expense }
-  | { kind: "payment"; date: IsoDate; item: CardPayment };
+type Row = { kind: "expense"; date: IsoDate; item: Expense };
 
 const selectData = (s: FinanceSnapshot) => s;
 
@@ -118,29 +116,23 @@ export function ExpensesPage() {
   const inPeriod = useMemo<Row[]>(() => {
     if (!data) return [];
     const within = (date: IsoDate) => date >= period.start && date <= period.end;
-    return [
-      ...data.expenses
-        .filter((e) => within(e.spentOn))
-        .map((item): Row => ({ kind: "expense", date: item.spentOn, item })),
-      ...data.cardPayments
-        .filter((p) => within(p.paidOn))
-        .map((item): Row => ({ kind: "payment", date: item.paidOn, item })),
-    ].sort((a, b) => (a.date < b.date ? 1 : a.date > b.date ? -1 : 0));
+    return data.expenses
+      .filter((e) => within(e.spentOn))
+      .map((item): Row => ({ kind: "expense", date: item.spentOn, item }))
+      .sort((a, b) => (a.date < b.date ? 1 : a.date > b.date ? -1 : 0));
   }, [data, period]);
 
   // Method chips: one per account used by an expense of the quincena (summary order) + "none".
   const methodOptions = useMemo(() => {
     if (!data) return { accounts: [], unspecified: false };
     const used = new Set(
-      inPeriod.flatMap((r) =>
-        r.kind === "expense" && r.item.paymentAccountId ? [r.item.paymentAccountId] : [],
-      ),
+      inPeriod.flatMap((r) => (r.item.paymentAccountId ? [r.item.paymentAccountId] : [])),
     );
     const accounts = groupPaymentAccounts(
       data.accounts.filter((a) => used.has(a.id)),
       locale,
     ).flatMap((g) => g.accounts);
-    const unspecified = inPeriod.some((r) => r.kind === "expense" && !r.item.paymentAccountId);
+    const unspecified = inPeriod.some((r) => !r.item.paymentAccountId);
     return { accounts, unspecified };
   }, [data, inPeriod, locale]);
 
@@ -150,7 +142,6 @@ export function ExpensesPage() {
       filtering
         ? inPeriod.filter(
             (r) =>
-              r.kind === "expense" &&
               (bucket === null || r.item.bucket === bucket) &&
               (method === null ||
                 (method === NO_METHOD
@@ -162,8 +153,7 @@ export function ExpensesPage() {
   );
   const groups = useMemo(() => groupByDay(rows.slice(0, visible), today), [rows, visible, today]);
   // Spec 010: rows that appear later animate in, deleted ones fade out, an edited one highlights.
-  const rowKey = (row: Row) =>
-    `${row.kind === "expense" ? "expense" : "card-payment"}:${row.item.id}`;
+  const rowKey = (row: Row) => `expense:${row.item.id}`;
   const rowKeys = useMemo(() => (data ? inPeriod.map(rowKey) : undefined), [data, inPeriod]);
   const motion = useRowMotion(rowKeys, period.key);
 
@@ -182,15 +172,12 @@ export function ExpensesPage() {
       </span>
     );
   };
-  const rowTitle = (row: Row) =>
-    row.kind === "expense"
-      ? (row.item.note ?? subName(row.item.subcategoryId))
-      : t("cardPaymentLabel", { card: accountName(row.item.cardAccountId) ?? "" });
+  const rowTitle = (row: Row) => row.item.note ?? subName(row.item.subcategoryId);
 
   // Spec 009 (FR-009): deleted at once, with Undo instead of a confirmation.
   const deleteRow = (row: Row) =>
     remove({
-      kind: row.kind === "expense" ? "expense" : "card-payment",
+      kind: "expense",
       id: row.item.id,
       label: tc("deletedItem", { name: rowTitle(row) }),
     });
@@ -330,7 +317,7 @@ export function ExpensesPage() {
                     {group.rows.map((row) => (
                       <li
                         key={`${row.kind}-${row.item.id}`}
-                        data-testid={row.kind === "expense" ? "expense-row" : "payment-row"}
+                        data-testid="expense-row"
                         data-row-state={motion.state(rowKey(row), row.item.id)}
                         className={cn(
                           "group/row relative isolate grid grid-cols-[1fr_auto] items-center gap-x-3 px-4 py-3 text-sm",
@@ -345,44 +332,33 @@ export function ExpensesPage() {
                             data-testid="row-flash"
                           />
                         )}
-                        {row.kind === "expense" && (
-                          // Mobile: the whole row opens its edit dialog (delete is inside it).
-                          <button
-                            type="button"
-                            className="absolute inset-0 focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none focus-visible:ring-inset md:hidden"
-                            aria-label={t("openEdit", { name: rowTitle(row) })}
-                            data-testid="expense-row-open"
-                            onClick={() => openCreate({ kind: "expense", expense: row.item })}
-                          />
-                        )}
+                        {/* Mobile: the whole row opens its edit dialog (delete is inside it). */}
+                        <button
+                          type="button"
+                          className="absolute inset-0 focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none focus-visible:ring-inset md:hidden"
+                          aria-label={t("openEdit", { name: rowTitle(row) })}
+                          data-testid="expense-row-open"
+                          onClick={() => openCreate({ kind: "expense", expense: row.item })}
+                        />
                         <span className="flex min-w-0 flex-col">
                           <span className="truncate font-medium">{rowTitle(row)}</span>
-                          {row.kind === "expense" ? (
-                            <span className="flex flex-wrap items-center gap-1 text-xs text-muted-foreground">
-                              <CategoryIcon
-                                icon={taxonomyIconFor(row.item.subcategoryId, data)}
-                                className="size-3.5"
-                              />
-                              {subName(row.item.subcategoryId)}
-                              <BucketBadge bucket={row.item.bucket} label={tb(row.item.bucket)} />
-                              {row.item.origin === "recurring" && (
-                                <Badge variant="secondary">
-                                  <Repeat aria-hidden="true" focusable="false" />
-                                  {t("automatic")}
-                                </Badge>
-                              )}
-                              {accountName(row.item.paymentAccountId) && (
-                                <>· {accountLabel(row.item.paymentAccountId)}</>
-                              )}
-                            </span>
-                          ) : (
-                            <span className="text-xs text-muted-foreground">
-                              {row.item.note ?? t("debtSettlement")}
-                              {accountName(row.item.fromAccountId) && (
-                                <> · {accountLabel(row.item.fromAccountId)}</>
-                              )}
-                            </span>
-                          )}
+                          <span className="flex flex-wrap items-center gap-1 text-xs text-muted-foreground">
+                            <CategoryIcon
+                              icon={taxonomyIconFor(row.item.subcategoryId, data)}
+                              className="size-3.5"
+                            />
+                            {subName(row.item.subcategoryId)}
+                            <BucketBadge bucket={row.item.bucket} label={tb(row.item.bucket)} />
+                            {row.item.origin === "recurring" && (
+                              <Badge variant="secondary">
+                                <Repeat aria-hidden="true" focusable="false" />
+                                {t("automatic")}
+                              </Badge>
+                            )}
+                            {accountName(row.item.paymentAccountId) && (
+                              <>· {accountLabel(row.item.paymentAccountId)}</>
+                            )}
+                          </span>
                         </span>
                         <span className="flex items-center justify-end gap-1">
                           <Money
@@ -396,19 +372,17 @@ export function ExpensesPage() {
                               // Desktop: the actions show on hover or keyboard focus.
                               "md:opacity-0 md:group-focus-within/row:opacity-100 md:group-hover/row:opacity-100",
                               // Mobile: an expense's actions live in its edit dialog.
-                              row.kind === "expense" && "max-md:hidden",
+                              "max-md:hidden",
                             )}
                           >
-                            {row.kind === "expense" && (
-                              <Button
-                                variant="ghost"
-                                size="icon"
-                                aria-label={t("edit")}
-                                onClick={() => openCreate({ kind: "expense", expense: row.item })}
-                              >
-                                <Pencil aria-hidden="true" />
-                              </Button>
-                            )}
+                            <Button
+                              variant="ghost"
+                              size="icon"
+                              aria-label={t("edit")}
+                              onClick={() => openCreate({ kind: "expense", expense: row.item })}
+                            >
+                              <Pencil aria-hidden="true" />
+                            </Button>
                             <Button
                               variant="ghost"
                               size="icon"

@@ -175,12 +175,13 @@ export interface ExpenseTemplate extends Owned {
   archived: boolean;
 }
 
-export interface CardPayment extends Owned {
+/**
+ * "Ya la pagué" (spec 011): the owner paid the bank statement that closed on `cutOff`. No amount: it
+ * settles everything recorded on the card up to that cut-off (and every earlier statement).
+ */
+export interface StatementMark extends Owned {
   cardAccountId: Uuid;
-  fromAccountId: Uuid | null;
-  amount: Cents;
-  paidOn: IsoDate;
-  note: string | null;
+  cutOff: IsoDate;
 }
 
 export interface Debtor extends Owned {
@@ -240,8 +241,8 @@ export interface NetWorthSnapshot extends Owned {
 // ---------------------------------------------------------------------------
 // Valores derivados / vistas (no se persisten)
 // ---------------------------------------------------------------------------
-export type LedgerEntryType =
-  "income" | "expense" | "recurring_expense" | "card_payment" | "installment_collection";
+/** Spec 011: card payments are no longer money movements (they're "paid" marks), so no "card_payment". */
+export type LedgerEntryType = "income" | "expense" | "recurring_expense" | "installment_collection";
 
 export interface LedgerEntry {
   id: Uuid;
@@ -282,7 +283,7 @@ export interface FinanceSnapshot {
   allocations: readonly IncomeAllocation[];
   recurring: readonly RecurringExpense[];
   expenses: readonly Expense[];
-  cardPayments: readonly CardPayment[];
+  statementMarks: readonly StatementMark[];
   debtors: readonly Debtor[];
   receivables: readonly Receivable[];
   installments: readonly Installment[];

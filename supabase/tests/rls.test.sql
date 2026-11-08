@@ -51,7 +51,7 @@ select table_privs_are('public', t, 'anon', array[]::text[], 'anon has no privil
     'user_settings','accounts','distribution_rules','investment_subrules','categories','subcategories',
     'incomes','income_allocations','recurring_expenses','expenses','card_payments','debtors',
     'receivables','installments','goals','goal_contributions','net_worth_snapshots','expense_templates',
-    'ledger_entries']) as t;
+    'card_statement_marks','ledger_entries']) as t;
 
 select function_privs_are('public', 'register_income', array['jsonb','jsonb'], 'anon', array[]::text[]);
 select function_privs_are('public', 'replace_income', array['uuid','jsonb','jsonb'], 'anon', array[]::text[]);

@@ -6,14 +6,14 @@
 | ----------------- | ------------- | --------------------------------------------------------------------------- |
 | `id`              | `uuid`        | PK, `gen_random_uuid()`                                                     |
 | `user_id`         | `uuid`        | `not null default auth.uid()`, FK `auth.users` `on delete cascade`          |
-| `card_account_id` | `uuid`        | `not null`; FK compuesta `(user_id, card_account_id) → accounts (user_id, id)` |
+| `card_account_id` | `uuid`        | `not null`; FK compuesta `(user_id, card_account_id) → accounts (user_id, id)`, sin cascada (como el resto: las cuentas se archivan) |
 | `cut_off`         | `date`        | `not null`; fecha de corte del estado de cuenta pagado                       |
 | `marked_at`       | `timestamptz` | `not null default now()`; solo referencia (no se muestra)                    |
 
 - `unique (user_id, card_account_id, cut_off)`: una marca por corte. Marcar dos veces no duplica.
 - Índice `(user_id, card_account_id, cut_off)` (lo da el `unique`).
 - RLS: las cuatro políticas por dueño (`auth.uid() = user_id`), igual que `0005_rls.sql`. `grant select, insert, delete` a `authenticated`; sin `update`.
-- Borrado de cuenta: las marcas se borran con la tarjeta (`on delete cascade` vía la FK compuesta) o el flujo de borrado de cuentas existente las incluye. `supabase/tests/account-deletion.test.sql` se extiende.
+- Borrado del usuario: las marcas se borran con él (`user_id … on delete cascade`). `supabase/tests/account-deletion.test.sql` lo comprueba.
 - **Conversión** (FR-018), dentro de la misma migración:
   `insert into card_statement_marks (user_id, card_account_id, cut_off) select distinct p.user_id, p.card_account_id, <corte más reciente < p.paid_on según accounts.cut_off_day> from card_payments p join accounts a … where a.cut_off_day is not null on conflict do nothing`.
   - El corte se calcula con `make_date(y, m, least(cut_off_day, días del mes))`.

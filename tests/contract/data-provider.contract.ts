@@ -149,13 +149,7 @@ async function seedThroughProvider(p: DataProvider) {
       occurrenceDate: d("2026-11-01"),
     },
   ]);
-  await p.cardPayments.create({
-    cardAccountId: card.id,
-    fromAccountId: debit.id,
-    amount: cents(50_000),
-    paidOn: d("2026-11-28"),
-    note: null,
-  });
+  await p.statementMarks.create({ cardAccountId: card.id, cutOff: d("2026-11-10") });
   const debtor = await p.receivables.createDebtor({ name: "Ana" });
   const receivable = await p.receivables.create({
     receivable: {
@@ -241,10 +235,7 @@ function expectForeignKeysResolved(s: FinanceSnapshot) {
     has(accounts, x.paymentAccountId, "expense.paymentAccountId");
     has(recurring, x.recurringExpenseId, "expense.recurringExpenseId");
   });
-  s.cardPayments.forEach((x) => {
-    has(accounts, x.cardAccountId, "cardPayment.cardAccountId");
-    has(accounts, x.fromAccountId, "cardPayment.fromAccountId");
-  });
+  s.statementMarks.forEach((x) => has(accounts, x.cardAccountId, "statementMark.cardAccountId"));
   s.receivables.forEach((x) => {
     has(debtors, x.debtorId, "receivable.debtorId");
     has(accounts, x.cardAccountId, "receivable.cardAccountId");
@@ -320,7 +311,7 @@ export function runDataProviderContract(
         incomes,
         recurring,
         expenses,
-        cardPayments,
+        statementMarks,
         debtors,
         receivables,
         goals,
@@ -335,7 +326,7 @@ export function runDataProviderContract(
         provider.incomes.list(),
         provider.recurring.list(),
         provider.expenses.list(),
-        provider.cardPayments.list(),
+        provider.statementMarks.list(),
         provider.receivables.listDebtors(),
         provider.receivables.list(),
         provider.goals.list(),
@@ -351,7 +342,7 @@ export function runDataProviderContract(
       expect(sortById(incomes.allocations)).toEqual(sortById(s.allocations));
       expect(sortById(recurring)).toEqual(sortById(s.recurring));
       expect(sortById(expenses)).toEqual(sortById(s.expenses));
-      expect(sortById(cardPayments)).toEqual(sortById(s.cardPayments));
+      expect(sortById(statementMarks)).toEqual(sortById(s.statementMarks));
       expect(sortById(debtors)).toEqual(sortById(s.debtors));
       expect(sortById(receivables.receivables)).toEqual(sortById(s.receivables));
       expect(sortById(receivables.installments)).toEqual(sortById(s.installments));
@@ -477,6 +468,27 @@ export function runDataProviderContract(
         ]);
         expect(again).toEqual([]);
         expect((await provider.goals.list()).contributions).toHaveLength(contributions.length);
+      });
+
+      it("statement marks: idempotent per cut-off, removable, owned (spec 011)", async () => {
+        const s = await provider.loadSnapshot();
+        const card = s.accounts.find((a) => a.kind === "credit_card");
+        if (!card) throw new Error("seed missing a card");
+        const first = await provider.statementMarks.create({
+          cardAccountId: card.id,
+          cutOff: d("2026-10-10"),
+        });
+        const again = await provider.statementMarks.create({
+          cardAccountId: card.id,
+          cutOff: d("2026-10-10"),
+        });
+        expect(again.id).toBe(first.id);
+        expect(
+          (await provider.statementMarks.list()).filter((m) => m.id === first.id),
+        ).toHaveLength(1);
+        await provider.statementMarks.remove(first.id);
+        await provider.statementMarks.remove(first.id); // unknown id doesn't fail
+        expect((await provider.statementMarks.list()).some((m) => m.id === first.id)).toBe(false);
       });
 
       it("refuses to archive a card with pending installments (CONFLICT)", async () => {
@@ -931,8 +943,11 @@ export function runDataProviderContract(
           ["recurring.update", () => p.recurring.update(anyId, { name: "x" })],
           ["recurring.end", () => p.recurring.end(anyId, d("2026-11-01"))],
           ["recurring.remove", () => p.recurring.remove(anyId)],
-          ["cardPayments.create", () => p.cardPayments.create(before.cardPayments[0] as never)],
-          ["cardPayments.remove", () => p.cardPayments.remove(anyId)],
+          [
+            "statementMarks.create",
+            () => p.statementMarks.create({ cardAccountId: anyId, cutOff: d("2026-11-10") }),
+          ],
+          ["statementMarks.remove", () => p.statementMarks.remove(anyId)],
           ["receivables.createDebtor", () => p.receivables.createDebtor({ name: "x" })],
           [
             "receivables.create",

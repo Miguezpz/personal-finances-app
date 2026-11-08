@@ -7,7 +7,7 @@ import type { DataProvider } from "../provider";
 import { createSupabaseAuth } from "./auth";
 import { getSupabaseBrowserClient, type AppSupabaseClient } from "./client";
 import { createAccountsRepository } from "./repos/accounts";
-import { createCardPaymentsRepository } from "./repos/card-payments";
+import { createStatementMarksRepository } from "./repos/statement-marks";
 import { createExpenseTemplatesRepository } from "./repos/expense-templates";
 import { createExpensesRepository, createRecurringRepository } from "./repos/expenses";
 import {
@@ -37,7 +37,7 @@ export function createSupabaseProvider(options: SupabaseProviderOptions = {}): D
   const expenses = createExpensesRepository(db);
   const recurring = createRecurringRepository(db);
   const expenseTemplates = createExpenseTemplatesRepository(db);
-  const cardPayments = createCardPaymentsRepository(db);
+  const statementMarks = createStatementMarksRepository(db);
   const receivables = createReceivablesRepository(db);
   const goals = createGoalsRepository(db);
   const netWorth = createNetWorthRepository(db);
@@ -55,7 +55,7 @@ export function createSupabaseProvider(options: SupabaseProviderOptions = {}): D
     expenses,
     recurring,
     expenseTemplates,
-    cardPayments,
+    statementMarks,
     receivables,
     goals,
     netWorth,
@@ -72,7 +72,7 @@ export function createSupabaseProvider(options: SupabaseProviderOptions = {}): D
         incomeData,
         recurringList,
         expenseList,
-        cardPaymentList,
+        markList,
         debtors,
         receivableData,
         goalData,
@@ -87,7 +87,7 @@ export function createSupabaseProvider(options: SupabaseProviderOptions = {}): D
         incomes.list(),
         recurring.list(),
         expenses.list(),
-        cardPayments.list(),
+        statementMarks.list(),
         receivables.listDebtors(),
         receivables.list(),
         goals.list(),
@@ -104,7 +104,7 @@ export function createSupabaseProvider(options: SupabaseProviderOptions = {}): D
         allocations: incomeData.allocations,
         recurring: recurringList,
         expenses: expenseList,
-        cardPayments: cardPaymentList,
+        statementMarks: markList,
         debtors,
         receivables: receivableData.receivables,
         installments: receivableData.installments,

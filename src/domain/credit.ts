@@ -1,25 +1,23 @@
 /**
- * Credit cards (FR-013a/b, FR-028/029, research.md R13).
+ * Credit cards (FR-013a/b, FR-028/029, research.md R13; spec 011 "paid checklist").
  *
  * Statement calendar (card-terms.ts): cut-off on clampChargeDay(y, m, cutOffDay); payment due =
- * cut-off + paymentDueOffsetDays, moved back to the previous business day (spec 007, FR-010). A card purchase lowers its bucket the day it happens (that's an Expense)
- * and raises the card's debt; a card payment settles debt and never touches the buckets.
+ * cut-off + paymentDueOffsetDays, moved back to the previous business day (spec 007, FR-010). A card
+ * purchase lowers its bucket the day it happens (that's an Expense) and raises the card's debt.
  *
- *   totalDebt          = Σ purchases with the card + Σ full MSI totals on the card − Σ payments  (≥ 0)
- *   payToAvoidInterest = Σ purchases dated ≤ last cut-off
- *                      + Σ MSI installments billed up to this statement (cardDueOn ≤ its due date)
- *                      − Σ payments                                                          (≥ 0)
+ * Spec 011: there are no payment amounts. The owner marks a statement as paid ("Ya la pagué"); the
+ * latest marked cut-off L ("paid through") settles everything recorded up to it, so nothing can be
+ * over-paid and a later statement never looks paid in advance (research.md R2/R3):
  *
- * Deviation from contracts/domain-engine.ts: the contract subtracted only payments made AFTER the
- * cut-off, which re-counts every earlier statement that was paid before it. The cumulative form
- * above is identical on a fresh card (US10-1a: $5,000) and correct over any history. Future MSI
- * installments are never part of the "totalero" amount, but always part of the total debt.
+ *   outstanding(C) = Σ purchases with L < spentOn ≤ C + Σ MSI installments with due(L) < cardDueOn ≤ due(C)
+ *                    (0 when C ≤ L: the statement is paid)
+ *   totalDebt      = Σ purchases with spentOn > L + Σ MSI installments with cardDueOn > due(L)
  */
 import { cardTermsOf, cutOffIn, dueDateFor, lastCutOffOn, type CardTerms } from "./card-terms";
-import { addMonthsToMonthStart, parseIsoDate } from "./dates";
+import { addDays, addMonthsToMonthStart, parseIsoDate } from "./dates";
 import { InvalidDateError } from "./errors";
 import { clampChargeDay } from "./periods";
-import type { Account, Cents, FinanceSnapshot, IsoDate } from "./types";
+import type { Account, Cents, FinanceSnapshot, IsoDate, StatementMark, Uuid } from "./types";
 
 export interface CardStatus {
   cardId: Account["id"];
@@ -28,11 +26,14 @@ export interface CardStatus {
   /** Due date of the statement that closed on `lastCutOff` (may already be past). */
   nextPaymentDue: IsoDate;
   payToAvoidInterest: Cents;
-  /** The statement's due date has passed and it isn't fully paid. */
+  /** The statement's due date has passed and it isn't marked as paid. */
   overdue: boolean;
 }
 
-type CardData = Pick<FinanceSnapshot, "expenses" | "cardPayments" | "receivables" | "installments">;
+export type CardData = Pick<
+  FinanceSnapshot,
+  "expenses" | "statementMarks" | "receivables" | "installments"
+>;
 
 function requireCard(card: Account): CardTerms {
   const terms = cardTermsOf(card);
@@ -42,64 +43,127 @@ function requireCard(card: Account): CardTerms {
 
 export { lastCutOffOn };
 
+/** The card's latest marked cut-off ("paid through"), or null if it was never marked. */
+export function paidThrough(cardId: Uuid, marks: readonly StatementMark[]): IsoDate | null {
+  let latest: IsoDate | null = null;
+  for (const m of marks) {
+    if (m.cardAccountId === cardId && (latest === null || m.cutOff > latest)) latest = m.cutOff;
+  }
+  return latest;
+}
+
+/** What is recorded on the card: its purchases and the installments of its MSI receivables. */
+function chargesOf(card: Account, data: CardData) {
+  const purchases = data.expenses.filter((e) => e.paymentAccountId === card.id);
+  const receivables = new Set(
+    data.receivables.filter((r) => r.cardAccountId === card.id).map((r) => r.id),
+  );
+  const installments = data.installments.filter((i) => receivables.has(i.receivableId));
+  return { purchases, installments };
+}
+
+type Charges = ReturnType<typeof chargesOf>;
+
+/** Charges billed after the statement `after` (exclusive; null = since ever) up to `upTo` (inclusive). */
+function billedBetween(
+  terms: CardTerms,
+  charges: Charges,
+  after: IsoDate | null,
+  upTo: IsoDate,
+): number {
+  const afterDue = after === null ? null : dueDateFor(terms, after);
+  const upToDue = dueDateFor(terms, upTo);
+  let sum = 0;
+  for (const e of charges.purchases) {
+    if ((after === null || e.spentOn > after) && e.spentOn <= upTo) sum += e.amount;
+  }
+  for (const i of charges.installments) {
+    if ((afterDue === null || i.cardDueOn > afterDue) && i.cardDueOn <= upToDue) sum += i.amount;
+  }
+  return sum;
+}
+
+export type StatementState = "paid" | "nothing" | "pending" | "overdue";
+
+export interface StatementView {
+  cutOff: IsoDate;
+  due: IsoDate;
+  /** Days on which this statement can be paid: the day after its cut-off to the day before it's due (FR-025). */
+  payRange: { from: IsoDate; to: IsoDate };
+  outstanding: Cents;
+  state: StatementState;
+  /** The card's own mark on exactly this cut-off, if any ("Desmarcar"). */
+  markId: Uuid | null;
+}
+
+/** One statement of the card: its amount and state as of `today` (spec 011, FR-013). */
+export function statementOf(
+  card: Account,
+  data: CardData,
+  cutOff: IsoDate,
+  today: IsoDate,
+): StatementView {
+  const terms = requireCard(card);
+  const due = dueDateFor(terms, cutOff);
+  const through = paidThrough(card.id, data.statementMarks);
+  const markId =
+    data.statementMarks.find((m) => m.cardAccountId === card.id && m.cutOff === cutOff)?.id ?? null;
+  const paid = through !== null && cutOff <= through;
+  const outstanding = paid ? 0 : billedBetween(terms, chargesOf(card, data), through, cutOff);
+  const state: StatementState = paid
+    ? "paid"
+    : outstanding === 0
+      ? "nothing"
+      : today > due
+        ? "overdue"
+        : "pending";
+  return {
+    cutOff,
+    due,
+    payRange: { from: addDays(cutOff, 1), to: addDays(due, -1) },
+    outstanding: outstanding as Cents,
+    state,
+    markId,
+  };
+}
+
 export function cardStatus(card: Account, data: CardData, today: IsoDate): CardStatus {
   const terms = requireCard(card);
   const lastCutOff = lastCutOffOn(terms.cutOffDay, today);
-  const nextPaymentDue = dueDateFor(terms, lastCutOff);
+  const last = statementOf(card, data, lastCutOff, today);
 
-  let purchases = 0;
-  let billedPurchases = 0;
-  for (const e of data.expenses) {
-    if (e.paymentAccountId !== card.id) continue;
-    purchases += e.amount;
-    if (e.spentOn <= lastCutOff) billedPurchases += e.amount;
+  const through = paidThrough(card.id, data.statementMarks);
+  const throughDue = through === null ? null : dueDateFor(terms, through);
+  const charges = chargesOf(card, data);
+  let totalDebt = 0;
+  for (const e of charges.purchases)
+    if (through === null || e.spentOn > through) totalDebt += e.amount;
+  for (const i of charges.installments) {
+    if (throughDue === null || i.cardDueOn > throughDue) totalDebt += i.amount;
   }
 
-  let msiTotal = 0;
-  const cardReceivables = new Set<string>();
-  for (const r of data.receivables) {
-    if (r.cardAccountId !== card.id) continue;
-    msiTotal += r.total;
-    cardReceivables.add(r.id);
-  }
-  let billedInstallments = 0;
-  for (const i of data.installments) {
-    if (cardReceivables.has(i.receivableId) && i.cardDueOn <= nextPaymentDue)
-      billedInstallments += i.amount;
-  }
-
-  let payments = 0;
-  for (const p of data.cardPayments) {
-    if (p.cardAccountId === card.id) payments += p.amount;
-  }
-
-  const payToAvoidInterest = Math.max(0, billedPurchases + billedInstallments - payments);
   return {
     cardId: card.id,
-    totalDebt: Math.max(0, purchases + msiTotal - payments) as Cents,
+    totalDebt: totalDebt as Cents,
     lastCutOff,
-    nextPaymentDue,
-    payToAvoidInterest: payToAvoidInterest as Cents,
-    overdue: today > nextPaymentDue && payToAvoidInterest > 0,
+    nextPaymentDue: last.due,
+    payToAvoidInterest: last.outstanding,
+    overdue: last.state === "overdue",
   };
 }
 
 // ---------------------------------------------------------------------------
 // Statement summary (spec 008, US3, research.md R4): one answer for Credit and Expenses
 // ---------------------------------------------------------------------------
-export type StatementState = "paid" | "pending" | "overdue";
-
 export interface CardStatementSummary {
   cardId: Account["id"];
   /** The statement that closed on the latest cut-off ≤ today. */
-  last: { cutOff: IsoDate; due: IsoDate; outstanding: Cents; state: StatementState };
+  last: StatementView;
   /** The following statement, projected with what is known today (same rule as the timeline). */
   next: { cutOff: IsoDate; due: IsoDate; amount: Cents };
   totalDebt: Cents;
-  /** Which statement leads: the last one until it's paid, then the next one. */
+  /** Which statement leads: the last one until it's paid (or has nothing to pay), then the next one. */
   headline: "last" | "next";
-  /** What "Pay" suggests: the headline statement's amount. */
-  payAmount: Cents;
 }
 
 export function cardStatementSummary(
@@ -109,23 +173,20 @@ export function cardStatementSummary(
 ): CardStatementSummary {
   const terms = requireCard(card);
   const status = cardStatus(card, data, today);
-  const outstanding = status.payToAvoidInterest;
-  const state: StatementState =
-    outstanding === 0 ? "paid" : today > status.nextPaymentDue ? "overdue" : "pending";
+  const last = statementOf(card, data, status.lastCutOff, today);
 
   const nextCutOff = cutOffIn(terms.cutOffDay, addMonthsToMonthStart(status.lastCutOff, 1));
-  // Incremental, like creditTimeline: what the next statement adds, assuming this one is paid.
-  const cumulative = cardStatus(card, data, nextCutOff).payToAvoidInterest;
-  const nextAmount = Math.max(0, cumulative - outstanding) as Cents;
+  // What the next statement adds, assuming this one gets paid.
+  const through = paidThrough(card.id, data.statementMarks);
+  const from = through !== null && through > status.lastCutOff ? through : status.lastCutOff;
+  const nextAmount = billedBetween(terms, chargesOf(card, data), from, nextCutOff) as Cents;
 
-  const headline = state === "paid" ? "next" : "last";
   return {
     cardId: card.id,
-    last: { cutOff: status.lastCutOff, due: status.nextPaymentDue, outstanding, state },
+    last,
     next: { cutOff: nextCutOff, due: dueDateFor(terms, nextCutOff), amount: nextAmount },
     totalDebt: status.totalDebt,
-    headline,
-    payAmount: headline === "last" ? outstanding : nextAmount,
+    headline: last.state === "paid" || last.state === "nothing" ? "next" : "last",
   };
 }
 
@@ -141,6 +202,8 @@ export interface TimelineEvent {
   label: string;
   /** card_due: pay-to-avoid-interest of that statement; collection_due: still owed; payday: null. */
   amount: Cents | null;
+  /** card_due only: the statement is marked as paid (spec 011, FR-017). */
+  paid?: boolean;
   /** Card id or installment id (null for paydays). Extension of the contract, for links/keys. */
   refId: Account["id"] | null;
 }
@@ -175,7 +238,7 @@ export function creditTimeline(
     | "settings"
     | "accounts"
     | "expenses"
-    | "cardPayments"
+    | "statementMarks"
     | "debtors"
     | "receivables"
     | "installments"
@@ -196,27 +259,31 @@ export function creditTimeline(
   }
 
   // Due dates fall up to 60 days after the cut-off: start two months earlier. The first statement
-  // in range carries everything still unpaid (its cumulative pay-to-avoid-interest); each later
-  // one only what it adds, assuming the previous one is paid on time — otherwise the same debt
-  // would be listed twice.
+  // in range carries everything still unpaid since the last marked one; each later one only what it
+  // adds, assuming the previous one gets paid — otherwise the same debt would be listed twice.
   for (const card of s.accounts) {
     if (card.kind !== "credit_card" || card.archived) continue;
     const terms = requireCard(card);
-    let previous: number | null = null;
+    const charges = chargesOf(card, s);
+    const through = paidThrough(card.id, s.statementMarks);
+    let previous: IsoDate | null = null;
     for (const { year, month } of monthsBetween(from, to, 2)) {
       const cutOff = clampChargeDay(year, month, terms.cutOffDay);
       const due = dueDateFor(terms, cutOff);
       if (due < from) continue;
       if (due > to) break;
-      const cumulative = cardStatus(card, s, cutOff).payToAvoidInterest;
+      const paid = through !== null && cutOff <= through;
+      const since =
+        previous !== null && (through === null || previous > through) ? previous : through;
       events.push({
         date: due,
         kind: "card_due",
         label: card.name,
-        amount: Math.max(0, cumulative - (previous ?? 0)) as Cents,
+        amount: (paid ? 0 : billedBetween(terms, charges, since, cutOff)) as Cents,
         refId: card.id,
+        paid,
       });
-      previous = cumulative;
+      previous = cutOff;
     }
   }
 

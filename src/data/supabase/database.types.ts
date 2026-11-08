@@ -45,6 +45,26 @@ isOneToOne: false
       referencedColumns: ["user_id","id"]
     }
                   ]
+                },"card_statement_marks": {
+                  Row: {
+                    "card_account_id": string,"cut_off": string,"id": string,"marked_at": string,"user_id": string
+                  }
+                  ComputedFields: never
+                  Insert: {
+                    "card_account_id": string,"cut_off": string,"id"?: string,"marked_at"?: string,"user_id"?: string
+                  }
+                  Update: {
+                    "card_account_id"?: string,"cut_off"?: string,"id"?: string,"marked_at"?: string,"user_id"?: string
+                  }
+                  Relationships: [
+                    {
+      foreignKeyName: "card_statement_marks_user_id_card_account_id_fkey"
+      columns: ["user_id","card_account_id"]
+isOneToOne: false
+      referencedRelation: "accounts"
+      referencedColumns: ["user_id","id"]
+    }
+                  ]
                 },"categories": {
                   Row: {
                     "archived_at": string | null,"icon": string | null,"id": string,"macro": Database["public"]['Enums']["spend_bucket"],"name": string,"name_key": string | null,"user_id": string

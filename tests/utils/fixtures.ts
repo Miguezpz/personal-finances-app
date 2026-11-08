@@ -6,7 +6,6 @@ import { bps, cents } from "@/domain/money";
 import { DEFAULT_USER_SETTINGS } from "@/domain/settings";
 import type {
   Account,
-  CardPayment,
   Category,
   DistributionRule,
   Expense,
@@ -21,6 +20,7 @@ import type {
   RecurringExpense,
   Subcategory,
   Uuid,
+  StatementMark,
 } from "@/domain/types";
 
 let seq = 0;
@@ -38,7 +38,7 @@ export const emptySnapshot = (overrides: Partial<FinanceSnapshot> = {}): Finance
   allocations: [],
   recurring: [],
   expenses: [],
-  cardPayments: [],
+  statementMarks: [],
   debtors: [],
   receivables: [],
   installments: [],
@@ -156,13 +156,10 @@ export const makeRecurring = (o: Partial<RecurringExpense> = {}): RecurringExpen
   ...o,
 });
 
-export const makeCardPayment = (o: Partial<CardPayment> = {}): CardPayment => ({
+export const makeMark = (o: Partial<StatementMark> = {}): StatementMark => ({
   id: testId(),
   cardAccountId: testId(),
-  fromAccountId: null,
-  amount: cents(50_000),
-  paidOn: d("2026-11-20"),
-  note: null,
+  cutOff: d("2026-11-10"),
   ...o,
 });
 

@@ -17,6 +17,8 @@
  *  - MSI installment k (1..N) is billed on the statement k−1 months after the purchase's first
  *    statement: cardDueOn = that statement's due date; dueOn (collect from debtor) = cardDueOn −
  *    collectionLeadDays. Equal installments, remainder cents on the last one.
+ *  - Statement marks (spec 011): every statement is marked as paid two days before it is due; the
+ *    latest one whose payday is still ahead stays pending.
  *
  * No real data of the owner (FR-048).
  */
@@ -35,7 +37,6 @@ import { clampChargeDay } from "@/domain/periods";
 import { DEFAULT_USER_SETTINGS } from "@/domain/settings";
 import type {
   Account,
-  CardPayment,
   Cents,
   Expense,
   ExpenseTemplate,
@@ -50,6 +51,7 @@ import type {
   Receivable,
   RecurringExpense,
   SpendBucket,
+  StatementMark,
   Uuid,
 } from "@/domain/types";
 import {
@@ -533,38 +535,20 @@ export function generateDemoSnapshot(options: SeedOptions): FinanceSnapshot {
     lastPastDue: "pending",
   });
 
-  // --- Card payments: each statement paid in full ("totalero") two days before it is due
-  const cardPayments: CardPayment[] = [];
+  // --- "Ya la pagué" marks (spec 011): the owner pays each statement in full ("totalero") two days
+  // before it is due and marks it. The latest statement whose payday is still ahead stays unmarked,
+  // so the demo always has a closed statement pending (FR-021).
+  const statementMarks: StatementMark[] = [];
+  /** When each mark was made (due − 2), for the net-worth history below. */
+  const markedOn = new Map<Uuid, IsoDate>();
   for (const c of cards) {
     let cutOff = statementCutOff(c, rangeStart);
-    let previousCutOff = shiftCutOff(c, cutOff, -1);
     for (;;) {
-      const due = dueFor(c, cutOff);
-      const paidOn = addDays(due, -2);
+      const paidOn = addDays(dueFor(c, cutOff), -2);
       if (paidOn > today) break;
-      const direct = expenses
-        .filter(
-          (e) => e.paymentAccountId === c.id && e.spentOn > previousCutOff && e.spentOn <= cutOff,
-        )
-        .reduce((s, e) => s + e.amount, 0);
-      const msi = installments
-        .filter(
-          (i) =>
-            i.cardDueOn === due &&
-            receivables.some((r) => r.id === i.receivableId && r.cardAccountId === c.id),
-        )
-        .reduce((s, i) => s + i.amount, 0);
-      if (direct + msi > 0) {
-        cardPayments.push({
-          id: nextId(),
-          cardAccountId: c.id,
-          fromAccountId: ACCOUNT_IDS.debit,
-          amount: cents(direct + msi),
-          paidOn,
-          note: null,
-        });
-      }
-      previousCutOff = cutOff;
+      const id = nextId();
+      statementMarks.push({ id, cardAccountId: c.id, cutOff });
+      markedOn.set(id, paidOn);
       cutOff = shiftCutOff(c, cutOff, 1);
     }
   }
@@ -630,13 +614,35 @@ export function generateDemoSnapshot(options: SeedOptions): FinanceSnapshot {
         (s, i) => s + i.amount - (i.collectedOn !== null && i.collectedOn < on ? i.collected : 0),
         0,
       );
-    const cardCharges =
-      expenses
-        .filter((e) => cards.some((c) => c.id === e.paymentAccountId) && e.spentOn < on)
-        .reduce((s, e) => s + e.amount, 0) +
-      receivables.filter((r) => r.purchaseDate < on).reduce((s, r) => s + r.total, 0);
-    const paid = cardPayments.filter((p) => p.paidOn < on).reduce((s, p) => s + p.amount, 0);
-    const liabilities = Math.max(0, cardCharges - paid);
+    // Card debt as of `on`: what is recorded after each card's latest statement marked before `on`.
+    let liabilities = 0;
+    for (const c of cards) {
+      let through: IsoDate | null = null;
+      for (const m of statementMarks) {
+        const at = markedOn.get(m.id) as IsoDate;
+        if (m.cardAccountId === c.id && at < on && (through === null || m.cutOff > through))
+          through = m.cutOff;
+      }
+      const throughDue = through === null ? null : dueFor(c, through);
+      liabilities += expenses
+        .filter(
+          (e) =>
+            e.paymentAccountId === c.id &&
+            e.spentOn < on &&
+            (through === null || e.spentOn > through),
+        )
+        .reduce((sum, e) => sum + e.amount, 0);
+      liabilities += installments
+        .filter((i) => {
+          const r = receivables.find((x) => x.id === i.receivableId);
+          return (
+            r?.cardAccountId === c.id &&
+            r.purchaseDate < on &&
+            (throughDue === null || i.cardDueOn > throughDue)
+          );
+        })
+        .reduce((sum, i) => sum + i.amount, 0);
+    }
     const assets = openingAssets + invested + saved + receivable;
     netWorthSnapshots.push({
       id: nextId(),
@@ -661,7 +667,7 @@ export function generateDemoSnapshot(options: SeedOptions): FinanceSnapshot {
     allocations,
     recurring,
     expenses: expenses.sort(byDate((e) => e.spentOn)),
-    cardPayments: cardPayments.sort(byDate((p) => p.paidOn)),
+    statementMarks,
     debtors: DEBTORS,
     receivables,
     installments,

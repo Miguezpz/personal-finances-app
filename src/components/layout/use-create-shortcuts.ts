@@ -1,7 +1,7 @@
 "use client";
 
 /**
- * N / I / P open the expense, income and card payment dialogs (spec 008, FR-011, research.md R2).
+ * N / I open the expense and income dialogs (spec 008, FR-011, research.md R2; spec 011 removed P).
  * Ignored with modifiers, on key repeat, while typing in an editable element, or while any dialog
  * or panel is open — so they never steal a letter from a form.
  */
@@ -21,7 +21,7 @@ function anyPanelOpen(): boolean {
   return document.querySelector('[role="dialog"][data-state="open"], [role="menu"]') !== null;
 }
 
-export function useCreateShortcuts(hasCards: boolean) {
+export function useCreateShortcuts() {
   useEffect(() => {
     const onKeyDown = (e: KeyboardEvent) => {
       if (e.defaultPrevented || e.repeat || e.ctrlKey || e.metaKey || e.altKey || e.shiftKey)
@@ -29,11 +29,10 @@ export function useCreateShortcuts(hasCards: boolean) {
       if (isEditableTarget(e.target) || anyPanelOpen()) return;
       const action = CREATE_ACTIONS.find((a) => a.shortcut === e.key.toLowerCase());
       if (!action) return;
-      if (action.kind === "card-payment" && !hasCards) return;
       e.preventDefault();
       useUi.getState().openCreate({ kind: action.kind });
     };
     document.addEventListener("keydown", onKeyDown);
     return () => document.removeEventListener("keydown", onKeyDown);
-  }, [hasCards]);
+  }, []);
 }

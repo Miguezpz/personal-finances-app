@@ -16,19 +16,19 @@ description: "Task list for spec 011 — Pago de tarjeta como checklist y sesió
 
 ## Phase 1: Setup
 
-- [ ] T001 Registrar en "Notas" de specs/011-card-paid-checklist/tasks.md la línea base: conteo de unitarias (`pnpm test`) y First Load de `/dashboard` (`NEXT_PUBLIC_DEMO_MODE=true pnpm build`)
+- [X] T001 Registrar en "Notas" de specs/011-card-paid-checklist/tasks.md la línea base: conteo de unitarias (`pnpm test`) y First Load de `/dashboard` (`NEXT_PUBLIC_DEMO_MODE=true pnpm build`)
 
 ## Phase 2: Foundational (bloquea todas las historias)
 
-- [ ] T002 Tipos en src/domain/types.ts: `StatementMark extends Owned { cardAccountId: Uuid; cutOff: IsoDate }`; en `FinanceSnapshot` reemplazar `cardPayments` por `statementMarks: readonly StatementMark[]`; eliminar `CardPayment`. Corregir los usos mínimos para compilar (los que se rehacen en tareas posteriores pueden quedar con TODO temporal sin romper `tsc`)
-- [ ] T003 [P] Pruebas primero en tests/unit/domain/legacy-card-payments.test.ts:
+- [X] T002 Tipos en src/domain/types.ts: `StatementMark extends Owned { cardAccountId: Uuid; cutOff: IsoDate }`; en `FinanceSnapshot` reemplazar `cardPayments` por `statementMarks: readonly StatementMark[]`; eliminar `CardPayment`. Corregir los usos mínimos para compilar (los que se rehacen en tareas posteriores pueden quedar con TODO temporal sin romper `tsc`)
+- [X] T003 [P] Pruebas primero en tests/unit/domain/legacy-card-payments.test.ts:
   - pago el día 12 con corte el 10 → corte del 10;
   - pago el mismo día del corte → corte del mes anterior;
   - corte el 31 → último día de febrero;
   - pago el 1 de enero → corte de diciembre.
 
   Implementar `markForLegacyPayment(cutOffDay, paidOn)` en src/domain/legacy-card-payments.ts con `lastCutOffOn(cutOffDay, addDays(paidOn, -1))`
-- [ ] T004 Pruebas primero en tests/unit/domain/credit.test.ts y tests/unit/domain/card-statement-summary.test.ts (reescribir los casos de pagos), cubriendo los invariantes 1–5 de contracts/domain.md (con fast-check para "sin saldo a favor" y "desmarcar regresa al estado previo"):
+- [X] T004 Pruebas primero en tests/unit/domain/credit.test.ts y tests/unit/domain/card-statement-summary.test.ts (reescribir los casos de pagos), cubriendo los invariantes 1–5 de contracts/domain.md (con fast-check para "sin saldo a favor" y "desmarcar regresa al estado previo"):
   - `paidThrough`;
   - corte pagado por marca propia o posterior;
   - estado `nothing`;
@@ -36,35 +36,35 @@ description: "Task list for spec 011 — Pago de tarjeta como checklist y sesió
   - cuotas MSI cubiertas por `cardDueOn ≤ due(L)`, marca cuya fecha ya no coincide con un corte tras cambiar los términos (sigue cubriendo hasta su fecha), `creditTimeline` muestra pagado el corte marcado (FR-017);
   - `markId` del último corte;
   - compra tardía dentro de un corte pagado, que queda cubierta.
-- [ ] T005 Implementar en src/domain/credit.ts: `CardData` con `statementMarks`, `paidThrough`, `statementOf`, `StatementState` con `"nothing"`, las fórmulas R3 en `cardStatus`, y `cardStatementSummary` con `headline: "next"` cuando el último corte es `paid` o `nothing`. Se quita `payAmount`. `creditTimeline` usa `statementOf` (FR-017). Actualizar el encabezado del módulo
-- [ ] T006 [P] src/domain/net-worth.ts y src/domain/account-kind.ts: dejar de leer `cardPayments`. El bloqueo de cambio de tipo cuenta marcas o compras MSI en lugar de pagos, y `fromAccountId` deja de existir. Actualizar tests/unit/domain/{net-worth,account-kind,installments}.test.ts
-- [ ] T007 Proveedor: `StatementMarksRepository { list(); create({ cardAccountId, cutOff }); remove(id) }` en src/data/provider.ts, en lugar de `CardPaymentsRepository`; `DataProvider.statementMarks`
-- [ ] T008 [P] Mock en src/data/mock/provider.ts: `statementMarks.list` del snapshot; `create` y `remove` → `denyWrite("statementMarks.create" | "statementMarks.remove")`
-- [ ] T009 [P] Supabase:
+- [X] T005 Implementar en src/domain/credit.ts: `CardData` con `statementMarks`, `paidThrough`, `statementOf`, `StatementState` con `"nothing"`, las fórmulas R3 en `cardStatus`, y `cardStatementSummary` con `headline: "next"` cuando el último corte es `paid` o `nothing`. Se quita `payAmount`. `creditTimeline` usa `statementOf` (FR-017). Actualizar el encabezado del módulo
+- [X] T006 [P] src/domain/net-worth.ts y src/domain/account-kind.ts: dejar de leer `cardPayments`. El bloqueo de cambio de tipo cuenta marcas o compras MSI en lugar de pagos, y `fromAccountId` deja de existir. Actualizar tests/unit/domain/{net-worth,account-kind,installments}.test.ts
+- [X] T007 Proveedor: `StatementMarksRepository { list(); create({ cardAccountId, cutOff }); remove(id) }` en src/data/provider.ts, en lugar de `CardPaymentsRepository`; `DataProvider.statementMarks`
+- [X] T008 [P] Mock en src/data/mock/provider.ts: `statementMarks.list` del snapshot; `create` y `remove` → `denyWrite("statementMarks.create" | "statementMarks.remove")`
+- [X] T009 [P] Supabase:
   - Crear src/data/supabase/repos/statement-marks.ts: `create` con upsert `onConflict: "user_id,card_account_id,cut_off"`, `ignoreDuplicates`, y relectura si no devuelve fila.
   - Agregar el mapper `toStatementMark` en src/data/supabase/mappers.ts.
   - Cargar `card_statement_marks` en `loadSnapshot` en src/data/supabase/provider.ts.
   - Eliminar src/data/supabase/repos/card-payments.ts.
   - Agregar a mano la tabla `card_statement_marks` en src/data/supabase/database.types.ts (se regenera en T041).
-- [ ] T010 Migración supabase/migrations/0011_card_statement_marks.sql (data-model §1):
+- [X] T010 Migración supabase/migrations/0011_card_statement_marks.sql (data-model §1):
   - Tabla con FK compuesta `(user_id, card_account_id) → accounts (user_id, id) on delete cascade`, `unique (user_id, card_account_id, cut_off)`.
   - RLS con las políticas por dueño, al estilo de 0005; grants `select, insert, delete` a `authenticated`.
   - Conversión de `card_payments` con la regla de `markForLegacyPayment` (`make_date` + `least(cut_off_day, días del mes)`), con `on conflict do nothing`.
   - Sin tocar `card_payments` ni la vista `ledger`.
-- [ ] T011 [P] pgTAP supabase/tests/card-statement-marks.test.sql:
+- [X] T011 [P] pgTAP supabase/tests/card-statement-marks.test.sql:
   - aislamiento entre usuarios (ver, insertar sobre tarjeta ajena, borrar);
   - unicidad por corte;
   - casos de conversión de T003 y dos pagos sobre un mismo corte que dejan una marca.
 
   Extender supabase/tests/account-deletion.test.sql y supabase/tests/rls.test.sql con la tabla nueva
-- [ ] T012 [P] Consulta de revisión supabase/queries/preview-card-marks.sql: solo `select`, con la misma expresión de corte que T010, que devuelva tarjeta (nombre), `paid_on`, `amount_cents` y el corte que quedaría marcado, ordenada por tarjeta y fecha
-- [ ] T013 Seed del demo en src/data/mock/seed.ts:
+- [X] T012 [P] Consulta de revisión supabase/queries/preview-card-marks.sql: solo `select`, con la misma expresión de corte que T010, que devuelva tarjeta (nombre), `paid_on`, `amount_cents` y el corte que quedaría marcado, ordenada por tarjeta y fecha
+- [X] T013 Seed del demo en src/data/mock/seed.ts:
   - Reemplazar la generación de `cardPayments` por marcas: una por estado de cuenta cuyo `due − 2 ≤ today`.
   - El más reciente posterior queda sin marcar (FR-021).
   - Las deudas de `netWorthSnapshots` del seed usan la fórmula R3 con marcas, sin restar pagos.
   - Actualizar el encabezado y tests/unit/data/mock-seed-consistency.test.ts: las marcas existen, ninguna con `cutOff > today`, y al menos un corte cerrado está pendiente en algún `today`.
-- [ ] T014 Contrato: reemplazar los casos de `cardPayments` por `statementMarks` en tests/contract/data-provider.contract.ts y tests/contract/schemas.ts, según la tabla de contracts/data-provider.md
-- [ ] T015 Gate rápido (`pnpm typecheck && pnpm lint && pnpm test`) y commit + push
+- [X] T014 Contrato: reemplazar los casos de `cardPayments` por `statementMarks` en tests/contract/data-provider.contract.ts y tests/contract/schemas.ts, según la tabla de contracts/data-provider.md
+- [X] T015 Gate rápido (`pnpm typecheck && pnpm lint && pnpm test`) y commit + push
 
 **Checkpoint**: el dominio y los datos conocen las marcas; la UI todavía puede mostrar "Pagar".
 
@@ -76,23 +76,23 @@ description: "Task list for spec 011 — Pago de tarjeta como checklist y sesió
 
 **Independent Test**: un corte pendiente pasa a "Pagado" con un toque, sin formulario, y la alerta del Dashboard desaparece. En el demo aparece el aviso de solo lectura.
 
-- [ ] T016 [US1] Pruebas primero en tests/unit/features/statement-marks.test.tsx:
+- [X] T016 [US1] Pruebas primero en tests/unit/features/statement-marks.test.tsx:
   - marcar actualiza el snapshot al instante y llama a `provider.statementMarks.create`;
   - un fallo revierte;
   - el demo rechaza sin cambiar nada;
   - el aviso trae "Deshacer" y deshacer borra la marca creada.
-- [ ] T017 [US1] Crear src/features/credit/use-statement-marks.ts:
+- [X] T017 [US1] Crear src/features/credit/use-statement-marks.ts:
   - `useMarkStatementPaid()` y `useUnmarkStatement()` con `useSnapshotMutation` (optimista, `replaceTemp`).
   - `useStatementMarkActions()` envuelve ambos con el aviso de 6 s (`UNDO_TOAST_MS`) y "Deshacer", al estilo de `useQuickExpense`.
   - Deshacer espera la promesa de la escritura y aplica la contraria.
   - Demo y sin conexión con sus avisos habituales.
-- [ ] T018 [US1] src/features/credit/CardStatementCard.tsx:
+- [X] T018 [US1] src/features/credit/CardStatementCard.tsx:
   - Reemplazar `PayButton` por `MarkPaidButton`: `data-testid="mark-paid"`, `aria-label` con `credit.markPaidFor`, área táctil de 44 px.
   - Estado `nothing` con su badge (`credit.stateNothing`), sin acción.
   - Sin `openCreate`.
   - Variantes `full` y `compact`.
-- [ ] T019 [US1] src/features/safe-to-spend/CardDueAlerts.tsx: el botón "Pagar" de cada alerta pasa a "Ya la pagué" (mismo hook); un corte `nothing` no genera alerta
-- [ ] T020 [US1] Eliminar el pago con monto:
+- [X] T019 [US1] src/features/safe-to-spend/CardDueAlerts.tsx: el botón "Pagar" de cada alerta pasa a "Ya la pagué" (mismo hook); un corte `nothing` no genera alerta
+- [X] T020 [US1] Eliminar el pago con monto:
   - src/features/expenses/CardPaymentDialog.tsx, src/features/expenses/LazyCardPaymentDialog.tsx;
   - `useCreateCardPayment`/`useDeleteCardPayment` y el esquema de pago en src/features/expenses/{hooks,schemas}.ts;
   - el kind `card-payment` en src/store/ui.ts y src/components/layout/DialogHost.tsx;
@@ -100,7 +100,7 @@ description: "Task list for spec 011 — Pago de tarjeta como checklist y sesió
   - el atajo P en src/components/layout/use-create-shortcuts.ts.
 
   Actualizar tests/unit/components/create-shortcuts.test.tsx
-- [ ] T021 [P] [US1] i18n en src/i18n/messages/{en,es}.json:
+- [X] T021 [P] [US1] i18n en src/i18n/messages/{en,es}.json:
   - agregar `credit.markPaid`, `markPaidFor`, `marked`, `stateNothing`;
   - borrar las llaves de pago con monto listadas en contracts/ui.md, y que tests/unit/i18n/parity.test.ts siga verde.
 - [ ] T022 [US1] e2e demo en tests/e2e/us15-card-paid-checklist.spec.ts (EN/ES):
@@ -119,8 +119,8 @@ description: "Task list for spec 011 — Pago de tarjeta como checklist y sesió
 
 **Independent Test**: marcar y luego "Deshacer" regresa a pendiente; con una marca antigua, "Desmarcar" regresa a pendiente o vencido.
 
-- [ ] T024 [US2] src/features/credit/CardStatementCard.tsx: con el último corte `paid` y `markId` propio, botón secundario "Desmarcar" (`data-testid="unmark-paid"`, `aria-label` con `credit.unmarkFor`) que usa `useStatementMarkActions().unmark` con aviso y "Deshacer"
-- [ ] T025 [P] [US2] i18n `credit.unmark`, `unmarkFor`, `unmarked` EN/ES; pruebas de desmarcar y deshacer-desmarcar en tests/unit/features/statement-marks.test.tsx
+- [X] T024 [US2] src/features/credit/CardStatementCard.tsx: con el último corte `paid` y `markId` propio, botón secundario "Desmarcar" (`data-testid="unmark-paid"`, `aria-label` con `credit.unmarkFor`) que usa `useStatementMarkActions().unmark` con aviso y "Deshacer"
+- [X] T025 [P] [US2] i18n `credit.unmark`, `unmarkFor`, `unmarked` EN/ES; pruebas de desmarcar y deshacer-desmarcar en tests/unit/features/statement-marks.test.tsx
 - [ ] T026 [US2] e2e `@live` en tests/e2e/us15-card-paid-checklist.spec.ts: marcar → Deshacer → pendiente; marcar → esperar el aviso → Desmarcar → pendiente o vencido; el disponible para gastar del Dashboard no cambia (SC-006)
 - [ ] T027 [US2] Gate y commit + push
 
@@ -228,4 +228,7 @@ description: "Task list for spec 011 — Pago de tarjeta como checklist y sesió
 
 ## Notas
 
-- (se completa durante la implementación)
+- Línea base (T001): unit 715; First Load `/dashboard` 336.2 kB gzip (build demo).
+- T009: la vista SQL `ledger_entries` todavía tiene filas `card_payment`; el repositorio de bitácora de Supabase las excluye con `.neq("entry_type", "card_payment")` para coincidir con `buildLedger` (la app no usa ese repo; solo el contrato).
+- T010: la FK de la tarjeta no hace cascada (como el resto; las cuentas se archivan). Las marcas se borran con el usuario (`user_id … on delete cascade`).
+- T018/T024: `MarkPaidButton` y `UnmarkButton` (src/features/credit/MarkPaidButton.tsx) se comparten entre Crédito, Gastos, el Dashboard y la sesión.

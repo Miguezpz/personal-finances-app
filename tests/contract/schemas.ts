@@ -154,13 +154,10 @@ export const expenseTemplateSchema = z.strictObject({
   archived: z.boolean(),
 });
 
-export const cardPaymentSchema = z.strictObject({
+export const statementMarkSchema = z.strictObject({
   id: uuid,
   cardAccountId: uuid,
-  fromAccountId: uuid.nullable(),
-  amount: positiveCents,
-  paidOn: isoDate,
-  note: z.string().max(200).nullable(),
+  cutOff: isoDate,
 });
 
 export const debtorSchema = z.strictObject({ id: uuid, name: z.string().min(1).max(80) });
@@ -252,7 +249,7 @@ export const financeSnapshotSchema = z.strictObject({
   allocations: z.array(allocationSchema),
   recurring: z.array(recurringSchema),
   expenses: z.array(expenseSchema),
-  cardPayments: z.array(cardPaymentSchema),
+  statementMarks: z.array(statementMarkSchema),
   debtors: z.array(debtorSchema),
   receivables: z.array(receivableSchema),
   installments: z.array(installmentSchema),

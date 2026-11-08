@@ -49,7 +49,7 @@ const BLOCKER_MESSAGES = {
 
 /** Only what decides whether the kind can change (domain/account-kind.ts). */
 const selectKindDeps = (s: FinanceSnapshot) => ({
-  cardPayments: s.cardPayments,
+  statementMarks: s.statementMarks,
   receivables: s.receivables,
   incomes: s.incomes,
   allocations: s.allocations,

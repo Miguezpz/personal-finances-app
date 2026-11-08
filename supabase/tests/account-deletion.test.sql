@@ -40,6 +40,7 @@ insert into expenses (amount_cents, spent_on, subcategory_id, bucket, origin, re
 values (800000, '2026-11-01', '50000000-0000-0000-0000-000000000005', 'needs', 'recurring',
         'e0000000-0000-0000-0000-00000000000e', '2026-11-01');
 insert into card_payments (card_account_id, amount_cents, paid_on) values ('a3000000-0000-0000-0000-000000000003', 100, '2026-11-20');
+insert into card_statement_marks (card_account_id, cut_off) values ('a3000000-0000-0000-0000-000000000003', '2026-11-10');
 insert into debtors (id, name) values ('d0000000-0000-0000-0000-00000000000d', 'Ana');
 select create_receivable(
   '{"debtor_id":"d0000000-0000-0000-0000-00000000000d","card_account_id":"a3000000-0000-0000-0000-000000000003",
@@ -96,9 +97,10 @@ select is(
      select count(*) from public.goals              where user_id = 'cccccccc-0000-0000-0000-000000000003' union all
      select count(*) from public.goal_contributions where user_id = 'cccccccc-0000-0000-0000-000000000003' union all
      select count(*) from public.net_worth_snapshots where user_id = 'cccccccc-0000-0000-0000-000000000003' union all
-     select count(*) from public.expense_templates  where user_id = 'cccccccc-0000-0000-0000-000000000003') t),
+     select count(*) from public.expense_templates  where user_id = 'cccccccc-0000-0000-0000-000000000003' union all
+     select count(*) from public.card_statement_marks where user_id = 'cccccccc-0000-0000-0000-000000000003') t),
   0,
-  'no row of the deleted user remains in any of the 18 tables'
+  'no row of the deleted user remains in any of the 19 tables'
 );
 
 select * from finish();

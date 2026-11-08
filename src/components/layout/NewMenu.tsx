@@ -9,7 +9,6 @@ import { Plus } from "lucide-react";
 import { useTranslations } from "next-intl";
 import dynamic from "next/dynamic";
 import { Button } from "@/components/ui/button";
-import { useHasActiveCards } from "./create-actions";
 import { useCreateShortcuts } from "./use-create-shortcuts";
 
 function NewMenuPlaceholder() {
@@ -28,11 +27,10 @@ const NewMenuContent = dynamic(() => import("./NewMenuContent"), {
 });
 
 export function NewMenu() {
-  const hasCards = useHasActiveCards();
-  useCreateShortcuts(hasCards);
+  useCreateShortcuts();
   return (
     <div className="hidden md:block">
-      <NewMenuContent hasCards={hasCards} />
+      <NewMenuContent />
     </div>
   );
 }

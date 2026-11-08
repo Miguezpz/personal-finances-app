@@ -2,20 +2,20 @@
 
 /**
  * Cards to pay soon (spec 009, US6, FR-025): every card whose last statement is still unpaid and
- * due within 7 days — or already overdue — with its amount and "Pay". Uses the same statement
- * summary as Credit and Expenses (spec 008), so the amount always matches.
+ * due within 7 days — or already overdue — with its amount and "Ya la pagué" (spec 011). Uses the
+ * same statement summary as Credit and Expenses (spec 008), so the amount always matches; a
+ * statement with nothing recorded never alerts.
  */
 import { CreditCard } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { useMemo } from "react";
 import { Money } from "@/components/money/Money";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
-import { Button } from "@/components/ui/button";
 import { daysBetween } from "@/domain/dates";
+import { MarkPaidButton } from "@/features/credit/MarkPaidButton";
 import { useCardStatements, type CardStatement } from "@/features/credit/use-card-statements";
 import { useToday } from "@/lib/use-today";
 import { cn } from "@/lib/utils";
-import { openCreate } from "@/store/ui";
 
 export const CARD_DUE_WINDOW_DAYS = 7;
 
@@ -31,7 +31,7 @@ export function useCardDueAlerts(): CardDue[] {
   return useMemo(
     () =>
       (statements ?? [])
-        .filter((s) => s.summary.last.state !== "paid")
+        .filter((s) => s.summary.last.state === "pending" || s.summary.last.state === "overdue")
         .map((statement) => ({ statement, days: daysBetween(today, statement.summary.last.due) }))
         .filter((a) => a.days <= CARD_DUE_WINDOW_DAYS)
         .sort((a, b) => a.days - b.days),
@@ -55,21 +55,7 @@ export function CardDueRow({ alert, className }: { alert: CardDue; className?: s
           : t("cardDueIn", { card: card.name, days: alert.days })}
       </span>
       <Money cents={summary.last.outstanding} className="font-semibold whitespace-nowrap" />
-      <Button
-        variant="outline"
-        size="sm"
-        className="pointer-coarse:min-h-11"
-        onClick={() =>
-          openCreate({
-            kind: "card-payment",
-            cardId: card.id,
-            suggestedAmount: summary.last.outstanding,
-          })
-        }
-        data-testid="card-due-pay"
-      >
-        {t("pay")}
-      </Button>
+      <MarkPaidButton card={card} cutOff={summary.last.cutOff} />
     </div>
   );
 }
