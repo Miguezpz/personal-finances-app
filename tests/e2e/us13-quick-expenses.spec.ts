@@ -256,9 +256,9 @@ test.describe("US13 · managing quick expenses", { tag: "@live" }, () => {
     await expect(page.getByTestId("bucket-needs-balance")).toBeVisible();
     await expect(page.getByTestId("quick-expense-bar")).toHaveCount(0);
 
-    // A: the discreet link goes to Expenses › Quick expenses.
+    // A: the discreet link goes to Settings › Quick expenses (spec 009).
     await page.getByTestId("quick-expense-create-first").click();
-    await page.waitForURL("**/expenses#quick-expenses");
+    await page.waitForURL("**/settings/quick-expenses");
     const section = page.getByTestId("quick-expenses-section");
     await expect(section.getByText(m.empty)).toBeVisible();
 
@@ -295,8 +295,9 @@ test.describe("US13 · managing quick expenses", { tag: "@live" }, () => {
     await expect.poll(async () => (await expensesOf(admin, owner))?.length).toBe(1);
 
     // F: edit to $30 → the next tap records $30, the first expense stays at $24.
-    await page.goto("/expenses");
-    await section.getByTestId("template-edit").click();
+    await page.goto("/settings/quick-expenses");
+    await section.getByTestId("template-menu").click();
+    await page.getByTestId("template-edit").click();
     dialog = page.getByRole("dialog");
     await expect(dialog.locator("#template-amount")).toHaveValue("24.00");
     await dialog.locator("#template-amount").fill("30");
@@ -330,12 +331,17 @@ test.describe("US13 · managing quick expenses", { tag: "@live" }, () => {
     await expect.poll(async () => (await expensesOf(admin, owner))?.length).toBe(1);
 
     // G: move Transporte down → the Dashboard shows Café first.
-    await page.goto("/expenses");
+    await page.goto("/settings/quick-expenses");
     const section = page.getByTestId("quick-expenses-section");
     const rows = section.getByTestId("template-row");
-    await expect(rows.first().getByTestId("template-up")).toBeDisabled();
-    await expect(rows.last().getByTestId("template-down")).toBeDisabled();
-    await rows.first().getByTestId("template-down").click();
+    await rows.first().getByTestId("template-menu").click();
+    await expect(page.getByTestId("template-up")).toHaveAttribute("data-disabled", "");
+    await page.keyboard.press("Escape");
+    await rows.last().getByTestId("template-menu").click();
+    await expect(page.getByTestId("template-down")).toHaveAttribute("data-disabled", "");
+    await page.keyboard.press("Escape");
+    await rows.first().getByTestId("template-menu").click();
+    await page.getByTestId("template-down").click();
     await expect(rows.first()).toContainText("Café");
     await page.goto("/dashboard");
     await expect
@@ -343,8 +349,9 @@ test.describe("US13 · managing quick expenses", { tag: "@live" }, () => {
       .toEqual([`quick-expense-${cafe}`, `quick-expense-${transporte}`]);
 
     // H: delete Café → gone from the Dashboard, its expense stays.
-    await page.goto("/expenses");
-    await section.locator(`[data-template="${cafe}"]`).getByTestId("template-delete").click();
+    await page.goto("/settings/quick-expenses");
+    await section.locator(`[data-template="${cafe}"]`).getByTestId("template-menu").click();
+    await page.getByTestId("template-delete").click();
     await page.getByTestId("confirm-delete-template").click();
     await expect(rows).toHaveCount(1);
     await expect
@@ -374,7 +381,7 @@ test.describe("US13 · managing quick expenses", { tag: "@live" }, () => {
     userClient,
   }) => {
     const { subcategoryId } = await seed(admin, owner, userClient, []);
-    await page.goto("/expenses");
+    await page.goto("/settings/quick-expenses");
     await expect(page.getByTestId("quick-expenses-section")).toBeVisible();
 
     const addWithSwitch = async (amount: string, note: string) => {
@@ -405,7 +412,12 @@ test.describe("US13 · managing quick expenses", { tag: "@live" }, () => {
     await expect(page.getByTestId("template-row")).toHaveCount(2);
 
     // The edit dialog has neither the quick row nor the switch.
-    await page.getByTestId("expense-row").first().getByRole("button").first().click();
+    await page.goto("/expenses");
+    await page
+      .getByTestId("expense-row")
+      .first()
+      .getByRole("button", { name: /^(edit|editar)$/i })
+      .click();
     const edit = page.getByRole("dialog");
     await expect(edit.locator("#expense-amount")).toBeVisible();
     await expect(edit.getByTestId("save-as-template")).toHaveCount(0);
@@ -442,7 +454,7 @@ test.describe("US13 · quick expenses in the demo", { tag: "@demo" }, () => {
     const readOnly = page
       .locator("[data-sonner-toast]")
       .filter({ hasText: MESSAGES[locale].common.demoReadOnly });
-    await page.goto("/expenses");
+    await page.goto("/settings/quick-expenses");
     const section = page.getByTestId("quick-expenses-section");
     await expect(section.getByTestId("template-row")).toHaveCount(1);
 
@@ -455,7 +467,8 @@ test.describe("US13 · quick expenses in the demo", { tag: "@demo" }, () => {
     await expect(readOnly).toHaveCount(1);
     await expect(section.getByTestId("template-row")).toHaveCount(1);
 
-    await section.getByTestId("template-delete").click();
+    await section.getByTestId("template-menu").click();
+    await page.getByTestId("template-delete").click();
     await page.getByTestId("confirm-delete-template").click();
     await expect(readOnly.first()).toBeVisible();
     await expect(section.getByTestId("template-row")).toHaveCount(1);

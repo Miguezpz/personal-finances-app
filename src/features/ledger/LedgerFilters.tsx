@@ -1,10 +1,12 @@
 "use client";
 
 /** Ledger filters (T125, FR-042): date range, category, account, movement type and third party. */
-import { ListFilter, X } from "lucide-react";
+import { ListFilter, Search, X } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
+import { Chip } from "@/components/ui/chip";
+import { LEDGER_PRESETS } from "@/domain/ledger-presets";
 import { Field, FieldLabel } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
 import {
@@ -18,6 +20,7 @@ import {
   EMPTY_LEDGER_FILTERS,
   isFiltering,
   LEDGER_TYPES,
+  MAX_SEARCH_LENGTH,
   type LedgerFilterState,
   type ThirdPartyFilter,
 } from "./filters";
@@ -39,7 +42,8 @@ export function LedgerFilters({ value, onChange, lookups }: Props) {
     (k) => value[k] !== EMPTY_LEDGER_FILTERS[k],
   ).length;
   const set = <K extends keyof LedgerFilterState>(key: K, v: LedgerFilterState[K]) =>
-    onChange({ ...value, [key]: v });
+    // Typing a date replaces the preset that had set the range (spec 009).
+    onChange({ ...value, [key]: v, ...((key === "from" || key === "to") && { preset: "" }) });
 
   const categoriesByMacro = (["needs", "wants"] as const).map((macro) => ({
     macro,
@@ -53,6 +57,47 @@ export function LedgerFilters({ value, onChange, lookups }: Props) {
 
   return (
     <div className="flex flex-col gap-3">
+      {/* Spec 009 (FR-022): date shortcuts and text search, always at hand. */}
+      <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
+        <div className="relative sm:w-72">
+          <Search
+            aria-hidden="true"
+            className="pointer-events-none absolute top-1/2 left-3 size-4 -translate-y-1/2 text-muted-foreground"
+          />
+          <Input
+            type="search"
+            value={value.q}
+            maxLength={MAX_SEARCH_LENGTH}
+            onChange={(e) => onChange({ ...value, q: e.target.value })}
+            placeholder={t("searchPlaceholder")}
+            aria-label={t("search")}
+            className="pl-9"
+            data-testid="ledger-search"
+          />
+        </div>
+        <div
+          role="group"
+          aria-label={t("presetsLabel")}
+          className="-mx-1 flex gap-2 overflow-x-auto px-1 py-0.5"
+        >
+          {LEDGER_PRESETS.map((preset) => (
+            <Chip
+              key={preset}
+              pressed={value.preset === preset}
+              onClick={() =>
+                onChange({
+                  ...value,
+                  preset: value.preset === preset ? "" : preset,
+                  ...(value.preset === preset && { from: "", to: "" }),
+                })
+              }
+              data-testid={`ledger-preset-${preset}`}
+            >
+              {t(`presets.${preset}`)}
+            </Chip>
+          ))}
+        </div>
+      </div>
       <Button
         variant="outline"
         className="w-fit md:hidden"

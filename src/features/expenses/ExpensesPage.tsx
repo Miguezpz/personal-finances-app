@@ -9,7 +9,8 @@
  * chips filter by bucket and payment method (FR-020); quincena and filters live in the URL, so the
  * Dashboard can link here filtered and a reload keeps them; rows are grouped by day (FR-016); on a
  * phone a row opens its edit dialog — delete is inside it — and on desktop the row's actions show
- * on hover or focus (FR-015); deleting has Undo instead of a confirmation (FR-009).
+ * on hover or focus (FR-015); deleting has Undo instead of a confirmation (FR-009). Quick
+ * expense templates are managed in Settings › Quick expenses (FR-029).
  */
 import { Pencil, Plus, Repeat, Trash2 } from "lucide-react";
 import { useTranslations } from "next-intl";
@@ -50,7 +51,6 @@ import { cn } from "@/lib/utils";
 import { selectLocale, usePreferences } from "@/store/preferences";
 import { openCreate } from "@/store/ui";
 import { CardDebtSummary } from "./CardDebtSummary";
-import { QuickExpensesSection } from "./QuickExpensesSection";
 import { PeriodNavigator, SpendingByMethod } from "./SpendingByMethod";
 
 const PAGE = 50;
@@ -207,8 +207,6 @@ export function ExpensesPage() {
       <SpendingByMethod period={period} />
 
       <CardDebtSummary />
-
-      <QuickExpensesSection />
 
       <section aria-labelledby="movements" className="flex flex-col gap-3">
         <h2 id="movements" className="text-lg font-semibold tracking-tight">

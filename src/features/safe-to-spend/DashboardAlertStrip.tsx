@@ -9,6 +9,7 @@ import { ChevronRight, HandCoins, TriangleAlert, type LucideIcon } from "lucide-
 import Link from "next/link";
 import { useTranslations } from "next-intl";
 import { useCollectionAlerts } from "@/features/receivables/CollectionAlerts";
+import { CardDueRow, useCardDueAlerts } from "./CardDueAlerts";
 import { cn } from "@/lib/utils";
 
 interface Row {
@@ -23,6 +24,7 @@ export function DashboardAlertStrip({ overspentBuckets }: { overspentBuckets: st
   const t = useTranslations("dashboard");
   const tr = useTranslations("receivables");
   const { alerts } = useCollectionAlerts();
+  const cardsDue = useCardDueAlerts();
 
   const rows: Row[] = [];
   if (overspentBuckets.length > 0)
@@ -41,7 +43,7 @@ export function DashboardAlertStrip({ overspentBuckets }: { overspentBuckets: st
       label: tr("alertsTitle", { count: alerts.length }),
       tone: "default",
     });
-  if (rows.length === 0) return null;
+  if (rows.length === 0 && cardsDue.length === 0) return null;
 
   return (
     <nav aria-label={t("alertsLabel")} className="md:hidden" data-testid="dashboard-alert-strip">
@@ -61,6 +63,12 @@ export function DashboardAlertStrip({ overspentBuckets }: { overspentBuckets: st
               <span className="min-w-0 flex-1 truncate">{label}</span>
               <ChevronRight aria-hidden="true" className="size-4 shrink-0 text-muted-foreground" />
             </Link>
+          </li>
+        ))}
+        {/* Spec 009 (FR-025): cards due within 7 days, with "Pay". */}
+        {cardsDue.map((a) => (
+          <li key={a.statement.card.id}>
+            <CardDueRow alert={a} className="px-3 py-2" />
           </li>
         ))}
       </ul>

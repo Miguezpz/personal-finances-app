@@ -254,6 +254,8 @@ Como dueño, quiero administrar mis gastos rápidos en Configuración, con un en
 - El modo demo rechaza el borrado **antes** de quitar el registro (no hay quitar-y-reponer).
 - Los presets "Esta quincena" y "Quincena pasada" usan la quincena del sistema actual (1–15 y 16–fin de mes); el spec 006 podrá cambiarlo después.
 - La búsqueda de Bitácora es local sobre los datos ya cargados.
+- Los pagos de tarjeta no tienen edición hoy; sus filas de Bitácora no abren un diálogo (FR-023 se cumple para gastos e ingresos).
+- El borrado diferido se confirma en `pagehide` como mejor esfuerzo: si el navegador cancela la petición al cerrar la pestaña, el registro sigue en el servidor y reaparece en la siguiente carga.
 - La alerta de tarjeta usa el mismo estado de tarjeta que Crédito y Gastos (spec 008).
 - Las verificaciones con backend local o en vivo se omiten por decisión del usuario; los flujos que escriben se prueban con e2e `@live` que no se ejecutan, y en demo se verifica el aviso de solo lectura.
 - Depende de: spec 008 (diálogos únicos, hoja ＋, estado de tarjeta) y spec 005 (gastos rápidos y su deshacer).

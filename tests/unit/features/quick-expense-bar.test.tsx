@@ -69,7 +69,7 @@ describe("QuickExpenseBar", () => {
     // Once the Dashboard variant shows its link, the data is loaded for both.
     expect(await screen.findByTestId("quick-expense-create-first")).toHaveAttribute(
       "href",
-      "/expenses#quick-expenses",
+      "/settings/quick-expenses",
     );
     expect(screen.getByTestId("dialog-slot")).toBeEmptyDOMElement();
     expect(screen.queryByTestId("quick-expense-bar")).toBeNull();

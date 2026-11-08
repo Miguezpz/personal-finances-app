@@ -144,10 +144,11 @@ test.describe("Accessibility", { tag: "@demo" }, () => {
       await audit(page, where("another amount or date dialog"));
       await page.keyboard.press("Escape");
 
-      await page.goto("/expenses#quick-expenses");
+      await page.goto("/settings/quick-expenses");
       await expect(page.getByTestId("template-row").first()).toBeVisible();
       await audit(page, where("quick expenses section"));
-      await page.getByTestId("template-edit").first().click();
+      await page.getByTestId("template-menu").first().click();
+      await page.getByTestId("template-edit").click();
       await expect(page.getByRole("dialog")).toBeVisible();
       await audit(page, where("quick expense dialog"));
       await page.keyboard.press("Escape");

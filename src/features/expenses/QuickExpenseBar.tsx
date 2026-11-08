@@ -65,7 +65,7 @@ export function QuickExpenseBar({ variant, onApplied }: Props) {
     return (
       <div>
         <Button asChild variant="link" size="sm" className="h-auto px-0">
-          <Link href="/expenses#quick-expenses" data-testid="quick-expense-create-first">
+          <Link href="/settings/quick-expenses" data-testid="quick-expense-create-first">
             <Plus aria-hidden="true" />
             {t("createFirst")}
           </Link>

@@ -5,7 +5,9 @@
  * buttons, then the owner's quick expenses. Each action closes the sheet and opens the app's single
  * instance of that dialog (DialogHost).
  */
+import { Settings2 } from "lucide-react";
 import { useTranslations } from "next-intl";
+import Link from "next/link";
 import { lazy, Suspense } from "react";
 import {
   Sheet,
@@ -77,6 +79,16 @@ export function CreateSheet() {
             <QuickExpenseBar variant="dialog" onApplied={() => setOpen(false)} />
           </Suspense>
         )}
+        {/* Spec 009 (FR-029): template management lives in Settings. */}
+        <Link
+          href="/settings/quick-expenses"
+          onClick={() => setOpen(false)}
+          className="inline-flex w-fit items-center gap-1 self-end rounded-md text-sm font-medium text-muted-foreground hover:text-foreground focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none pointer-coarse:min-h-11"
+          data-testid="create-manage-quick"
+        >
+          <Settings2 aria-hidden="true" className="size-4" />
+          {t("manageQuick")}
+        </Link>
       </SheetContent>
     </Sheet>
   );

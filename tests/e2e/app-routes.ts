@@ -15,6 +15,7 @@ export const APP_ROUTES = [
   "/settings/rules",
   "/settings/accounts",
   "/settings/categories",
+  "/settings/quick-expenses",
   "/settings/preferences",
 ] as const;
 

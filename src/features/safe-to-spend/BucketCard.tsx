@@ -7,7 +7,8 @@
  * Motion (spec 003, FR-030/031): when the available balance changes the block flashes its background (never the
  * figure, which always shows its final value); the bar grows from zero with a transform; the semáforo color fades.
  */
-import { CircleCheck, Clock } from "lucide-react";
+import { ChevronRight, CircleCheck, Clock } from "lucide-react";
+import Link from "next/link";
 import { useTranslations } from "next-intl";
 import { useEffect, useState } from "react";
 import { Money } from "@/components/money/Money";
@@ -99,7 +100,18 @@ export function BucketCard({
           <BucketIcon bucket={data.bucket} />
           {name}
         </CardTitle>
-        <TrafficLightBadge light={data.light} />
+        <div className="flex items-center gap-2">
+          {/* Spec 009 (FR-024): straight to this bucket's expenses. */}
+          <Link
+            href={`/expenses?bucket=${data.bucket}`}
+            className="inline-flex items-center gap-0.5 rounded-md text-xs font-medium text-muted-foreground hover:text-foreground focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none pointer-coarse:min-h-11"
+            data-testid={`bucket-${data.bucket}-link`}
+          >
+            {t("seeExpenses")}
+            <ChevronRight aria-hidden="true" className="size-3.5" />
+          </Link>
+          <TrafficLightBadge light={data.light} />
+        </div>
       </CardHeader>
       <CardContent className="flex flex-col gap-4">
         <div

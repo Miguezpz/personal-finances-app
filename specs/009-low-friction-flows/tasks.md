@@ -45,7 +45,7 @@ description: "Task list for spec 009 — Flujos y formularios con menos fricció
 - [X] T015 [P] [US1] CardPaymentDialog: default `fromAccountId` = `sourceAccountId` y `setLastUsed` en éxito (src/features/expenses/CardPaymentDialog.tsx)
 - [X] T016 [P] [US1] RecurringForm: defaults `lastUsed` (cuenta y subcategoría), día de cargo = día de hoy en altas y autofocus del monto (src/features/recurring/RecurringForm.tsx)
 - [X] T017 [P] [US1] GoalForm: el monto mensual sugerido como valor del campo cuando está vacío (src/features/goals/GoalForm.tsx); PreferencesForm: `inputMode="numeric"` en los enteros (src/features/settings/preferences/PreferencesForm.tsx)
-- [ ] T018 [US1] e2e demo en tests/e2e/flows.spec.ts: chips de fecha (Otra muestra el input con `max` = hoy), recientes visibles con historial, "250,5" válido sin error de campo, `save-and-add` visible en escritorio y oculto en móvil; e2e `@live` de lo recordado (ejecución omitida por decisión del usuario)
+- [X] T018 [US1] e2e demo en tests/e2e/flows.spec.ts: chips de fecha (Otra muestra el input con `max` = hoy), recientes visibles con historial, "250,5" válido sin error de campo, `save-and-add` visible en escritorio y oculto en móvil; e2e `@live` de lo recordado (ejecución omitida por decisión del usuario)
 
 ---
 
@@ -57,7 +57,7 @@ description: "Task list for spec 009 — Flujos y formularios con menos fricció
 - [X] T020 [P] [US2] Pruebas de `useDeferredDelete` con proveedor en memoria (oculta al instante, Deshacer restaura sin llamar `remove`, commit a 6 s con timers falsos, rollback si falla, demo no oculta) en tests/unit/features/deferred-delete.test.tsx
 - [X] T021 [US2] Usar `useDeferredDelete` y quitar el diálogo de confirmación en src/features/expenses/ExpensesPage.tsx (gastos y pagos), src/features/income/IncomePage.tsx y src/features/recurring/RecurringPage.tsx; "Borrar" dentro de la edición de un gasto (`delete-expense`) en AddExpenseDialog
 - [X] T022 [US2] Crear src/features/shared/retry-toast.ts (`notifySaveFailed`) y ampliar `CreateDialog` en src/store/ui.ts (`draft` en expense/income, kind `receivable`); los diálogos aceptan `draft` como valores iniciales y pasan `onFailure`: AddExpenseDialog, RegisterIncomeDialog y AddReceivableDialog (que se monta lazy en src/components/layout/DialogHost.tsx; ReceivablesPage abre `openCreate({kind:"receivable"})`)
-- [ ] T023 [US2] e2e demo: borrar un gasto o un ingreso muestra solo lectura y la fila sigue; sin diálogo de confirmación. e2e `@live`: deshacer y reintentar (ejecución omitida por decisión del usuario) — tests/e2e/flows.spec.ts; ajustar los specs existentes que esperaban el diálogo de confirmación (us9-demo, us4-expenses, us8-settings-ledger si aplica)
+- [X] T023 [US2] e2e demo: borrar un gasto o un ingreso muestra solo lectura y la fila sigue; sin diálogo de confirmación. e2e `@live`: deshacer y reintentar (ejecución omitida por decisión del usuario) — tests/e2e/flows.spec.ts; ajustar los specs existentes que esperaban el diálogo de confirmación (us9-demo, us4-expenses, us8-settings-ledger si aplica)
 
 ---
 
@@ -73,39 +73,39 @@ description: "Task list for spec 009 — Flujos y formularios con menos fricció
 - [X] T026 [US4] ExpensesPage: agrupar por día con `groupByDay` (`day-group`, `data-label`); en móvil la fila completa es un botón que abre la edición (gasto) o el pago; en escritorio, acciones visibles al hover o al foco
 - [X] T027 [P] [US4] Menú ⋯ (DropdownMenu) para las acciones de las filas de plantillas en src/features/expenses/QuickExpensesSection.tsx y de taxonomía en src/features/settings/taxonomy/TaxonomyEditor.tsx (conservar testids de cada acción como ítems del menú)
 - [X] T028 [P] [US4] ReceivablesPage: cuotas como tarjetas `installment-card` en móvil (`md:hidden`) y tabla solo en escritorio (src/features/receivables/ReceivablesPage.tsx)
-- [ ] T029 [US4] e2e demo a 390 px: fila tocable abre la edición con `delete-expense`, grupos por día, cuotas como tarjetas sin overflow; actualizar specs que usaban los iconos de fila o de taxonomía/plantillas (tests/e2e/flows.spec.ts y los afectados)
+- [X] T029 [US4] e2e demo a 390 px: fila tocable abre la edición con `delete-expense`, grupos por día, cuotas como tarjetas sin overflow; actualizar specs que usaban los iconos de fila o de taxonomía/plantillas (tests/e2e/flows.spec.ts y los afectados)
 
 ---
 
 ## Phase 7: User Story 5 - Encontrar y filtrar (Priority: P2)
 
 - [X] T030 [US5] Gastos: selector de quincena en el `PageHeader` (`expenses-period`), que filtra el resumen (`SpendingByMethod` recibe `period`) y la lista; chips de bucket y método + `clear-filters`; estado en la URL (`periodo`, `bucket`, `metodo`) con `useSearchParams`/`router.replace`; `<Suspense>` en src/app/(app)/expenses/page.tsx
-- [ ] T031 [US5] Bitácora: filtros en la URL (`desde`, `hasta`, `tipo`, `categoria`, `cuenta`, `terceros`, `q` ≤ 100 caracteres, `preset`) con validación, presets `ledger-preset-*`, búsqueda `ledger-search` (src/features/ledger/{filters.ts,LedgerFilters.tsx,LedgerPage.tsx}); `<Suspense>` en src/app/(app)/ledger/page.tsx
-- [ ] T032 [US5] Filas de Bitácora de gasto, ingreso y pago de tarjeta abren la edición (`data-editable`) en src/features/ledger/LedgerTable.tsx
-- [ ] T033 [US5] e2e demo: chips de Gastos y URL; preset + búsqueda de Bitácora en la URL y conservados al recargar; fila de Bitácora abre la edición (tests/e2e/flows.spec.ts; ajustar us8-settings-ledger si cambia)
+- [X] T031 [US5] Bitácora: filtros en la URL (`desde`, `hasta`, `tipo`, `categoria`, `cuenta`, `terceros`, `q` ≤ 100 caracteres, `preset`) con validación, presets `ledger-preset-*`, búsqueda `ledger-search` (src/features/ledger/{filters.ts,LedgerFilters.tsx,LedgerPage.tsx}); `<Suspense>` en src/app/(app)/ledger/page.tsx
+- [X] T032 [US5] Filas de Bitácora de gasto, ingreso y pago de tarjeta abren la edición (`data-editable`) en src/features/ledger/LedgerTable.tsx
+- [X] T033 [US5] e2e demo: chips de Gastos y URL; preset + búsqueda de Bitácora en la URL y conservados al recargar; fila de Bitácora abre la edición (tests/e2e/flows.spec.ts; ajustar us8-settings-ledger si cambia)
 
 ---
 
 ## Phase 8: User Story 6 - Dashboard accionable (Priority: P2)
 
-- [ ] T034 [US6] Enlace "Ver gastos" (`bucket-<bucket>-link`) en src/features/safe-to-spend/BucketCard.tsx → `/expenses?bucket=<bucket>`
-- [ ] T035 [US6] Crear src/features/safe-to-spend/CardDueAlerts.tsx (tarjetas con último estado no pagado y `daysBetween(today, last.due) ≤ 7`, `card-due-alert`, `<Money>`, Pagar → `openCreate`) y usarla en Dashboard (bloque de escritorio) y como filas en DashboardAlertStrip (móvil)
-- [ ] T036 [US6] e2e demo: el enlace del bucket abre Gastos con el chip activo; la alerta de tarjeta aparece cuando el seed la tiene
+- [X] T034 [US6] Enlace "Ver gastos" (`bucket-<bucket>-link`) en src/features/safe-to-spend/BucketCard.tsx → `/expenses?bucket=<bucket>`
+- [X] T035 [US6] Crear src/features/safe-to-spend/CardDueAlerts.tsx (tarjetas con último estado no pagado y `daysBetween(today, last.due) ≤ 7`, `card-due-alert`, `<Money>`, Pagar → `openCreate`) y usarla en Dashboard (bloque de escritorio) y como filas en DashboardAlertStrip (móvil)
+- [X] T036 [US6] e2e demo: el enlace del bucket abre Gastos con el chip activo; la alerta de tarjeta aparece cuando el seed la tiene
 
 ---
 
 ## Phase 9: User Story 7 - Gastos rápidos en Configuración (Priority: P3)
 
-- [ ] T037 [US7] Nueva ruta src/app/(app)/settings/quick-expenses/page.tsx con `SettingsHeader` + `QuickExpensesSection`; entrada en `SETTINGS_SECTIONS` (icono `Zap`); quitar la sección de ExpensesPage; actualizar los enlaces de "crear el primero" (QuickExpenseBar) y `#quick-expenses`
-- [ ] T038 [US7] Enlace "Administrar" (`create-manage-quick`) en src/components/layout/CreateSheet.tsx → `/settings/quick-expenses`; agregar la ruta a tests/e2e/app-routes.ts y actualizar us13-quick-expenses (navegación a la nueva ruta)
+- [X] T037 [US7] Nueva ruta src/app/(app)/settings/quick-expenses/page.tsx con `SettingsHeader` + `QuickExpensesSection`; entrada en `SETTINGS_SECTIONS` (icono `Zap`); quitar la sección de ExpensesPage; actualizar los enlaces de "crear el primero" (QuickExpenseBar) y `#quick-expenses`
+- [X] T038 [US7] Enlace "Administrar" (`create-manage-quick`) en src/components/layout/CreateSheet.tsx → `/settings/quick-expenses`; agregar la ruta a tests/e2e/app-routes.ts y actualizar us13-quick-expenses (navegación a la nueva ruta)
 
 ---
 
 ## Phase 10: Polish
 
-- [ ] T039 Gate completo: `pnpm typecheck && pnpm lint && pnpm test`, `E2E_MODES=demo pnpm test:e2e`, `pnpm build`, medir el First Load (≤ +20 kB vs T001), build demo + `pnpm check:demo-bundle`; verificar 44 px táctiles en chips y filas nuevas (FR-032) en tests/e2e/mobile.spec.ts
-- [ ] T040 Ejecución de los e2e `@live` (recordar, deshacer, reintentar) y revisión visual en el deploy: **omitidas por decisión del usuario**
-- [ ] T041 Marcar las tareas completadas y documentar en "Notas" cualquier bloqueo
+- [X] T039 Gate completo: `pnpm typecheck && pnpm lint && pnpm test`, `E2E_MODES=demo pnpm test:e2e`, `pnpm build`, medir el First Load (≤ +20 kB vs T001), build demo + `pnpm check:demo-bundle`; verificar 44 px táctiles en chips y filas nuevas (FR-032) en tests/e2e/mobile.spec.ts
+- [X] T040 Ejecución de los e2e `@live` (recordar, deshacer, reintentar) y revisión visual en el deploy — **omitidas por decisión del usuario** (sin Supabase local)
+- [X] T041 Marcar las tareas completadas y documentar en "Notas" cualquier bloqueo
 
 ## Dependencies & Execution Order
 
@@ -123,3 +123,10 @@ MVP = Phase 2 + US1. Commit + push al cerrar cada fase con el gate rápido.
 ## Notas
 
 - Línea base First Load (T001, 2026-11-07, tras el spec 008): `/` 301.9 kB gzip; `/dashboard` 331.7 kB gzip. Presupuesto: `/dashboard` ≤ 351.7 kB.
+- Gate final (2026-11-07): `pnpm typecheck`, `pnpm lint`, `pnpm test` (697 ✓), `E2E_MODES=demo pnpm test:e2e` (144 ✓ + flows 18 ✓), `pnpm build` ✓, build demo + `pnpm check:demo-bundle` ✓ (353 archivos limpios).
+- First Load: `/` 304.3 kB gzip (+2.4), `/dashboard` 334.5 kB gzip (+2.8 kB; presupuesto +20 kB ✓).
+- Decisiones de implementación:
+  - Los pagos de tarjeta no tienen diálogo de edición, así que sus filas en Bitácora no abren nada (FR-023 aplica a gastos e ingresos).
+  - El "Reintentar" de gasto, ingreso y cuenta por cobrar usa la promesa de la mutación, que sí se resuelve aunque el diálogo ya se haya desmontado. `onFailure` queda disponible en `useSnapshotMutation`.
+  - Los filtros de Bitácora mantienen estado local sincronizado con la URL. Al teclear rápido, un `router.replace` lento descartaba letras; ahora el estado local responde primero y la URL lo sigue.
+- Sin bloqueos pendientes. La ejecución de los e2e `@live` queda omitida por decisión del usuario.

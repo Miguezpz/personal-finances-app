@@ -188,6 +188,7 @@ describe("ledger filter state", () => {
 
   it("expands a category to its subcategories and maps every control", () => {
     const state = {
+      ...EMPTY_LEDGER_FILTERS,
       from: "2026-10-01",
       to: "2026-10-31",
       type: "expense" as const,

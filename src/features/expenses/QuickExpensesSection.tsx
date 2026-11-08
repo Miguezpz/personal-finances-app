@@ -4,7 +4,7 @@
  * "Quick expenses" on the Expenses page (spec 005, US2): the active templates in the Dashboard's
  * order, with edit, move up/down and delete (with confirmation). Up to 12 (FR-005). A template
  * whose subcategory is archived is flagged unavailable (FR-011); one whose payment method is
- * archived says it's recorded without one. `#quick-expenses` is the Dashboard's "create" anchor.
+ * archived says it's recorded without one. `#quick-expenses` (now on Settings › Quick expenses, spec 009) is the Dashboard's "create" anchor.
  */
 import { ArrowDown, ArrowUp, CircleAlert, Ellipsis, Pencil, Plus, Trash2, Zap } from "lucide-react";
 import { useTranslations } from "next-intl";
@@ -13,6 +13,7 @@ import { toast } from "sonner";
 import { CategoryIcon } from "@/components/icons/CategoryIcon";
 import { Money } from "@/components/money/Money";
 import { Button } from "@/components/ui/button";
+import { cn } from "@/lib/utils";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -50,7 +51,8 @@ const selectSectionData = (s: FinanceSnapshot) => ({
   accounts: s.accounts,
 });
 
-export function QuickExpensesSection() {
+/** `inSettings`: the page header already names it (spec 009, Settings › Quick expenses). */
+export function QuickExpensesSection({ inSettings = false }: { inSettings?: boolean }) {
   const t = useTranslations("quickExpenses");
   const tc = useTranslations("common");
   const nameOf = useTaxonomyName();
@@ -97,7 +99,7 @@ export function QuickExpensesSection() {
       data-testid="quick-expenses-section"
     >
       <div className="flex flex-wrap items-center justify-between gap-2">
-        <div className="flex min-w-0 flex-col gap-1">
+        <div className={cn("flex min-w-0 flex-col gap-1", inSettings && "sr-only")}>
           <h2 id="quick-expenses-title" className="text-lg font-semibold tracking-tight">
             {t("title")}
           </h2>

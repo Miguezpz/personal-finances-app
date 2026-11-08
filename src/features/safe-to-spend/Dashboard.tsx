@@ -18,6 +18,7 @@ import { CollectionAlerts } from "@/features/receivables/CollectionAlerts";
 import { selectLocale, usePreferences } from "@/store/preferences";
 import { useUi } from "@/store/ui";
 import { BucketCard } from "./BucketCard";
+import { CardDueAlerts } from "./CardDueAlerts";
 import { DashboardAlertStrip } from "./DashboardAlertStrip";
 import { useSafeToSpend } from "./useSafeToSpend";
 import { PageHeader } from "@/components/layout/PageHeader";
@@ -117,6 +118,7 @@ export function Dashboard() {
 
           {/* Desktop: the full alerts above the buckets; mobile shows DashboardAlertStrip instead. */}
           <div className="flex flex-col gap-6 empty:hidden max-md:hidden">
+            <CardDueAlerts />
             <CollectionAlerts />
 
             {overspent.length > 0 && (

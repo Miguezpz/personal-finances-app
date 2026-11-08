@@ -7,15 +7,21 @@
  */
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import { useTranslations } from "next-intl";
-import { useMemo, useState } from "react";
+import { usePathname, useRouter, useSearchParams } from "next/navigation";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { Money } from "@/components/money/Money";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
+import { useFinanceSnapshot } from "@/data/useFinanceSnapshot";
 import { filterLedger } from "@/domain/ledger";
-import type { Cents } from "@/domain/types";
+import { matchesSearch, presetRange } from "@/domain/ledger-presets";
+import type { Cents, FinanceSnapshot, LedgerEntry } from "@/domain/types";
+import { useToday } from "@/lib/use-today";
+import { openCreate } from "@/store/ui";
 import { ExportButton } from "./ExportButton";
 import {
-  EMPTY_LEDGER_FILTERS,
+  filtersFromParams,
+  filtersToParams,
   isFiltering,
   type LedgerFilterState,
   toLedgerFilter,
@@ -31,19 +37,57 @@ import { useSnapshotStatus } from "@/data/useFinanceSnapshot";
 
 export const LEDGER_PAGE_SIZE = 25;
 
+const selectEditable = (s: FinanceSnapshot) => ({ expenses: s.expenses, incomes: s.incomes });
+
 export function LedgerPage() {
   const t = useTranslations("ledger");
   const snapshotStatus = useSnapshotStatus();
   const { data: ledger } = useLedger();
   const { data: lookups } = useLedgerLookups();
-  const [filters, setFilters] = useState<LedgerFilterState>(EMPTY_LEDGER_FILTERS);
+  const { data: entities } = useFinanceSnapshot(selectEditable);
+  // Spec 009 (FR-021): the filters live in the URL, so a reload or a shared link keeps them.
+  const params = useSearchParams();
+  const router = useRouter();
+  const pathname = usePathname();
+  const today = useToday();
+  const query = params.toString();
+  // Local state answers at once (typing in the search box); the URL follows. Queries this page
+  // wrote itself are skipped when they come back, so a slow round-trip never undoes a keystroke;
+  // any other URL change (Back, a shared link) replaces the filters.
+  const [filters, setFilters] = useState<LedgerFilterState>(() =>
+    filtersFromParams(new URLSearchParams(query), today),
+  );
+  const written = useRef(new Set<string>());
+  useEffect(() => {
+    if (written.current.has(query)) {
+      written.current.delete(query);
+      return;
+    }
+    setFilters(filtersFromParams(new URLSearchParams(query), today));
+  }, [query, today]);
   const [page, setPage] = useState(0);
 
   const filtered = useMemo(
     () =>
-      ledger && lookups ? filterLedger(ledger, toLedgerFilter(filters, lookups.subcategories)) : [],
+      ledger && lookups
+        ? filterLedger(ledger, toLedgerFilter(filters, lookups.subcategories)).filter((e) =>
+            matchesSearch([e.description], filters.q),
+          )
+        : [],
     [ledger, lookups, filters],
   );
+
+  // Spec 009 (FR-023): expense and income rows open their edit dialog.
+  const openEntry = (entry: LedgerEntry) => {
+    if (!entities) return;
+    if (entry.type === "expense" || entry.type === "recurring_expense") {
+      const expense = entities.expenses.find((x) => x.id === entry.id);
+      if (expense) openCreate({ kind: "expense", expense });
+    } else if (entry.type === "income") {
+      const income = entities.incomes.find((x) => x.id === entry.id);
+      if (income) openCreate({ kind: "income", income });
+    }
+  };
   const totals = useMemo(() => {
     let inflow = 0;
     let outflow = 0;
@@ -58,8 +102,13 @@ export function LedgerPage() {
   const current = Math.min(page, pages - 1);
   const visible = filtered.slice(current * LEDGER_PAGE_SIZE, (current + 1) * LEDGER_PAGE_SIZE);
 
-  function onFiltersChange(next: LedgerFilterState) {
+  function onFiltersChange(changed: LedgerFilterState) {
+    // A preset sets its own dates right away (the URL keeps only the preset).
+    const next = changed.preset ? { ...changed, ...presetRange(changed.preset, today) } : changed;
     setFilters(next);
+    const nextQuery = filtersToParams(next).toString();
+    written.current.add(nextQuery);
+    router.replace(nextQuery ? `${pathname}?${nextQuery}` : pathname, { scroll: false });
     setPage(0);
   }
 
@@ -114,7 +163,7 @@ export function LedgerPage() {
             </EmptyState>
           ) : (
             <>
-              <LedgerTable entries={visible} lookups={lookups} />
+              <LedgerTable entries={visible} lookups={lookups} onOpen={openEntry} />
               <nav
                 className="flex items-center justify-between gap-2 text-sm"
                 aria-label={t("pagination")}

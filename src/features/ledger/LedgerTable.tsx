@@ -32,6 +32,8 @@ import type { LedgerLookups } from "./hooks";
 interface Props {
   entries: readonly LedgerEntry[];
   lookups: LedgerLookups;
+  /** Opens the entry's edit dialog (spec 009, FR-023). */
+  onOpen?: (entry: LedgerEntry) => void;
 }
 
 interface Labelled {
@@ -69,8 +71,16 @@ function IconGlyph({ icon: Icon }: { icon: LucideIcon }) {
   return <Icon aria-hidden="true" focusable="false" className="size-3.5 shrink-0" />;
 }
 
-export function LedgerTable({ entries, lookups }: Props) {
+/** Rows that open an edit dialog (spec 009, FR-023): expenses (manual or recurring) and incomes. */
+const EDITABLE: ReadonlySet<LedgerEntry["type"]> = new Set([
+  "expense",
+  "recurring_expense",
+  "income",
+]);
+
+export function LedgerTable({ entries, lookups, onOpen }: Props) {
   const t = useTranslations("ledger");
+  const tc = useTranslations("expenses");
   const locale = usePreferences(selectLocale);
   const nameOf = useTaxonomyName();
 
@@ -102,8 +112,17 @@ export function LedgerTable({ entries, lookups }: Props) {
               key={`${e.type}:${e.id}`}
               data-testid="ledger-card"
               data-type={e.type}
-              className="flex items-start justify-between gap-3 rounded-lg border bg-card p-3"
+              data-editable={EDITABLE.has(e.type) || undefined}
+              className="relative flex items-start justify-between gap-3 rounded-lg border bg-card p-3"
             >
+              {onOpen && EDITABLE.has(e.type) && (
+                <button
+                  type="button"
+                  className="absolute inset-0 rounded-lg focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none"
+                  aria-label={tc("openEdit", { name: e.description || t(`types.${e.type}`) })}
+                  onClick={() => onOpen(e)}
+                />
+              )}
               <div className="flex min-w-0 flex-col gap-0.5">
                 <p className="flex min-w-0 items-center gap-1.5 font-medium">
                   <TypeIcon
@@ -133,7 +152,12 @@ export function LedgerTable({ entries, lookups }: Props) {
           );
         })}
       </ul>
-      <LedgerRows entries={entries} subcategoryOf={subcategoryOf} accountOf={accountOf} />
+      <LedgerRows
+        entries={entries}
+        subcategoryOf={subcategoryOf}
+        accountOf={accountOf}
+        {...(onOpen ? { onOpen } : {})}
+      />
     </>
   );
 }
@@ -142,10 +166,12 @@ function LedgerRows({
   entries,
   subcategoryOf,
   accountOf,
+  onOpen,
 }: {
   entries: readonly LedgerEntry[];
   subcategoryOf: (e: LedgerEntry) => Labelled | null;
   accountOf: (e: LedgerEntry) => Labelled | null;
+  onOpen?: (entry: LedgerEntry) => void;
 }) {
   const t = useTranslations("ledger");
   const locale = usePreferences(selectLocale);
@@ -166,7 +192,12 @@ function LedgerRows({
           const account = accountOf(e);
           const TypeIcon = LEDGER_TYPE_ICONS[e.type];
           return (
-            <TableRow key={`${e.type}:${e.id}`} data-testid="ledger-row" data-type={e.type}>
+            <TableRow
+              key={`${e.type}:${e.id}`}
+              data-testid="ledger-row"
+              data-type={e.type}
+              data-editable={EDITABLE.has(e.type) || undefined}
+            >
               <TableCell className="align-top text-muted-foreground tabular-nums">
                 {formatDate(e.occurredOn, locale)}
               </TableCell>
@@ -177,7 +208,18 @@ function LedgerRows({
                     focusable="false"
                     className="size-4 shrink-0 text-muted-foreground"
                   />
-                  {e.description || t(`types.${e.type}`)}
+                  {onOpen && EDITABLE.has(e.type) ? (
+                    <button
+                      type="button"
+                      className="rounded-sm text-left underline-offset-4 hover:underline focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none"
+                      onClick={() => onOpen(e)}
+                      data-testid="ledger-open"
+                    >
+                      {e.description || t(`types.${e.type}`)}
+                    </button>
+                  ) : (
+                    e.description || t(`types.${e.type}`)
+                  )}
                 </p>
                 <p className="flex flex-wrap items-center gap-x-1.5 text-xs text-muted-foreground">
                   {e.description && <span>{t(`types.${e.type}`)}</span>}
