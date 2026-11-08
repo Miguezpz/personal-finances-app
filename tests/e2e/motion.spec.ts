@@ -84,6 +84,48 @@ test.describe("US4 · motion", { tag: "@demo" }, () => {
     expect(await page.locator("header").first().boundingBox()).toEqual(header);
   });
 
+  test("spec 010: on mobile the header and the bottom bar stay above the page while it transitions", async ({
+    page,
+  }) => {
+    // Each gets its own snapshot; inside the root snapshot the page's snapshots painted over them (a flash per tap).
+    await page.setViewportSize({ width: 375, height: 812 });
+    await page.addInitScript(() => {
+      const w = window as unknown as { __vtReady: string[] };
+      w.__vtReady = [];
+      const start = document.startViewTransition?.bind(document);
+      if (start)
+        document.startViewTransition = ((arg: Parameters<typeof start>[0]) => {
+          const t = start(arg);
+          t.ready.then(
+            () => w.__vtReady.push("ready"),
+            (e: Error) => w.__vtReady.push(e.name),
+          );
+          return t;
+        }) as typeof document.startViewTransition;
+    });
+    await page.goto("/dashboard");
+    await expect(page.locator("main [aria-busy='true']")).toHaveCount(0);
+    const vtName = (testId: string) =>
+      page.getByTestId(testId).evaluate((el) => getComputedStyle(el).viewTransitionName);
+    expect(await vtName("mobile-nav")).toBe("mobile-nav");
+    expect(
+      await page
+        .locator("header")
+        .first()
+        .evaluate((el) => getComputedStyle(el).viewTransitionName),
+    ).toBe("app-header");
+
+    await page.getByTestId("mobile-nav-expenses").click();
+    await page.waitForURL("**/expenses");
+    await page.getByTestId("mobile-nav-more").click();
+    await page.getByTestId("more-sheet").locator('a[href="/goals"]').click();
+    await page.waitForURL("**/goals");
+    // A duplicated name would skip the transition (ready rejects with InvalidStateError).
+    await expect
+      .poll(() => page.evaluate(() => (window as unknown as { __vtReady: string[] }).__vtReady))
+      .toEqual(["ready", "ready"]);
+  });
+
   test("spec 010: goal bars grow with a transform (never width); the net-worth chart doesn't animate", async ({
     page,
   }) => {

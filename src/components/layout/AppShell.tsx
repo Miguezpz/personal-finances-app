@@ -193,12 +193,12 @@ export function AppShell({ children, toolbar }: { children: ReactNode; toolbar?:
       >
         {tc("skipToContent")}
       </a>
-      <header className="sticky top-0 z-30 flex min-h-14 items-center gap-2 border-b bg-background/95 pt-[env(safe-area-inset-top)] pr-[max(1rem,env(safe-area-inset-right))] pl-[max(1rem,env(safe-area-inset-left))] backdrop-blur">
+      <header className="sticky top-0 z-30 flex min-h-14 items-center gap-2 border-b bg-background/95 pt-[env(safe-area-inset-top)] pr-[max(1rem,env(safe-area-inset-right))] pl-[max(1rem,env(safe-area-inset-left))] backdrop-blur [view-transition-name:app-header]">
         {/* Mobile "More" panel (opened from the bottom bar): the destinations the bar doesn't show. */}
         <Sheet open={sidebarOpen} onOpenChange={setSidebarOpen}>
           <SheetContent
             side="bottom"
-            className="max-h-[85dvh] overflow-y-auto rounded-t-2xl p-4 pb-[max(1rem,env(safe-area-inset-bottom))]"
+            className="max-h-[85dvh] overflow-y-auto rounded-t-2xl p-4 pb-[max(1rem,env(safe-area-inset-bottom))] [view-transition-name:more-sheet]"
             data-testid="more-sheet"
           >
             <SheetHeader className="p-0">

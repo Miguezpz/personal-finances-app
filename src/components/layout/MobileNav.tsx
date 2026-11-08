@@ -82,7 +82,7 @@ export function MobileNav() {
     <nav
       aria-label={t("mobileLabel")}
       data-testid="mobile-nav"
-      className="fixed inset-x-0 bottom-0 z-30 border-t bg-background/95 pb-[env(safe-area-inset-bottom)] backdrop-blur md:hidden"
+      className="fixed inset-x-0 bottom-0 z-30 border-t bg-background/95 pb-[env(safe-area-inset-bottom)] backdrop-blur [view-transition-name:mobile-nav] md:hidden"
     >
       <div ref={listRef} className="group/nav relative">
         <NavIndicator listRef={listRef} className="rounded-full" />

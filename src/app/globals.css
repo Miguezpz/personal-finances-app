@@ -192,6 +192,26 @@
 ::view-transition-new(.page-in) {
   animation: vt-rise-in 180ms var(--ease-out-quint) 60ms both;
 }
+/*
+ * The sticky header, the fixed bottom bar and the mobile "More" sheet (which closes as its link navigates) get their
+ * own snapshot (view-transition-name in AppShell / MobileNav). Otherwise they'd stay inside the root snapshot, and the
+ * page's snapshots, painted above root, would cover them while they fade — on mobile the content scrolled under the
+ * bar flashed over it on every tap. They're captured after the page (higher z-index), and show only their live new
+ * state (the nav indicator sliding, the sheet sliding out), without moving or cross-fading.
+ */
+::view-transition-group(app-header),
+::view-transition-group(mobile-nav),
+::view-transition-group(more-sheet),
+::view-transition-new(app-header),
+::view-transition-new(mobile-nav),
+::view-transition-new(more-sheet) {
+  animation: none;
+}
+::view-transition-old(app-header),
+::view-transition-old(mobile-nav),
+::view-transition-old(more-sheet) {
+  display: none;
+}
 
 /* Spec 010 · rows that appear after the list was on screen (adds, Undo) and rows on their way out (delete). */
 @keyframes row-in {
