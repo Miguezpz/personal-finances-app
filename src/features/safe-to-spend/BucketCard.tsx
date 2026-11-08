@@ -10,7 +10,6 @@
 import { ChevronRight, CircleCheck, Clock } from "lucide-react";
 import Link from "next/link";
 import { useTranslations } from "next-intl";
-import { useEffect, useState } from "react";
 import { Money } from "@/components/money/Money";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { negateCents } from "@/domain/money";
@@ -22,6 +21,8 @@ import { cn } from "@/lib/utils";
 import { selectLocale, usePreferences } from "@/store/preferences";
 import { LIGHT_STYLES, TrafficLightBadge } from "./TrafficLightBadge";
 import { BUCKET_ICONS } from "@/components/icons/domain-icons";
+import { useFlashOnChange } from "@/components/motion/use-flash-on-change";
+import { useMountedFrame } from "@/components/motion/use-mounted-frame";
 
 function Row({ label, cents, muted = false }: { label: string; cents: Cents; muted?: boolean }) {
   return (
@@ -79,19 +80,10 @@ export function BucketCard({
     data.ratio === null ? 0 : Math.max(0, Math.min(100, Math.floor(data.ratio / 100)));
 
   // Re-key the balance block when the balance changes, to replay the highlight (not on the first render).
-  const [shown, setShown] = useState(data.available);
-  const [flashes, setFlashes] = useState(0);
-  if (shown !== data.available) {
-    setShown(data.available);
-    setFlashes((n) => n + 1);
-  }
+  const { key: flashes, flashing } = useFlashOnChange(data.available);
 
   // The bar starts at 0 and grows to its value on the next frame.
-  const [mounted, setMounted] = useState(false);
-  useEffect(() => {
-    const id = requestAnimationFrame(() => setMounted(true));
-    return () => cancelAnimationFrame(id);
-  }, []);
+  const mounted = useMountedFrame();
 
   return (
     <Card data-testid={`bucket-${data.bucket}`} data-light={data.light}>
@@ -119,7 +111,7 @@ export function BucketCard({
           data-testid={`bucket-${data.bucket}-balance`}
           className={cn(
             "flex flex-col gap-1 rounded-lg bg-surface-highlight p-4",
-            flashes > 0 && "animate-balance-highlight",
+            flashing && "animate-balance-highlight",
           )}
         >
           <span className="text-sm text-muted-foreground">{t("safeToSpend")}</span>

@@ -84,6 +84,30 @@ test.describe("US4 · motion", { tag: "@demo" }, () => {
     expect(await page.locator("header").first().boundingBox()).toEqual(header);
   });
 
+  test("spec 010: goal bars grow with a transform (never width); the net-worth chart doesn't animate", async ({
+    page,
+  }) => {
+    await page.goto("/goals");
+    await expect(page.locator("main [aria-busy='true']")).toHaveCount(0);
+    const fill = page.getByTestId("goal-progress-fill").first();
+    await expect(fill).toBeVisible();
+    const props = await fill.evaluate((el) => getComputedStyle(el).transitionProperty);
+    expect(props).toContain("transform");
+    expect(props).not.toContain("width");
+    await expect.poll(() => fill.getAttribute("style")).not.toContain("scaleX(0)");
+
+    await page.goto("/net-worth");
+    await expect(page.locator("main [aria-busy='true']")).toHaveCount(0);
+    const chart = page.getByTestId("net-worth-chart");
+    await expect(chart).toBeVisible();
+    await page.waitForTimeout(350); // past the route transition and the reveal
+    expect(
+      await chart.evaluate(
+        (el) => el.getAnimations({ subtree: true }).filter((a) => a.playState === "running").length,
+      ),
+    ).toBe(0);
+  });
+
   test("spec 010: what replaces a skeleton fades in, and amounts stay masked meanwhile", async ({
     page,
   }) => {

@@ -29,9 +29,13 @@ import { EmptyState } from "@/components/ui/empty-state";
 import { GOAL_KIND_ICONS } from "@/components/icons/domain-icons";
 import { PageLoadError } from "@/components/data/PageQueryState";
 import { useSnapshotStatus } from "@/data/useFinanceSnapshot";
+import { FlashOnChange } from "@/components/motion/FlashOnChange";
+import { useMountedFrame } from "@/components/motion/use-mounted-frame";
 
+/** Grows from 0 to its value when it appears, like the buckets' bar (spec 010, FR-008). */
 function ProgressBar({ value, label }: { value: number; label: string }) {
   const pct = Math.max(0, Math.min(100, Math.round(value * 100)));
+  const mounted = useMountedFrame();
   return (
     <div
       role="progressbar"
@@ -41,7 +45,11 @@ function ProgressBar({ value, label }: { value: number; label: string }) {
       aria-valuenow={pct}
       className="h-2 w-full overflow-hidden rounded-full bg-muted"
     >
-      <div className="h-full rounded-full bg-primary transition-all" style={{ width: `${pct}%` }} />
+      <div
+        className="h-full w-full origin-left rounded-full bg-primary transition-transform duration-slow ease-out-quint"
+        style={{ transform: `scaleX(${mounted ? pct / 100 : 0})` }}
+        data-testid="goal-progress-fill"
+      />
     </div>
   );
 }
@@ -158,14 +166,17 @@ export function GoalsPage() {
                       </CardDescription>
                     </CardHeader>
                     <CardContent className="flex flex-col gap-3">
-                      <div className="flex items-baseline justify-between gap-2">
+                      <FlashOnChange
+                        value={p.saved}
+                        className="-mx-2 flex items-baseline justify-between gap-2 rounded-lg px-2 py-1"
+                      >
                         <Money cents={p.saved} className="text-2xl font-semibold" />
                         {p.target > 0 && (
                           <span className="text-sm text-muted-foreground">
                             {t.rich("ofTarget", { amount: () => <Money cents={p.target} /> })}
                           </span>
                         )}
-                      </div>
+                      </FlashOnChange>
                       <ProgressBar
                         value={p.target > 0 ? p.saved / p.target : 0}
                         label={t("progressLabel", { name: g.name })}
@@ -211,12 +222,15 @@ export function GoalsPage() {
                       </CardDescription>
                     </CardHeader>
                     <CardContent className="flex flex-col gap-3">
-                      <div className="flex items-baseline justify-between gap-2">
+                      <FlashOnChange
+                        value={saved}
+                        className="-mx-2 flex items-baseline justify-between gap-2 rounded-lg px-2 py-1"
+                      >
                         <Money cents={saved} className="text-2xl font-semibold" />
                         <span className="text-sm text-muted-foreground">
                           {t("savedThisYear", { year: String(year) })}
                         </span>
-                      </div>
+                      </FlashOnChange>
                       <ProgressBar
                         value={annual > 0 ? saved / annual : 0}
                         label={t("progressLabel", { name: g.name })}

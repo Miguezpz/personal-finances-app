@@ -40,8 +40,8 @@ description: "Task list for spec 010 — Animaciones y pulido"
 
 ## Phase 5: User Story 3 - Montos y metas (Priority: P3)
 
-- [ ] T013 [P] [US3] BucketCard usa `useFlashOnChange` (sin cambio visible); GoalsPage: `ProgressBar` crece con `scaleX` desde 0 y las tarjetas destellan al cambiar su monto; NetWorthPage: los tiles destellan al cambiar su valor (src/features/{safe-to-spend/BucketCard,goals/GoalsPage,net-worth/NetWorthPage}.tsx)
-- [ ] T014 [US3] e2e: la barra de metas tiene `transform` animado desde 0 (sin movimiento reducido) y la gráfica de patrimonio sigue sin animaciones, en tests/e2e/motion.spec.ts
+- [X] T013 [P] [US3] BucketCard usa `useFlashOnChange` (sin cambio visible); GoalsPage: `ProgressBar` crece con `scaleX` desde 0 y las tarjetas destellan al cambiar su monto; NetWorthPage: los tiles destellan al cambiar su valor (src/features/{safe-to-spend/BucketCard,goals/GoalsPage,net-worth/NetWorthPage}.tsx)
+- [X] T014 [US3] e2e: la barra de metas tiene `transform` animado desde 0 (sin movimiento reducido) y la gráfica de patrimonio sigue sin animaciones, en tests/e2e/motion.spec.ts
 
 ## Phase 6: User Story 4 - Hojas con asa y arrastre (Priority: P3)
 

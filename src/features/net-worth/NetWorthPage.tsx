@@ -19,6 +19,7 @@ import { EmptyState } from "@/components/ui/empty-state";
 import { ArrowDownRight, ArrowUpRight, Scale } from "lucide-react";
 import { PageLoadError } from "@/components/data/PageQueryState";
 import { useSnapshotStatus } from "@/data/useFinanceSnapshot";
+import { FlashOnChange } from "@/components/motion/FlashOnChange";
 
 export function NetWorthPage() {
   const t = useTranslations("netWorth");
@@ -66,7 +67,12 @@ export function NetWorthPage() {
         <>
           <dl className="grid gap-3 sm:grid-cols-3" data-testid="net-worth-now">
             {tiles.map((tile) => (
-              <div key={tile.key} className="flex flex-col gap-1 rounded-xl border p-4">
+              <FlashOnChange
+                key={tile.key}
+                value={tile.value}
+                className="flex flex-col gap-1 rounded-xl border p-4"
+                data-testid="net-worth-tile"
+              >
                 <dt className="flex items-center gap-1.5 text-sm text-muted-foreground">
                   <tile.icon aria-hidden="true" focusable="false" className="size-4 shrink-0" />
                   {tile.label}
@@ -77,7 +83,7 @@ export function NetWorthPage() {
                     className={tile.primary ? "text-3xl font-semibold" : "text-xl font-semibold"}
                   />
                 </dd>
-              </div>
+              </FlashOnChange>
             ))}
           </dl>
           <p className="-mt-3 text-xs text-muted-foreground">{t("formulaHint")}</p>
