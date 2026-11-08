@@ -32,7 +32,7 @@ description: "Task list for spec 008 — Navegación y consistencia del shell"
 - [ ] T006 [P] Implementar `cardStatementSummary(card, data, today): CardStatementSummary` en src/domain/credit.ts según data-model.md (`last.state`: `outstanding = 0` → paid; `today > due` → overdue; otro → pending; `next.amount = max(0, cumulative(next.cutOff) − last.outstanding)`; `headline = last.state === "paid" ? "next" : "last"`)
 - [ ] T007 [P] Pruebas de `cardStatementSummary` (pagado con compras posteriores = caso Gold Card, pendiente, vencido, pagado en parte, sin movimientos, MSI en el próximo estado, y que el monto `next` coincida con el `card_due` de `creditTimeline`) en tests/unit/domain/card-statement-summary.test.ts
 - [ ] T008 [P] Crear src/features/income/LazyRegisterIncomeDialog.tsx y src/features/expenses/LazyCardPaymentDialog.tsx con el patrón de LazyAddExpenseDialog.tsx (lazy + Suspense + `usePreload…`)
-- [ ] T009 Crear src/components/layout/DialogHost.tsx según contracts/ui-shell.md (un diálogo a la vez, `key` por entidad, `onOpenChange(false)` → `closeDialog`, precarga en idle) y montarlo una vez en src/components/layout/AppShell.tsx
+- [ ] T009 Crear src/components/layout/DialogHost.tsx según contracts/ui-shell.md (un diálogo a la vez, `key` por entidad, `onOpenChange(false)` → `closeDialog`, precarga en idle; cierra el diálogo activo y la hoja ＋ cuando cambia `usePathname()`, para que un diálogo no sobreviva a la navegación con atrás) y montarlo una vez en src/components/layout/AppShell.tsx
 
 **Checkpoint**: base lista; gate rápido (`pnpm typecheck && pnpm lint && pnpm test`) y commit.
 
@@ -47,7 +47,7 @@ description: "Task list for spec 008 — Navegación y consistencia del shell"
 - [ ] T010 [US1] Barra lateral agrupada en src/components/layout/AppShell.tsx: `NavLinks` recibe grupos, pinta encabezados discretos (`text-xs uppercase text-muted-foreground`), Configuración separada al fondo; `nav` sticky con `max-h-[calc(100dvh-5rem)] overflow-y-auto`
 - [ ] T011 [US1] Panel "Más" en src/components/layout/AppShell.tsx: `Sheet side="bottom"` (`rounded-t-2xl`, `max-h-[85dvh] overflow-y-auto`, padding safe-area), título `nav.moreTitle`, `data-testid="more-sheet"`, lista `SECONDARY_NAV_GROUPS` con encabezados; navegar cierra el panel
 - [ ] T012 [US1] Reescribir src/components/layout/MobileNav.tsx: Inicio · Gastos · ＋ (`mobile-nav-create`, `variant="cta"` elevado, `aria-haspopup="dialog"`, `aria-expanded`, `aria-label` `nav.create`, alterna `createSheetOpen`) · Crédito · Más (`aria-current="page"` y estilo activo si `isSecondaryRoute`); eliminar el FAB, `useFabHidden` y su diálogo
-- [ ] T013 [US1] Actualizar tests/e2e/mobile.spec.ts (barra de 5 elementos, sin `fab-add-expense`, "Más" activo en `/goals`, panel inferior agrupado) y crear tests/e2e/navigation.spec.ts (grupos de la barra lateral, scroll a 1440×600, `aria-current` en todas las APP_ROUTES)
+- [ ] T013 [US1] Actualizar tests/e2e/mobile.spec.ts (barra de 5 elementos, sin `fab-add-expense`, "Más" activo en `/goals`, panel inferior agrupado) y crear tests/e2e/navigation.spec.ts (grupos de la barra lateral, scroll a 768×600 (SC-003), `aria-current` en todas las APP_ROUTES)
 
 **Checkpoint**: gate rápido + commit.
 
@@ -109,7 +109,7 @@ description: "Task list for spec 008 — Navegación y consistencia del shell"
 
 ## Phase 8: Polish & Cross-Cutting Concerns
 
-- [ ] T032 Actualizar tests/e2e/a11y.spec.ts (hoja ＋, panel "Más" y menú "＋ Nuevo" abiertos, en claro, oscuro y móvil)
+- [ ] T032 Actualizar tests/e2e/a11y.spec.ts (hoja ＋, panel "Más" y menú "＋ Nuevo" abiertos, en claro, oscuro y móvil) y tests/e2e/motion.spec.ts (los paneles nuevos sin animación con `prefers-reduced-motion`, FR-027); verificar 44 px táctiles en ＋, "Más" y las acciones de la hoja (FR-029)
 - [ ] T033 Gate completo: `pnpm typecheck && pnpm lint && pnpm test`, `E2E_MODES=demo pnpm test:e2e`, `pnpm build`, build demo + `pnpm check:demo-bundle`; comparar First Load con T001 (≤ +20 kB)
 - [ ] T034 Verificación e2e live (`live-en`, `live-es`) y revisión visual en el deploy: **omitidas por decisión del usuario** (sin Supabase local)
 - [ ] T035 Actualizar comentarios de spec 003 obsoletos (FR-019/020/021/027) en los archivos tocados y marcar las tareas completadas
