@@ -30,7 +30,7 @@ description: "Task list for spec 010 — Animaciones y pulido"
 ## Phase 3: User Story 1 - Navegar y cargar con continuidad (Priority: P2) 🎯 MVP
 
 - [ ] T008 [US1] src/app/(app)/template.tsx: `<ViewTransition enter="page-in" exit="page-out" default="none">` en lugar de `animate-content-in`, más `useRevealOnLoad`; template como componente cliente mínimo (el revelado necesita un efecto)
-- [ ] T009 [US1] e2e en tests/e2e/motion.spec.ts: con movimiento reducido no quedan animaciones (la prueba existente cubre el template nuevo); al recargar Gastos, el contenido que reemplaza al esqueleto tiene una animación WAAPI en curso (sin movimiento reducido)
+- [ ] T009 [US1] e2e en tests/e2e/motion.spec.ts: con movimiento reducido no quedan animaciones (la prueba existente cubre el template nuevo); al recargar Gastos, el contenido que reemplaza al esqueleto tiene una animación WAAPI en curso (sin movimiento reducido), y con privacidad activa ningún monto queda legible durante el revelado (SC-002)
 
 ## Phase 4: User Story 2 - Ver qué cambió en las listas (Priority: P2)
 
@@ -52,7 +52,7 @@ description: "Task list for spec 010 — Animaciones y pulido"
 
 - [ ] T017 [P] [US5] `FieldError` con `animate-field-error-in` (src/components/ui/field.tsx)
 - [ ] T018 [P] [US5] `DropdownMenuItem` `pointer-coarse:min-h-11` + `focus-visible:ring-2 focus-visible:ring-ring`; radio `pointer-coarse:after:-inset-[14px]`; switch `pointer-coarse:after:-inset-y-[13px]` (src/components/ui/{dropdown-menu,radio-group,switch}.tsx)
-- [ ] T019 [US5] e2e: el icono ＋ gira con la hoja abierta (`rotate` en el estilo calculado) y el error de validación aparece con su animación (tests/e2e/motion.spec.ts)
+- [ ] T019 [US5] e2e: el icono ＋ gira con la hoja abierta (`rotate` en el estilo calculado) y el error de validación aparece con su animación (tests/e2e/motion.spec.ts); a 375 px, los elementos del menú "＋ Nuevo"/⋯ y los radios del formulario de ingreso miden ≥ 44 px (FR-012)
 
 ## Phase 8: Polish
 
