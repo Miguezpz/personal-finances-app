@@ -163,18 +163,6 @@
   animation: card-in var(--duration-base) var(--ease-out-quint) both;
 }
 
-/* Content fade when navigating (FR-028), mounted by src/app/(app)/template.tsx. */
-@keyframes content-in {
-  from {
-    opacity: 0;
-    transform: translateY(4px);
-  }
-}
-
-@utility animate-content-in {
-  animation: content-in var(--duration-fast) var(--ease-out-quint);
-}
-
 /*
  * Spec 010 · route transition (React <ViewTransition> in src/app/(app)/template.tsx). The old page fades out
  * quickly; the new one fades in shortly after, rising 4 px — 240 ms in all (spec 003: ≤ 300 ms). The root snapshot

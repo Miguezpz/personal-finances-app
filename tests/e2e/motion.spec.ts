@@ -60,6 +60,61 @@ test.describe("US4 · motion", { tag: "@demo" }, () => {
     }
   });
 
+  test("spec 010: navigating starts a view transition and the header stays still", async ({
+    page,
+  }) => {
+    await page.addInitScript(() => {
+      const w = window as unknown as { __vt: number };
+      w.__vt = 0;
+      const start = document.startViewTransition?.bind(document);
+      if (start)
+        document.startViewTransition = ((arg: Parameters<typeof start>[0]) => {
+          w.__vt++;
+          return start(arg);
+        }) as typeof document.startViewTransition;
+    });
+    await page.goto("/expenses");
+    await expect(page.locator("main [aria-busy='true']")).toHaveCount(0);
+    const header = await page.locator("header").first().boundingBox();
+    await page.locator('aside nav a[href="/goals"]').click();
+    await page.waitForURL("**/goals");
+    await expect
+      .poll(() => page.evaluate(() => (window as unknown as { __vt: number }).__vt))
+      .toBeGreaterThan(0);
+    expect(await page.locator("header").first().boundingBox()).toEqual(header);
+  });
+
+  test("spec 010: what replaces a skeleton fades in, and amounts stay masked meanwhile", async ({
+    page,
+  }) => {
+    await page.addInitScript(() => {
+      localStorage.setItem(
+        "pfa:prefs:v1",
+        JSON.stringify({ state: { locale: "en", privacyMode: true }, version: 1 }),
+      );
+      // Record the reveal's Web Animations (useRevealOnLoad) and sample amounts while they run.
+      const w = window as unknown as { __reveals: number; __leaks: number };
+      w.__reveals = 0;
+      w.__leaks = 0;
+      const animate = Element.prototype.animate;
+      Element.prototype.animate = function (...args: Parameters<typeof animate>) {
+        if (this.closest("main")) {
+          w.__reveals++;
+          this.querySelectorAll(".money").forEach((el) => {
+            if (el.getAttribute("data-masked") !== "true") w.__leaks++;
+          });
+        }
+        return animate.apply(this, args);
+      };
+    });
+    await page.goto("/expenses");
+    await expect(page.locator("main [aria-busy='true']")).toHaveCount(0);
+    await expect
+      .poll(() => page.evaluate(() => (window as unknown as { __reveals: number }).__reveals))
+      .toBeGreaterThan(0);
+    expect(await page.evaluate(() => (window as unknown as { __leaks: number }).__leaks)).toBe(0);
+  });
+
   test("the staggered entrance never delays the balances", async ({ page }) => {
     await page.goto("/dashboard");
     await expect(page.locator("main [aria-busy='true']")).toHaveCount(0);
