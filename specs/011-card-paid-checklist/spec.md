@@ -1,4 +1,4 @@
-# Feature Specification: Pago de tarjeta como checklist
+# Feature Specification: Pago de tarjeta como checklist y sesión de pago del mes
 
 **Feature Branch**: `main` (sin rama de feature)
 
@@ -6,7 +6,14 @@
 
 **Status**: Draft
 
-**Input**: User description: "Spec 011 — Pago de tarjeta como checklist ("Ya la pagué"). Contexto del dueño: su familia usa sus tarjetas de crédito y le paga a él directamente; él solo registra SUS propias compras, y antes de la fecha límite paga al banco el total para no generar intereses (totalero). Por eso el monto que la app tiene registrado por corte es menor que el del estado de cuenta real, y registrar el monto real como pago deja un saldo a favor que oculta los cortes siguientes. Objetivo: que "Pagar tarjeta" funcione como una tarea por palomear por corte, sin capturar montos. Decisiones ya acordadas con el usuario: (1) Cada corte pendiente o vencido muestra una acción de un toque "Ya la pagué" (EN "Mark as paid") en lugar del diálogo con monto, en Crédito, en Gastos (tarjetas de crédito) y en la alerta del Dashboard; el diálogo de pago con monto y cuenta de origen desaparece, sin opción de "otro monto". (2) Marcar un corte como pagado lo deja en estado "Pagado", quita la alerta del Dashboard y hace que el siguiente corte empiece limpio: nunca genera saldo a favor ni hace que cortes futuros parezcan pagados. (3) Se puede desmarcar (Deshacer de 6 s como el resto de la app, y también desmarcar después). (4) El disponible para gastar no cambia: las compras ya se descontaron el día que se hicieron. (5) Lo que pasa si no se marca: el corte pasa a Vencido tras la fecha límite y la alerta permanece; definir cómo se ven la deuda total, patrimonio y bitácora con cortes marcados. (6) Los pagos de tarjeta ya registrados en el historial (datos reales del dueño y del demo) deben seguir siendo coherentes: definir migración o compatibilidad. (7) Las cuotas MSI de terceros siguen funcionando igual. (8) Atajo P y la opción "Pagar tarjeta" de la hoja ＋ se adaptan o se quitan. Debe verificarse en modo normal y demo, EN y ES."
+**Input**: User description: "Spec 011 — Pago de tarjeta como checklist ("Ya la pagué"). Contexto del dueño: su familia usa sus tarjetas de crédito y le paga a él directamente; él solo registra SUS propias compras, y antes de la fecha límite paga al banco el total para no generar intereses (totalero). Por eso el monto que la app tiene registrado por corte es menor que el del estado de cuenta real, y registrar el monto real como pago deja un saldo a favor que oculta los cortes siguientes. Objetivo: que "Pagar tarjeta" funcione como una tarea por palomear por corte, sin capturar montos. Decisiones ya acordadas con el usuario: (1) Cada corte pendiente o vencido muestra una acción de un toque "Ya la pagué" (EN "Mark as paid") en lugar del diálogo con monto, en Crédito, en Gastos (tarjetas de crédito) y en la alerta del Dashboard; el diálogo de pago con monto y cuenta de origen desaparece, sin opción de "otro monto". (2) Marcar un corte como pagado lo deja en estado "Pagado", quita la alerta del Dashboard y hace que el siguiente corte empiece limpio: nunca genera saldo a favor ni hace que cortes futuros parezcan pagados. (3) Se puede desmarcar (Deshacer de 6 s como el resto de la app, y también desmarcar después). (4) El disponible para gastar no cambia: las compras ya se descontaron el día que se hicieron. (5) Lo que pasa si no se marca: el corte pasa a Vencido tras la fecha límite y la alerta permanece; definir cómo se ven la deuda total, patrimonio y bitácora con cortes marcados. (6) Los pagos de tarjeta ya registrados en el historial (datos reales del dueño y del demo) deben seguir siendo coherentes: definir migración o compatibilidad. (7) Las cuotas MSI de terceros siguen funcionando igual. (8) Atajo P y la opción "Pagar tarjeta" de la hoja ＋ se adaptan o se quitan. Debe verificarse en modo normal y demo, EN y ES." Ampliación del dueño (2026-11-08): "quiero que la app establezca las fechas en las que debería enfocarme a pagar todas las tarjetas: busco una fecha al mes en la que pago todas las tarjetas de crédito de golpe; que la app me muestre un rango de unos 3 días en el que pueda pagarlas todas en una sesión, donde coincidan todas las tarjetas y sus fechas límite."
+
+## Clarifications
+
+### Session 2026-11-08
+
+- Q: Cuando los rangos de pago de las tarjetas se cruzan en más de 3 días, ¿dónde va la ventana de la sesión? → A: Junto a la quincena: la primera ventana válida que empiece en o después de un día de pago (los de Preferencias, por defecto el 15 y el último día del mes), para que el dinero ya esté disponible. Si ningún día de pago cae en el cruce, empieza el día siguiente al último corte.
+- Q: Si las fechas de las tarjetas no permiten pagarlas todas en una sola sesión, ¿qué hace la app? → A: Propone el menor número de sesiones posible (normalmente 2), cada una con su ventana y sus tarjetas.
 
 ## User Scenarios & Testing *(mandatory)*
 
@@ -77,6 +84,26 @@ Como dueño con pagos de tarjeta ya registrados con monto (antes de este cambio)
 
 ---
 
+### User Story 5 - Sesión de pago del mes (Priority: P2)
+
+Como dueño, quiero que la app me diga en qué días del mes puedo pagar todas mis tarjetas de crédito de una sola vez (una ventana de unos 3 días donde ya cerraron todos los cortes y ninguna fecha límite ha pasado), para hacer una sola sesión de pagos al mes en lugar de estar pendiente de cada tarjeta.
+
+**Why this priority**: es la forma en que el dueño ya paga: una sesión al mes. Junto con el checklist (US1), convierte el pago de tarjetas en una tarea mensual: ir a la sesión, pagar y palomear.
+
+**Independent Test**: con dos tarjetas (A: corte el 10 de noviembre y límite el 30; B: corte el 25 de octubre y límite el 14 de noviembre) los rangos de pago son del 11 al 29 y del 26 de octubre al 13 de noviembre, y se cruzan del 11 al 13. Ningún día de pago cae en el cruce, así que Crédito muestra una sesión del 11 al 13 de noviembre con ambas tarjetas. Con el Dashboard en un día de esa ventana aparece el aviso de la sesión con las tarjetas por palomear.
+
+**Acceptance Scenarios**:
+
+1. **Given** varias tarjetas cuyos rangos de pago (del día siguiente al corte hasta el día anterior a la fecha límite) se cruzan, **When** el dueño abre Crédito, **Then** ve la próxima sesión de pago: una ventana de hasta 3 días dentro del cruce, con cada tarjeta, su fecha límite y su estado (pendiente, pagada o nada que pagar).
+2. **Given** el cruce incluye un día de pago, **When** se calcula la ventana, **Then** la ventana incluye ese día de pago y empieza en él, salvo que no quepan 3 días antes del fin del cruce; en ese caso termina el último día del cruce.
+3. **Given** el cruce no incluye ningún día de pago, **When** se calcula la ventana, **Then** empieza el día siguiente al último corte.
+4. **Given** los rangos no se cruzan para todas las tarjetas, **When** el dueño abre Crédito, **Then** ve el menor número de sesiones posible, cada una con su ventana y sus tarjetas.
+5. **Given** hoy está dentro de la ventana de una sesión con tarjetas pendientes, **When** el dueño abre el Dashboard, **Then** ve un aviso "Hoy toca pagar tus tarjetas" con cada tarjeta pendiente y su "Ya la pagué".
+6. **Given** el dueño marcó todas las tarjetas de la sesión, **When** la vuelve a ver, **Then** aparece como completada y Crédito muestra la fecha de la siguiente sesión.
+7. **Given** la ventana ya pasó y quedan tarjetas sin marcar, **When** se ven Crédito y el Dashboard, **Then** esas tarjetas siguen con su propia alerta (pendiente o vencida) como en US1.
+
+---
+
 ### Edge Cases
 
 - **Corte sin compras registradas**: un corte cerrado en el que no se registró nada no requiere acción: aparece como "Nada que pagar" (como hoy), sin botón "Ya la pagué" y sin alerta. Si el dueño pagó compras de su familia en ese corte, no hay nada que marcar porque la app no tiene deuda registrada.
@@ -89,6 +116,12 @@ Como dueño con pagos de tarjeta ya registrados con monto (antes de este cambio)
 - **Tarjeta archivada**: conserva sus marcas; no muestra acciones de marcar.
 - **Sin conexión o error al guardar**: la marca se muestra de inmediato y, si falla al guardar, se revierte con el aviso de error habitual.
 - **Modo privacidad**: el botón y los estados no muestran montos nuevos; los montos existentes siguen enmascarados.
+- **Una sola tarjeta**: la sesión es su propia ventana (de hasta 3 días), con las mismas reglas.
+- **Cruce de menos de 3 días**: la ventana ocupa todo el cruce (1 o 2 días); sigue siendo una sola sesión.
+- **Fechas límite en día inhábil**: se usan las fechas límite ya ajustadas a día hábil (spec 007).
+- **Tarjeta sin términos completos o archivada**: no participa en la sesión.
+- **Sesión con una tarjeta sin compras registradas**: la tarjeta aparece como "Nada que pagar" dentro de la sesión y no impide que la sesión se complete.
+- **Ciclos**: cada sesión agrupa, de cada tarjeta, el estado de cuenta cuyo rango de pago cae en la ventana; la siguiente sesión es la del mes siguiente.
 
 ## Requirements *(mandatory)*
 
@@ -130,6 +163,18 @@ Como dueño con pagos de tarjeta ya registrados con monto (antes de este cambio)
 
 **Calidad**
 
+**Sesión de pago del mes**
+
+- **FR-025**: El rango de pago de un estado de cuenta MUST ir del día siguiente a su fecha de corte hasta el día anterior a su fecha límite (ajustada a día hábil), ambos inclusive.
+- **FR-026**: La app MUST agrupar los estados de cuenta próximos de todas las tarjetas activas con términos completos en el menor número de sesiones tal que, en cada sesión, los rangos de pago de sus estados de cuenta se crucen al menos un día.
+- **FR-027**: La ventana de cada sesión MUST durar 3 días (o todo el cruce si es más corto) y quedar completa dentro del cruce. Si algún día de pago (Preferencias) cae en el cruce, la ventana MUST incluir el primero de ellos, empezando en él o, si no caben 3 días antes del fin del cruce, terminando el último día del cruce. Si ningún día de pago cae en el cruce, MUST empezar el primer día del cruce.
+- **FR-028**: Crédito MUST mostrar la próxima sesión (la primera cuya ventana termina hoy o después y tiene estados de cuenta sin marcar, o la siguiente si la actual ya está completa), con su ventana, cada tarjeta, su fecha límite, su estado y la acción "Ya la pagué" en las pendientes.
+- **FR-029**: Cuando hoy cae dentro de la ventana de una sesión con tarjetas pendientes, el Dashboard MUST mostrar un aviso de sesión con las tarjetas pendientes y su "Ya la pagué"; mientras dure ese aviso, MUST NOT duplicarse con la alerta individual de esas mismas tarjetas.
+- **FR-030**: Una sesión con todas sus tarjetas marcadas o sin deuda registrada MUST mostrarse como completada, junto con la ventana de la siguiente sesión.
+- **FR-031**: La sesión MUST calcularse en el cliente a partir de los términos de las tarjetas y las Preferencias, sin datos nuevos guardados ni recordatorios fuera de la app.
+
+**Calidad**
+
 - **FR-023**: Todo texto nuevo MUST existir en inglés y español; la función MUST verificarse en modo normal y demo, en ambos idiomas.
 - **FR-024**: Las acciones "Ya la pagué" y "Desmarcar" MUST tener un área táctil de al menos 44 px y un nombre accesible que incluya la tarjeta.
 
@@ -137,6 +182,7 @@ Como dueño con pagos de tarjeta ya registrados con monto (antes de este cambio)
 
 - **Marca de corte pagado**: indica que el dueño ya pagó al banco el estado de cuenta de una tarjeta que cerró en una fecha de corte concreta. Atributos: tarjeta, fecha de corte, cuándo se marcó. Una por tarjeta y fecha de corte. Sin monto.
 - **Corte (estado de cuenta)**: derivado de los términos de la tarjeta (día de corte y días para pagar). Su estado es Pagado (cubierto por una marca propia o posterior), Pendiente (sin marca, antes de la fecha límite), Vencido (sin marca, después de la fecha límite) o Nada que pagar (sin deuda registrada).
+- **Sesión de pago**: derivada, no se guarda. Agrupa un estado de cuenta próximo de una o más tarjetas cuyos rangos de pago se cruzan, con una ventana de hasta 3 días y un estado (pendiente o completada).
 - **Pago de tarjeta (anterior)**: registro con monto que deja de usarse; existe solo como origen de la conversión a marcas.
 
 ## Success Criteria *(mandatory)*
@@ -148,6 +194,8 @@ Como dueño con pagos de tarjeta ya registrados con monto (antes de este cambio)
 - **SC-003**: Deshacer o desmarcar devuelve el corte a su estado previo en menos de 1 s, sin recargar.
 - **SC-004**: Después de la conversión, todos los cortes que estaban liquidados con los pagos anteriores del dueño aparecen "Pagado" y ninguno cambia a Vencido.
 - **SC-005**: Ninguna vista (Gastos, Bitácora, exportación CSV) muestra un pago de tarjeta con monto.
+- **SC-007**: Con las tarjetas del dueño, la app propone una sola sesión al mes siempre que sus rangos de pago se crucen, y en el 100 % de los casos de prueba la ventana queda completa dentro de todos los rangos (ninguna tarjeta se paga antes de su corte ni después de su fecha límite).
+- **SC-008**: Marcar todas las tarjetas de una sesión desde su aviso en el Dashboard toma un toque por tarjeta, sin salir del Dashboard.
 - **SC-006**: El disponible para gastar de todas las quincenas es idéntico antes y después de marcar o desmarcar cualquier corte.
 
 ## Assumptions
@@ -157,4 +205,6 @@ Como dueño con pagos de tarjeta ya registrados con monto (antes de este cambio)
 - La fecha en que se marcó se guarda como referencia, pero no se muestra ni afecta cálculos.
 - La alerta del Dashboard conserva su ventana actual (7 días antes de la fecha límite, o vencida).
 - La conversión de pagos anteriores se aplica una sola vez a los datos reales y al demo; los pagos con monto no se borran hasta que la conversión se verifica, pero dejan de usarse.
+- La sesión de pago no envía notificaciones fuera de la app (Principio I: sin servidor ni tareas programadas); el aviso aparece al abrir el Dashboard.
+- Los días de pago de la sesión son los de Preferencias (por defecto el 15 y el último día del mes); el spec 006 (quincena por día de pago real) podrá ajustarlos después.
 - El cálculo de "pagado" usa los términos actuales de la tarjeta (día de corte y días para pagar, ajustados a día hábil como en el spec 007).

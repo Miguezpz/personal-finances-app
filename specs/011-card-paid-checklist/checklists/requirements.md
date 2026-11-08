@@ -35,4 +35,5 @@
   - Marcar el corte más reciente liquida también los anteriores sin marcar (FR-004).
   - La conversión de pagos anteriores asigna cada pago al corte más reciente anterior a su fecha (FR-018).
   - Se quitan "Pagar tarjeta" de la hoja ＋ y el atajo P (FR-011), y los pagos desaparecen de Gastos y Bitácora (FR-012).
+- Iteración 2 (ampliación del dueño, sesión de pago del mes): se agregan US5, FR-025–FR-031, SC-007/008 y dos aclaraciones (ventana junto a la quincena; menor número de sesiones si no hay cruce). Todo sigue pasando.
 - "Actualización optimista" (FR-002) describe el comportamiento visible (se refleja al instante), no una tecnología.
