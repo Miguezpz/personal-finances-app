@@ -9,7 +9,7 @@
     "hiddenAmount": "Monto oculto",
     "wakingDatabase": "Despertando la base de datos… puede tardar unos segundos tras un periodo de inactividad.",
     "offline": "Estás sin conexión. Puedes ver los últimos datos cargados, pero no se pueden guardar cambios.",
-    "demoReadOnly": "Esta demo es de solo lectura: no se guardó nada.",
+    "demoReadOnly": "Este demo es de solo lectura: no se guardó nada.",
     "demoBadge": "Demo",
     "unexpectedError": "Algo salió mal.",
     "unexpectedErrorHint": "Inténtalo de nuevo en un momento. Si se repite, recarga la página.",
@@ -25,7 +25,7 @@
       "es": "Español"
     },
     "appShortName": "Finanzas",
-    "appDescription": "Control de finanzas personales sin costo, con reparto automático de ingresos y un Safe-to-Spend quincenal.",
+    "appDescription": "Control de finanzas personales sin costo, con reparto automático de ingresos y un disponible para gastar quincenal.",
     "undo": "Deshacer",
     "loadError": "No pudimos cargar tus datos. Revisa tu conexión e inténtalo de nuevo.",
     "saveFailedRetry": "No se pudo guardar. Tus datos siguen aquí.",
@@ -276,7 +276,7 @@
     "statusApplied": "cobrado",
     "alertsLabel": "Alertas",
     "seeExpenses": "Ver gastos",
-    "cardDueIn": "{card} vence {days, plural, =0 {el día de hoy} one {en # día} other {en # días}}",
+    "cardDueIn": "{card} vence {days, plural, =0 {hoy mismo} one {en # día} other {en # días}}",
     "cardOverdue": "{card} está vencida",
     "pay": "Pagar"
   },
@@ -349,7 +349,7 @@
   },
   "quickExpenses": {
     "title": "Gastos rápidos",
-    "description": "Los gastos que repites, a un toque desde el Dashboard. Un toque lo registra con la fecha de hoy.",
+    "description": "Los gastos que repites, a un toque desde Inicio. Un toque lo registra con la fecha de hoy.",
     "apply": "Registrar {name}, {amount}",
     "added": "{name} registrado.",
     "undo": "Deshacer",
@@ -522,9 +522,9 @@
     "title": "Configuración",
     "description": "Cuentas, categorías, reglas y cómo calcula la app. Exporta tus datos cuando quieras.",
     "rulesLink": "Regla de distribución",
-    "rulesLinkHint": "Cómo se reparte cada ingreso entre Necesidades, Deseos e Inversión.",
+    "rulesLinkHint": "Cómo se reparte cada ingreso entre Necesidades, Gustos e Inversión.",
     "accountsLinkHint": "Cuentas bancarias, tarjetas con su corte y fecha límite, inversiones y efectivo.",
-    "categoriesLinkHint": "Categorías y subcategorías de tus gastos, dentro de Necesidades o Deseos.",
+    "categoriesLinkHint": "Categorías y subcategorías de tus gastos, dentro de Necesidades o Gustos.",
     "preferencesLinkHint": "Umbrales del semáforo, días de pago, recordatorios y zona horaria.",
     "exportTitle": "Exporta tus datos",
     "exportHint": "Descarga la bitácora en CSV o un respaldo completo (un CSV por tabla, en ZIP). Se genera en tu dispositivo.",
@@ -596,7 +596,7 @@
     "accountRestored": "Cuenta restaurada.",
     "archiveBlocked": "Esta tarjeta aún tiene mensualidades de terceros pendientes. Cóbralas o liquídalas antes de archivarla.",
     "categoriesTitle": "Categorías",
-    "categoriesDescription": "Cada categoría pertenece a Necesidades o Deseos; los gastos usan sus subcategorías. Los nombres por defecto siguen tu idioma hasta que los renombres.",
+    "categoriesDescription": "Cada categoría pertenece a Necesidades o Gustos; los gastos usan sus subcategorías. Los nombres por defecto siguen tu idioma hasta que los renombres.",
     "addCategory": "Agregar categoría",
     "addSubcategory": "Agregar subcategoría",
     "addSubcategoryTo": "Nueva subcategoría en {category}",
@@ -654,7 +654,7 @@
     "timezoneRequired": "Elige una zona horaria.",
     "icon": "Ícono",
     "iconPicker": "Cambiar ícono de {name}",
-    "iconPickerHint": "Se muestra junto al nombre en gastos, el ledger y los gastos fijos.",
+    "iconPickerHint": "Se muestra junto al nombre en gastos, la bitácora y los gastos fijos.",
     "iconInherited": "Usar el de la categoría",
     "iconSave": "Guardar ícono",
     "iconCancel": "Cancelar",
@@ -703,7 +703,7 @@
     },
     "quickExpensesTitle": "Gastos rápidos",
     "quickExpensesLinkHint": "Crea, ordena y edita tus gastos de un toque.",
-    "quickExpensesDescription": "Los gastos que registras con un toque desde el Dashboard y la hoja ＋."
+    "quickExpensesDescription": "Los gastos que registras con un toque desde Inicio y la hoja ＋."
   },
   "ledger": {
     "title": "Bitácora",
@@ -790,8 +790,8 @@
     "nothingToPay": "Nada que pagar en este estado de cuenta",
     "collectFrom": "Cobrar a {name}",
     "collectHint": "Mensualidad de terceros — destinada a la tarjeta",
-    "lastStatement": "Último estado",
-    "nextStatement": "Próximo estado",
+    "lastStatement": "Último corte",
+    "nextStatement": "Próximo corte",
     "statePaid": "Pagado",
     "statePending": "Pendiente",
     "stateOverdue": "Vencido",
@@ -829,7 +829,7 @@
       "sinking_fund": "Vacío = el monto anual entre 12."
     },
     "sourceBucket": "Se toma de",
-    "sourceBucketHint": "Las aportaciones desde Necesidades o Deseos reducen el Safe-to-Spend de esa bolsa; desde Inversión no.",
+    "sourceBucketHint": "Las aportaciones desde Necesidades o Gustos reducen el disponible para gastar de esa bolsa; desde Inversión no.",
     "saved": "Meta guardada.",
     "saveFailed": "No se pudo guardar la meta. Inténtalo de nuevo.",
     "nameRequired": "Escribe un nombre.",
@@ -866,7 +866,7 @@
     "month": "Mes",
     "historyTitle": "Historial",
     "noHistory": "La primera instantánea mensual se toma la próxima vez que abras la app.",
-    "formulaHint": "Activos: saldos iniciales, inversiones, ahorro en metas, lo que te deben terceros y lo que queda en Necesidades y Deseos. Deudas: deuda total de tarjetas."
+    "formulaHint": "Activos: saldos iniciales, inversiones, ahorro en metas, lo que te deben terceros y lo que queda en Necesidades y Gustos. Deudas: deuda total de tarjetas."
   },
   "create": {
     "title": "Crear",

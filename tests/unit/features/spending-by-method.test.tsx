@@ -91,12 +91,12 @@ describe("SpendingByMethod", () => {
     const section = await screen.findByTestId("spending-by-method");
     await screen.findByTestId("spending-total");
     const nav = screen.getByTestId("expenses-period");
-    const next = within(nav).getByRole("button", { name: "Next quincena" });
+    const next = within(nav).getByRole("button", { name: "Next pay period" });
     expect(next).toBeDisabled();
     expect(section).toHaveAttribute("data-period", current.key);
     expect(screen.getByTestId("spending-total")).toHaveTextContent("$0.00");
 
-    await user.click(within(nav).getByRole("button", { name: "Previous quincena" }));
+    await user.click(within(nav).getByRole("button", { name: "Previous pay period" }));
     expect(section).toHaveAttribute("data-period", previous.key);
     expect(screen.getByTestId("spending-total")).toHaveTextContent("$300.00");
     expect(next).toBeEnabled();
