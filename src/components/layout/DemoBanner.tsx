@@ -2,7 +2,8 @@
 
 /**
  * Read-only demo notice (T134, FR-046/047): always visible while the data provider can't write
- * (the public demo with fictitious data), with a link to the source code for recruiters.
+ * (the public demo with fictitious data), with a link to the source code for recruiters. Brand colors
+ * (bg-primary / text-primary-foreground): lime with near-black text in neon, teal/emerald elsewhere.
  */
 import { ExternalLink, FlaskConical } from "lucide-react";
 import { useTranslations } from "next-intl";
@@ -16,7 +17,7 @@ export function DemoBanner() {
   return (
     <aside
       aria-label={t("label")}
-      className="flex flex-wrap items-center justify-center gap-x-3 gap-y-1 border-b bg-amber-50 px-4 py-2 text-center text-sm text-amber-950 dark:bg-amber-950/40 dark:text-amber-100"
+      className="flex flex-wrap items-center justify-center gap-x-3 gap-y-1 bg-primary px-4 py-2 text-center text-sm font-medium text-primary-foreground"
       data-testid="demo-banner"
     >
       <span className="flex items-center gap-2">
@@ -27,7 +28,7 @@ export function DemoBanner() {
         href={REPO_URL}
         target="_blank"
         rel="noopener noreferrer"
-        className="inline-flex items-center gap-1 font-medium underline underline-offset-4"
+        className="inline-flex items-center gap-1 rounded-sm font-semibold underline decoration-current/60 underline-offset-4 hover:decoration-current focus-visible:ring-2 focus-visible:ring-primary-foreground focus-visible:outline-none"
       >
         {t("sourceCode")}
         <ExternalLink aria-hidden="true" className="size-3.5" />
