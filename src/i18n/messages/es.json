@@ -774,7 +774,6 @@
     "payday": "Día de pago",
     "paydayHint": "Entra dinero",
     "cardDue": "Vence {card}",
-    "nothingToPay": "Nada que pagar en este estado de cuenta",
     "collectFrom": "Cobrar a {name}",
     "collectHint": "Mensualidad de terceros — destinada a la tarjeta",
     "lastStatement": "Último corte",
@@ -790,7 +789,6 @@
     "unmarkFor": "Desmarcar: {card}",
     "marked": "{card} marcada como pagada.",
     "unmarked": "{card} desmarcada.",
-    "stateNothing": "Nada que pagar",
     "sessionTitle": "Sesión de pago",
     "sessionWindow": "{start} – {end}",
     "sessionDone": "Sesión completa",
@@ -798,7 +796,8 @@
     "sessionHint": "Paga todas tus tarjetas en una sola sesión entre estas fechas.",
     "sessionCardDue": "vence {date}",
     "sessionNone": "Agrega las fechas de corte y de pago de tus tarjetas para tener una sesión de pago.",
-    "sessionClosesOn": "corta el {date}"
+    "sessionClosesOn": "corta el {date}",
+    "noPurchases": "Sin compras registradas"
   },
   "goals": {
     "title": "Metas",

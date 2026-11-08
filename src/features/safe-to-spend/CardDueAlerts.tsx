@@ -10,9 +10,9 @@
 import { CalendarCheck, CreditCard } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { useMemo } from "react";
-import { Money } from "@/components/money/Money";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { daysBetween } from "@/domain/dates";
+import { StatementAmount } from "@/features/credit/CardStatementCard";
 import { MarkPaidButton } from "@/features/credit/MarkPaidButton";
 import { SessionCardRow, useSessionWindowLabel } from "@/features/credit/PaymentSessionCard";
 import {
@@ -109,7 +109,10 @@ export function CardDueRow({ alert, className }: { alert: CardDue; className?: s
           ? t("cardOverdue", { card: card.name })
           : t("cardDueIn", { card: card.name, days: alert.days })}
       </span>
-      <Money cents={summary.last.outstanding} className="font-semibold whitespace-nowrap" />
+      <StatementAmount
+        cents={summary.last.outstanding}
+        className="font-semibold whitespace-nowrap"
+      />
       <MarkPaidButton card={card} cutOff={summary.last.cutOff} />
     </div>
   );

@@ -76,7 +76,7 @@ describe("paymentSessions (FR-025, FR-026)", () => {
     expect(sessions.flatMap((x) => names(x.cards))).toEqual(["A"]);
   });
 
-  it("is done when every card is paid or has nothing to pay; the phase follows today", () => {
+  it("is done when every card is marked as paid; the phase follows today", () => {
     const s = snap({
       accounts: [A, B],
       expenses: [buy(A, 1_000, "2026-11-02"), buy(B, 2_000, "2026-10-20")],
@@ -111,8 +111,15 @@ describe("nextPaymentSession (FR-028, FR-030)", () => {
     expect(next?.cards.find((c) => c.card.id === A.id)?.statement.state).toBe("pending");
   });
 
-  it("returns no next session when nothing is pending in the coming cycles", () => {
+  it("cards without recorded purchases still need checking off (the session isn't done)", () => {
     const s = snap({ accounts: [A, B] });
-    expect(nextPaymentSession([A, B], s, s.settings, d("2026-11-05")).next).toBeNull();
+    const { next } = nextPaymentSession([A, B], s, s.settings, d("2026-11-05"));
+    expect(next?.done).toBe(false);
+    expect(next?.cards.map((c) => c.statement.state)).toEqual(["pending", "pending"]);
+  });
+
+  it("returns no next session when there are no cards", () => {
+    const s = snap({ accounts: [] });
+    expect(nextPaymentSession([], s, s.settings, d("2026-11-05")).next).toBeNull();
   });
 });

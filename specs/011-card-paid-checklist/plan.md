@@ -13,7 +13,7 @@ Dos cambios:
 **Enfoque**:
 - **Datos**: tabla nueva `card_statement_marks` (migración `0011`, con RLS y unicidad por corte). Convierte los `card_payments` existentes en marcas. La tabla anterior se conserva, pero la app deja de leerla. Antes de aplicar la migración a la nube, el dueño revisa la conversión con una consulta de solo lectura (R4).
 - **Dominio**:
-  - `credit.ts` cambia a "pagado hasta el último corte marcado": sin resta de pagos, así que no hay saldo a favor (R2, R3). Gana el estado `nothing` y `statementOf`.
+  - `credit.ts` cambia a "pagado hasta el último corte marcado": sin resta de pagos, así que no hay saldo a favor (R2, R3). Gana `statementOf` (el estado `nothing` que tenía al principio se retiró el 2026-11-08; ver Notas de tasks.md).
   - Nuevo `payment-sessions.ts`: agrupación mínima de rangos de pago y ventana junto al día de pago (R5).
   - Nuevo `legacy-card-payments.ts`: la regla de conversión, compartida con el SQL y el seed.
   - `ledger.ts` y `csv.ts` dejan de incluir pagos.
@@ -99,7 +99,7 @@ supabase/
 
 src/domain/
 ├── types.ts                 # StatementMark; FinanceSnapshot.statementMarks (sin cardPayments)
-├── credit.ts                # paidThrough, statementOf, estado "nothing", fórmulas R3
+├── credit.ts                # paidThrough, statementOf, fórmulas R3
 ├── payment-sessions.ts      # nuevo
 ├── legacy-card-payments.ts  # nuevo
 ├── ledger.ts · csv.ts · net-worth.ts · account-kind.ts

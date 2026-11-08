@@ -8,13 +8,13 @@
 import { CalendarCheck, CircleCheck } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { AccountMark } from "@/components/icons/AccountMark";
-import { Money } from "@/components/money/Money";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import type { PaymentSession, SessionCard } from "@/domain/payment-sessions";
 import { formatDate } from "@/i18n/format";
 import { useToday } from "@/lib/use-today";
 import { selectLocale, usePreferences } from "@/store/preferences";
+import { StatementAmount } from "./CardStatementCard";
 import { MarkPaidButton, UnmarkButton } from "./MarkPaidButton";
 import { usePaymentSession } from "./use-card-statements";
 
@@ -29,13 +29,6 @@ export function useSessionWindowLabel() {
           end: formatDate(window.end, locale, "short"),
         });
 }
-
-const STATE_KEY = {
-  paid: "statePaid",
-  nothing: "stateNothing",
-  pending: "statePending",
-  overdue: "stateOverdue",
-} as const;
 
 /** One card of a session: name, due date, amount or state, and its action. */
 export function SessionCardRow({ item }: { item: SessionCard }) {
@@ -69,11 +62,14 @@ export function SessionCardRow({ item }: { item: SessionCard }) {
         </span>
       </span>
       {open ? (
-        <Money cents={statement.outstanding} className="font-semibold whitespace-nowrap" />
+        <StatementAmount
+          cents={statement.outstanding}
+          className="font-semibold whitespace-nowrap"
+        />
       ) : (
         <Badge variant="secondary" className="gap-1">
-          {statement.state === "paid" && <CircleCheck aria-hidden="true" />}
-          {t(STATE_KEY[statement.state])}
+          <CircleCheck aria-hidden="true" />
+          {t("statePaid")}
         </Badge>
       )}
       {open && closed ? (

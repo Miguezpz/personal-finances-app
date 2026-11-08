@@ -42,7 +42,7 @@ export interface StatementMark extends Owned {
 | `due`         | `dueDateFor(terms, cutOff)` (día hábil, spec 007)                                |
 | `payRange`    | `[cutOff + 1, due − 1]` (FR-025)                                                 |
 | `outstanding` | R3: compras `(L, cutOff]` + cuotas MSI `(due(L), due]`; 0 si `cutOff ≤ L`        |
-| `state`       | `paid` · `nothing` · `pending` · `overdue` (R3)                                  |
+| `state`       | `paid` · `pending` · `overdue` (R3; sin marca = pendiente/vencido aunque no haya compras) |
 | `markId`      | id de la marca propia de ese corte, si existe (para "Desmarcar")                 |
 
 `L = paidThrough(card) = max(cutOff de sus marcas)`.
@@ -55,7 +55,6 @@ pending ────────────────────────
    │ today > due                                   │ desmarcar / deshacer
    ▼                                               ▼
 overdue ─────────── marcar ──────────▶ paid ──▶ pending | overdue (según la fecha)
-nothing: sin deuda registrada y sin marca; no tiene acción
 ```
 
 ### Sesión de pago (`PaymentSession`)
@@ -64,7 +63,7 @@ nothing: sin deuda registrada y sin marca; no tiene acción
 | ---------- | ----------------------------------------------------------------------------- |
 | `window`   | `{ start, end }`, 1–3 días dentro del cruce (FR-027)                           |
 | `cards`    | `{ card, statement }[]`, el estado de cuenta vigente de cada tarjeta del grupo |
-| `done`     | todas sus tarjetas `paid` o `nothing`                                          |
+| `done`     | todas sus tarjetas `paid`                                                      |
 | `phase`    | `upcoming` (hoy < inicio) · `today` (inicio ≤ hoy ≤ fin) · `past`             |
 
 ## 4. Proveedor de datos (`src/data/provider.ts`)

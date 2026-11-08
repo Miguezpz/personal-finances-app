@@ -88,11 +88,13 @@ describe("cardStatementSummary", () => {
     expect(s.headline).toBe("last");
   });
 
-  it("no recorded purchases → nothing to pay, the next one leads", () => {
-    const s = cardStatementSummary(card, emptySnapshot({ accounts: [card] }), TODAY);
-    expect(s.last.state).toBe("nothing");
-    expect(s.headline).toBe("next");
-    expect(s.next.amount).toBe(cents(0));
+  it("no recorded purchases → still pending until marked (the family's purchases aren't recorded)", () => {
+    const s = cardStatementSummary(card, emptySnapshot({ accounts: [card] }), d("2026-11-15"));
+    expect(s.last).toMatchObject({ state: "pending", outstanding: cents(0) });
+    expect(s.headline).toBe("last");
+    expect(cardStatementSummary(card, emptySnapshot({ accounts: [card] }), TODAY).last.state).toBe(
+      "overdue",
+    );
   });
 
   it("an earlier statement covered by a later mark is paid, without its own mark id", () => {

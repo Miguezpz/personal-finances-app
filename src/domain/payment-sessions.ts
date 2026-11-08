@@ -31,7 +31,7 @@ export interface PaymentSession {
   /** The shared pay range the window was chosen from. */
   cross: { from: IsoDate; to: IsoDate };
   cards: readonly SessionCard[];
-  /** Every card is paid or has nothing to pay (FR-030). */
+  /** Every card's statement is marked as paid (FR-030). */
   done: boolean;
   phase: "upcoming" | "today" | "past";
 }
@@ -87,8 +87,7 @@ function statementInCycle(card: Account, data: CardData, today: IsoDate, cycle: 
   return view;
 }
 
-const isSettled = (c: SessionCard) =>
-  c.statement.state === "paid" || c.statement.state === "nothing";
+const isSettled = (c: SessionCard) => c.statement.state === "paid";
 
 /**
  * The sessions of one monthly cycle (0 = the statements that can still be paid today), in window

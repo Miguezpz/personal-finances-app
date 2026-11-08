@@ -5,7 +5,7 @@ Funciones nuevas o cambiadas en `src/domain/`. Ninguna lee el reloj: `today` sie
 ## `src/domain/credit.ts` (cambia)
 
 ```ts
-export type StatementState = "paid" | "nothing" | "pending" | "overdue";
+export type StatementState = "paid" | "pending" | "overdue"; // revisado: sin "nothing"
 
 /** Último corte pagado de la tarjeta (máximo de sus marcas), o null. */
 export function paidThrough(cardId: Uuid, marks: readonly StatementMark[]): IsoDate | null;
@@ -25,7 +25,7 @@ export interface CardStatementSummary {
   last: { cutOff: IsoDate; due: IsoDate; outstanding: Cents; state: StatementState; markId: Uuid | null };
   next: { cutOff: IsoDate; due: IsoDate; amount: Cents };
   totalDebt: Cents;
-  headline: "last" | "next";        // "next" cuando last es paid o nothing
+  headline: "last" | "next";        // "next" cuando last es paid
 }
 export function cardStatementSummary(card: Account, data: CardData, today: IsoDate): CardStatementSummary;
 
@@ -52,7 +52,7 @@ export interface SessionCard { card: Account; statement: ReturnType<typeof state
 export interface PaymentSession {
   window: { start: IsoDate; end: IsoDate };   // 1–3 días (FR-027)
   cards: readonly SessionCard[];
-  done: boolean;                              // todas paid | nothing
+  done: boolean;                              // todas paid
   phase: "upcoming" | "today" | "past";
 }
 

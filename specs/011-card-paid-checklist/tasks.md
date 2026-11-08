@@ -242,4 +242,10 @@ description: "Task list for spec 011 — Pago de tarjeta como checklist y sesió
 - T037: un corte que todavía no cierra aparece en la sesión con "corta el {fecha}" y sin botón (FR-008). La e2e del demo lo descubrió.
 - T039: los nombres accesibles son "Ya la pagué: {tarjeta}" y "Desmarcar: {tarjeta}". axe exige que el texto visible esté dentro del nombre (label-content-name-mismatch).
 - T044: la revisión en solo lectura dio 0 pagos que convertir. `0011` se aplicó en la nube con aprobación del dueño, y la versión se renombró a `0011`. **Desviación de orden**: el código llegó a `main` (70cf073) antes que la migración, así que producción no pudo leer la tabla entre ese push y la migración. Se guardó como lección en memoria.
+- **Revisión tras usarlo con datos reales (2026-11-08)**: las 6 tarjetas del dueño mostraban "Nada que pagar" y no tenían botón. No había compras registradas en su último corte; la familia compra con ellas sin registrarse. Se quitó el estado `nothing`:
+  - todo corte cerrado sin marcar queda pendiente o vencido y tiene "Ya la pagué";
+  - sin compras registradas muestra "Sin compras registradas";
+  - la sesión se completa solo con todas las tarjetas marcadas.
+
+  Se actualizaron FR-008/FR-030, data-model, los contratos y las pruebas.
 

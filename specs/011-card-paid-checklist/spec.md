@@ -18,7 +18,7 @@
 - Q: ¿Se conservan "Pagar tarjeta" en la hoja ＋ y el atajo P? → A: No; marcar solo se hace desde las tarjetas (FR-011).
 - Q: ¿Los pagos de tarjeta siguen apareciendo en Gastos y en la Bitácora? → A: No; ya no son movimientos con monto (FR-012).
 - Q: ¿Qué pasa con los pagos con monto ya registrados? → A: Cada uno se convierte en la marca del corte que pagaba y se descarta cualquier excedente; antes de aplicarlo a los datos reales se le muestra al dueño qué cortes quedarían marcados (FR-018, FR-032).
-- Q: ¿Qué muestra un corte cerrado sin compras propias registradas? → A: "Nada que pagar", sin botón ni alerta (FR-008).
+- Q: ¿Qué muestra un corte cerrado sin compras propias registradas? → A: ~~"Nada que pagar", sin botón ni alerta~~. **Revisado el mismo día tras usarlo con datos reales**: las 6 tarjetas del dueño mostraban "Nada que pagar" y ninguna se podía palomear, pero la familia también compra con ellas y el estado de cuenta real sí tiene saldo. Ahora todo corte cerrado sin marcar está pendiente (vencido tras su fecha límite), tiene "Ya la pagué", entra en avisos y en la sesión, y en lugar de un monto en $0 muestra "Sin compras registradas" (FR-008).
 - Q: ¿Desde cuándo avisa el Dashboard de la sesión de pago? → A: Desde 7 días antes de que empiece la ventana: "Próxima sesión de pago" con sus fechas y tarjetas, en lugar de las alertas individuales de esas tarjetas; dentro de la ventana cambia a "Hoy toca pagar tus tarjetas" con sus "Ya la pagué" (FR-029).
 
 ## User Scenarios & Testing *(mandatory)*
@@ -113,7 +113,7 @@ Como dueño, quiero que la app me diga en qué días del mes puedo pagar todas m
 
 ### Edge Cases
 
-- **Corte sin compras registradas**: un corte cerrado en el que no se registró nada no requiere acción: aparece como "Nada que pagar" (como hoy), sin botón "Ya la pagué" y sin alerta. Si el dueño pagó compras de su familia en ese corte, no hay nada que marcar porque la app no tiene deuda registrada.
+- **Corte sin compras registradas**: puede tener saldo real por las compras de la familia, así que se palomea igual: pendiente (vencido tras su fecha límite), con "Ya la pagué", avisos y sesión. En lugar de "$0.00" muestra "Sin compras registradas". Una tarjeta que de verdad no se usó se resuelve con un toque.
 - **Marcar un corte cuando el anterior no está marcado**: marcar el corte más reciente también deja como pagados los cortes anteriores sin marcar de esa tarjeta, porque el estado de cuenta del banco incluye el saldo anterior y pagarlo liquida todo lo previo.
 - **Desmarcar un corte que cubría a otros**: al desmarcar el corte más reciente, los cortes anteriores vuelven a su propio estado (pagados si tenían su propia marca, pendientes o vencidos si no).
 - **Periodo abierto**: solo se pueden marcar cortes ya cerrados (fecha de corte ≤ hoy). Las compras del periodo abierto siguen como deuda del próximo corte.
@@ -127,7 +127,7 @@ Como dueño, quiero que la app me diga en qué días del mes puedo pagar todas m
 - **Cruce de menos de 3 días**: la ventana ocupa todo el cruce (1 o 2 días); sigue siendo una sola sesión.
 - **Fechas límite en día inhábil**: se usan las fechas límite ya ajustadas a día hábil (spec 007).
 - **Tarjeta sin términos completos o archivada**: no participa en la sesión.
-- **Sesión con una tarjeta sin compras registradas**: la tarjeta aparece como "Nada que pagar" dentro de la sesión y no impide que la sesión se complete.
+- **Sesión con una tarjeta sin compras registradas**: aparece como "Sin compras registradas" con su "Ya la pagué"; la sesión se completa cuando todas las tarjetas están marcadas.
 - **Ciclos**: cada sesión agrupa, de cada tarjeta, el estado de cuenta cuyo rango de pago cae en la ventana; la siguiente sesión es la del mes siguiente.
 
 ## Requirements *(mandatory)*
@@ -143,7 +143,7 @@ Como dueño, quiero que la app me diga en qué días del mes puedo pagar todas m
 - **FR-005**: Una marca MUST NOT cubrir nada posterior a su fecha de corte: el siguiente corte MUST incluir solo lo registrado después, y ningún corte futuro MUST aparecer pagado por una marca anterior.
 - **FR-006**: Tras marcar, MUST aparecer un aviso con "Deshacer" durante 6 s; deshacer MUST devolver el corte (y los anteriores que cubría) a su estado previo.
 - **FR-007**: El corte pagado más reciente de una tarjeta, si tiene marca propia, MUST ofrecer "Desmarcar" (EN "Unmark"); desmarcar MUST ser inmediato, con aviso y "Deshacer". Un corte anterior se reabre desmarcando primero los posteriores.
-- **FR-008**: Solo los cortes cerrados (fecha de corte ≤ hoy) MUST poder marcarse; un corte sin deuda registrada MUST mostrarse como "Nada que pagar" sin acción.
+- **FR-008**: Solo los cortes cerrados (fecha de corte ≤ hoy) MUST poder marcarse. Todo corte cerrado sin marcar MUST ofrecer "Ya la pagué", tenga o no compras registradas; sin compras registradas MUST mostrar "Sin compras registradas" en lugar de un monto.
 - **FR-009**: Un corte no marcado cuya fecha límite ya pasó MUST mostrarse como "Vencido" y su alerta MUST permanecer en el Dashboard hasta que se marque.
 
 **Lo que desaparece**
@@ -178,7 +178,7 @@ Como dueño, quiero que la app me diga en qué días del mes puedo pagar todas m
 - **FR-027**: La ventana de cada sesión MUST durar 3 días (o todo el cruce si es más corto) y quedar completa dentro del cruce. Si algún día de pago (Preferencias) cae en el cruce, la ventana MUST incluir el primero de ellos, empezando en él o, si no caben 3 días antes del fin del cruce, terminando el último día del cruce. Si ningún día de pago cae en el cruce, MUST empezar el primer día del cruce.
 - **FR-028**: Crédito MUST mostrar la próxima sesión (la primera cuya ventana termina hoy o después y tiene estados de cuenta sin marcar, o la siguiente si la actual ya está completa), con su ventana, cada tarjeta, su fecha límite, su estado y la acción "Ya la pagué" en las pendientes.
 - **FR-029**: Desde 7 días antes del inicio de la ventana de una sesión con tarjetas pendientes, el Dashboard MUST mostrar "Próxima sesión de pago" con las fechas de la ventana y sus tarjetas; dentro de la ventana MUST cambiar a "Hoy toca pagar tus tarjetas" con cada tarjeta pendiente y su "Ya la pagué". Mientras se muestre el aviso de sesión, las tarjetas de esa sesión MUST NOT tener además su alerta individual; una tarjeta vencida conserva su alerta de vencida.
-- **FR-030**: Una sesión con todas sus tarjetas marcadas o sin deuda registrada MUST mostrarse como completada, junto con la ventana de la siguiente sesión.
+- **FR-030**: Una sesión con todas sus tarjetas marcadas MUST mostrarse como completada, junto con la ventana de la siguiente sesión.
 - **FR-031**: La sesión MUST calcularse en el cliente a partir de los términos de las tarjetas y las Preferencias, sin datos nuevos guardados ni recordatorios fuera de la app.
 
 **Calidad**
@@ -189,8 +189,8 @@ Como dueño, quiero que la app me diga en qué días del mes puedo pagar todas m
 ### Key Entities
 
 - **Marca de corte pagado**: indica que el dueño ya pagó al banco el estado de cuenta de una tarjeta que cerró en una fecha de corte concreta. Atributos: tarjeta, fecha de corte, cuándo se marcó. Una por tarjeta y fecha de corte. Sin monto.
-- **Corte (estado de cuenta)**: derivado de los términos de la tarjeta (día de corte y días para pagar). Su estado es Pagado (cubierto por una marca propia o posterior), Pendiente (sin marca, antes de la fecha límite), Vencido (sin marca, después de la fecha límite) o Nada que pagar (sin deuda registrada).
-- **Sesión de pago**: derivada, no se guarda. Agrupa un estado de cuenta próximo de una o más tarjetas cuyos rangos de pago se cruzan, con una ventana de hasta 3 días y un estado (pendiente o completada).
+- **Corte (estado de cuenta)**: derivado de los términos de la tarjeta (día de corte y días para pagar). Su estado es Pagado (cubierto por una marca propia o posterior), Pendiente (sin marca, antes de la fecha límite) o Vencido (sin marca, después de la fecha límite), con o sin compras registradas.
+- **Sesión de pago**: derivada, no se guarda. Agrupa un estado de cuenta próximo de una o más tarjetas cuyos rangos de pago se cruzan, con una ventana de hasta 3 días y un estado (pendiente o completada: todas marcadas).
 - **Pago de tarjeta (anterior)**: registro con monto que deja de usarse; existe solo como origen de la conversión a marcas.
 
 ## Success Criteria *(mandatory)*

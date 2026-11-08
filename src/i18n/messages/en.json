@@ -774,7 +774,6 @@
     "payday": "Payday",
     "paydayHint": "Money comes in",
     "cardDue": "{card} due",
-    "nothingToPay": "Nothing to pay on this statement",
     "collectFrom": "Collect from {name}",
     "collectHint": "Third-party installment — earmarked for the card",
     "lastStatement": "Last statement",
@@ -790,7 +789,6 @@
     "unmarkFor": "Unmark: {card}",
     "marked": "{card} marked as paid.",
     "unmarked": "{card} unmarked.",
-    "stateNothing": "Nothing to pay",
     "sessionTitle": "Payment session",
     "sessionWindow": "{start} – {end}",
     "sessionDone": "Session complete",
@@ -798,7 +796,8 @@
     "sessionHint": "Pay all your cards in one go between these dates.",
     "sessionCardDue": "due {date}",
     "sessionNone": "Add the cut-off and due dates of your cards to get a payment session.",
-    "sessionClosesOn": "closes {date}"
+    "sessionClosesOn": "closes {date}",
+    "noPurchases": "No purchases recorded"
   },
   "goals": {
     "title": "Goals",

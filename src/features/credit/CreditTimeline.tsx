@@ -93,7 +93,7 @@ export function CreditTimeline({ events, today }: { events: TimelineEvent[]; tod
                                 ? t("statePaid")
                                 : (e.amount ?? 0) > 0
                                   ? t("payToAvoidInterest")
-                                  : t("nothingToPay")
+                                  : t("noPurchases")
                               : t("collectHint")}
                         </span>
                       </div>

@@ -83,7 +83,12 @@ function billedBetween(
   return sum;
 }
 
-export type StatementState = "paid" | "nothing" | "pending" | "overdue";
+/**
+ * A closed statement is "paid" once marked; otherwise pending, then overdue after its due date —
+ * even with no purchases recorded: the owner's family also uses the cards and isn't recorded, so
+ * every statement gets checked off (spec 011, clarification 2026-11-08).
+ */
+export type StatementState = "paid" | "pending" | "overdue";
 
 export interface StatementView {
   cutOff: IsoDate;
@@ -110,13 +115,7 @@ export function statementOf(
     data.statementMarks.find((m) => m.cardAccountId === card.id && m.cutOff === cutOff)?.id ?? null;
   const paid = through !== null && cutOff <= through;
   const outstanding = paid ? 0 : billedBetween(terms, chargesOf(card, data), through, cutOff);
-  const state: StatementState = paid
-    ? "paid"
-    : outstanding === 0
-      ? "nothing"
-      : today > due
-        ? "overdue"
-        : "pending";
+  const state: StatementState = paid ? "paid" : today > due ? "overdue" : "pending";
   return {
     cutOff,
     due,
@@ -162,7 +161,7 @@ export interface CardStatementSummary {
   /** The following statement, projected with what is known today (same rule as the timeline). */
   next: { cutOff: IsoDate; due: IsoDate; amount: Cents };
   totalDebt: Cents;
-  /** Which statement leads: the last one until it's paid (or has nothing to pay), then the next one. */
+  /** Which statement leads: the last one until it's marked as paid, then the next one. */
   headline: "last" | "next";
 }
 
@@ -186,7 +185,7 @@ export function cardStatementSummary(
     last,
     next: { cutOff: nextCutOff, due: dueDateFor(terms, nextCutOff), amount: nextAmount },
     totalDebt: status.totalDebt,
-    headline: last.state === "paid" || last.state === "nothing" ? "next" : "last",
+    headline: last.state === "paid" ? "next" : "last",
   };
 }
 

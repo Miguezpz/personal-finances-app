@@ -20,7 +20,7 @@ Con `L = paidThrough(card)` (o "nunca") y `due(·)` = `dueDateFor` (spec 007):
 
 - **A pagar en el corte C** (`C > L`): compras con `L < spentOn ≤ C` + cuotas MSI con `due(L) < cardDueOn ≤ due(C)`. Si `C ≤ L`, el corte está pagado.
 - **Deuda total**: compras con `spentOn > L` (incluye el periodo abierto) + cuotas MSI con `cardDueOn > due(L)`.
-- **Estado del último corte**: `paid` si `C ≤ L`; `nothing` si no está pagado y su monto es 0; `overdue` si `today > due(C)`; si no, `pending`.
+- **Estado del último corte**: `paid` si `C ≤ L`; `overdue` si `today > due(C)`; si no, `pending`, aunque el monto registrado sea 0. Al principio había un estado `nothing` para monto 0; se retiró el 2026-11-08 porque la familia compra con las tarjetas sin registrarse.
 - **Siguiente corte**: lo que agrega entre el corte actual y el siguiente, como hoy (supone que el actual se paga).
 - **Rationale**: los pagos dejan de restar, así que no puede haber saldo a favor (FR-005, FR-019). Las cuotas MSI se asignan por `cardDueOn`, que el spec 007 ya ajusta a día hábil.
 - **Alternatives considered**: conservar `payments` como resta opcional. Se descartó porque la spec elimina los montos de pago (FR-010).
@@ -40,7 +40,7 @@ Con `L = paidThrough(card)` (o "nunca") y `due(·)` = `dueDateFor` (spec 007):
   1. Por tarjeta activa con términos, su **estado de cuenta vigente**: el primero cuyo rango de pago `[corte+1, due−1]` termina hoy o después.
   2. Agrupación mínima de intervalos por "estacado" voraz (ordenar por fin de rango; abrir grupo en el menor fin; unir todos los que empiezan antes o en ese punto). Es óptimo para cubrir intervalos con el menor número de puntos (FR-026).
   3. Por grupo, cruce `[max inicios, min fines]` y ventana de `min(3, largo del cruce)` días según FR-027: si un día de pago (`firstPayday`, `secondPayday` con 31 = último día) cae en el cruce, la ventana incluye el primero y empieza en él, o termina en el fin del cruce si no cabe. Si no cae ninguno, empieza al inicio del cruce.
-  4. Estado de la sesión: `done` si todas sus tarjetas están `paid` o `nothing`. La **próxima sesión** (FR-028) es la primera con ventana que termina hoy o después y no está `done`. Si todas están `done`, se calcula el ciclo siguiente con el estado de cuenta posterior de cada tarjeta.
+  4. Estado de la sesión: `done` si todas sus tarjetas están `paid`. La **próxima sesión** (FR-028) es la primera con ventana que termina hoy o después y no está `done`. Si todas están `done`, se calcula el ciclo siguiente con el estado de cuenta posterior de cada tarjeta.
 - **Rationale**: es determinista y barato (≤ 6 tarjetas), se calcula en el cliente sin guardar nada (FR-031) y usa las mismas fechas ajustadas del spec 007.
 - **Alternatives considered**: buscar la combinación de ciclos que dé una sola sesión moviendo tarjetas al mes siguiente. Se descartó porque podría proponer pagar un estado de cuenta después de su fecha límite.
 

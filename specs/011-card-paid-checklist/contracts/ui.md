@@ -4,11 +4,10 @@ Todo texto viene de `src/i18n/messages/{en,es}.json`; las llaves nuevas se lista
 
 ## `CardStatementCard` (Crédito `full`, Gastos `compact`)
 
-- Estado del último corte: `paid` ✓ · `nothing` ("Nada que pagar") · `pending` · `overdue`.
+- Estado del último corte: `paid` ✓ · `pending` · `overdue`. Sin compras registradas, el monto se muestra como "Sin compras registradas" (`data-testid="no-purchases"`).
 - Acción:
   - `pending` / `overdue` → botón **"Ya la pagué"** (`data-testid="mark-paid"`, `aria-label="Ya la pagué: {card}"`, mínimo 44 px de área táctil).
   - `paid` con marca propia en el último corte → botón secundario **"Desmarcar"** (`data-testid="unmark-paid"`).
-  - `nothing` → sin acción.
 - Se elimina el botón "Pagar" (`pay-card`) y su `openCreate`.
 
 ## `PaymentSessionCard` (nuevo, arriba en Crédito) — `data-testid="payment-session"`
@@ -51,7 +50,7 @@ Todo texto viene de `src/i18n/messages/{en,es}.json`; las llaves nuevas se lista
 | `credit.unmarkFor`            | Unmark: {card}                     | Desmarcar: {card}                     |
 | `credit.marked`               | {card} marked as paid.             | {card} marcada como pagada.           |
 | `credit.unmarked`             | {card} unmarked.                   | {card} desmarcada.                    |
-| `credit.stateNothing`         | Nothing to pay                     | Nada que pagar                        |
+| `credit.noPurchases`          | No purchases recorded              | Sin compras registradas               |
 | `credit.sessionTitle`         | Payment session                    | Sesión de pago                        |
 | `credit.sessionWindow`        | {start} – {end}                    | {start} – {end}                       |
 | `credit.sessionDone`          | Session complete                   | Sesión completa                       |
