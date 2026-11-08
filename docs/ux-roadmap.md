@@ -224,6 +224,7 @@ En total, el First Load de `/dashboard` creció **+7.5 kB gzip** (cada spec ten�
 
 - **Revelado del esqueleto y salida de filas sin `<ViewTransition>`**: React solo activa las transiciones de vista con transiciones, Suspense o valores diferidos. Las actualizaciones de TanStack Query y de Zustand son síncronas, así que se usaron un `MutationObserver` con la API de animaciones del navegador (revelado) y CSS (filas).
 - **Errores de validación**: entran con desvanecimiento y desplazamiento, sin animar la altura con `interpolate-size`, porque el spec 003 solo permite opacidad, transform y color de fondo.
+- **Icono del panel "Apariencia"**: conserva el icono original de ajustes (`SlidersHorizontal`) por preferencia del usuario (2026-11-08); solo cambió el nombre.
 - **Pagos de tarjeta en Bitácora**: no abren edición, porque no existe un diálogo para editar pagos.
 
 ### Omitido por decisión del usuario

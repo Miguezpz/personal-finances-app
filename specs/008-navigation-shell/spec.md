@@ -97,7 +97,7 @@ Como dueño, quiero que cada pantalla tenga el mismo tipo de encabezado (icono, 
 
 1. **Given** cualquier página autenticada, **When** se ve su encabezado, **Then** tiene icono, título y, opcionalmente, descripción y acciones, con el mismo estilo en todas.
 2. **Given** cualquier subpágina de Configuración (incluida Reglas), **When** se ve, **Then** muestra un enlace "‹ Configuración" que regresa al índice.
-3. **Given** la barra superior, **When** el dueño abre el panel de idioma, moneda, tema y salir, **Then** se titula "Apariencia" (EN: "Appearance") y su botón usa un icono distinto al de la página de Preferencias.
+3. **Given** la barra superior, **When** el dueño abre el panel de idioma, moneda, tema y salir, **Then** se titula "Apariencia" (EN: "Appearance"); su botón conserva el icono de ajustes original.
 
 ---
 
@@ -159,7 +159,7 @@ Como dueño, quiero que el encabezado no quede bajo la muesca o la barra de esta
 
 - **FR-014**: Todas las páginas autenticadas MUST usar el mismo encabezado (icono, título, descripción y acciones opcionales), incluidos el índice de Configuración y Reglas.
 - **FR-015**: Todas las subpáginas de Configuración MUST mostrar un enlace de regreso "‹ Configuración".
-- **FR-016**: El panel de la barra superior con idioma, moneda, tema y cerrar sesión MUST llamarse "Apariencia" ("Appearance") y usar un icono distinto al de la página de Preferencias (actualiza spec 003 FR-021).
+- **FR-016**: El panel de la barra superior con idioma, moneda, tema y cerrar sesión MUST llamarse "Apariencia" ("Appearance") (actualiza spec 003 FR-021). Conserva su icono original de ajustes (`SlidersHorizontal`) por preferencia del usuario (2026-11-08).
 
 **Shell**
 

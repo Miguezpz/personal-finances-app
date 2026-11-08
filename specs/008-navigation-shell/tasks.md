@@ -92,7 +92,7 @@ description: "Task list for spec 008 — Navegación y consistencia del shell"
 
 - [X] T025 [P] [US4] Agregar prop `back?: {href, label}` a src/components/layout/PageHeader.tsx
 - [X] T026 [US4] Crear src/features/settings/settings-sections.ts (SECTIONS compartido con iconos); `SettingsIndex.tsx` usa PageHeader con `navIcon("/settings")`; `SettingsHeader.tsx` delega en PageHeader con el icono de su sección y `back`; src/features/settings/rules/RulesSettings.tsx usa SettingsHeader
-- [X] T027 [P] [US4] Renombrar el panel en src/components/layout/PreferencesSheet.tsx a `nav.appearance` con icono `Palette` (conservar testids)
+- [X] T027 [P] [US4] Renombrar el panel en src/components/layout/PreferencesSheet.tsx a `nav.appearance` (conservar testids; el icono `SlidersHorizontal` se mantiene por preferencia del usuario)
 - [X] T028 [US4] e2e: encabezado con icono y "‹ Configuración" en `/settings/rules`; panel "Apariencia" en móvil, en tests/e2e/navigation.spec.ts
 
 ---

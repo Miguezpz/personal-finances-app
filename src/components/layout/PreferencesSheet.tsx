@@ -6,7 +6,7 @@
  * and this button; language, currency, theme and sign-out live in a bottom sheet. It's a dialog (not a menu), so the
  * toggles keep their button semantics and their data-testids.
  */
-import { Coins, Languages, LogOut, type LucideIcon, Palette } from "lucide-react";
+import { Coins, Languages, LogOut, type LucideIcon, SlidersHorizontal } from "lucide-react";
 import { useTranslations } from "next-intl";
 import type { ReactNode } from "react";
 import { Button } from "@/components/ui/button";
@@ -63,7 +63,7 @@ export function PreferencesSheet({
           aria-label={t("appearance")}
           data-testid="preferences-open"
         >
-          <Palette aria-hidden="true" />
+          <SlidersHorizontal aria-hidden="true" />
         </Button>
       </SheetTrigger>
       <SheetContent

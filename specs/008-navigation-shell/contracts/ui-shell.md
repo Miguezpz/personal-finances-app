@@ -45,4 +45,4 @@ Teclas N/I/P → `openCreate`. Se ignoran con modificadores, repetición, foco e
 Nueva prop `back?: { href: string; label: string }`: muestra el enlace con `ChevronLeft` encima del título.
 
 ## `PreferencesSheet`
-Título y `aria-label` = `nav.appearance` ("Apariencia"/"Appearance"), icono `Palette`. Se conservan los testids `preferences-open` y `preferences-sheet`.
+Título y `aria-label` = `nav.appearance` ("Apariencia"/"Appearance"), icono `SlidersHorizontal` (el original). Se conservan los testids `preferences-open` y `preferences-sheet`.

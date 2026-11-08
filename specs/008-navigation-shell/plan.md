@@ -84,7 +84,7 @@ src/components/layout/
 ├── DialogHost.tsx                      # nuevo: monta los 3 diálogos lazy según useUi.activeDialog
 ├── use-create-shortcuts.ts             # nuevo: N/I/P
 ├── PageHeader.tsx                      # prop `back?` opcional (enlace ‹ Configuración)
-└── PreferencesSheet.tsx                # "Apariencia" + icono Palette
+└── PreferencesSheet.tsx                # "Apariencia" (icono original SlidersHorizontal)
 src/components/ui/responsive-cta.tsx    # se elimina (sus usos pasan a Button default/outline)
 src/domain/credit.ts                    # cardStatementSummary (puro)
 src/features/credit/
