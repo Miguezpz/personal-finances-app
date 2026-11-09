@@ -112,7 +112,7 @@ test.describe("US2 · mobile", { tag: "@demo" }, () => {
     }
   });
 
-  test("the Dashboard shows its alerts as a strip above the buckets", async ({ page }) => {
+  test("the Dashboard shows its alerts as a strip below the buckets", async ({ page }) => {
     await page.goto("/dashboard");
     await settled(page);
     const strip = page.getByTestId("dashboard-alert-strip");
@@ -123,7 +123,7 @@ test.describe("US2 · mobile", { tag: "@demo" }, () => {
     }
     const stripBox = await strip.boundingBox();
     const bucketBox = await page.getByTestId("bucket-needs").boundingBox();
-    expect(stripBox?.y ?? 0).toBeLessThan(bucketBox?.y ?? 0);
+    expect(stripBox?.y ?? 0).toBeGreaterThan(bucketBox?.y ?? 0);
     await strip.locator("a").first().click();
     await expect(page).toHaveURL(/\/(expenses|receivables)$/);
   });

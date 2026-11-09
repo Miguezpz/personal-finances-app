@@ -93,12 +93,6 @@ export function Dashboard() {
         </Alert>
       ) : (
         <div className="flex flex-col gap-6">
-          {/* Spec 008 (FR-019): on mobile the alerts sit on top as a compact, tappable strip. */}
-          <DashboardAlertStrip overspentBuckets={overspent.map((b) => tb(b.bucket))} />
-
-          {/* Spec 005: one tap records a repeated expense (no entrance animation of its own). */}
-          <QuickExpenseBar variant="dashboard" />
-
           {!hasAllocations && (
             <Alert>
               <AlertTitle>{t("emptyTitle")}</AlertTitle>
@@ -116,22 +110,7 @@ export function Dashboard() {
             </Alert>
           )}
 
-          {/* Desktop: the full alerts above the buckets; mobile shows DashboardAlertStrip instead. */}
-          <div className="flex flex-col gap-6 empty:hidden max-md:hidden">
-            <CardDueAlerts />
-            <CollectionAlerts />
-
-            {overspent.length > 0 && (
-              <Alert variant="destructive" role="status">
-                <TriangleAlert aria-hidden="true" />
-                <AlertTitle>{t("overspentTitle")}</AlertTitle>
-                <AlertDescription>
-                  {t("overspentHint", { buckets: overspent.map((b) => tb(b.bucket)).join(", ") })}
-                </AlertDescription>
-              </Alert>
-            )}
-          </div>
-
+          {/* Needs and Wants always come first: "how much can I spend today?". */}
           <div className="grid gap-4 md:grid-cols-2" aria-live="polite">
             <div {...intro(0)}>
               <BucketCard
@@ -151,6 +130,30 @@ export function Dashboard() {
                 recurring={recurringItems.filter((i) => i.bucket === "wants")}
               />
             </div>
+          </div>
+
+          {/* Right below: the credit cards still to pay this quincena (every width). */}
+          <CardDueAlerts />
+
+          {/* Spec 005: one tap records a repeated expense (no entrance animation of its own). */}
+          <QuickExpenseBar variant="dashboard" />
+
+          {/* Spec 008 (FR-019): on mobile the other alerts are a compact, tappable strip. */}
+          <DashboardAlertStrip overspentBuckets={overspent.map((b) => tb(b.bucket))} />
+
+          {/* Desktop: the full alerts; mobile shows DashboardAlertStrip instead. */}
+          <div className="flex flex-col gap-6 empty:hidden max-md:hidden">
+            <CollectionAlerts />
+
+            {overspent.length > 0 && (
+              <Alert variant="destructive" role="status">
+                <TriangleAlert aria-hidden="true" />
+                <AlertTitle>{t("overspentTitle")}</AlertTitle>
+                <AlertDescription>
+                  {t("overspentHint", { buckets: overspent.map((b) => tb(b.bucket)).join(", ") })}
+                </AlertDescription>
+              </Alert>
+            )}
           </div>
         </div>
       )}
