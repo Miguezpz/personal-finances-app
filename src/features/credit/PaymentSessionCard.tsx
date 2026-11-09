@@ -30,7 +30,10 @@ export function useSessionWindowLabel() {
         });
 }
 
-/** One card of a session: name, due date, amount or state, and its action. */
+/**
+ * One card of a session: logo, the name with "$1,234 · due Nov 10" (or "Paid · …") underneath, the amount first, and its
+ * action on the right — two pieces side by side at most, so it fits a phone.
+ */
 export function SessionCardRow({ item }: { item: SessionCard }) {
   const t = useTranslations("credit");
   const locale = usePreferences(selectLocale);
@@ -41,37 +44,34 @@ export function SessionCardRow({ item }: { item: SessionCard }) {
   const closed = statement.cutOff <= today;
   return (
     <li
-      className="flex flex-wrap items-center gap-x-3 gap-y-2 py-2 text-sm"
+      className="flex items-center gap-3 py-2 text-sm"
       data-testid="session-card"
       data-card={card.id}
       data-state={statement.state}
     >
-      <span className="flex min-w-0 flex-1 items-center gap-2">
-        <AccountMark account={card} className="size-6" />
-        <span className="flex min-w-0 flex-col">
-          <span className="truncate font-medium">{card.name}</span>
-          <span className="text-xs text-muted-foreground">
-            {t("sessionCardDue", { date: formatDate(statement.due, locale, "short") })}
-            {!closed && (
-              <>
-                {" "}
-                · {t("sessionClosesOn", { date: formatDate(statement.cutOff, locale, "short") })}
-              </>
-            )}
-          </span>
+      <AccountMark account={card} className="size-6" />
+      <span className="flex min-w-0 flex-1 flex-col">
+        <span className="truncate font-medium text-foreground">{card.name}</span>
+        <span className="truncate text-xs text-muted-foreground">
+          {open ? (
+            <StatementAmount
+              cents={statement.outstanding}
+              className="font-medium text-foreground"
+              compact
+            />
+          ) : (
+            <span className="inline-flex items-center gap-1 align-bottom">
+              <CircleCheck aria-hidden="true" className="size-3" />
+              {t("statePaid")}
+            </span>
+          )}
+          {" · "}
+          {t("sessionCardDue", { date: formatDate(statement.due, locale, "short") })}
+          {!closed && (
+            <> · {t("sessionClosesOn", { date: formatDate(statement.cutOff, locale, "short") })}</>
+          )}
         </span>
       </span>
-      {open ? (
-        <StatementAmount
-          cents={statement.outstanding}
-          className="font-semibold whitespace-nowrap"
-        />
-      ) : (
-        <Badge variant="secondary" className="gap-1">
-          <CircleCheck aria-hidden="true" />
-          {t("statePaid")}
-        </Badge>
-      )}
       {open && closed ? (
         <MarkPaidButton card={card} cutOff={statement.cutOff} />
       ) : statement.state === "paid" && statement.markId !== null ? (

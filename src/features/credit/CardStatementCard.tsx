@@ -45,12 +45,27 @@ function StateBadge({ state }: { state: StatementState }) {
  * A statement's recorded amount, or "No purchases recorded" when there is none: the bank statement
  * may still have the family's purchases, so it's a fact, not "nothing to pay".
  */
-export function StatementAmount({ cents, className }: { cents: Cents; className?: string }) {
+/**
+ * The statement amount, or "No purchases recorded" when it's zero. `compact` is for a secondary
+ * line (phone rows): the short label, inheriting the line's size and color.
+ */
+export function StatementAmount({
+  cents,
+  className,
+  compact = false,
+}: {
+  cents: Cents;
+  className?: string;
+  compact?: boolean;
+}) {
   const t = useTranslations("credit");
   if (cents === 0)
     return (
-      <span className="text-sm font-normal text-muted-foreground" data-testid="no-purchases">
-        {t("noPurchases")}
+      <span
+        className={compact ? undefined : "text-sm font-normal text-muted-foreground"}
+        data-testid="no-purchases"
+      >
+        {t(compact ? "noPurchasesShort" : "noPurchases")}
       </span>
     );
   return <Money cents={cents} {...(className ? { className } : {})} />;

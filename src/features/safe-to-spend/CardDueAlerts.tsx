@@ -10,6 +10,7 @@
 import { CalendarCheck, CreditCard } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { useMemo } from "react";
+import { AccountMark } from "@/components/icons/AccountMark";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { daysBetween } from "@/domain/dates";
 import { StatementAmount } from "@/features/credit/CardStatementCard";
@@ -94,25 +95,35 @@ export function SessionAlert({
   );
 }
 
+/**
+ * One card to pay, sized for a phone: logo, the name with "$1,234 · Overdue" underneath (the amount first, so a narrow screen cuts the rest), and
+ * "Ya la pagué" on the right — never more than two pieces side by side.
+ */
 export function CardDueRow({ alert, className }: { alert: CardDue; className?: string }) {
   const t = useTranslations("dashboard");
   const { card, summary } = alert.statement;
+  const overdue = alert.days < 0;
   return (
     <div
-      className={cn("flex flex-wrap items-center gap-x-3 gap-y-1 text-sm", className)}
+      className={cn("flex items-center gap-3 text-sm", className)}
       data-testid="card-due-alert"
       data-card={card.id}
     >
-      <CreditCard aria-hidden="true" className="size-4 shrink-0" />
-      <span className="min-w-0 flex-1 font-medium">
-        {alert.days < 0
-          ? t("cardOverdue", { card: card.name })
-          : t("cardDueIn", { card: card.name, days: alert.days })}
+      <AccountMark account={card} className="size-6" />
+      <span className="flex min-w-0 flex-1 flex-col">
+        <span className="truncate font-medium text-foreground">{card.name}</span>
+        <span className="truncate text-xs text-muted-foreground">
+          <StatementAmount
+            cents={summary.last.outstanding}
+            className="font-medium text-foreground"
+            compact
+          />
+          {" · "}
+          <span className={cn(overdue && "font-medium text-destructive")}>
+            {overdue ? t("cardOverdue") : t("cardDueIn", { days: alert.days })}
+          </span>
+        </span>
       </span>
-      <StatementAmount
-        cents={summary.last.outstanding}
-        className="font-semibold whitespace-nowrap"
-      />
       <MarkPaidButton card={card} cutOff={summary.last.cutOff} />
     </div>
   );
@@ -120,16 +131,24 @@ export function CardDueRow({ alert, className }: { alert: CardDue; className?: s
 
 /** Desktop: one alert listing the cards due soon (nothing when there are none). */
 export function CardDueAlerts() {
-  const tc = useTranslations("credit");
+  const t = useTranslations("dashboard");
   const alerts = useCardDueAlerts();
   const session = useSessionAlert();
   if (alerts.length === 0 && !session) return null;
   const overdue = alerts.some((a) => a.days < 0);
+  // The icon goes inside the title (not as the Alert's own icon) so the rows use the full width;
+  // minmax(0,1fr) lets the names truncate instead of widening the grid past the screen.
   return (
-    <Alert variant={overdue ? "destructive" : "default"} data-testid="card-due-alerts">
-      <CreditCard aria-hidden="true" />
-      <AlertTitle>{tc("title")}</AlertTitle>
-      <AlertDescription className="flex flex-col gap-2">
+    <Alert
+      variant={overdue ? "destructive" : "default"}
+      className="grid-cols-[minmax(0,1fr)]"
+      data-testid="card-due-alerts"
+    >
+      <AlertTitle className="flex items-center gap-2">
+        <CreditCard aria-hidden="true" className="size-4 shrink-0" />
+        {t("cardsDueTitle")}
+      </AlertTitle>
+      <AlertDescription className="flex flex-col gap-3 pt-1">
         {session && <SessionAlert session={session} />}
         {alerts.map((a) => (
           <CardDueRow key={a.statement.card.id} alert={a} />
