@@ -155,6 +155,7 @@ test.describe("Spec 009 · lists on a phone", { tag: "@demo" }, () => {
     const targets = page.locator(
       '[data-testid="expense-filters"] [data-slot="chip"], [data-testid="expense-row-open"]',
     );
+    await expect(page.getByTestId("expense-row-open").first()).toBeVisible();
     const count = await targets.count();
     expect(count).toBeGreaterThan(1);
     for (let i = 0; i < Math.min(count, 8); i++) {
