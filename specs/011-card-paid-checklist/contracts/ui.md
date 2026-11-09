@@ -18,13 +18,11 @@ Todo texto viene de `src/i18n/messages/{en,es}.json`; las llaves nuevas se lista
 - Si hay varias sesiones en el ciclo, se listan en orden (FR-026).
 - Sin tarjetas con términos → no se muestra.
 
-## `CardDueAlerts` (Dashboard)
+## `CardDueAlerts` (Dashboard) — enmienda 2026-11-09
 
-- Si la próxima sesión tiene pendientes y `today ≥ inicio − 7` → bloque `data-testid="session-alert"`:
-  - antes de la ventana: "Próxima sesión de pago: {ventana}" + tarjetas pendientes;
-  - dentro: "Hoy toca pagar tus tarjetas" + "Ya la pagué" por tarjeta.
-- Alertas individuales (`card-alert`) solo para tarjetas fuera de ese bloque, o vencidas.
-- El botón "Pagar" de la alerta se cambia por "Ya la pagué".
+- Una sola línea `data-testid="card-due-alerts"` (`data-count`): "N tarjetas por pagar pronto" (`dashboard.cardsDueNotice`), o en rojo `dashboard.cardsOverdueNotice` si alguna está vencida, con el enlace `card-due-see-credit` → `/credit`.
+- Cuenta, una vez cada una, las tarjetas pendientes que vencen en ≤ 7 días o están vencidas, y las pendientes de la próxima sesión si `today ≥ inicio − 7`.
+- Sin filas por tarjeta ni "Ya la pagué": marcar se hace solo en Crédito. Se quitaron `session-alert`, `card-due-alert` y sus llaves (`cardsDueTitle`, `cardDueIn`, `cardOverdue`, `sessionUpcoming`, `sessionToday`).
 
 ## Aviso tras marcar / desmarcar
 

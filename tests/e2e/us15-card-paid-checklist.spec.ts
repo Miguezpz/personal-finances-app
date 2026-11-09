@@ -68,10 +68,9 @@ test.describe("US15 · paid checklist in the demo", { tag: "@demo" }, () => {
     await expect(page.getByRole("dialog")).toHaveCount(0);
   });
 
-  test("inside the session window the Dashboard says it's time to pay", async ({
+  test("inside the session window the Dashboard points to Credit, which lists the cards", async ({
     page,
-  }, testInfo) => {
-    const m = MESSAGES[localeOf(testInfo.project.metadata)];
+  }) => {
     // A day inside the next session's window, computed with the same domain as the app.
     const base = todayIn(TZ, new Date());
     const seed = generateDemoSnapshot({ today: base });
@@ -87,21 +86,23 @@ test.describe("US15 · paid checklist in the demo", { tag: "@demo" }, () => {
     await page.goto("/dashboard");
     await settled(page);
 
-    const alert = page.locator('[data-testid="session-alert"]:visible');
-    await expect(alert).toHaveAttribute("data-phase", "today");
-    await expect(alert).toContainText(m.dashboard.sessionToday);
     const pending = (expected?.cards ?? []).filter(
       (c) => c.statement.state === "pending" || c.statement.state === "overdue",
     );
-    for (const c of pending) {
+    // The Dashboard only counts the cards and links to Credit: no rows, no "Ya la pagué".
+    const notice = page.getByTestId("card-due-alerts");
+    await expect(notice).toBeVisible();
+    expect(Number(await notice.getAttribute("data-count"))).toBeGreaterThanOrEqual(pending.length);
+    await expect(page.getByTestId("session-card")).toHaveCount(0);
+    await expect(page.getByTestId("mark-paid")).toHaveCount(0);
+
+    await notice.getByTestId("card-due-see-credit").click();
+    await page.waitForURL("**/credit");
+    const session = page.getByTestId("payment-session");
+    for (const c of pending)
       await expect(
-        alert.locator(`[data-testid="session-card"][data-card="${c.card.id}"]`),
+        session.locator(`[data-testid="session-card"][data-card="${c.card.id}"]`),
       ).toBeVisible();
-      if (c.statement.state === "pending")
-        await expect(
-          page.locator(`[data-testid="card-due-alert"][data-card="${c.card.id}"]`),
-        ).toHaveCount(0);
-    }
   });
 });
 

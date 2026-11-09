@@ -77,11 +77,15 @@ test.describe("US4 · expenses and card statements", { tag: "@live" }, () => {
     await expect(wants.locator(".money").first()).toHaveText("$400.00");
 
     await page.goto("/expenses");
-    const debt = page.locator(`[data-testid="card-debt"][data-card="${cardId}"]`);
+    await expect(page.getByTestId("expense-row")).toHaveCount(1);
+    // Card statements live only in Credit.
+    await expect(page.getByTestId("card-debt")).toHaveCount(0);
+
+    await page.goto("/credit");
+    const debt = page.locator(`[data-testid="credit-card"][data-card="${cardId}"]`);
     // $600 bought today, on the statement that closed today (spec 008, US3).
     await expect(debt.getByTestId("statement-amount")).toContainText("$600.00");
     await expect(debt).toHaveAttribute("data-state", "pending");
-    await expect(page.getByTestId("expense-row")).toHaveCount(1);
 
     // --- "Ya la pagué" settles it with one tap, no form -----------------------------------
     await debt.getByTestId("mark-paid").click();

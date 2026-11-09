@@ -1,16 +1,17 @@
 /**
  * Spec 005 · Quick expenses end to end.
+ * Quick expenses live only where an expense is registered (the new-expense dialog and the mobile
+ * "＋" sheet), never on the Dashboard.
  *  - live-en, live-es: a tap records today's expense and lowers Needs at once; Undo restores it;
  *    two taps record two; "⋯ › Yesterday" and "⋯ › another amount" (the template keeps its
  *    amount); the floating button's dialog records with one tap on a phone; the edit dialog has
  *    no quick row (quickstart C, D, E, F1–F4).
- *  - live: managing templates from Expenses (create, edit, reorder, delete, archived subcategory,
- *    the Dashboard's "create" link) and "Save as quick expense" in the expense dialog
- *    (quickstart A, B, F, G, H, I, J).
- *  - demo-en, demo-es: "Transporte $24" is on the Dashboard; a tap, creating and deleting are
- *    refused read-only.
+ *  - live: managing templates in Settings (create, edit, reorder, delete, archived subcategory)
+ *    and "Save as quick expense" in the expense dialog (quickstart B, F, G, H, I, J).
+ *  - demo-en, demo-es: "Transporte $24" is in the new-expense dialog, not on the Dashboard; a tap,
+ *    creating and deleting are refused read-only.
  */
-import type { Page } from "@playwright/test";
+import type { Locator, Page } from "@playwright/test";
 import type { SupabaseClient } from "@supabase/supabase-js";
 import type { Database } from "../../src/data/supabase/database.types";
 import { addDays } from "../../src/domain/dates";
@@ -99,16 +100,18 @@ const templatesOf = async (admin: SupabaseClient<Database>, owner: Owner) =>
       .order("created_at")
   ).data;
 
-/** Template ids in the Dashboard row's order. */
-const dashboardOrder = (page: Page) =>
-  page
+/** Template ids in the quick row's order. */
+const barOrder = (dialog: Locator) =>
+  dialog
     .getByTestId("quick-expense-bar")
     .locator('[data-testid^="quick-expense-"]:not([data-testid^="quick-expense-menu-"])')
     .evaluateAll((els) => els.map((e) => e.getAttribute("data-testid")));
 
-async function openDashboard(page: Page) {
-  await page.goto("/dashboard");
-  await expect(page.getByTestId("quick-expense-bar")).toBeVisible();
+/** Opens the new-expense dialog, the quick row's home; a tap there records and closes it. */
+async function openQuickExpenses(page: Page) {
+  const dialog = await openCreate(page, "expense");
+  await expect(dialog.getByTestId("quick-expense-bar")).toBeVisible();
+  return dialog;
 }
 
 test.describe("US13 · quick expenses", { tag: "@live" }, () => {
@@ -120,11 +123,15 @@ test.describe("US13 · quick expenses", { tag: "@live" }, () => {
   }, testInfo) => {
     const m = MESSAGES[localeOf(testInfo.project.metadata)].quickExpenses;
     const { today, templateId } = await seed(admin, owner, userClient);
-    await openDashboard(page);
+    await page.goto("/dashboard");
     const needs = page.getByTestId("bucket-needs-balance");
     await expect(needs).toContainText("$1,000.00");
+    // Not on the Dashboard: only where an expense is registered.
+    await expect(page.getByTestId("quick-expense-bar")).toHaveCount(0);
 
-    await page.getByTestId(`quick-expense-${templateId}`).click();
+    let dialog = await openQuickExpenses(page);
+    await dialog.getByTestId(`quick-expense-${templateId}`).click();
+    await expect(dialog).toBeHidden();
     await expect(needs).toContainText("$976.00");
     const toast = page.locator("[data-sonner-toast]").filter({
       hasText: m.added.replace("{name}", "Transporte"),
@@ -146,10 +153,12 @@ test.describe("US13 · quick expenses", { tag: "@live" }, () => {
     await expect(needs).toContainText("$1,000.00");
     await expect.poll(() => expensesOf(admin, owner)).toEqual([]);
 
-    // Two taps in a row: two expenses (FR-010).
-    const button = page.getByTestId(`quick-expense-${templateId}`);
-    await button.click();
-    await button.click();
+    // Two taps: two expenses (FR-010).
+    for (let i = 0; i < 2; i++) {
+      dialog = await openQuickExpenses(page);
+      await dialog.getByTestId(`quick-expense-${templateId}`).click();
+      await expect(dialog).toBeHidden();
+    }
     await expect(needs).toContainText("$952.00");
     await expect.poll(async () => (await expensesOf(admin, owner))?.length).toBe(2);
   });
@@ -162,10 +171,12 @@ test.describe("US13 · quick expenses", { tag: "@live" }, () => {
   }, testInfo) => {
     const m = MESSAGES[localeOf(testInfo.project.metadata)].quickExpenses;
     const { today, templateId } = await seed(admin, owner, userClient);
-    await openDashboard(page);
+    await page.goto("/dashboard");
 
-    await page.getByTestId(`quick-expense-menu-${templateId}`).click();
+    let expenseDialog = await openQuickExpenses(page);
+    await expenseDialog.getByTestId(`quick-expense-menu-${templateId}`).click();
     await page.getByRole("menuitem", { name: m.yesterday }).click();
+    await expect(expenseDialog).toBeHidden();
     await expect
       .poll(() => expensesOf(admin, owner))
       .toEqual([
@@ -180,9 +191,11 @@ test.describe("US13 · quick expenses", { tag: "@live" }, () => {
 
     // Reopen only once the first menu has finished closing.
     await expect(page.getByRole("menu")).toHaveCount(0);
-    await page.getByTestId(`quick-expense-menu-${templateId}`).click();
+    expenseDialog = await openQuickExpenses(page);
+    await expenseDialog.getByTestId(`quick-expense-menu-${templateId}`).click();
     await page.getByRole("menuitem", { name: m.customize }).click();
-    const dialog = page.getByRole("dialog");
+    // It opens on top of the new-expense dialog.
+    const dialog = page.getByRole("dialog").filter({ has: page.locator("#quick-expense-amount") });
     await expect(dialog.locator("#quick-expense-amount")).toHaveValue("24.00");
     await expect(dialog.locator("#quick-expense-date")).toHaveValue(today);
     // A future date is refused.
@@ -203,7 +216,9 @@ test.describe("US13 · quick expenses", { tag: "@live" }, () => {
       .eq("id", templateId)
       .single();
     expect(template?.amount_cents).toBe(2400);
-    await expect(page.getByTestId(`quick-expense-${templateId}`)).toContainText("$24.00");
+    await expect(page.getByRole("dialog")).toHaveCount(0);
+    expenseDialog = await openQuickExpenses(page);
+    await expect(expenseDialog.getByTestId(`quick-expense-${templateId}`)).toContainText("$24.00");
   });
 
   test("on a phone, the floating button's dialog records with one tap; editing has no quick row", async ({
@@ -244,7 +259,7 @@ test.describe("US13 · quick expenses", { tag: "@live" }, () => {
 });
 
 test.describe("US13 · managing quick expenses", { tag: "@live" }, () => {
-  test("from an empty Dashboard: create one in Expenses, then edit it; recorded expenses keep their amount", async ({
+  test("create one in Settings, then edit it; recorded expenses keep their amount", async ({
     ownerPage: page,
     admin,
     owner,
@@ -252,13 +267,13 @@ test.describe("US13 · managing quick expenses", { tag: "@live" }, () => {
   }, testInfo) => {
     const m = MESSAGES[localeOf(testInfo.project.metadata)].quickExpenses;
     const { subcategoryId } = await seed(admin, owner, userClient, []);
+    // Without templates the new-expense dialog has no quick row.
     await page.goto("/dashboard");
-    await expect(page.getByTestId("bucket-needs-balance")).toBeVisible();
-    await expect(page.getByTestId("quick-expense-bar")).toHaveCount(0);
+    let expenseDialog = await openCreate(page, "expense");
+    await expect(expenseDialog.locator("#expense-amount")).toBeVisible();
+    await expect(expenseDialog.getByTestId("quick-expense-bar")).toHaveCount(0);
 
-    // A: the discreet link goes to Settings › Quick expenses (spec 009).
-    await page.getByTestId("quick-expense-create-first").click();
-    await page.waitForURL("**/settings/quick-expenses");
+    await page.goto("/settings/quick-expenses");
     const section = page.getByTestId("quick-expenses-section");
     await expect(section.getByText(m.empty)).toBeVisible();
 
@@ -284,14 +299,15 @@ test.describe("US13 · managing quick expenses", { tag: "@live" }, () => {
         { name: "Transporte", amount_cents: 2400, archived: false, payment_account_id: null },
       ]);
 
-    // It's on the Dashboard; record one at $24.
+    // It's in the new-expense dialog; record one at $24.
     await page.goto("/dashboard");
-    const templateId = (await page
+    expenseDialog = await openQuickExpenses(page);
+    const templateId = (await expenseDialog
       .getByTestId("quick-expense-bar")
       .locator("li button")
       .first()
       .getAttribute("data-testid"))!.replace("quick-expense-", "");
-    await page.getByTestId(`quick-expense-${templateId}`).click();
+    await expenseDialog.getByTestId(`quick-expense-${templateId}`).click();
     await expect.poll(async () => (await expensesOf(admin, owner))?.length).toBe(1);
 
     // F: edit to $30 → the next tap records $30, the first expense stays at $24.
@@ -304,8 +320,9 @@ test.describe("US13 · managing quick expenses", { tag: "@live" }, () => {
     await dialog.getByTestId("save-template").click();
     await expect(section.getByTestId("template-row")).toContainText("$30.00");
     await page.goto("/dashboard");
-    await expect(page.getByTestId(`quick-expense-${templateId}`)).toContainText("$30.00");
-    await page.getByTestId(`quick-expense-${templateId}`).click();
+    expenseDialog = await openQuickExpenses(page);
+    await expect(expenseDialog.getByTestId(`quick-expense-${templateId}`)).toContainText("$30.00");
+    await expenseDialog.getByTestId(`quick-expense-${templateId}`).click();
     await expect
       .poll(async () => (await expensesOf(admin, owner))?.map((e) => e.amount_cents).sort())
       .toEqual([2400, 3000]);
@@ -322,15 +339,16 @@ test.describe("US13 · managing quick expenses", { tag: "@live" }, () => {
       { name: "Café", amount_cents: 5500, sort: 1 },
     ]);
     const [transporte, cafe] = [id("Transporte"), id("Café")];
-    await openDashboard(page);
-    expect(await dashboardOrder(page)).toEqual([
+    await page.goto("/dashboard");
+    let expenseDialog = await openQuickExpenses(page);
+    expect(await barOrder(expenseDialog)).toEqual([
       `quick-expense-${transporte}`,
       `quick-expense-${cafe}`,
     ]);
-    await page.getByTestId(`quick-expense-${cafe}`).click();
+    await expenseDialog.getByTestId(`quick-expense-${cafe}`).click();
     await expect.poll(async () => (await expensesOf(admin, owner))?.length).toBe(1);
 
-    // G: move Transporte down → the Dashboard shows Café first.
+    // G: move Transporte down → the quick row shows Café first.
     await page.goto("/settings/quick-expenses");
     const section = page.getByTestId("quick-expenses-section");
     const rows = section.getByTestId("template-row");
@@ -347,11 +365,12 @@ test.describe("US13 · managing quick expenses", { tag: "@live" }, () => {
     await page.getByTestId("template-down").click();
     await expect(rows.first()).toContainText("Café");
     await page.goto("/dashboard");
+    expenseDialog = await openQuickExpenses(page);
     await expect
-      .poll(() => dashboardOrder(page))
+      .poll(() => barOrder(expenseDialog))
       .toEqual([`quick-expense-${cafe}`, `quick-expense-${transporte}`]);
 
-    // H: delete Café → gone from the Dashboard, its expense stays.
+    // H: delete Café → gone from the quick row, its expense stays.
     await page.goto("/settings/quick-expenses");
     await section.locator(`[data-template="${cafe}"]`).getByTestId("template-menu").click();
     await page.getByTestId("template-delete").click();
@@ -365,7 +384,8 @@ test.describe("US13 · managing quick expenses", { tag: "@live" }, () => {
       ]);
     expect(await expensesOf(admin, owner)).toHaveLength(1);
     await page.goto("/dashboard");
-    await expect(page.getByTestId(`quick-expense-${cafe}`)).toHaveCount(0);
+    expenseDialog = await openQuickExpenses(page);
+    await expect(expenseDialog.getByTestId(`quick-expense-${cafe}`)).toHaveCount(0);
 
     // I: archiving its subcategory disables the button, with the reason.
     const { error } = await userClient
@@ -374,7 +394,8 @@ test.describe("US13 · managing quick expenses", { tag: "@live" }, () => {
       .eq("id", subcategoryId);
     expect(error).toBeNull();
     await page.reload();
-    await expect(page.getByTestId(`quick-expense-${transporte}`)).toBeDisabled();
+    expenseDialog = await openQuickExpenses(page);
+    await expect(expenseDialog.getByTestId(`quick-expense-${transporte}`)).toBeDisabled();
   });
 
   test("Save as quick expense creates the template with the expense (note, or the subcategory name)", async ({
@@ -429,12 +450,15 @@ test.describe("US13 · managing quick expenses", { tag: "@live" }, () => {
 });
 
 test.describe("US13 · quick expenses in the demo", { tag: "@demo" }, () => {
-  test("Transporte $24 is on the Dashboard and a tap is refused read-only", async ({
+  test("Transporte $24 is in the new-expense dialog, not on the Dashboard; a tap is refused read-only", async ({
     page,
   }, testInfo) => {
     const locale = localeOf(testInfo.project.metadata);
-    await openDashboard(page);
-    const button = page.getByTestId(`quick-expense-${DEMO_TEMPLATE_ID}`);
+    await page.goto("/dashboard");
+    await expect(page.getByTestId("bucket-needs-balance")).toBeVisible();
+    await expect(page.getByTestId("quick-expense-bar")).toHaveCount(0);
+    const dialog = await openQuickExpenses(page);
+    const button = dialog.getByTestId(`quick-expense-${DEMO_TEMPLATE_ID}`);
     await expect(button).toContainText("Transporte");
     await expect(button).toContainText("$24.00");
     const needs = page.getByTestId("bucket-needs-balance").locator(".money").first();

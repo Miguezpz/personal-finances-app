@@ -16,6 +16,10 @@
 - Q: ¿Cómo se registra un día con un monto distinto al de la plantilla (por ejemplo, 1 viaje de $12 en lugar de $24)? → A: El menú secundario también permite cambiar el monto (y la fecha) antes de registrar; el toque normal usa el monto de la plantilla y la plantilla no cambia.
 - Q: ¿En qué lugares de la app deben estar los botones de gasto rápido? → A: En el Dashboard y, además, arriba del diálogo de nuevo gasto (que se abre desde cualquier página con el botón flotante del celular).
 
+### Enmienda 2026-11-09
+
+- Los gastos rápidos ya no aparecen en el Dashboard: solo donde se registra un gasto (arriba del diálogo de nuevo gasto y en la hoja ＋ del celular). Donde este spec dice "Dashboard" como lugar de los botones, léase "el diálogo de nuevo gasto". Sin plantillas no se muestra nada; se crean en Ajustes › Gastos rápidos. Reemplaza la clarificación de lugares, FR-006 y US2-6.
+
 ## User Scenarios & Testing *(mandatory)*
 
 ### User Story 1 - Registrar un gasto repetido con un toque (Priority: P1)
@@ -55,7 +59,7 @@ Como dueño, quiero crear, editar, reordenar y borrar mis gastos rápidos (nombr
 3. **Given** una plantilla, **When** el dueño cambia su monto, nombre, subcategoría o método de pago, **Then** los toques siguientes usan los datos nuevos y los gastos ya registrados no cambian.
 4. **Given** una plantilla, **When** el dueño la borra, **Then** deja de mostrarse y los gastos registrados con ella se conservan intactos.
 5. **Given** varias plantillas, **When** el dueño cambia su orden, **Then** el Dashboard las muestra en ese orden.
-6. **Given** que el dueño no tiene plantillas, **When** abre el Dashboard, **Then** ve un acceso discreto para crear su primer gasto rápido, en lugar de una fila vacía.
+6. ~~**Given** que el dueño no tiene plantillas, **When** abre el Dashboard, **Then** ve un acceso discreto para crear su primer gasto rápido~~ (enmienda 2026-11-09: sin plantillas no se muestra nada; se crean en Ajustes).
 
 ---
 
@@ -103,7 +107,7 @@ Como dueño, al registrar un gasto a mano quiero marcar "Guardar como gasto ráp
 
 **Registro con un toque**
 
-- **FR-006**: El Dashboard MUST mostrar las plantillas activas como botones con nombre y monto, en el orden elegido por el dueño.
+- **FR-006**: ~~El Dashboard MUST mostrar las plantillas activas~~ (enmienda 2026-11-09) El Dashboard MUST NOT mostrar gastos rápidos; las plantillas activas aparecen como botones con nombre y monto, en el orden elegido por el dueño, solo en el diálogo de nuevo gasto y la hoja ＋ (FR-006a).
 - **FR-006a**: El diálogo de nuevo gasto (el que abren el botón del Dashboard y el botón flotante del celular en cualquier página) MUST mostrar arriba del formulario los mismos botones. Tocar uno registra el gasto (FR-007) y cierra el diálogo. En el diálogo de edición de un gasto no aparecen. Sin plantillas activas, el diálogo no muestra la fila.
 - **FR-007**: Un toque MUST registrar un gasto con el monto, la subcategoría y el método de pago de la plantilla, la fecha de negocio de hoy y el nombre de la plantilla como nota. El gasto es un gasto manual: se edita, se borra y se exporta como cualquier otro.
 - **FR-007a**: Cada botón MUST ofrecer un menú secundario, accesible con teclado y lector de pantalla, con dos acciones:
@@ -135,7 +139,7 @@ Como dueño, al registrar un gasto a mano quiero marcar "Guardar como gasto ráp
 
 ### Measurable Outcomes
 
-- **SC-001**: Registrar el transporte del día toma 1 toque desde el Dashboard, frente a abrir el formulario y llenar 4 campos hoy.
+- **SC-001**: Registrar el transporte del día toma 2 toques (＋ o "Nuevo › Gasto", y la plantilla; enmienda 2026-11-09), frente a abrir el formulario y llenar 4 campos hoy.
 - **SC-002**: El disponible del Dashboard cambia en menos de 100 ms después del toque, sin esperar al servidor.
 - **SC-003**: Deshacer un toque deja el disponible y la lista de gastos exactamente como estaban antes (0 centavos de diferencia).
 - **SC-004**: En un mes con 20 días de salida, el dueño registra los 20 gastos de transporte sin abrir el formulario de gasto ni una vez.

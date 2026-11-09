@@ -152,23 +152,6 @@ test.describe("US2 · mobile", { tag: "@demo" }, () => {
     await expect(page.getByTestId("ledger-table")).toBeHidden();
   });
 
-  test("card rows in Expenses keep the name and its details on one line each", async ({ page }) => {
-    await page.setViewportSize({ width: 320, height: 640 });
-    await page.goto("/expenses");
-    await settled(page);
-    const rows = page.getByTestId("card-debt");
-    await expect(rows.first()).toBeVisible();
-    for (const row of await rows.all()) {
-      // One text line is ~20 px; a name or detail wrapped word by word is several times that.
-      for (const part of [row.locator("> span").first(), row.getByTestId("statement-state")]) {
-        const box = await part.boundingBox();
-        expect(box?.height ?? 0).toBeLessThanOrEqual(24);
-      }
-      const name = row.locator("> span").first();
-      expect(await name.evaluate((el) => el.getBoundingClientRect().width)).toBeGreaterThan(60);
-    }
-  });
-
   test("every control in the bottom bar and the header is at least 44 × 44 px", async ({
     page,
   }) => {
@@ -215,8 +198,8 @@ test.describe("US2 · no horizontal scroll", { tag: "@demo" }, () => {
   }
 });
 
-// Spec 005 · SC-005: six quick expenses at 360 px scroll inside their own row, never the page,
-// and every button is at least 44 px tall.
+// Spec 005 · SC-005: six quick expenses at 360 px (in the "＋" sheet) scroll inside their own row,
+// never the page, and every button is at least 44 px tall.
 test.describe("Spec 005 · quick expense row on a phone", { tag: "@live" }, () => {
   test.use({ viewport: { width: 360, height: 740 }, hasTouch: true, isMobile: true });
 
@@ -250,9 +233,10 @@ test.describe("Spec 005 · quick expense row on a phone", { tag: "@live" }, () =
     expect(error).toBeNull();
 
     await page.goto("/dashboard");
-    const bar = page.getByTestId("quick-expense-bar");
-    await expect(bar.locator("li")).toHaveCount(6);
     await expect(page.locator("main [aria-busy='true']")).toHaveCount(0);
+    await page.getByTestId("mobile-nav-create").click();
+    const bar = page.getByTestId("create-sheet").getByTestId("quick-expense-bar");
+    await expect(bar.locator("li")).toHaveCount(6);
 
     const overflow = await page.evaluate(
       () => (document.scrollingElement?.scrollWidth ?? 0) - window.innerWidth,

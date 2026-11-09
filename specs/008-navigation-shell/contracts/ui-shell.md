@@ -21,7 +21,7 @@ Montado una vez en `AppShell`. Renderiza a lo más un diálogo:
 Orden: `mobile-nav-dashboard`, `mobile-nav-expenses`, `mobile-nav-create` (botón, `aria-haspopup="dialog"`, `aria-expanded`, nombre accesible "Crear"/"Create"), `mobile-nav-credit`, `mobile-nav-more` (con `aria-current="page"` en rutas secundarias).
 
 ## `<CreateSheet />`
-`data-testid="create-sheet"`, `Sheet side="bottom"`, título "Crear"/"Create". Acciones: `create-expense`, `create-income` y `create-card-payment` (deshabilitada sin tarjetas, con texto de ayuda). Debajo, `QuickExpenseBar variant="dialog"` (solo si hay plantillas).
+`data-testid="create-sheet"`, `Sheet side="bottom"`, título "Crear"/"Create". Acciones: `create-expense`, `create-income` y `create-card-payment` (deshabilitada sin tarjetas, con texto de ayuda). Debajo, `QuickExpenseBar` (solo si hay plantillas; desde 2026-11-09 no tiene variantes y no aparece en el Dashboard).
 
 ## `<NewMenu />` (hidden md:inline-flex, en la barra superior)
 Botón `data-testid="new-menu"` `variant="cta"` con el texto "＋ Nuevo"/"＋ New". Ítems: `new-expense` (N), `new-income` (I) y `new-card-payment` (P, deshabilitado sin tarjetas). Cada ítem muestra su atajo con `<kbd>`.
@@ -32,14 +32,14 @@ Teclas N/I/P → `openCreate`. Se ignoran con modificadores, repetición, foco e
 ## Panel "Más"
 `data-testid="more-sheet"`, `Sheet side="bottom"`, título "Más"/"More", grupos con encabezado (`h3` visual, lista `ul` por grupo) y el destino actual con `aria-current="page"`.
 
-## `<CardStatementCard summary card variant="full|compact" />`
+## `<CardStatementCard statement />` (enmienda 2026-11-09: solo la vista completa, solo en Crédito)
 - `full` (Crédito): `data-testid="credit-card"`, `data-card`, `data-state`.
   - Headline: etiqueta ("Pagar para no generar intereses" si el headline es `last`; "Próximo estado" si es `next`), `<Money>`, fecha límite.
   - Línea del último estado: "Último estado: pagado ✓ · 30 oct", "pendiente · vence …" o "Vencido" con Badge e icono.
   - Línea del próximo estado.
   - Deuda total.
   - Botón `pay-card` → `openCreate({kind:"card-payment", cardId, suggestedAmount: payAmount})`.
-- `compact` (Gastos): `data-testid="card-debt"`; una fila con marca, nombre, estado, `<Money>` del headline, fecha y `pay-card`. La sección incluye el enlace `cards-see-credit` a `/credit`.
+- ~~`compact` (Gastos)~~ (eliminado 2026-11-09): `data-testid="card-debt"`; una fila con marca, nombre, estado, `<Money>` del headline, fecha y `pay-card`. La sección incluye el enlace `cards-see-credit` a `/credit`.
 
 ## `PageHeader`
 Nueva prop `back?: { href: string; label: string }`: muestra el enlace con `ChevronLeft` encima del título.

@@ -132,14 +132,15 @@ test.describe("Accessibility", { tag: "@demo" }, () => {
       const where = (what: string) => `${what} (${scheme})`;
 
       await page.goto("/dashboard");
-      await expect(page.getByTestId("quick-expense-bar")).toBeVisible();
       await expect(page.locator("main [aria-busy='true']")).toHaveCount(0);
-      await page.locator('[data-testid^="quick-expense-menu-"]').first().click();
+      const expenseDialog = await openCreate(page, "expense");
+      await expect(expenseDialog.getByTestId("quick-expense-bar")).toBeVisible();
+      await expenseDialog.locator('[data-testid^="quick-expense-menu-"]').first().click();
       await expect(page.getByRole("menu")).toBeVisible();
       await audit(page, where("quick expense menu"));
 
       await page.getByRole("menuitem").last().click();
-      await expect(page.getByRole("dialog")).toBeVisible();
+      await expect(page.locator("#quick-expense-amount")).toBeVisible();
       await audit(page, where("another amount or date dialog"));
       await page.keyboard.press("Escape");
 

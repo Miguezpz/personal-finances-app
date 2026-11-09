@@ -415,7 +415,7 @@ function NewExpenseQuickRow({ onApplied }: { onApplied: () => void }) {
   if (!hasTemplates) return null;
   return (
     <div className="flex min-w-0 flex-col gap-4">
-      <QuickExpenseBar variant="dialog" onApplied={onApplied} />
+      <QuickExpenseBar onApplied={onApplied} />
       <Separator />
     </div>
   );

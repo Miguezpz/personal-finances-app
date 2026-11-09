@@ -15,7 +15,7 @@
 Respondidas en modo autónomo con `docs/ux-roadmap.md` y la opción recomendada (el usuario no estuvo disponible).
 
 - Q: ¿Qué acciones propias de cada página se quitan y cuáles solo pierden el estilo destacado? → A: Se quitan las que repiten una acción global: "Agregar gasto" (Dashboard y Gastos) y "Registrar ingreso" (Ingresos). Las demás altas (meta, gasto fijo, cuenta por cobrar, regla, etc.) se quedan con estilo secundario. "Pagar" dentro de una tarjeta se queda porque precarga datos. Los estados vacíos conservan un enlace secundario que abre el diálogo global.
-- Q: ¿El menú "＋ Nuevo" de escritorio también muestra los gastos rápidos? → A: No. Solo muestra las 3 acciones; en escritorio los gastos rápidos siguen en el Dashboard.
+- Q: ¿El menú "＋ Nuevo" de escritorio también muestra los gastos rápidos? → A: No. Solo muestra las 3 acciones; en escritorio los gastos rápidos siguen en el Dashboard. (Enmienda 2026-11-09: ya no están en el Dashboard; en escritorio aparecen en el diálogo que abre "Nuevo › Gasto".)
 - Q: ¿Los atajos N/I/P funcionan solo en escritorio o en cualquier ancho con teclado físico? → A: En cualquier ancho, con las mismas exclusiones (campo editable, diálogo o panel abierto, modificadores). Solo se anuncian en el menú de escritorio.
 - Q: ¿Tocar ＋ con la hoja abierta la cierra? → A: Sí. ＋ alterna la hoja y anuncia si está abierta; el icono indica el estado.
 - Q: ¿La franja compacta de alertas del Dashboard también se aplica en escritorio? → A: No. Solo en móvil (< 768 px); en escritorio las alertas se quedan en su lugar dentro de la cuadrícula.
@@ -170,9 +170,9 @@ Como dueño, quiero que el encabezado no quede bajo la muesca o la barra de esta
 **Estado de tarjetas**
 
 - **FR-020**: Cada tarjeta de crédito activa MUST mostrar su último estado de cuenta (pagado, pendiente o vencido, con fecha límite y, si no está pagado, el monto para no generar intereses) y su próximo estado (monto proyectado y fecha límite).
-- **FR-021**: El estado de una tarjeta MUST calcularse en un solo lugar y mostrarse idéntico en Crédito y Gastos.
+- **FR-021**: El estado de una tarjeta MUST calcularse en un solo lugar. (Enmienda 2026-11-09: se muestra solo en Crédito.)
 - **FR-022**: Cada estado de tarjeta MUST ofrecer "Pagar", que abre el diálogo de pago con la tarjeta y el monto pendiente del último estado o, si está pagado, el del próximo.
-- **FR-023**: En Gastos, la sección de tarjetas MUST ser un resumen compacto con enlace a Crédito.
+- **FR-023**: ~~En Gastos, la sección de tarjetas MUST ser un resumen compacto con enlace a Crédito.~~ (Enmienda 2026-11-09: Gastos no muestra tarjetas; todo lo de crédito vive en Crédito.)
 - **FR-024**: "Vencido" MUST comunicarse con texto e icono, no solo con color.
 
 **Transversales**

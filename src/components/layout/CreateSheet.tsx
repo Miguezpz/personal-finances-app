@@ -67,7 +67,7 @@ export function CreateSheet() {
         </ul>
         {open && (
           <Suspense fallback={null}>
-            <QuickExpenseBar variant="dialog" onApplied={() => setOpen(false)} />
+            <QuickExpenseBar onApplied={() => setOpen(false)} />
           </Suspense>
         )}
         {/* Spec 009 (FR-029): template management lives in Settings. */}

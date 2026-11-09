@@ -3,8 +3,8 @@
 /**
  * A card's statements (spec 008, US3; spec 011): the last one (paid / pending / overdue) and the
  * next one, with "Ya la pagué" — or "Desmarcar" when the last one carries its own mark. The
- * headline is the last statement until it's marked as paid, then the next one — the same answer on
- * Credit (`full`) and Expenses (`compact`).
+ * headline is the last statement until it's marked as paid, then the next one. Shown only on
+ * Credit.
  */
 import { CalendarClock, CircleCheck, Clock, TriangleAlert } from "lucide-react";
 import { useTranslations } from "next-intl";
@@ -15,7 +15,6 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import type { StatementState } from "@/domain/credit";
 import type { Cents, IsoDate } from "@/domain/types";
 import { formatDate } from "@/i18n/format";
-import { cn } from "@/lib/utils";
 import { selectLocale, usePreferences } from "@/store/preferences";
 import { MarkPaidButton, UnmarkButton } from "./MarkPaidButton";
 import type { CardStatement } from "./use-card-statements";
@@ -80,31 +79,7 @@ function StatementAction({ statement }: { statement: CardStatement }) {
   return null;
 }
 
-/** "✓ Paid" / "⚠ Overdue" as a word for a secondary line (the compact row's state). */
-function StateWord({ state }: { state: StatementState }) {
-  const t = useTranslations("credit");
-  const Icon = STATE_ICONS[state];
-  return (
-    <span
-      className={cn(
-        "inline-flex items-center gap-1 align-bottom",
-        state === "overdue" && "font-medium text-destructive",
-      )}
-      data-testid="statement-state"
-    >
-      <Icon aria-hidden="true" className="size-3 shrink-0" />
-      {t(STATE_KEYS[state])}
-    </span>
-  );
-}
-
-export function CardStatementCard({
-  statement,
-  variant,
-}: {
-  statement: CardStatement;
-  variant: "full" | "compact";
-}) {
+export function CardStatementCard({ statement }: { statement: CardStatement }) {
   const t = useTranslations("credit");
   const locale = usePreferences(selectLocale);
   const { card, summary } = statement;
@@ -113,48 +88,6 @@ export function CardStatementCard({
   const headlineAmount = headline === "last" ? last.outstanding : next.amount;
   const headlineLabel = headline === "last" ? t("payToAvoidInterest") : t("nextStatement");
   const short = (date: IsoDate) => formatDate(date, locale, "short");
-
-  if (variant === "compact") {
-    // A phone row (spec 008 Expenses): never more than two pieces side by side —
-    //   [logo] name ............ amount
-    //          ✓ Paid · next statement due Dec 4   (wraps rather than cutting the date)
-    //          [action]            (≥ sm: the action moves to the right of the second line)
-    return (
-      <div
-        data-testid="card-debt"
-        data-card={card.id}
-        data-state={last.state}
-        data-overdue={last.state === "overdue"}
-        className="grid grid-cols-[auto_minmax(0,1fr)_auto] items-center gap-x-3 gap-y-1 px-4 py-3 text-sm"
-      >
-        <AccountMark account={card} className="row-span-2 size-6 self-center" />
-        <span className="truncate font-medium">{card.name}</span>
-        <span
-          data-testid="statement-amount"
-          data-cents={headlineAmount}
-          className="text-right text-muted-foreground"
-        >
-          <StatementAmount
-            cents={headlineAmount}
-            className="font-semibold whitespace-nowrap text-foreground"
-            compact
-          />
-        </span>
-        <span className="col-start-2 text-xs text-pretty text-muted-foreground">
-          <StateWord state={last.state} />
-          {" · "}
-          <span className="whitespace-nowrap">
-            {headline === "last"
-              ? t("dueShort", { date: short(headlineDue) })
-              : t("nextDueShort", { date: short(headlineDue) })}
-          </span>
-        </span>
-        <div className="col-span-2 col-start-2 empty:hidden sm:col-span-1 sm:col-start-3 sm:row-start-2 sm:justify-self-end">
-          <StatementAction statement={statement} />
-        </div>
-      </div>
-    );
-  }
 
   return (
     <Card data-testid="credit-card" data-card={card.id} data-state={last.state}>

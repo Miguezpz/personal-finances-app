@@ -4,7 +4,7 @@
  * How much was spent with each payment method in the quincena chosen in the page header (spec 009):
  * cash and credit cards always show, even at $0; any other account (debit, savings, archived…)
  * only when it was used; "unspecified" when some expense has no method. Cards' debt lives in
- * CardDebtSummary; this is spending, so card payments never count.
+ * Credit; this is spending, so card payments never count.
  */
 import { ChevronLeft, ChevronRight, CircleHelp } from "lucide-react";
 import { useTranslations } from "next-intl";

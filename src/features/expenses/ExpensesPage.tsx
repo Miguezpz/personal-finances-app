@@ -51,7 +51,6 @@ import { cn } from "@/lib/utils";
 import { useRowMotion } from "@/components/motion/use-row-motion";
 import { selectLocale, usePreferences } from "@/store/preferences";
 import { openCreate } from "@/store/ui";
-import { CardDebtSummary } from "./CardDebtSummary";
 import { PeriodNavigator, SpendingByMethod } from "./SpendingByMethod";
 
 const PAGE = 50;
@@ -198,8 +197,6 @@ export function ExpensesPage() {
       />
 
       <SpendingByMethod period={period} />
-
-      <CardDebtSummary />
 
       <section aria-labelledby="movements" className="flex flex-col gap-3">
         <h2 id="movements" className="text-lg font-semibold tracking-tight">

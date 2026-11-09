@@ -276,11 +276,8 @@
     "statusApplied": "charged",
     "alertsLabel": "Alerts",
     "seeExpenses": "See expenses",
-    "cardsDueTitle": "Cards to pay",
-    "cardDueIn": "{days, plural, =0 {Due today} one {Due in # day} other {Due in # days}}",
-    "cardOverdue": "Overdue",
-    "sessionUpcoming": "Next payment session: {window}",
-    "sessionToday": "Time to pay your cards"
+    "cardsDueNotice": "{count, plural, one {# card to pay soon} other {# cards to pay soon}}",
+    "cardsOverdueNotice": "{count, plural, one {# card to pay, overdue} other {# cards to pay, some overdue}}"
   },
   "expenses": {
     "addTitle": "Add expense",
@@ -318,7 +315,6 @@
     "previousQuincena": "Previous pay period",
     "nextQuincena": "Next pay period",
     "spendingTotal": "Total",
-    "cardsTitle": "Credit cards",
     "payToAvoidInterest": "Pay to avoid interest",
     "dueOn": "Due {date}",
     "cutOffOn": "statement closed {date}",
@@ -338,7 +334,7 @@
   },
   "quickExpenses": {
     "title": "Quick expenses",
-    "description": "Expenses you repeat, one tap away on the Dashboard. A tap records it for today.",
+    "description": "Expenses you repeat, one tap away when you register an expense. A tap records it for today.",
     "apply": "Record {name}, {amount}",
     "added": "{name} recorded.",
     "undo": "Undo",
@@ -359,7 +355,6 @@
     "unavailableSubcategory": "Unavailable: its category is archived",
     "accountArchived": "Its payment method is archived; it's recorded without one.",
     "create": "New quick expense",
-    "createFirst": "Create a quick expense",
     "edit": "Edit",
     "editTitle": "Edit quick expense",
     "createTitle": "New quick expense",
@@ -692,7 +687,7 @@
     },
     "quickExpensesTitle": "Quick expenses",
     "quickExpensesLinkHint": "Create, order and edit your one-tap expenses.",
-    "quickExpensesDescription": "The expenses you record with one tap from the Dashboard and the ＋ sheet."
+    "quickExpensesDescription": "The expenses you record with one tap when registering an expense."
   },
   "ledger": {
     "title": "Ledger",
@@ -783,7 +778,6 @@
     "statePending": "Pending",
     "stateOverdue": "Overdue",
     "dueShort": "due {date}",
-    "nextDueShort": "next due {date}",
     "seeInCredit": "See in Credit",
     "markPaid": "Mark as paid",
     "markPaidFor": "Mark as paid: {card}",

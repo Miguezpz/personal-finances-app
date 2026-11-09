@@ -19,6 +19,6 @@ normalizeSearch(s: string): string; matchesSearch(entry: { note?: string|null; d
 - Gasto: `date-chip-today|yesterday|other`, `recent-subcategory` (cada chip), `save-and-add`, `delete-expense`.
 - Gastos: `expenses-period` (selector en el header), `filter-bucket-needs|wants`, `filter-method-<id|none>`, `clear-filters`, `day-group` (`data-label`), `expense-row` (botón en móvil).
 - Bitácora: `ledger-preset-<preset>`, `ledger-search`, filas `ledger-row` y `ledger-card` con `data-editable`.
-- Dashboard: `bucket-<bucket>-link`, `card-due-alert` (`data-card`).
+- Dashboard: `bucket-<bucket>-link`, `card-due-alerts` (`data-count`; enmienda 2026-11-09, antes `card-due-alert` por tarjeta).
 - Hoja ＋: `create-manage-quick`.
 - Por cobrar: `installment-card` (móvil).

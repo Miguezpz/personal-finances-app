@@ -213,7 +213,7 @@ Como dueño, quiero administrar mis gastos rápidos en Configuración, con un en
 **Dashboard**
 
 - **FR-024**: Cada bucket del Dashboard MUST ofrecer un enlace a Gastos filtrado por ese bucket.
-- **FR-025**: El Dashboard MUST mostrar una alerta por cada tarjeta con su último estado pendiente que vence en 7 días o menos, o vencido, con el monto y "Pagar".
+- **FR-025**: El Dashboard MUST avisar de las tarjetas con su último estado pendiente que vence en 7 días o menos, o vencido. (Enmienda 2026-11-09: un solo aviso con el número de tarjetas y enlace a Crédito; el monto y "Ya la pagué" están en Crédito.)
 
 **Detalles**
 

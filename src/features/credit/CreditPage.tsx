@@ -2,8 +2,8 @@
 
 /**
  * Credit management (T144, FR-028/029, US10-1/1a): the monthly payment session (spec 011, US5),
- * each card's last and next statements with "Ya la pagué" (spec 008, US3: the same
- * CardStatementCard as Expenses) and the timeline of paydays, due dates and collections.
+ * each card's last and next statements with "Ya la pagué" (spec 008, US3; the only place
+ * cards are paid or marked) and the timeline of paydays, due dates and collections.
  */
 import Link from "next/link";
 import { useTranslations } from "next-intl";
@@ -58,7 +58,7 @@ export function CreditPage() {
               <ul className="grid gap-4 md:grid-cols-2">
                 {cards.map((statement) => (
                   <li key={statement.card.id}>
-                    <CardStatementCard statement={statement} variant="full" />
+                    <CardStatementCard statement={statement} />
                   </li>
                 ))}
               </ul>

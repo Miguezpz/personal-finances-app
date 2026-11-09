@@ -18,7 +18,7 @@ import { StatementAmount } from "./CardStatementCard";
 import { MarkPaidButton, UnmarkButton } from "./MarkPaidButton";
 import { usePaymentSession } from "./use-card-statements";
 
-export function useSessionWindowLabel() {
+function useSessionWindowLabel() {
   const t = useTranslations("credit");
   const locale = usePreferences(selectLocale);
   return (window: PaymentSession["window"]) =>
@@ -34,7 +34,7 @@ export function useSessionWindowLabel() {
  * One card of a session: logo, the name with "$1,234 · due Nov 10" (or "Paid · …") underneath, the amount first, and its
  * action on the right — two pieces side by side at most, so it fits a phone.
  */
-export function SessionCardRow({ item }: { item: SessionCard }) {
+function SessionCardRow({ item }: { item: SessionCard }) {
   const t = useTranslations("credit");
   const locale = usePreferences(selectLocale);
   const today = useToday();

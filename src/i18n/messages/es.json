@@ -276,11 +276,8 @@
     "statusApplied": "cobrado",
     "alertsLabel": "Alertas",
     "seeExpenses": "Ver gastos",
-    "cardsDueTitle": "Tarjetas por pagar",
-    "cardDueIn": "{days, plural, =0 {Vence hoy} one {Vence en # día} other {Vence en # días}}",
-    "cardOverdue": "Vencida",
-    "sessionUpcoming": "Próxima sesión de pago: {window}",
-    "sessionToday": "Hoy toca pagar tus tarjetas"
+    "cardsDueNotice": "{count, plural, one {# tarjeta por pagar pronto} other {# tarjetas por pagar pronto}}",
+    "cardsOverdueNotice": "{count, plural, one {# tarjeta por pagar, vencida} other {# tarjetas por pagar, alguna vencida}}"
   },
   "expenses": {
     "addTitle": "Registrar gasto",
@@ -318,7 +315,6 @@
     "previousQuincena": "Quincena anterior",
     "nextQuincena": "Quincena siguiente",
     "spendingTotal": "Total",
-    "cardsTitle": "Tarjetas de crédito",
     "payToAvoidInterest": "Pago para no generar intereses",
     "dueOn": "Fecha límite {date}",
     "cutOffOn": "corte del {date}",
@@ -338,7 +334,7 @@
   },
   "quickExpenses": {
     "title": "Gastos rápidos",
-    "description": "Los gastos que repites, a un toque desde Inicio. Un toque lo registra con la fecha de hoy.",
+    "description": "Los gastos que repites, a un toque al registrar un gasto. Un toque lo registra con la fecha de hoy.",
     "apply": "Registrar {name}, {amount}",
     "added": "{name} registrado.",
     "undo": "Deshacer",
@@ -359,7 +355,6 @@
     "unavailableSubcategory": "No disponible: su categoría está archivada",
     "accountArchived": "Su método de pago está archivado; se registra sin método de pago.",
     "create": "Nuevo gasto rápido",
-    "createFirst": "Crear un gasto rápido",
     "edit": "Editar",
     "editTitle": "Editar gasto rápido",
     "createTitle": "Nuevo gasto rápido",
@@ -692,7 +687,7 @@
     },
     "quickExpensesTitle": "Gastos rápidos",
     "quickExpensesLinkHint": "Crea, ordena y edita tus gastos de un toque.",
-    "quickExpensesDescription": "Los gastos que registras con un toque desde Inicio y la hoja ＋."
+    "quickExpensesDescription": "Los gastos que registras con un toque al registrar un gasto."
   },
   "ledger": {
     "title": "Bitácora",
@@ -783,7 +778,6 @@
     "statePending": "Pendiente",
     "stateOverdue": "Vencido",
     "dueShort": "vence {date}",
-    "nextDueShort": "próximo vence {date}",
     "seeInCredit": "Ver en Crédito",
     "markPaid": "Ya la pagué",
     "markPaidFor": "Ya la pagué: {card}",

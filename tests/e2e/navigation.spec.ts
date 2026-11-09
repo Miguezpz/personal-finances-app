@@ -105,39 +105,23 @@ test.describe("Spec 008 · navigation", { tag: "@demo" }, () => {
     await expect(page.getByRole("dialog")).toBeHidden();
   });
 
-  test("Credit and Expenses show the same statement for every card, with one-tap actions", async ({
-    page,
-  }) => {
+  test("card statements and their one-tap actions live only in Credit", async ({ page }) => {
     await page.goto("/credit");
-    const full = page.getByTestId("credit-card");
-    await expect(full.first()).toBeVisible();
-    const byCard = new Map<string, { amount: string | null; state: string | null }>();
-    for (const card of await full.all()) {
-      byCard.set((await card.getAttribute("data-card")) as string, {
-        amount: await card.getByTestId("statement-amount").getAttribute("data-cents"),
-        state: await card.getAttribute("data-state"),
-      });
-    }
-
-    await page.goto("/expenses");
-    const compact = page.getByTestId("card-debt");
-    await expect(compact).toHaveCount(byCard.size);
-    for (const row of await compact.all()) {
-      const expected = byCard.get((await row.getAttribute("data-card")) as string);
-      expect(expected).toBeDefined();
-      // Same value (the label differs: the phone row says "No purchases" for short).
-      expect(await row.getByTestId("statement-amount").getAttribute("data-cents")).toBe(
-        expected?.amount,
-      );
-      expect(await row.getAttribute("data-state")).toBe(expected?.state);
-    }
-    await expect(page.getByTestId("cards-see-credit")).toHaveAttribute("href", "/credit");
-
-    // No amount form anywhere: "Ya la pagué" / "Desmarcar" act on the card itself (spec 011).
+    await expect(page.getByTestId("credit-card").first()).toBeVisible();
+    // No amount form: "Ya la pagué" / "Desmarcar" act on the card itself (spec 011).
     await expect(page.getByTestId("pay-card")).toHaveCount(0);
     await expect(
       page.getByTestId("mark-paid").or(page.getByTestId("unmark-paid")).first(),
     ).toBeVisible();
+
+    // Expenses and the Dashboard don't repeat them.
+    await page.goto("/expenses");
+    await expect(page.getByTestId("expense-row").first()).toBeVisible();
+    await expect(page.getByTestId("card-debt")).toHaveCount(0);
+    await expect(page.getByTestId("mark-paid")).toHaveCount(0);
+    await page.goto("/dashboard");
+    await expect(page.getByTestId("bucket-needs-balance")).toBeVisible();
+    await expect(page.getByTestId("mark-paid")).toHaveCount(0);
   });
 
   test("page headers have an icon; Rules links back to Settings", async ({ page }, testInfo) => {

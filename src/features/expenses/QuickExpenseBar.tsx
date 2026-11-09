@@ -3,15 +3,11 @@
 /**
  * Row of quick expense buttons (spec 005, FR-006/FR-006a). One tap records the template's expense
  * for today; the "⋯" menu records it for yesterday or with another amount or date (FR-007a).
- *  - variant "dashboard": between the header and the bucket cards; without templates it shows a
- *    discreet link to create the first one (US2-6).
- *  - variant "dialog": on top of the new-expense dialog and in the mobile "＋" sheet (spec 008);
- *    nothing without templates. `onApplied` lets the dialog or sheet close itself.
+ * Only shown while registering an expense: on top of the new-expense dialog and in the mobile "＋"
+ * sheet (spec 008); nothing without templates. `onApplied` lets the dialog or sheet close itself.
  * The row scrolls on its own, so the page never scrolls sideways at 360 px (SC-005).
  */
-import { Plus } from "lucide-react";
 import { useTranslations } from "next-intl";
-import Link from "next/link";
 import { lazy, Suspense, useState } from "react";
 import { Money, useMoneyFormatter, useShouldMask } from "@/components/money/Money";
 import { Button } from "@/components/ui/button";
@@ -44,12 +40,11 @@ const selectBarData = (s: FinanceSnapshot) => ({
 });
 
 interface Props {
-  variant: "dashboard" | "dialog";
   /** Called after recording; the expense dialog uses it to close. */
   onApplied?: (() => void) | undefined;
 }
 
-export function QuickExpenseBar({ variant, onApplied }: Props) {
+export function QuickExpenseBar({ onApplied }: Props) {
   const t = useTranslations("quickExpenses");
   const tc = useTranslations("common");
   const today = useToday();
@@ -59,20 +54,7 @@ export function QuickExpenseBar({ variant, onApplied }: Props) {
   const masked = useShouldMask();
   const [custom, setCustom] = useState<ExpenseTemplate | null>(null);
 
-  if (!data) return null;
-  if (data.templates.length === 0) {
-    if (variant === "dialog") return null;
-    return (
-      <div>
-        <Button asChild variant="link" size="sm" className="h-auto px-0">
-          <Link href="/settings/quick-expenses" data-testid="quick-expense-create-first">
-            <Plus aria-hidden="true" />
-            {t("createFirst")}
-          </Link>
-        </Button>
-      </div>
-    );
-  }
+  if (!data || data.templates.length === 0) return null;
 
   const record = (template: ExpenseTemplate, overrides?: Parameters<typeof apply>[1]) => {
     apply(template, overrides);

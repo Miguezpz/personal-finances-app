@@ -84,7 +84,7 @@ Los ítems pasan a tener `group` y se ordenan así:
   - el **próximo estado** (monto y fecha);
   - el botón **Pagar**.
 - Lo usan Crédito y Expenses. La lógica de selección del estado que hoy está en `CreditPage.tsx:60-66` se mueve a un helper compartido junto a `useCardStatuses`.
-- En Expenses la sección de tarjetas se reduce a un resumen compacto con enlace a Crédito.
+- En Expenses la sección de tarjetas se reduce a un resumen compacto con enlace a Crédito. (2026-11-09: se quitó; todo lo de crédito vive en Crédito.)
 
 ---
 

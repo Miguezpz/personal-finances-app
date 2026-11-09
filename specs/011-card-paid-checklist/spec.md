@@ -136,15 +136,15 @@ Como dueño, quiero que la app me diga en qué días del mes puedo pagar todas m
 
 **Marcar y desmarcar**
 
-- **FR-001**: Cada corte cerrado de una tarjeta con deuda registrada y sin marcar MUST ofrecer una acción de un toque "Ya la pagué" (EN "Mark as paid") en Crédito, en la sección de tarjetas de crédito de Gastos y en la alerta de tarjeta del Dashboard.
+- **FR-001**: Cada corte cerrado de una tarjeta con deuda registrada y sin marcar MUST ofrecer una acción de un toque "Ya la pagué" (EN "Mark as paid") en Crédito. (Enmienda 2026-11-09: solo en Crédito; Gastos ya no tiene sección de tarjetas y el Dashboard solo avisa.)
 - **FR-002**: Marcar un corte MUST NOT pedir monto, fecha, cuenta de origen ni confirmación; MUST quedar reflejado al instante (actualización optimista) en todas las vistas.
-- **FR-003**: Un corte marcado MUST mostrarse en estado "Pagado" y MUST NOT generar alerta en el Dashboard.
+- **FR-003**: Un corte marcado MUST mostrarse en estado "Pagado" y MUST NOT contar en el aviso del Dashboard.
 - **FR-004**: Marcar un corte MUST cubrir todo lo registrado en esa tarjeta con fecha ≤ su fecha de corte (compras propias y cuotas MSI que le tocan) y MUST dejar como pagados los cortes anteriores sin marcar.
 - **FR-005**: Una marca MUST NOT cubrir nada posterior a su fecha de corte: el siguiente corte MUST incluir solo lo registrado después, y ningún corte futuro MUST aparecer pagado por una marca anterior.
 - **FR-006**: Tras marcar, MUST aparecer un aviso con "Deshacer" durante 6 s; deshacer MUST devolver el corte (y los anteriores que cubría) a su estado previo.
 - **FR-007**: El corte pagado más reciente de una tarjeta, si tiene marca propia, MUST ofrecer "Desmarcar" (EN "Unmark"); desmarcar MUST ser inmediato, con aviso y "Deshacer". Un corte anterior se reabre desmarcando primero los posteriores.
 - **FR-008**: Solo los cortes cerrados (fecha de corte ≤ hoy) MUST poder marcarse. Todo corte cerrado sin marcar MUST ofrecer "Ya la pagué", tenga o no compras registradas; sin compras registradas MUST mostrar "Sin compras registradas" en lugar de un monto.
-- **FR-009**: Un corte no marcado cuya fecha límite ya pasó MUST mostrarse como "Vencido" y su alerta MUST permanecer en el Dashboard hasta que se marque.
+- **FR-009**: Un corte no marcado cuya fecha límite ya pasó MUST mostrarse como "Vencido" y MUST seguir contando en el aviso del Dashboard (en rojo) hasta que se marque.
 
 **Lo que desaparece**
 
@@ -177,7 +177,7 @@ Como dueño, quiero que la app me diga en qué días del mes puedo pagar todas m
 - **FR-026**: La app MUST agrupar los estados de cuenta próximos de todas las tarjetas activas con términos completos en el menor número de sesiones tal que, en cada sesión, los rangos de pago de sus estados de cuenta se crucen al menos un día.
 - **FR-027**: La ventana de cada sesión MUST durar 3 días (o todo el cruce si es más corto) y quedar completa dentro del cruce. Si algún día de pago (Preferencias) cae en el cruce, la ventana MUST incluir el primero de ellos, empezando en él o, si no caben 3 días antes del fin del cruce, terminando el último día del cruce. Si ningún día de pago cae en el cruce, MUST empezar el primer día del cruce.
 - **FR-028**: Crédito MUST mostrar la próxima sesión (la primera cuya ventana termina hoy o después y tiene estados de cuenta sin marcar, o la siguiente si la actual ya está completa), con su ventana, cada tarjeta, su fecha límite, su estado y la acción "Ya la pagué" en las pendientes.
-- **FR-029**: Desde 7 días antes del inicio de la ventana de una sesión con tarjetas pendientes, el Dashboard MUST mostrar "Próxima sesión de pago" con las fechas de la ventana y sus tarjetas; dentro de la ventana MUST cambiar a "Hoy toca pagar tus tarjetas" con cada tarjeta pendiente y su "Ya la pagué". Mientras se muestre el aviso de sesión, las tarjetas de esa sesión MUST NOT tener además su alerta individual; una tarjeta vencida conserva su alerta de vencida.
+- **FR-029**: Desde 7 días antes del inicio de la ventana de una sesión con tarjetas pendientes, las tarjetas pendientes de esa sesión MUST contar en el aviso del Dashboard. (Enmienda 2026-11-09: el Dashboard muestra una sola línea "N tarjetas por pagar pronto" —en rojo si alguna está vencida— con enlace "Ver en Crédito"; sin filas por tarjeta ni "Ya la pagué". La sesión con sus fechas y tarjetas se ve en Crédito, FR-028. Cada tarjeta cuenta una vez.)
 - **FR-030**: Una sesión con todas sus tarjetas marcadas MUST mostrarse como completada, junto con la ventana de la siguiente sesión.
 - **FR-031**: La sesión MUST calcularse en el cliente a partir de los términos de las tarjetas y las Preferencias, sin datos nuevos guardados ni recordatorios fuera de la app.
 
