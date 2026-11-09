@@ -87,7 +87,7 @@ test.describe("US4 · expenses and card statements", { tag: "@live" }, () => {
     await debt.getByTestId("mark-paid").click();
     await expect(page.getByRole("dialog")).toHaveCount(0);
     await expect(debt).toHaveAttribute("data-state", "paid");
-    await expect(debt.getByTestId("statement-amount")).toContainText("$0.00");
+    await expect(debt.getByTestId("statement-amount")).toHaveAttribute("data-cents", "0");
 
     // --- …and leaves the Safe-to-Spend exactly where it was ------------------------------
     await page.goto("/dashboard");

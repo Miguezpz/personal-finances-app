@@ -111,10 +111,10 @@ test.describe("Spec 008 · navigation", { tag: "@demo" }, () => {
     await page.goto("/credit");
     const full = page.getByTestId("credit-card");
     await expect(full.first()).toBeVisible();
-    const byCard = new Map<string, { amount: string; state: string | null }>();
+    const byCard = new Map<string, { amount: string | null; state: string | null }>();
     for (const card of await full.all()) {
       byCard.set((await card.getAttribute("data-card")) as string, {
-        amount: await card.getByTestId("statement-amount").innerText(),
+        amount: await card.getByTestId("statement-amount").getAttribute("data-cents"),
         state: await card.getAttribute("data-state"),
       });
     }
@@ -125,7 +125,10 @@ test.describe("Spec 008 · navigation", { tag: "@demo" }, () => {
     for (const row of await compact.all()) {
       const expected = byCard.get((await row.getAttribute("data-card")) as string);
       expect(expected).toBeDefined();
-      expect(await row.getByTestId("statement-amount").innerText()).toBe(expected?.amount);
+      // Same value (the label differs: the phone row says "No purchases" for short).
+      expect(await row.getByTestId("statement-amount").getAttribute("data-cents")).toBe(
+        expected?.amount,
+      );
       expect(await row.getAttribute("data-state")).toBe(expected?.state);
     }
     await expect(page.getByTestId("cards-see-credit")).toHaveAttribute("href", "/credit");

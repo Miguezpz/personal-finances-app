@@ -13,8 +13,9 @@ import { Money } from "@/components/money/Money";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import type { StatementState } from "@/domain/credit";
-import type { Cents } from "@/domain/types";
+import type { Cents, IsoDate } from "@/domain/types";
 import { formatDate } from "@/i18n/format";
+import { cn } from "@/lib/utils";
 import { selectLocale, usePreferences } from "@/store/preferences";
 import { MarkPaidButton, UnmarkButton } from "./MarkPaidButton";
 import type { CardStatement } from "./use-card-statements";
@@ -43,11 +44,8 @@ function StateBadge({ state }: { state: StatementState }) {
 
 /**
  * A statement's recorded amount, or "No purchases recorded" when there is none: the bank statement
- * may still have the family's purchases, so it's a fact, not "nothing to pay".
- */
-/**
- * The statement amount, or "No purchases recorded" when it's zero. `compact` is for a secondary
- * line (phone rows): the short label, inheriting the line's size and color.
+ * may still have the family's purchases, so it's a fact, not "nothing to pay". `compact` uses the
+ * short label ("No purchases") and inherits the surrounding size and color, for phone rows.
  */
 export function StatementAmount({
   cents,
@@ -82,6 +80,24 @@ function StatementAction({ statement }: { statement: CardStatement }) {
   return null;
 }
 
+/** "✓ Paid" / "⚠ Overdue" as a word for a secondary line (the compact row's state). */
+function StateWord({ state }: { state: StatementState }) {
+  const t = useTranslations("credit");
+  const Icon = STATE_ICONS[state];
+  return (
+    <span
+      className={cn(
+        "inline-flex items-center gap-1 align-bottom",
+        state === "overdue" && "font-medium text-destructive",
+      )}
+      data-testid="statement-state"
+    >
+      <Icon aria-hidden="true" className="size-3 shrink-0" />
+      {t(STATE_KEYS[state])}
+    </span>
+  );
+}
+
 export function CardStatementCard({
   statement,
   variant,
@@ -96,30 +112,46 @@ export function CardStatementCard({
   const headlineDue = headline === "last" ? last.due : next.due;
   const headlineAmount = headline === "last" ? last.outstanding : next.amount;
   const headlineLabel = headline === "last" ? t("payToAvoidInterest") : t("nextStatement");
+  const short = (date: IsoDate) => formatDate(date, locale, "short");
 
   if (variant === "compact") {
+    // A phone row (spec 008 Expenses): never more than two pieces side by side —
+    //   [logo] name ............ amount
+    //          ✓ Paid · next statement due Dec 4   (wraps rather than cutting the date)
+    //          [action]            (≥ sm: the action moves to the right of the second line)
     return (
       <div
         data-testid="card-debt"
         data-card={card.id}
         data-state={last.state}
         data-overdue={last.state === "overdue"}
-        className="flex flex-wrap items-center gap-x-3 gap-y-2 px-4 py-3 text-sm"
+        className="grid grid-cols-[auto_minmax(0,1fr)_auto] items-center gap-x-3 gap-y-1 px-4 py-3 text-sm"
       >
-        <span className="flex min-w-0 flex-1 items-center gap-2">
-          <AccountMark account={card} className="size-6" />
-          <span className="flex min-w-0 flex-col">
-            <span className="truncate font-medium">{card.name}</span>
-            <span className="text-xs text-muted-foreground">
-              {headlineLabel} · {t("dueShort", { date: formatDate(headlineDue, locale) })}
-            </span>
+        <AccountMark account={card} className="row-span-2 size-6 self-center" />
+        <span className="truncate font-medium">{card.name}</span>
+        <span
+          data-testid="statement-amount"
+          data-cents={headlineAmount}
+          className="text-right text-muted-foreground"
+        >
+          <StatementAmount
+            cents={headlineAmount}
+            className="font-semibold whitespace-nowrap text-foreground"
+            compact
+          />
+        </span>
+        <span className="col-start-2 text-xs text-pretty text-muted-foreground">
+          <StateWord state={last.state} />
+          {" · "}
+          <span className="whitespace-nowrap">
+            {headline === "last"
+              ? t("dueShort", { date: short(headlineDue) })
+              : t("nextDueShort", { date: short(headlineDue) })}
           </span>
         </span>
-        <StateBadge state={last.state} />
-        <span data-testid="statement-amount">
-          <StatementAmount cents={headlineAmount} className="font-semibold whitespace-nowrap" />
-        </span>
-        <StatementAction statement={statement} />
+        <div className="col-span-2 col-start-2 empty:hidden sm:col-span-1 sm:col-start-3 sm:row-start-2 sm:justify-self-end">
+          <StatementAction statement={statement} />
+        </div>
       </div>
     );
   }
@@ -140,37 +172,44 @@ export function CardStatementCard({
       <CardContent className="flex flex-col gap-3">
         <div className="flex flex-col">
           <span className="text-sm text-muted-foreground">{headlineLabel}</span>
-          <span data-testid="statement-amount">
+          <span data-testid="statement-amount" data-cents={headlineAmount}>
             <StatementAmount cents={headlineAmount} className="text-3xl font-semibold" />
           </span>
         </div>
-        <dl className="grid gap-1 text-sm">
-          <div className="flex flex-wrap items-center justify-between gap-x-3">
+        {/* Three aligned columns — label · amount · due date — short dates and "No purchases", so
+            each row fits a phone line (spec 008 FR-019 layout, revisited). */}
+        <dl className="grid grid-cols-[minmax(0,1fr)_auto_auto] items-baseline gap-x-3 gap-y-1 text-sm">
+          <div className="col-span-3 grid grid-cols-subgrid">
             <dt className="text-muted-foreground">{t("lastStatement")}</dt>
-            <dd className="flex items-center gap-1.5" data-testid="last-statement">
-              {last.state === "paid" ? (
-                t(STATE_KEYS[last.state])
-              ) : (
-                <StatementAmount cents={last.outstanding} />
-              )}
-              <span className="text-muted-foreground">
-                · {t("dueShort", { date: formatDate(last.due, locale) })}
+            <dd className="col-span-2 grid grid-cols-subgrid" data-testid="last-statement">
+              <span className="text-right whitespace-nowrap">
+                {last.state === "paid" ? (
+                  t(STATE_KEYS[last.state])
+                ) : (
+                  <StatementAmount cents={last.outstanding} compact />
+                )}
+              </span>
+              <span className="text-right whitespace-nowrap text-muted-foreground">
+                {t("dueShort", { date: short(last.due) })}
               </span>
             </dd>
           </div>
-          <div className="flex flex-wrap items-center justify-between gap-x-3">
+          <div className="col-span-3 grid grid-cols-subgrid">
             <dt className="text-muted-foreground">{t("nextStatement")}</dt>
-            <dd className="flex items-center gap-1.5" data-testid="next-statement">
-              <Money cents={next.amount} />
-              <span className="text-muted-foreground">
-                · {t("dueShort", { date: formatDate(next.due, locale) })}
+            <dd className="col-span-2 grid grid-cols-subgrid" data-testid="next-statement">
+              <Money cents={next.amount} className="text-right whitespace-nowrap" />
+              <span className="text-right whitespace-nowrap text-muted-foreground">
+                {t("dueShort", { date: short(next.due) })}
               </span>
+            </dd>
+          </div>
+          <div className="col-span-3 flex items-baseline justify-between gap-3">
+            <dt className="text-muted-foreground">{t("totalDebtShort")}</dt>
+            <dd className="text-right whitespace-nowrap" data-testid="total-debt">
+              <Money cents={summary.totalDebt} />
             </dd>
           </div>
         </dl>
-        <p className="text-sm text-muted-foreground">
-          {t.rich("totalDebt", { amount: () => <Money cents={summary.totalDebt} /> })}
-        </p>
         <div className="empty:hidden">
           <StatementAction statement={statement} />
         </div>

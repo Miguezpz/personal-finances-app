@@ -152,6 +152,23 @@ test.describe("US2 · mobile", { tag: "@demo" }, () => {
     await expect(page.getByTestId("ledger-table")).toBeHidden();
   });
 
+  test("card rows in Expenses keep the name and its details on one line each", async ({ page }) => {
+    await page.setViewportSize({ width: 320, height: 640 });
+    await page.goto("/expenses");
+    await settled(page);
+    const rows = page.getByTestId("card-debt");
+    await expect(rows.first()).toBeVisible();
+    for (const row of await rows.all()) {
+      // One text line is ~20 px; a name or detail wrapped word by word is several times that.
+      for (const part of [row.locator("> span").first(), row.getByTestId("statement-state")]) {
+        const box = await part.boundingBox();
+        expect(box?.height ?? 0).toBeLessThanOrEqual(24);
+      }
+      const name = row.locator("> span").first();
+      expect(await name.evaluate((el) => el.getBoundingClientRect().width)).toBeGreaterThan(60);
+    }
+  });
+
   test("every control in the bottom bar and the header is at least 44 × 44 px", async ({
     page,
   }) => {
