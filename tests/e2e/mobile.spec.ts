@@ -264,8 +264,12 @@ test.describe("Spec 005 · quick expense row on a phone", { tag: "@live" }, () =
     const buttons = bar.locator("button");
     expect(await buttons.count()).toBe(12);
     for (let i = 0; i < 12; i++) {
-      const box = await buttons.nth(i).boundingBox();
-      expect(box?.height ?? 0, `height of button ${i}`).toBeGreaterThanOrEqual(44);
+      // Poll and round: the bar can re-render or still be animating in.
+      await expect
+        .poll(async () => Math.round((await buttons.nth(i).boundingBox())?.height ?? 0), {
+          message: `height of button ${i}`,
+        })
+        .toBeGreaterThanOrEqual(44);
     }
   });
 });

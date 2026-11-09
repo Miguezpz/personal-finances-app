@@ -337,9 +337,12 @@ test.describe("US13 · managing quick expenses", { tag: "@live" }, () => {
     await rows.first().getByTestId("template-menu").click();
     await expect(page.getByTestId("template-up")).toHaveAttribute("data-disabled", "");
     await page.keyboard.press("Escape");
+    // A closed menu stays mounted while it animates out; wait for it to go.
+    await expect(page.getByRole("menu")).toHaveCount(0);
     await rows.last().getByTestId("template-menu").click();
     await expect(page.getByTestId("template-down")).toHaveAttribute("data-disabled", "");
     await page.keyboard.press("Escape");
+    await expect(page.getByRole("menu")).toHaveCount(0);
     await rows.first().getByTestId("template-menu").click();
     await page.getByTestId("template-down").click();
     await expect(rows.first()).toContainText("Café");

@@ -158,8 +158,12 @@ test.describe("Spec 009 · lists on a phone", { tag: "@demo" }, () => {
     const count = await targets.count();
     expect(count).toBeGreaterThan(1);
     for (let i = 0; i < Math.min(count, 8); i++) {
-      const box = await targets.nth(i).boundingBox();
-      expect(box?.height ?? 0, `height of target ${i}`).toBeGreaterThanOrEqual(44);
+      // Poll and round: rows can still be animating in (sub-pixel heights).
+      await expect
+        .poll(async () => Math.round((await targets.nth(i).boundingBox())?.height ?? 0), {
+          message: `height of target ${i}`,
+        })
+        .toBeGreaterThanOrEqual(44);
     }
   });
 
