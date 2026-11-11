@@ -132,10 +132,10 @@
   animation: balance-highlight var(--duration-slow) var(--ease-out-quint);
 }
 
-/* Neon: --nav-active is the full acid green, too loud for a skeleton sweep or a balance flash — use a faint tint. */
+/* Neon: --primary is the full acid green, too loud for a skeleton sweep or a balance flash — use a faint tint. */
 @keyframes balance-highlight-neon {
   from {
-    background-color: color-mix(in oklch, var(--nav-active) 25%, var(--surface-highlight));
+    background-color: color-mix(in oklch, var(--primary) 25%, var(--surface-highlight));
   }
 }
 /* Unlayered on purpose: it must win over the @utility rules above (utilities layer). */
@@ -143,7 +143,7 @@
   background-image: linear-gradient(
     90deg,
     var(--muted) 0%,
-    color-mix(in oklch, var(--muted), var(--nav-active) 12%) 50%,
+    color-mix(in oklch, var(--muted), var(--primary) 12%) 50%,
     var(--muted) 100%
   );
 }
@@ -240,5 +240,24 @@ html[data-privacy="off"] input[data-money] {
   }
   .animate-shimmer {
     animation: none !important;
+  }
+}
+
+/* Header title fades in as the page scrolls (spec 012). shortcut: without scroll-timeline support or with reduced motion it stays hidden; no JS fallback. */
+.header-title {
+  opacity: 0;
+}
+@supports (animation-timeline: scroll()) {
+  @media (prefers-reduced-motion: no-preference) {
+    .header-title {
+      animation: header-title-in linear both;
+      animation-timeline: scroll(root);
+      animation-range: 3rem 6rem;
+    }
+  }
+}
+@keyframes header-title-in {
+  to {
+    opacity: 1;
   }
 }

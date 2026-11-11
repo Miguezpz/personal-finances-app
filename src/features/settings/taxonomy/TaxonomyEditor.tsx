@@ -226,6 +226,7 @@ export function TaxonomyEditor() {
         description={t("categoriesDescription")}
         action={
           <Button
+            variant="outline"
             onClick={() => setNameDialog({ mode: "newCategory", macro: "needs" })}
             data-testid="add-category"
           >

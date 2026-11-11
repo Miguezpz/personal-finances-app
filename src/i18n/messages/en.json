@@ -38,8 +38,6 @@
   },
   "nav": {
     "label": "Main navigation",
-    "openMenu": "Open menu",
-    "closeMenu": "Close menu",
     "dashboard": "Dashboard",
     "income": "Income",
     "expenses": "Expenses",
@@ -52,7 +50,6 @@
     "settings": "Settings",
     "signOut": "Sign out",
     "more": "More",
-    "preferences": "Preferences",
     "mobileLabel": "Quick navigation",
     "groups": {
       "main": "Main",
@@ -751,6 +748,7 @@
   "demo": {
     "label": "Demo notice",
     "banner": "You're exploring a read-only demo with fictitious data. Nothing you change is saved.",
+    "bannerShort": "Read-only demo · sample data",
     "sourceCode": "View the source code",
     "opensInNewTab": "(opens in a new tab)"
   },

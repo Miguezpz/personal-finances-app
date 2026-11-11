@@ -22,7 +22,8 @@ export function DemoBanner() {
     >
       <span className="flex items-center gap-2">
         <FlaskConical aria-hidden="true" className="size-4 shrink-0" />
-        {t("banner")}
+        <span className="sm:hidden">{t("bannerShort")}</span>
+        <span className="hidden sm:inline">{t("banner")}</span>
       </span>
       <a
         href={REPO_URL}

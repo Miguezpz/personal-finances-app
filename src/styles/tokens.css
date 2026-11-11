@@ -31,6 +31,7 @@
   --brand-carbon: #1a1a1a;
   --brand-steel: #333333;
   --brand-acid: #cee616;
+  --brand-acid-deep: #2d320c;
   --brand-smoke: #f5f5f5;
   --brand-neutral: #a3a3a3;
 
@@ -161,8 +162,8 @@
   --cta-foreground: var(--brand-abyss);
   --success: var(--brand-acid);
   --surface-highlight: var(--brand-carbon);
-  --nav-active: var(--brand-acid);
-  --nav-active-foreground: var(--brand-abyss);
+  --nav-active: var(--brand-acid-deep);
+  --nav-active-foreground: var(--brand-acid);
   --ring: var(--brand-acid);
   --border: var(--brand-steel);
   --input: #737373;

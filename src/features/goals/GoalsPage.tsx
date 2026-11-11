@@ -116,7 +116,11 @@ export function GoalsPage() {
         description={t("description")}
         actions={
           <>
-            <Button onClick={() => setForm({ open: true, goal: null })} data-testid="add-goal">
+            <Button
+              variant="outline"
+              onClick={() => setForm({ open: true, goal: null })}
+              data-testid="add-goal"
+            >
               <Plus aria-hidden="true" />
               {t("addTitle")}
             </Button>

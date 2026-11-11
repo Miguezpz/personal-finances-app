@@ -69,7 +69,11 @@ export function AccountsSettings() {
         title={t("accountsTitle")}
         description={t("accountsDescription")}
         action={
-          <Button onClick={() => setForm({ open: true, account: null })} data-testid="add-account">
+          <Button
+            variant="outline"
+            onClick={() => setForm({ open: true, account: null })}
+            data-testid="add-account"
+          >
             <Plus aria-hidden="true" />
             {t("addAccount")}
           </Button>

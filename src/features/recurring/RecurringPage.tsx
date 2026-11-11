@@ -90,6 +90,7 @@ export function RecurringPage() {
         description={t("description")}
         actions={
           <Button
+            variant="outline"
             onClick={() => setForm({ open: true, recurring: null })}
             data-testid="add-recurring"
           >

@@ -31,7 +31,7 @@ export function CurrencyToggle() {
             "rounded px-2 py-1 text-xs font-medium tabular-nums transition-colors pointer-coarse:min-h-11 pointer-coarse:min-w-11",
             "focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none",
             current === c
-              ? "bg-primary text-primary-foreground"
+              ? "bg-nav-active text-nav-active-foreground"
               : "text-muted-foreground hover:bg-muted",
           )}
         >

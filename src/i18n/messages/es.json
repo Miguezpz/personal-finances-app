@@ -38,8 +38,6 @@
   },
   "nav": {
     "label": "Navegación principal",
-    "openMenu": "Abrir menú",
-    "closeMenu": "Cerrar menú",
     "dashboard": "Inicio",
     "income": "Ingresos",
     "expenses": "Gastos",
@@ -52,7 +50,6 @@
     "settings": "Configuración",
     "signOut": "Cerrar sesión",
     "more": "Más",
-    "preferences": "Preferencias",
     "mobileLabel": "Navegación rápida",
     "groups": {
       "main": "Principal",
@@ -751,6 +748,7 @@
   "demo": {
     "label": "Aviso del demo",
     "banner": "Estás explorando un demo de solo lectura con datos ficticios. Nada de lo que cambies se guarda.",
+    "bannerShort": "Demo de solo lectura · datos ficticios",
     "sourceCode": "Ver el código fuente",
     "opensInNewTab": "(se abre en una pestaña nueva)"
   },

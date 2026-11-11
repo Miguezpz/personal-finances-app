@@ -59,6 +59,7 @@ export function ReceivablesPage() {
         actions={
           <>
             <Button
+              variant="outline"
               className="shrink-0"
               onClick={() => openCreate({ kind: "receivable" })}
               data-testid="add-receivable"
