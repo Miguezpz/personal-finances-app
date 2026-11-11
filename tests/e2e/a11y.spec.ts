@@ -14,9 +14,13 @@ async function audit(page: Page, where: string) {
   // enabled once its data is read) right after the first check.
   const settledAnimations = () =>
     page.waitForFunction(() =>
-      document
-        .getAnimations()
-        .every((a) => a.playState !== "running" || a.effect?.getTiming().iterations === Infinity),
+      document.getAnimations().every(
+        (a) =>
+          // Scroll-driven animations (the header title, spec 012) never finish: skip them.
+          !(a.timeline instanceof DocumentTimeline) ||
+          a.playState !== "running" ||
+          a.effect?.getTiming().iterations === Infinity,
+      ),
     );
   await settledAnimations();
   await page.waitForTimeout(150);

@@ -47,6 +47,26 @@ test.describe("Spec 008 · navigation", { tag: "@demo" }, () => {
     await expect(settings).toBeInViewport();
   });
 
+  test("tablet icon rail: no horizontal overflow and every link has an accessible name", async ({
+    page,
+  }) => {
+    await page.setViewportSize({ width: 768, height: 600 });
+    await page.goto("/dashboard");
+    // The rail mounts with the session: wait for it before measuring anything.
+    const links = page.locator("aside nav a");
+    await expect(links).toHaveCount(10);
+    await expect(page.locator("main [aria-busy='true']")).toHaveCount(0);
+    const overflow = await page.evaluate(() => ({
+      main:
+        (document.querySelector("main")?.scrollWidth ?? 0) -
+        (document.querySelector("main")?.clientWidth ?? 0),
+      doc: document.documentElement.scrollWidth - window.innerWidth,
+    }));
+    expect(overflow.main, "main overflow").toBeLessThanOrEqual(0);
+    expect(overflow.doc, "document overflow").toBeLessThanOrEqual(0);
+    for (let i = 0; i < 10; i++) await expect(links.nth(i)).toHaveAccessibleName(/\S/);
+  });
+
   test("every route marks exactly one destination as current", async ({ page }) => {
     test.setTimeout(90_000);
     for (const route of APP_ROUTES) {
@@ -56,6 +76,10 @@ test.describe("Spec 008 · navigation", { tag: "@demo" }, () => {
   });
 
   test("＋ New is the only highlighted call to action and opens each dialog", async ({ page }) => {
+    for (const route of ["/goals", "/settings/accounts"]) {
+      await page.goto(route);
+      await expect(page.locator('[data-variant="cta"]:visible'), route).toHaveCount(1);
+    }
     await page.goto("/net-worth");
     await expect(page.locator('[data-variant="cta"]:visible')).toHaveCount(1);
     await expect(page.getByTestId("new-menu")).toBeEnabled();

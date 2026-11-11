@@ -52,7 +52,10 @@ test.describe("US14 · card statement dates in the demo", { tag: "@demo" }, () =
     );
 
     await page.waitForFunction(() =>
-      document.getAnimations().every((a) => a.playState !== "running"),
+      document
+        .getAnimations()
+        // Scroll-driven animations (the header title, spec 012) never finish: skip them.
+        .every((a) => !(a.timeline instanceof DocumentTimeline) || a.playState !== "running"),
     );
     const { violations } = await new AxeBuilder({ page })
       .include('[role="dialog"]')

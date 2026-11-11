@@ -39,7 +39,11 @@ test.describe("US10 · credit, goals and net worth", { tag: "@demo" }, () => {
         await expect(card).toContainText(m.credit.nextStatement);
         const name =
           (await card.locator("[data-slot=card-title]").innerText()).split("\n")[0] ?? "";
-        const onTimeline = due.filter({ hasText: name.trim() }).first();
+        // A statement already marked as paid shows "Paid" instead of an amount: skip those rows.
+        const onTimeline = due
+          .filter({ hasText: name.trim() })
+          .filter({ has: page.locator(".money") })
+          .first();
         if ((await onTimeline.count()) > 0)
           expect(await headline.innerText()).toBe(await onTimeline.locator(".money").innerText());
       } else {

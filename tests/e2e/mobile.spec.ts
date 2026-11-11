@@ -69,6 +69,56 @@ test.describe("US2 · mobile", { tag: "@demo" }, () => {
     await expect(nav.getByTestId("mobile-nav-more")).toHaveAttribute("aria-current", "page");
   });
 
+  test("the ＋ sits inside the bottom bar's rectangle", async ({ page }) => {
+    await page.goto("/dashboard");
+    await settled(page);
+    const bar = await page.getByTestId("mobile-nav").boundingBox();
+    const plus = await page.getByTestId("mobile-nav-create").boundingBox();
+    expect(bar).not.toBeNull();
+    expect(plus).not.toBeNull();
+    expect(plus!.y).toBeGreaterThanOrEqual(bar!.y);
+    expect(plus!.y + plus!.height).toBeLessThanOrEqual(bar!.y + bar!.height);
+  });
+
+  test("the More sheet is a compact grid: ≤ 50 % of the viewport, 7 links, tiles ≥ 44 px", async ({
+    page,
+  }) => {
+    await page.goto("/dashboard");
+    await settled(page);
+    await page.getByTestId("mobile-nav-more").click();
+    const sheet = page.getByTestId("more-sheet");
+    await expect(sheet).toBeVisible();
+    const links = sheet.locator("a");
+    await expect(links).toHaveCount(7);
+    for (const href of [
+      "/income",
+      "/recurring",
+      "/goals",
+      "/receivables",
+      "/ledger",
+      "/net-worth",
+      "/settings",
+    ]) {
+      await expect(sheet.locator(`a[href="${href}"]`)).toBeVisible();
+    }
+    // Wait for the slide-in to finish before measuring.
+    await expect
+      .poll(async () => {
+        const box = await sheet.boundingBox();
+        return box ? Math.round(box.y + box.height) : 0;
+      })
+      .toBe(PHONE.height);
+    const box = await sheet.boundingBox();
+    expect(box?.height ?? Infinity).toBeLessThanOrEqual(PHONE.height * 0.5);
+    for (let i = 0; i < 7; i++) {
+      const link = links.nth(i);
+      const label = await link.getAttribute("href");
+      expect((await link.boundingBox())?.height ?? 0, `height of ${label}`).toBeGreaterThanOrEqual(
+        44,
+      );
+    }
+  });
+
   test("＋ opens the create sheet; an action opens its form as a bottom sheet with a numeric keyboard", async ({
     page,
   }) => {
