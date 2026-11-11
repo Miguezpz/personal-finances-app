@@ -76,8 +76,9 @@ Browser (Next.js App Router, all derived values computed client-side)
 - **Neon (default) / Light / Dark / System.** Stored with the other device preferences and applied by an inline
   script before the first paint, so a reload never flashes the wrong theme; "System" follows the OS live. Brand
   surfaces such as the demo notice use the primary token, so they follow the theme (lime with near-black text in neon).
-- **Mobile first.** Bottom bar `Dashboard · Expenses · ＋ · Credit · More` (＋ opens a sheet with expense, income, card
-  payment and quick expenses), forms as bottom sheets with the numeric keyboard, ledger as cards, 44 px touch
+- **Mobile first.** Bottom bar `Dashboard · Expenses · ＋ · Credit · More` (＋ sits inside the bar and opens a sheet
+  with expense, income and quick expenses; More opens a compact tile grid of the other destinations), an icon rail
+  on tablets (768–1023 px), forms as bottom sheets with the numeric keyboard, ledger as cards, 44 px touch
   targets, no horizontal scroll from 320 px.
 - **Motion that respects you.** Short (≤ 300 ms) transitions on opacity/transform only: a page-in fade when
   navigating (the header and bottom bar never move), new rows sliding in and deleted ones fading out, a sliding

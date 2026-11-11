@@ -125,7 +125,12 @@ function MoreGrid({ onNavigate }: { onNavigate: () => void }) {
   const t = useTranslations("nav");
   const pathname = usePathname();
   const tileClass = (active: boolean) =>
-    cn(TILE_CLASS, active && "bg-nav-active text-nav-active-foreground hover:bg-nav-active");
+    // px-1 + wrapping: "Patrimonio" and "Gastos fijos" must fit a 320 px phone without an ellipsis.
+    cn(
+      TILE_CLASS,
+      "px-1",
+      active && "bg-nav-active text-nav-active-foreground hover:bg-nav-active",
+    );
   return (
     <div className="mt-3">
       <div className="grid grid-cols-3 gap-2">
@@ -147,7 +152,7 @@ function MoreGrid({ onNavigate }: { onNavigate: () => void }) {
                       className={tileClass(active)}
                     >
                       <Icon aria-hidden="true" className="size-5" />
-                      <span className="max-w-full truncate">{t(labelKey)}</span>
+                      <span className="text-center leading-tight">{t(labelKey)}</span>
                     </Link>
                   </li>
                 );

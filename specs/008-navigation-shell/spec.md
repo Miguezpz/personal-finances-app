@@ -140,10 +140,10 @@ Como dueño, quiero que el encabezado no quede bajo la muesca o la barra de esta
 
 - **FR-001**: Los destinos MUST agruparse en: Principal (Inicio, Gastos, Ingresos, Crédito), Planear (Gastos fijos, Metas), Deudas (Por cobrar), Análisis (Bitácora, Patrimonio) y un pie con Configuración. Los nombres de los grupos MUST existir en español e inglés.
 - **FR-002**: En escritorio (≥ 768 px), la barra lateral MUST mostrar los grupos con un encabezado discreto, Configuración separada al fondo, y MUST poder desplazarse por sí sola cuando la altura de la ventana no alcanza.
-- **FR-003**: En móvil (< 768 px), la barra inferior MUST mostrar, en orden: Inicio, Gastos, ＋ (central, destacado), Crédito y Más, respetando el área segura inferior. Reemplaza la composición de la barra inferior de spec 003 (FR-019).
+- **FR-003**: En móvil (< 768 px), la barra inferior MUST mostrar, en orden: Inicio, Gastos, ＋ (central, destacado), Crédito y Más, respetando el área segura inferior. Reemplaza la composición de la barra inferior de spec 003 (FR-019). *(Enmienda spec 012: el ＋ queda dentro de la barra, sin sobresalir ni anillo, para no tapar contenido.)*
 - **FR-004**: El botón flotante "Agregar gasto" de móvil MUST eliminarse (reemplaza spec 003 FR-020); el botón ＋ de la barra cumple su función.
 - **FR-005**: "Más" MUST mostrarse como activo y anunciarse como página actual cuando la ruta pertenece a un destino que no está en la barra inferior, incluidas sus subrutas.
-- **FR-006**: "Más" MUST abrir un panel que sube desde abajo, titulado "Más", con los destinos secundarios agrupados según FR-001 (Ingresos dentro de Principal) y el destino actual marcado. Elegir un destino MUST navegar y cerrar el panel.
+- **FR-006**: "Más" MUST abrir un panel que sube desde abajo, titulado "Más", con los destinos secundarios agrupados según FR-001 (Ingresos dentro de Principal) y el destino actual marcado. Elegir un destino MUST navegar y cerrar el panel. *(Enmienda spec 012: los destinos van en cuadrícula de 3 columnas con Configuración como fila aparte; los encabezados de grupo quedan solo para lectores de pantalla.)*
 
 **Creación global**
 
@@ -152,7 +152,7 @@ Como dueño, quiero que el encabezado no quede bajo la muesca o la barra de esta
 - **FR-009**: Cada diálogo de creación (gasto, ingreso, pago de tarjeta) MUST montarse una sola vez en toda la app, y cualquier página MUST poder abrirlo, opcionalmente con datos iniciales (por ejemplo, tarjeta y monto).
 - **FR-010**: En escritorio, la barra superior MUST incluir un botón destacado "＋ Nuevo" con un menú de solo tres opciones (Gasto, Ingreso y Pagar tarjeta, sin gastos rápidos), que muestra el atajo de cada opción.
 - **FR-011**: Con teclado físico (en cualquier ancho), las teclas N, I y P (sin modificadores) MUST abrir los diálogos de gasto, ingreso y pago de tarjeta, salvo que el foco esté en un campo editable o haya un diálogo o panel abierto.
-- **FR-012**: Cada pantalla MUST tener como máximo una llamada a la acción destacada; en escritorio es "＋ Nuevo" (reemplaza la asignación por página de spec 003 FR-006). Las acciones que repiten una acción global ("Agregar gasto" en Dashboard y Gastos, "Registrar ingreso" en Ingresos) MUST quitarse; las demás acciones de página MUST usar estilo secundario. Los estados vacíos MAY ofrecer un enlace secundario que abre el diálogo global.
+- **FR-012**: Cada pantalla MUST tener como máximo una llamada a la acción destacada; en escritorio es "＋ Nuevo" (reemplaza la asignación por página de spec 003 FR-006). Las acciones que repiten una acción global ("Agregar gasto" en Dashboard y Gastos, "Registrar ingreso" en Ingresos) MUST quitarse; las demás acciones de página MUST usar estilo secundario. Los estados vacíos MAY ofrecer un enlace secundario que abre el diálogo global. *(Enmienda spec 012: cumplido también en Metas, Cuentas, Cobros, Recurrentes y Categorías, cuyos botones "Agregar" pasan a estilo secundario.)*
 - **FR-013**: "Pagar tarjeta" MUST mostrarse deshabilitado, con explicación, cuando no hay tarjetas de crédito activas.
 
 **Encabezados y paneles**
@@ -209,6 +209,6 @@ Como dueño, quiero que el encabezado no quede bajo la muesca o la barra de esta
 - Los atajos N/I/P funcionan con teclado físico en cualquier ancho, pero solo se anuncian en el menú "＋ Nuevo" de escritorio.
 - La hoja ＋ y "＋ Nuevo" no incluyen "Por cobrar" ni "Gasto fijo"; esas altas siguen en sus páginas (decisión del roadmap: las 3 acciones más frecuentes).
 - La gestión de plantillas de gasto rápido no cambia en este spec; el enlace "Administrar" en la hoja ＋ llega con el spec 009.
-- El indicador animado de la navegación (spec 003 FR-028) se conserva en la barra lateral, en la barra inferior y en el panel "Más".
+- El indicador animado de la navegación (spec 003 FR-028) se conserva en la barra lateral, en la barra inferior y en el panel "Más". *(Enmienda spec 012: el panel "Más" ya no lleva indicador deslizante; el destino activo se marca con tinte.)*
 - Los e2e de navegación se verifican en modo demo; las verificaciones con backend local o en vivo se omiten por decisión del usuario (trabajo solo de UI).
 - Depende de lo existente: los diálogos de gasto, ingreso y pago de tarjeta, los gastos rápidos (spec 005), el cálculo de fechas de tarjeta (spec 007) y el estado efímero de diálogos de la interfaz.

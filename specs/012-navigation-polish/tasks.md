@@ -43,18 +43,18 @@
 
 ## Phase 8: Frente C — Tests e2e en modo demo (después de A y B)
 
-- [ ] T017 [P] [C] `tests/e2e/mobile.spec.ts`: el ＋ queda dentro del rectángulo de la barra; la hoja "Más" mide ≤ 50 % del alto y muestra los 7 enlaces; mosaicos ≥ 44 px de alto
-- [ ] T018 [P] [C] `tests/e2e/navigation.spec.ts`: a 768×600, `main` sin desbordamiento horizontal y cada enlace del riel con nombre accesible; un solo `[data-variant="cta"]` visible (incluye `/goals` y `/settings/accounts`)
-- [ ] T019 [C] Correr `E2E_MODES=demo` para `a11y`, `motion`, `us9-demo`, `mobile`, `navigation`; corregir lo que falle (sin editar archivos fuera de los dos specs salvo reportarlo)
+- [X] T017 [P] [C] `tests/e2e/mobile.spec.ts`: el ＋ queda dentro del rectángulo de la barra; la hoja "Más" mide ≤ 50 % del alto y muestra los 7 enlaces; mosaicos ≥ 44 px de alto
+- [X] T018 [P] [C] `tests/e2e/navigation.spec.ts`: a 768×600, `main` sin desbordamiento horizontal y cada enlace del riel con nombre accesible; un solo `[data-variant="cta"]` visible (incluye `/goals` y `/settings/accounts`)
+- [X] T019 [C] Correr `E2E_MODES=demo` para `a11y`, `motion`, `us9-demo`, `mobile`, `navigation`; corregir lo que falle (sin editar archivos fuera de los dos specs salvo reportarlo)
 
 ## Phase 9: Gate, revisión visual y docs (sesión principal)
 
-- [ ] T020 `pnpm typecheck && pnpm lint && pnpm test`
-- [ ] T021 `E2E_MODES=demo pnpm test:e2e`
-- [ ] T022 `pnpm build && pnpm check:demo-bundle` (First Load de `/dashboard` no crece)
-- [ ] T023 Capturas con `pnpm dev:demo` a 320/390/768/1440 px en neón, claro y oscuro: "Más", hoja ＋, Metas con scroll, Dashboard a 768 px
-- [ ] T024 [P] Docs: `README.md` (viñeta "Mobile first": cuadrícula y riel), `docs/ux-roadmap.md` (sección spec 012), enmiendas en `specs/008-navigation-shell/spec.md` (FR-003, FR-006, FR-012, indicador en "Más")
-- [ ] T025 Marcar tareas `[X]`, commit + push final
+- [X] T020 `pnpm typecheck && pnpm lint && pnpm test`
+- [X] T021 `E2E_MODES=demo pnpm test:e2e`
+- [X] T022 `pnpm build && pnpm check:demo-bundle` (First Load de `/dashboard` no crece)
+- [X] T023 Capturas con `pnpm dev:demo` a 320/390/768/1440 px en neón, claro y oscuro: "Más", hoja ＋, Metas con scroll, Dashboard a 768 px
+- [X] T024 [P] Docs: `README.md` (viñeta "Mobile first": cuadrícula y riel), `docs/ux-roadmap.md` (sección spec 012), enmiendas en `specs/008-navigation-shell/spec.md` (FR-003, FR-006, FR-012, indicador en "Más")
+- [X] T025 Marcar tareas `[X]`, commit + push final
 
 ## Dependencias
 

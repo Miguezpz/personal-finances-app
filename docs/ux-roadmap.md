@@ -265,6 +265,20 @@ Gate: unit 715 ✓ · typecheck ✓ · lint ✓ · format ✓ · e2e demo `motio
 - **Gate**: unit 748 ✓ · e2e demo 166 ✓ · pgTAP 182 ✓ · contrato 45 ✓ · e2e live 69/72 (los 3 fallos ya existían antes del spec, en us13 y perf-budgets) · build ✓ · demo-bundle ✓. First Load `/dashboard` 336.2 → 340.5 kB (+4.3).
 - **Migración `0012`**: quita UPDATE, TRUNCATE, REFERENCES y TRIGGER de `authenticated` en `card_statement_marks`. Se aplicó en la nube con la aprobación del dueño el 2026-11-08; quedan SELECT, INSERT y DELETE.
 
+### Spec 012 · Pulido visual de la navegación y del menú móvil (2026-11-11)
+
+[specs/012-navigation-polish](../specs/012-navigation-polish/), con el flujo speckit completo. Solo UI: sin migraciones.
+
+- **"Más" en cuadrícula**: 6 mosaicos en 3 columnas y Configuración como fila aparte; los encabezados de grupo quedan solo para lectores de pantalla.
+- **＋ dentro de la barra**: ya no sobresale ni lleva anillo, así que no tapa contenido al hacer scroll.
+- **Lima solo para acciones (neón)**: "seleccionado" (destino activo, toggles de idioma y moneda) usa un tinte oscuro con texto lima; el lima sólido queda para ＋/Nuevo. Los botones "Agregar" de Metas, Cuentas, Cobros, Recurrentes y Categorías pasan a contorno.
+- **Riel de iconos en tablet (768–1023 px)**: el sidebar mide 64 px y el Dashboard deja de recortar montos.
+- **Header móvil**: muestra el nombre de la sección al hacer scroll (solo CSS; sin soporte de `animation-timeline` o con movimiento reducido queda oculto).
+- **Aviso demo**: texto corto en móvil.
+- **Cerrar sesión**: pasa al pie del sidebar en escritorio; "＋ Nuevo" es el último elemento de la barra superior.
+- **Limpieza**: se borraron `nav.openMenu`, `nav.closeMenu` y `nav.preferences`.
+- **Gate**: unit 751 ✓ · typecheck ✓ · lint ✓ · e2e demo 171/172 (el fallo, `motion.spec.ts` "closing by drag", es intermitente: pasó 10 de 10 al repetirlo solo) · build ✓ · demo-bundle ✓. First Load `/dashboard` 340.5 → 334.6 kB. De paso se corrigieron dos tests: las esperas de animaciones de `a11y` y `us14` ignoran las animaciones ligadas al scroll, y `us10` ya no depende de que el primer corte de la línea de tiempo esté sin pagar. VoiceOver con `display: contents` en la cuadrícula de "Más" quedó sin probar.
+
 ### Bloqueos pendientes
 
 - Ninguno. Todas las verificaciones locales (typecheck, lint, unit, e2e demo, build, demo-bundle) terminaron en verde. Para correr los flujos que escriben datos queda pendiente `pnpm test:e2e:local` con Supabase local.
