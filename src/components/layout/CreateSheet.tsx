@@ -16,9 +16,9 @@ import {
   SheetHeader,
   SheetTitle,
 } from "@/components/ui/sheet";
-import { cn } from "@/lib/utils";
 import { useUi } from "@/store/ui";
 import { CREATE_ACTIONS } from "./create-actions";
+import { TILE_CLASS } from "./nav-items";
 
 // Only needed once the sheet opens: its own chunk keeps it out of every route's First Load JS.
 const QuickExpenseBar = lazy(() =>
@@ -50,11 +50,7 @@ export function CreateSheet() {
                   type="button"
                   data-testid={`create-${testId}`}
                   onClick={() => openCreate({ kind })}
-                  className={cn(
-                    "flex min-h-20 w-full flex-col items-center justify-center gap-2 rounded-xl border bg-card p-3 text-sm font-medium transition-colors duration-fast",
-                    "hover:bg-muted focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none",
-                    "disabled:pointer-events-none disabled:opacity-50",
-                  )}
+                  className={TILE_CLASS}
                 >
                   <span className="flex size-10 items-center justify-center rounded-full bg-accent text-accent-foreground">
                     <Icon aria-hidden="true" className="size-5" />

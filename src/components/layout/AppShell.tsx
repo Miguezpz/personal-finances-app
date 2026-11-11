@@ -5,13 +5,12 @@
  * currency and privacy toggles (LanguageToggle T116, CurrencyToggle T109, PrivacyToggle T132),
  * cold-start / offline status, and the background processes of the authenticated area.
  */
-import { CloudOff, LogOut } from "lucide-react";
+import { ChevronRight, CloudOff, LogOut } from "lucide-react";
 import { useTranslations } from "next-intl";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { useEffect, useRef, type ReactNode } from "react";
 import { BrandMark } from "@/components/brand/BrandMark";
-import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sheet";
 import { useDataProvider } from "@/data/context";
 import { useAuthSync, useSession } from "@/features/auth/useSession";
@@ -32,9 +31,11 @@ import { DialogHost } from "./DialogHost";
 import {
   isActiveRoute,
   NAV_GROUPS,
+  NAV_ITEMS,
   SECONDARY_NAV_GROUPS,
   type NavGroup,
   type NavItem,
+  TILE_CLASS,
 } from "./nav-items";
 import { NewMenu } from "./NewMenu";
 import { NavIndicator } from "./NavIndicator";
@@ -42,15 +43,7 @@ import { PreferencesSheet } from "./PreferencesSheet";
 import { PrivacyToggle } from "./PrivacyToggle";
 import { ThemeToggle } from "./ThemeToggle";
 
-function NavList({
-  items,
-  pathname,
-  onNavigate,
-}: {
-  items: readonly NavItem[];
-  pathname: string;
-  onNavigate?: (() => void) | undefined;
-}) {
+function NavList({ items, pathname }: { items: readonly NavItem[]; pathname: string }) {
   const t = useTranslations("nav");
   return (
     <ul className="flex flex-col gap-1">
@@ -60,10 +53,10 @@ function NavList({
           <li key={href}>
             <Link
               href={href}
-              {...(onNavigate ? { onClick: onNavigate } : {})}
+              title={t(labelKey)}
               aria-current={active ? "page" : undefined}
               className={cn(
-                "relative z-10 flex items-center gap-3 rounded-md px-3 py-2 text-sm transition-colors duration-fast pointer-coarse:min-h-11",
+                "relative z-10 flex items-center gap-3 rounded-md px-3 py-2 text-sm transition-colors duration-fast md:max-lg:justify-center md:max-lg:px-0 pointer-coarse:min-h-11",
                 "focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none",
                 active
                   ? // The sliding indicator paints the background once measured (NavIndicator).
@@ -72,7 +65,7 @@ function NavList({
               )}
             >
               <Icon aria-hidden="true" className="size-4 shrink-0" />
-              {t(labelKey)}
+              <span className="md:max-lg:sr-only">{t(labelKey)}</span>
             </Link>
           </li>
         );
@@ -82,17 +75,18 @@ function NavList({
 }
 
 /**
- * Grouped destinations (spec 008, FR-001/FR-002/FR-006): a discreet heading per group; the footer
- * group (Settings) has no heading and is pushed to the bottom by the sidebar's flex column.
+ * Sidebar / tablet-rail destinations (spec 008, FR-001/FR-002/FR-006): a discreet heading per
+ * group (screen-reader only on the rail); the footer group (Settings + `footerExtra`) has no
+ * heading and is pushed to the bottom by the sidebar's flex column.
  */
 function NavGroups({
   groups,
-  onNavigate,
   pinFooter = false,
+  footerExtra,
 }: {
   groups: readonly NavGroup[];
-  onNavigate?: () => void;
   pinFooter?: boolean;
+  footerExtra?: ReactNode;
 }) {
   const t = useTranslations("nav");
   const pathname = usePathname();
@@ -100,23 +94,92 @@ function NavGroups({
   return (
     <div ref={listRef} className="group/nav relative flex min-h-full flex-col gap-4">
       <NavIndicator listRef={listRef} className="rounded-md" />
-      {groups.map(({ id, items }) =>
+      {groups.map(({ id, items }, i) =>
         id === "footer" ? (
-          <div key={id} className={cn("border-t pt-3", pinFooter && "mt-auto")}>
-            <NavList items={items} pathname={pathname} onNavigate={onNavigate} />
+          <div key={id} className={cn("flex flex-col gap-1 border-t pt-3", pinFooter && "mt-auto")}>
+            <NavList items={items} pathname={pathname} />
+            {footerExtra}
           </div>
         ) : (
-          <section key={id} aria-labelledby={`nav-group-${id}${onNavigate ? "-more" : ""}`}>
+          <section
+            key={id}
+            aria-labelledby={`nav-group-${id}`}
+            className={cn(i > 0 && "md:max-lg:border-t md:max-lg:pt-2")}
+          >
             <h2
-              id={`nav-group-${id}${onNavigate ? "-more" : ""}`}
-              className="px-3 pb-1 text-xs font-medium tracking-wide text-muted-foreground uppercase"
+              id={`nav-group-${id}`}
+              className="px-3 pb-1 text-xs font-medium tracking-wide text-muted-foreground uppercase md:max-lg:sr-only"
             >
               {t(`groups.${id}`)}
             </h2>
-            <NavList items={items} pathname={pathname} onNavigate={onNavigate} />
+            <NavList items={items} pathname={pathname} />
           </section>
         ),
       )}
+    </div>
+  );
+}
+
+/** "More" panel (spec 012): the secondary destinations as a 3-column tile grid; Settings is a full-width row. */
+function MoreGrid({ onNavigate }: { onNavigate: () => void }) {
+  const t = useTranslations("nav");
+  const pathname = usePathname();
+  const tileClass = (active: boolean) =>
+    cn(TILE_CLASS, active && "bg-nav-active text-nav-active-foreground hover:bg-nav-active");
+  return (
+    <div className="mt-3">
+      <div className="grid grid-cols-3 gap-2">
+        {SECONDARY_NAV_GROUPS.filter((g) => g.id !== "footer").map(({ id, items }) => (
+          <section key={id} aria-labelledby={`nav-group-${id}-more`} className="contents">
+            <h2 id={`nav-group-${id}-more`} className="sr-only">
+              {t(`groups.${id}`)}
+            </h2>
+            <ul className="contents">
+              {items.map(({ href, labelKey, icon: Icon }) => {
+                const active = isActiveRoute(pathname, href);
+                return (
+                  <li key={href} className="contents">
+                    <Link
+                      href={href}
+                      onClick={onNavigate}
+                      aria-current={active ? "page" : undefined}
+                      data-testid={`more-${labelKey}`}
+                      className={tileClass(active)}
+                    >
+                      <Icon aria-hidden="true" className="size-5" />
+                      <span className="max-w-full truncate">{t(labelKey)}</span>
+                    </Link>
+                  </li>
+                );
+              })}
+            </ul>
+          </section>
+        ))}
+      </div>
+      <ul className="mt-3 border-t pt-3">
+        {SECONDARY_NAV_GROUPS.filter((g) => g.id === "footer").flatMap((g) =>
+          g.items.map(({ href, labelKey, icon: Icon }) => {
+            const active = isActiveRoute(pathname, href);
+            return (
+              <li key={href}>
+                <Link
+                  href={href}
+                  onClick={onNavigate}
+                  aria-current={active ? "page" : undefined}
+                  className={cn(
+                    "flex min-h-11 items-center gap-3 rounded-xl border px-3 text-sm font-medium focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none",
+                    active ? "bg-nav-active text-nav-active-foreground" : "bg-card hover:bg-muted",
+                  )}
+                >
+                  <Icon aria-hidden="true" className="size-5 shrink-0" />
+                  <span className="flex-1">{t(labelKey)}</span>
+                  <ChevronRight aria-hidden="true" className="size-4 shrink-0" />
+                </Link>
+              </li>
+            );
+          }),
+        )}
+      </ul>
     </div>
   );
 }
@@ -170,6 +233,8 @@ export function AppShell({ children, toolbar }: { children: ReactNode; toolbar?:
   const setSidebarOpen = useUi((s) => s.setSidebarOpen);
   const session = useRequireSession();
   // The demo's synthetic session has no email: there's nothing to sign out of.
+  const pathname = usePathname();
+  const activeItem = NAV_ITEMS.find((i) => isActiveRoute(pathname, i.href));
   const canSignOut = Boolean(session.data?.email);
 
   async function signOut() {
@@ -205,7 +270,7 @@ export function AppShell({ children, toolbar }: { children: ReactNode; toolbar?:
               <SheetTitle>{t("moreTitle")}</SheetTitle>
             </SheetHeader>
             <nav aria-label={t("label")}>
-              <NavGroups groups={SECONDARY_NAV_GROUPS} onNavigate={() => setSidebarOpen(false)} />
+              <MoreGrid onNavigate={() => setSidebarOpen(false)} />
             </nav>
           </SheetContent>
         </Sheet>
@@ -218,6 +283,10 @@ export function AppShell({ children, toolbar }: { children: ReactNode; toolbar?:
           <span className="sr-only truncate sm:not-sr-only">{tc("appName")}</span>
         </Link>
 
+        <span aria-hidden="true" className="header-title truncate text-sm font-semibold md:hidden">
+          {activeItem ? t(activeItem.labelKey) : null}
+        </span>
+
         <div className="ml-auto flex items-center gap-2">
           {/* Desktop: inline toggles. Mobile: logo, privacy and the preferences panel only (FR-021). */}
           <div className="hidden items-center gap-2 md:flex">
@@ -228,17 +297,6 @@ export function AppShell({ children, toolbar }: { children: ReactNode; toolbar?:
           <PrivacyToggle />
           {toolbar}
           <NewMenu />
-          {canSignOut && (
-            <Button
-              variant="ghost"
-              size="sm"
-              className="hidden md:inline-flex"
-              onClick={() => void signOut()}
-            >
-              <LogOut aria-hidden="true" />
-              {t("signOut")}
-            </Button>
-          )}
           <PreferencesSheet {...(canSignOut ? { onSignOut: () => void signOut() } : {})} />
         </div>
       </header>
@@ -249,19 +307,35 @@ export function AppShell({ children, toolbar }: { children: ReactNode; toolbar?:
       <BackgroundProcesses />
 
       <div className="flex w-full flex-1">
-        <aside className="hidden w-60 shrink-0 border-r bg-sidebar md:block">
+        <aside className="hidden shrink-0 border-r bg-sidebar md:block md:w-16 lg:w-60">
           {/* Scrolls on its own when the window is short (FR-002); Settings stays at the bottom. */}
           <nav
             aria-label={t("label")}
-            className="sticky top-14 flex max-h-[calc(100dvh-3.5rem)] flex-col overflow-y-auto p-4"
+            className="sticky top-14 flex max-h-[calc(100dvh-3.5rem)] flex-col overflow-y-auto p-4 md:max-lg:p-2"
           >
-            <NavGroups groups={NAV_GROUPS} pinFooter />
+            <NavGroups
+              groups={NAV_GROUPS}
+              pinFooter
+              footerExtra={
+                canSignOut ? (
+                  <button
+                    type="button"
+                    title={t("signOut")}
+                    onClick={() => void signOut()}
+                    className="flex items-center gap-3 rounded-md px-3 py-2 text-sm font-medium text-muted-foreground hover:bg-muted hover:text-foreground focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none md:max-lg:justify-center md:max-lg:px-0 pointer-coarse:min-h-11"
+                  >
+                    <LogOut aria-hidden="true" className="size-4 shrink-0" />
+                    <span className="md:max-lg:sr-only">{t("signOut")}</span>
+                  </button>
+                ) : null
+              }
+            />
           </nav>
         </aside>
         <main
           id="main"
           tabIndex={-1}
-          className="mx-auto w-full max-w-7xl min-w-0 flex-1 p-4 pb-[calc(5rem+env(safe-area-inset-bottom))] outline-none md:p-6 md:pb-6"
+          className="mx-auto w-full max-w-7xl min-w-0 flex-1 p-4 pb-[calc(4.5rem+env(safe-area-inset-bottom))] outline-none md:p-6 md:pb-6"
         >
           {children}
         </main>

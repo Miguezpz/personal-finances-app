@@ -88,3 +88,7 @@ export function navIcon(href: NavItem["href"]): LucideIcon {
   if (!item) throw new Error(`No nav item for ${href}`);
   return item.icon;
 }
+
+/** Square tile shared by the "＋" sheet and the "More" grid (spec 012). */
+export const TILE_CLASS =
+  "flex min-h-20 w-full flex-col items-center justify-center gap-2 rounded-xl border bg-card p-3 text-sm font-medium transition-colors duration-fast hover:bg-muted focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none disabled:pointer-events-none disabled:opacity-50";
