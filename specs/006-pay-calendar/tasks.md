@@ -81,14 +81,14 @@
 
 ## Phase 5: Cierre
 
-- [ ] T023 Crear `tests/e2e/us16-pay-calendar.spec.ts` (demo, EN y ES) con `page.clock.install` en 2026-11-13 18:00 UTC (mediodía en CDMX), igual que `us15`:
+- [X] T023 Crear `tests/e2e/us16-pay-calendar.spec.ts` (demo, EN y ES) con `page.clock.install` en 2026-11-13 18:00 UTC (mediodía en CDMX), igual que `us15`:
   - `period-info` contiene el rango 13–29 nov y `payday-moved-early`.
   - Un gasto rápido de Gustos baja el disponible de Gustos exactamente ese monto.
   - `/expenses` en la quincena actual lista el gasto de hoy.
-- [ ] T024 Correr la regresión de e2e en demo: `us2-safe-to-spend`, `us3-recurring`, `us4-expenses`, `us4-spending-by-method`, `us1-income-split`, `us14-card-statement-dates` y `us15-card-paid-checklist`. Corregir los selectores o fechas que dependían del rango nominal.
-- [ ] T025 Puertas: `pnpm typecheck && pnpm lint && pnpm test && pnpm build`.
-- [ ] T026 [P] Docs: en `README.md` y `docs/ux-roadmap.md`, reemplazar la mención de quincenas fijas 1–15/16–fin por la regla del día real de pago (viernes si cae en fin de semana; corrección por fecha del ingreso). Actualizar el comentario de cabecera de `src/domain/periods.ts`.
-- [ ] T027 Commit y push a `main` por fase (sin migración, así que no hay paso de nube). Verificar en la app personal tras el despliegue (quickstart §3).
+- [X] T024 Correr la regresión de e2e en demo: `us2-safe-to-spend`, `us3-recurring`, `us4-expenses`, `us4-spending-by-method`, `us1-income-split`, `us14-card-statement-dates` y `us15-card-paid-checklist`. Corregir los selectores o fechas que dependían del rango nominal.
+- [X] T025 Puertas: `pnpm typecheck && pnpm lint && pnpm test && pnpm build`.
+- [X] T026 [P] Docs: en `README.md` y `docs/ux-roadmap.md`, reemplazar la mención de quincenas fijas 1–15/16–fin por la regla del día real de pago (viernes si cae en fin de semana; corrección por fecha del ingreso). Actualizar el comentario de cabecera de `src/domain/periods.ts`.
+- [X] T027 Commit y push a `main` por fase (sin migración, así que no hay paso de nube). Verificar en la app personal tras el despliegue (quickstart §3).
 
 ## Dependencies
 
@@ -113,3 +113,6 @@
 - `fundedPeriodFor` quedó en `src/domain/pay-calendar.ts` y no en `periods.ts`. Necesita `expectedStart`, y dejarla en `periods.ts` habría creado un import circular. `payday.test.ts` se eliminó: sus casos viven ahora en `pay-calendar.test.ts`, ya con el ajuste de fin de semana.
 - La nota del Dashboard dice "Pago adelantado" / "Paid early", sin "al viernes", porque también aparece cuando un ingreso registrado corrige el inicio a un día anterior al nominal.
 - `groupByPeriod` guarda en caché la quincena de cada fecha. Sin esa caché, la prueba de rendimiento con 5 años de historial tardaba 368 ms, por encima del límite de 50 ms.
+- Las seeds de las e2e en vivo (`us2`, `us5`, `us8`, `us13`, `matrix`, `perf-budgets`) y `us4-spending-by-method` ahora usan `currentQuincena(today)` (`tests/e2e/fixtures.ts`): el salario se recibe el día de pago real (`from`) y financia `start`. Así siguen pasando entre el viernes de pago y el día 1 o 16. Las e2e en vivo no se corrieron en local porque no hay Docker; las corre CI.
+- En el demo, `matrix` ya no exige un cargo recurrente aplicado: el día de pago la quincena nueva todavía no tiene ninguno. Ya fallaba los días 16 y 17 con las quincenas nominales.
+- `docs/ux-roadmap.md` no menciona las quincenas fijas, así que no se tocó.

@@ -5,9 +5,8 @@
  */
 import { readFile } from "node:fs/promises";
 import { ACCOUNT_IDS } from "../../src/data/mock/fixtures/catalog";
-import { addDays } from "../../src/domain/dates";
-import { periodOf, todayIn } from "../../src/domain/periods";
-import { expect, test } from "./fixtures";
+import { todayIn } from "../../src/domain/periods";
+import { currentQuincena, expect, test } from "./fixtures";
 
 const TZ = "America/Mexico_City";
 
@@ -20,8 +19,8 @@ test.describe("US8 · settings and ledger", { tag: "@live" }, () => {
   }) => {
     // One income, so the ledger isn't only the expenses created below.
     const today = todayIn(TZ, new Date());
-    const period = periodOf(today);
-    const received = addDays(period.start, -1);
+    const period = currentQuincena(today);
+    const received = period.from;
     const { data: ruleId } = await userClient.rpc("save_distribution_rule", {
       p_rule: { effective_from: received, needs_bps: 5000, wants_bps: 5000, investment_bps: 0 },
       p_subrules: [],

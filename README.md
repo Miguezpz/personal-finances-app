@@ -1,7 +1,8 @@
 # Personal Finances
 
 A personal finance app built around the Mexican **quincena** (paid on the 15th and the last day of
-the month; the English UI calls it a **pay period**): every income is split automatically by your
+the month, the Friday before when that falls on a weekend; the English UI calls it a **pay period**).
+Each quincena starts the day the money arrives, so spending on payday comes out of the new one: every income is split automatically by your
 rules into **Needs / Wants / Investment**, and the dashboard tells you how much is **safe to spend** in each bucket until the next payday.
 
 It's my day-to-day money tool and a portfolio project. It is designed, specified and tested end to
@@ -32,7 +33,7 @@ end with **Spec-Driven Development** (GitHub Spec Kit + Claude Code), and it run
 | Area                     | Highlights                                                                                                                                                                                                                                                                                                    |
 | ------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | Income & rules           | Versioned distribution rules (e.g. 50/30/20 with Investment sub-rules); exact splits in integer cents, largest-remainder rounding, funded quincena chosen per income. Every income has a type (salary, gift, cashback, sales…), exported in the CSV.                                                          |
-| Safe-to-Spend            | Per-bucket balance with carry-over between quincenas, a traffic light (never color alone) and days to payday. Recurring charges are reserved from day 1 of the quincena. The headline never goes negative: an overspent bucket shows $0 and how much it went over.                                            |
+| Safe-to-Spend            | Per-bucket balance with carry-over between quincenas, a traffic light (never color alone) and days to payday. Recurring charges are reserved from day 1 of the quincena. The quincena runs from the real payday to the day before the next one; a salary registered on a different date (holiday, late payment) moves it. The headline never goes negative: an overspent bucket shows $0 and how much it went over.                                            |
 | Expenses & cards         | One-tap expenses that inherit the bucket from their subcategory; credit cards in "totalero" mode: the headline is always the **amount to pay to avoid interest**, never the minimum. Paying is a one-tap **"Mark as paid"** checklist per statement (no amounts, with Undo). Accounts show their bank's logo. |
 | Categories               | A ready-made taxonomy of 26 categories (13 Needs, 13 Wants) with Lucide icons; each category's icon can be changed and subcategories inherit it unless they get their own.                                                                                                                                    |
 | Third parties (MSI)      | Interest-free installment purchases made for someone else: collection calendar ahead of the card's due date, kept out of personal metrics.                                                                                                                                                                    |

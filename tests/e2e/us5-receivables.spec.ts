@@ -4,9 +4,8 @@
  * date (US5-1/2, SC-006); record a collection → the debtor owes $10,000 (US5-4/6); and the
  * Safe-to-Spend never moves, nor is any expense created (US5-5, SC-007).
  */
-import { addDays } from "../../src/domain/dates";
-import { periodOf, todayIn } from "../../src/domain/periods";
-import { expect, test } from "./fixtures";
+import { todayIn } from "../../src/domain/periods";
+import { currentQuincena, expect, test } from "./fixtures";
 
 const TZ = "America/Mexico_City";
 
@@ -17,8 +16,8 @@ test.describe("US5 · receivables (MSI for third parties)", { tag: "@live" }, ()
     owner,
     userClient,
   }) => {
-    const period = periodOf(todayIn(TZ, new Date()));
-    const received = addDays(period.start, -1);
+    const period = currentQuincena(todayIn(TZ, new Date()));
+    const received = period.from;
     const { data: ruleId } = await userClient.rpc("save_distribution_rule", {
       p_rule: { effective_from: received, needs_bps: 5000, wants_bps: 5000, investment_bps: 0 },
       p_subrules: [],

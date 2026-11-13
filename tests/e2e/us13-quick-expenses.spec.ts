@@ -15,11 +15,11 @@ import type { Locator, Page } from "@playwright/test";
 import type { SupabaseClient } from "@supabase/supabase-js";
 import type { Database } from "../../src/data/supabase/database.types";
 import { addDays } from "../../src/domain/dates";
-import { periodOf, todayIn } from "../../src/domain/periods";
+import { todayIn } from "../../src/domain/periods";
 import type { Locale } from "../../src/domain/types";
 import en from "../../src/i18n/messages/en.json";
 import es from "../../src/i18n/messages/es.json";
-import { expect, openCreate, test, type Owner } from "./fixtures";
+import { currentQuincena, expect, openCreate, type Owner, test } from "./fixtures";
 
 const MESSAGES = { en, es } as const;
 const TZ = "America/Mexico_City";
@@ -37,8 +37,8 @@ async function seed(
   ],
 ) {
   const today = todayIn(TZ, new Date());
-  const period = periodOf(today);
-  const received = addDays(period.start, -1);
+  const period = currentQuincena(today);
+  const received = period.from;
   const { data: ruleId } = await userClient.rpc("save_distribution_rule", {
     p_rule: { effective_from: received, needs_bps: 5000, wants_bps: 5000, investment_bps: 0 },
     p_subrules: [],

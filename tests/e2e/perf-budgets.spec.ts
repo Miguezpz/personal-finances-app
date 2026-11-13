@@ -10,10 +10,9 @@
 import type { Page, TestInfo } from "@playwright/test";
 import en from "../../src/i18n/messages/en.json";
 import es from "../../src/i18n/messages/es.json";
-import { addDays } from "../../src/domain/dates";
-import { periodOf, todayIn } from "../../src/domain/periods";
+import { todayIn } from "../../src/domain/periods";
 import type { Locale } from "../../src/domain/types";
-import { expect, test } from "./fixtures";
+import { currentQuincena, expect, test } from "./fixtures";
 
 const MESSAGES = { en, es } as const;
 const localeOf = (testInfo: TestInfo) => (testInfo.project.metadata as { locale: Locale }).locale;
@@ -86,10 +85,10 @@ test.describe("Performance budgets", () => {
     { tag: "@live" },
     async ({ ownerPage: page, userClient, admin, owner }, testInfo) => {
       const locale = localeOf(testInfo);
-      const period = periodOf(todayIn("America/Mexico_City", new Date()));
+      const period = currentQuincena(todayIn("America/Mexico_City", new Date()));
       const { data: ruleId } = await userClient.rpc("save_distribution_rule", {
         p_rule: {
-          effective_from: addDays(period.start, -1),
+          effective_from: period.from,
           needs_bps: 5000,
           wants_bps: 5000,
           investment_bps: 0,
@@ -100,7 +99,7 @@ test.describe("Performance budgets", () => {
         p_income: {
           label: "Salary",
           amount_cents: 200_000,
-          received_on: addDays(period.start, -1),
+          received_on: period.from,
           funded_period_start: period.start,
           rule_id: ruleId,
         },

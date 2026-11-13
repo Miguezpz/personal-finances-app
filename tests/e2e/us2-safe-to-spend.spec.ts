@@ -5,9 +5,8 @@
  *  - live-*: recording an expense updates the balance and the color WITHOUT reloading (FR-018).
  * Locale-agnostic: driven by ids / test ids; amounts are formatted identically in en-US and es-MX.
  */
-import { addDays } from "../../src/domain/dates";
-import { periodOf, todayIn } from "../../src/domain/periods";
-import { expect, openCreate, test } from "./fixtures";
+import { todayIn } from "../../src/domain/periods";
+import { currentQuincena, expect, openCreate, test } from "./fixtures";
 
 const TZ = "America/Mexico_City";
 
@@ -49,8 +48,8 @@ test.describe("US2 · Safe-to-Spend (live)", { tag: "@live" }, () => {
   }) => {
     // Seed as the owner: a 50/50 rule and a $20,000 income funding the CURRENT quincena.
     const today = todayIn(TZ, new Date());
-    const period = periodOf(today);
-    const received = addDays(period.start, -1);
+    const period = currentQuincena(today);
+    const received = period.from;
     const { data: ruleId, error: ruleError } = await userClient.rpc("save_distribution_rule", {
       p_rule: { effective_from: received, needs_bps: 5000, wants_bps: 5000, investment_bps: 0 },
       p_subrules: [],

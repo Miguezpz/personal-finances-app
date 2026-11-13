@@ -11,6 +11,9 @@
 import { createClient, type SupabaseClient } from "@supabase/supabase-js";
 import { test as base, expect, type Page } from "@playwright/test";
 import type { Database } from "../../src/data/supabase/database.types";
+import { buildPayCalendar, periodOfDate } from "../../src/domain/pay-calendar";
+import { DEFAULT_USER_SETTINGS } from "../../src/domain/settings";
+import type { IsoDate } from "../../src/domain/types";
 
 const url = process.env.NEXT_PUBLIC_SUPABASE_URL ?? "";
 const secretKey = process.env.SUPABASE_TEST_SECRET_KEY ?? "";
@@ -81,6 +84,14 @@ export const test = base.extend<Fixtures>({
 });
 
 export { expect };
+
+/**
+ * The quincena holding `today` by the real payday (spec 006), with the default paydays (15 and last
+ * day, Friday before on weekends). Seeds receive the salary on `from` and fund `start`, so the
+ * Dashboard's current quincena is the seeded one on every day of the month.
+ */
+export const currentQuincena = (today: IsoDate) =>
+  periodOfDate(today, buildPayCalendar(DEFAULT_USER_SETTINGS, []));
 
 /** The next 15th that is today or later (in the browser's time zone), as YYYY-MM-DD. */
 export function nextFifteenth(now = new Date()): { received: string; fundedStart: string } {

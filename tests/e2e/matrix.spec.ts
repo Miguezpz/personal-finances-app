@@ -8,11 +8,10 @@
 import type { Page, TestInfo } from "@playwright/test";
 import en from "../../src/i18n/messages/en.json";
 import es from "../../src/i18n/messages/es.json";
-import { addDays } from "../../src/domain/dates";
-import { periodOf, todayIn } from "../../src/domain/periods";
+import { todayIn } from "../../src/domain/periods";
 import type { Locale } from "../../src/domain/types";
 import { APP_ROUTES, READABLE_AMOUNT } from "./app-routes";
-import { expect, openCreate, test } from "./fixtures";
+import { currentQuincena, expect, openCreate, test } from "./fixtures";
 
 const MESSAGES = { en, es } as const;
 const TZ = "America/Mexico_City";
@@ -93,9 +92,8 @@ test.describe("Matrix · P1 flows and global toggles", () => {
       const problems = watchConsole(page);
 
       await checkDashboard(page, locale);
-      await expect(
-        page.getByTestId("recurring-needs").locator('li[data-status="applied"]').first(),
-      ).toBeVisible();
+      // Applied or still pending: on payday (and the day after) nothing has been charged yet.
+      await expect(page.getByTestId("recurring-needs").locator("li").first()).toBeVisible();
 
       await page.goto("/income");
       await expect(page.getByTestId("income-card").first()).toBeVisible();
@@ -112,12 +110,12 @@ test.describe("Matrix · P1 flows and global toggles", () => {
       test.setTimeout(120_000);
       const locale = localeOf(testInfo);
       const today = todayIn(TZ, new Date());
-      const period = periodOf(today);
+      const period = currentQuincena(today);
 
       // A 50/50/0 rule effective before the quincena, and the default taxonomy (onboarding).
       await userClient.rpc("save_distribution_rule", {
         p_rule: {
-          effective_from: addDays(period.start, -1),
+          effective_from: period.from,
           needs_bps: 5000,
           wants_bps: 5000,
           investment_bps: 0,
@@ -139,9 +137,10 @@ test.describe("Matrix · P1 flows and global toggles", () => {
         .toBeTruthy();
 
       // Recurring: one already charged this quincena, one still pending (when the quincena allows).
-      const startDay = Number(period.start.slice(8));
-      const endDay = Number(period.end.slice(8));
-      const pendingDay = endDay > Number(today.slice(8)) ? endDay : null;
+      // Charged on the payday (already applied) and on the last day (pending), by the real range.
+      const startDay = Number(period.from.slice(8));
+      const endDay = Number(period.to.slice(8));
+      const pendingDay = period.to > today ? endDay : null;
       await userClient.from("recurring_expenses").insert([
         {
           name: "Rent",
@@ -149,7 +148,7 @@ test.describe("Matrix · P1 flows and global toggles", () => {
           charge_day: startDay,
           subcategory_id: rent as string,
           bucket: "needs",
-          starts_on: period.start,
+          starts_on: period.from,
         },
         ...(pendingDay
           ? [
@@ -159,7 +158,7 @@ test.describe("Matrix · P1 flows and global toggles", () => {
                 charge_day: pendingDay,
                 subcategory_id: rent as string,
                 bucket: "needs" as const,
-                starts_on: period.start,
+                starts_on: period.from,
               },
             ]
           : []),
@@ -172,7 +171,7 @@ test.describe("Matrix · P1 flows and global toggles", () => {
       await page.getByTestId("income-type-salary").click();
       await page.locator("#income-label").fill("Salary");
       await page.locator("#income-amount").fill("20,000");
-      await page.locator("#income-received").fill(addDays(period.start, -1));
+      await page.locator("#income-received").fill(period.from);
       await page.locator("#income-period").selectOption(period.start);
       await page.getByTestId("save-income").click();
       await expect(page.getByTestId("income-card").first()).toContainText("Salary");

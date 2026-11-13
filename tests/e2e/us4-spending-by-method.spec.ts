@@ -5,15 +5,15 @@
  */
 import type { Locator } from "@playwright/test";
 import { ACCOUNT_IDS } from "../../src/data/mock/fixtures/catalog";
-import { periodOf, previousPeriod, todayIn } from "../../src/domain/periods";
-import { expect, test } from "./fixtures";
+import { previousPeriod, todayIn } from "../../src/domain/periods";
+import { currentQuincena, expect, test } from "./fixtures";
 
 const TZ = "America/Mexico_City";
 const centsOf = async (l: Locator) => Number((await l.textContent())?.replace(/\D/g, "") ?? "0");
 
 test.describe("US4 · spending by payment method", { tag: "@demo" }, () => {
   test("shows cash and cards for the quincena, adds up, and navigates", async ({ page }) => {
-    const current = periodOf(todayIn(TZ, new Date()));
+    const current = currentQuincena(todayIn(TZ, new Date())); // by the real payday (spec 006)
     await page.goto("/expenses");
 
     const section = page.getByTestId("spending-by-method");
