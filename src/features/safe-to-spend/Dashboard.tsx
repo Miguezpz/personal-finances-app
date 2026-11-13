@@ -22,6 +22,7 @@ import { useUi } from "@/store/ui";
 import { BucketCard } from "./BucketCard";
 import { CardDueAlerts } from "./CardDueAlerts";
 import { DashboardAlertStrip } from "./DashboardAlertStrip";
+import { SavedCard } from "./SavedCard";
 import { useSafeToSpend } from "./useSafeToSpend";
 import { PageHeader } from "@/components/layout/PageHeader";
 import { navIcon } from "@/components/layout/nav-items";
@@ -138,6 +139,8 @@ export function Dashboard() {
               />
             </div>
           </div>
+
+          {data.saved && <SavedCard saved={data.saved} />}
 
           {/* Right below: a one-line notice of cards due soon; paying them happens in Crédito. */}
           <CardDueAlerts />

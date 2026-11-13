@@ -275,7 +275,11 @@
     "alertsLabel": "Alertas",
     "seeExpenses": "Ver gastos",
     "cardsDueNotice": "{count, plural, one {# tarjeta por pagar pronto} other {# tarjetas por pagar pronto}}",
-    "cardsOverdueNotice": "{count, plural, one {# tarjeta por pagar, vencida} other {# tarjetas por pagar, alguna vencida}}"
+    "cardsOverdueNotice": "{count, plural, one {# tarjeta por pagar, vencida} other {# tarjetas por pagar, alguna vencida}}",
+    "savedTitle": "Ahorrado",
+    "savedLastPeriod": "Quincena pasada",
+    "savedTotal": "Total ahorrado",
+    "savedHint": "Lo que te sobró de quincenas anteriores; no se suma a lo disponible."
   },
   "expenses": {
     "addTitle": "Registrar gasto",

@@ -275,7 +275,11 @@
     "alertsLabel": "Alerts",
     "seeExpenses": "See expenses",
     "cardsDueNotice": "{count, plural, one {# card to pay soon} other {# cards to pay soon}}",
-    "cardsOverdueNotice": "{count, plural, one {# card to pay, overdue} other {# cards to pay, some overdue}}"
+    "cardsOverdueNotice": "{count, plural, one {# card to pay, overdue} other {# cards to pay, some overdue}}",
+    "savedTitle": "Saved",
+    "savedLastPeriod": "Last pay period",
+    "savedTotal": "Total saved",
+    "savedHint": "What you had left from past pay periods; not added to what you can spend."
   },
   "expenses": {
     "addTitle": "Add expense",

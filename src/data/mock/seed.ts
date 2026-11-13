@@ -331,7 +331,7 @@ export function generateDemoSnapshot(options: SeedOptions): FinanceSnapshot {
     `00000000-0000-4000-8000-${(counter++).toString(16).padStart(12, "0")}` as Uuid;
 
   const rangeStart = addMonthsToMonthStart(monthStart(today), -(months - 1));
-  const settings = DEFAULT_USER_SETTINGS;
+  const settings = { ...DEFAULT_USER_SETTINGS, saveSurplus: true }; // spec 013: the demo shows Saved
   const card = (cardId: Uuid) => ACCOUNTS.find((a) => a.id === cardId) as Account;
   const cards = ACCOUNTS.filter((a) => a.kind === "credit_card");
 

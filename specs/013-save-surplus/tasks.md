@@ -57,12 +57,12 @@
 
 **Independent test**: el demo muestra `saved-card` con dos montos; con el modo privacidad están enmascarados.
 
-- [ ] T014 [US3] Crear `src/features/safe-to-spend/SavedCard.tsx`:
+- [X] T014 [US3] Crear `src/features/safe-to-spend/SavedCard.tsx`:
   - Una `Card` (`data-testid="saved-card"`) con título `dashboard.savedTitle`, ayuda `dashboard.savedHint` y dos filas `<dl>`: `saved-last` (`dashboard.savedLastPeriod`) y `saved-total` (`dashboard.savedTotal`), con `<Money>`.
   - Icono de Lucide `PiggyBank` con `aria-hidden`.
-- [ ] T015 [US3] En `src/features/safe-to-spend/Dashboard.tsx`, mostrar `<SavedCard saved={data.saved} />` debajo de la cuadrícula de buckets cuando `data?.saved` exista.
-- [ ] T016 [P] [US3] Agregar las llaves `dashboard.savedTitle`, `savedLastPeriod`, `savedTotal` y `savedHint` en `es.json` y `en.json`.
-- [ ] T017 [P] [US3] En `src/data/mock/seed.ts`, `settings = { ...DEFAULT_USER_SETTINGS, saveSurplus: true }`. Verificar `tests/unit/data/mock-seed-consistency.test.ts` y `third-party-isolation.test.ts`.
+- [X] T015 [US3] En `src/features/safe-to-spend/Dashboard.tsx`, mostrar `<SavedCard saved={data.saved} />` debajo de la cuadrícula de buckets cuando `data?.saved` exista.
+- [X] T016 [P] [US3] Agregar las llaves `dashboard.savedTitle`, `savedLastPeriod`, `savedTotal` y `savedHint` en `es.json` y `en.json`.
+- [X] T017 [P] [US3] En `src/data/mock/seed.ts`, `settings = { ...DEFAULT_USER_SETTINGS, saveSurplus: true }`. Verificar `tests/unit/data/mock-seed-consistency.test.ts` y `third-party-isolation.test.ts`.
 
 ## Phase 5: Cierre
 
