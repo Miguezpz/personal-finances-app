@@ -60,6 +60,7 @@ export const toUserSettings = (r: Row<"user_settings">): UserSettings => ({
   yellowMinBps: bps(r.yellow_min_bps),
   collectionLeadDays: r.collection_lead_days,
   emergencyFundMonths: r.emergency_fund_months,
+  saveSurplus: r.save_surplus,
 });
 
 export const toAccount = (r: Row<"accounts">): Account => ({
@@ -266,6 +267,7 @@ export const fromSettings = (s: Partial<UserSettings>): Update<"user_settings"> 
   ...(s.yellowMinBps !== undefined && { yellow_min_bps: s.yellowMinBps }),
   ...(s.collectionLeadDays !== undefined && { collection_lead_days: s.collectionLeadDays }),
   ...(s.emergencyFundMonths !== undefined && { emergency_fund_months: s.emergencyFundMonths }),
+  ...(s.saveSurplus !== undefined && { save_surplus: s.saveSurplus }),
 });
 
 export const fromIncome = (i: Omit<Income, "id">) => ({

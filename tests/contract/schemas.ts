@@ -25,6 +25,7 @@ export const userSettingsSchema = z.strictObject({
   yellowMinBps: bps,
   collectionLeadDays: z.number().int().min(0).max(15),
   emergencyFundMonths: z.number().int().min(1).max(36),
+  saveSurplus: z.boolean(),
 });
 
 export const accountSchema = z

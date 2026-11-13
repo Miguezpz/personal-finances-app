@@ -491,6 +491,13 @@ export function runDataProviderContract(
         expect((await provider.statementMarks.list()).some((m) => m.id === first.id)).toBe(false);
       });
 
+      it("settings.update round-trips saveSurplus (spec 013)", async () => {
+        expect((await provider.settings.update({ saveSurplus: true })).saveSurplus).toBe(true);
+        expect((await provider.settings.get()).saveSurplus).toBe(true);
+        expect((await provider.settings.update({ saveSurplus: false })).saveSurplus).toBe(false);
+        expect((await provider.settings.get()).saveSurplus).toBe(false);
+      });
+
       it("refuses to archive a card with pending installments (CONFLICT)", async () => {
         const card = (await provider.accounts.list()).find((a) => a.kind === "credit_card");
         if (!card) throw new Error("seed missing");

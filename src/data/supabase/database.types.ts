@@ -385,14 +385,14 @@ isOneToOne: false
                   ]
                 },"user_settings": {
                   Row: {
-                    "collection_lead_days": number,"created_at": string,"emergency_fund_months": number,"first_payday": number,"green_min_bps": number,"second_payday": number,"timezone": string,"updated_at": string,"user_id": string,"yellow_min_bps": number
+                    "collection_lead_days": number,"created_at": string,"emergency_fund_months": number,"first_payday": number,"green_min_bps": number,"save_surplus": boolean,"second_payday": number,"timezone": string,"updated_at": string,"user_id": string,"yellow_min_bps": number
                   }
                   ComputedFields: never
                   Insert: {
-                    "collection_lead_days"?: number,"created_at"?: string,"emergency_fund_months"?: number,"first_payday"?: number,"green_min_bps"?: number,"second_payday"?: number,"timezone"?: string,"updated_at"?: string,"user_id"?: string,"yellow_min_bps"?: number
+                    "collection_lead_days"?: number,"created_at"?: string,"emergency_fund_months"?: number,"first_payday"?: number,"green_min_bps"?: number,"save_surplus"?: boolean,"second_payday"?: number,"timezone"?: string,"updated_at"?: string,"user_id"?: string,"yellow_min_bps"?: number
                   }
                   Update: {
-                    "collection_lead_days"?: number,"created_at"?: string,"emergency_fund_months"?: number,"first_payday"?: number,"green_min_bps"?: number,"second_payday"?: number,"timezone"?: string,"updated_at"?: string,"user_id"?: string,"yellow_min_bps"?: number
+                    "collection_lead_days"?: number,"created_at"?: string,"emergency_fund_months"?: number,"first_payday"?: number,"green_min_bps"?: number,"save_surplus"?: boolean,"second_payday"?: number,"timezone"?: string,"updated_at"?: string,"user_id"?: string,"yellow_min_bps"?: number
                   }
                   Relationships: [
                     

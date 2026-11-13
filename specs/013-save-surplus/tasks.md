@@ -9,18 +9,18 @@
 
 ## Phase 1: Fundacional (bloquea todo)
 
-- [ ] T001 Crear `supabase/migrations/0013_save_surplus.sql` según `contracts/data.md`: `alter table public.user_settings add column save_surplus boolean not null default false;` más el `comment on column`.
-- [ ] T002 [P] Crear `supabase/tests/save-surplus.test.sql` (pgTAP, mismo encabezado que `card-terms.test.sql`):
+- [X] T001 Crear `supabase/migrations/0013_save_surplus.sql` según `contracts/data.md`: `alter table public.user_settings add column save_surplus boolean not null default false;` más el `comment on column`.
+- [X] T002 [P] Crear `supabase/tests/save-surplus.test.sql` (pgTAP, mismo encabezado que `card-terms.test.sql`):
   - `has_column`, `col_not_null` y `col_default_is('public','user_settings','save_surplus','false')`.
   - Un usuario nuevo tiene `save_surplus = false`.
   - El dueño puede actualizarla y otro usuario no la ve (RLS).
-- [ ] T003 En `src/domain/types.ts`, agregar `UserSettings.saveSurplus: boolean` ("true = el sobrante de cada quincena va a Ahorrado; spec 013"). En `src/domain/settings.ts`, `DEFAULT_USER_SETTINGS.saveSurplus = false`.
-- [ ] T004 [P] En `src/data/supabase/database.types.ts`, agregar `save_surplus` a `user_settings`: `boolean` en `Row`; `boolean` opcional en `Insert` y `Update`. En `src/data/supabase/mappers.ts`, `toUserSettings` agrega `saveSurplus: r.save_surplus` y `fromSettings` agrega `save_surplus` cuando viene definido.
-- [ ] T005 [P] En `src/domain/csv.ts`, agregar la columna `save_surplus` a `settings.csv` (encabezado y valor). Actualizar `tests/unit/domain/csv.test.ts` si fija los encabezados.
-- [ ] T006 [P] Contrato:
+- [X] T003 En `src/domain/types.ts`, agregar `UserSettings.saveSurplus: boolean` ("true = el sobrante de cada quincena va a Ahorrado; spec 013"). En `src/domain/settings.ts`, `DEFAULT_USER_SETTINGS.saveSurplus = false`.
+- [X] T004 [P] En `src/data/supabase/database.types.ts`, agregar `save_surplus` a `user_settings`: `boolean` en `Row`; `boolean` opcional en `Insert` y `Update`. En `src/data/supabase/mappers.ts`, `toUserSettings` agrega `saveSurplus: r.save_surplus` y `fromSettings` agrega `save_surplus` cuando viene definido.
+- [X] T005 [P] En `src/domain/csv.ts`, agregar la columna `save_surplus` a `settings.csv` (encabezado y valor). Actualizar `tests/unit/domain/csv.test.ts` si fija los encabezados.
+- [X] T006 [P] Contrato:
   - `tests/contract/schemas.ts`: `saveSurplus: z.boolean()`.
   - `tests/contract/data-provider.contract.ts`: ida y vuelta de `settings.update({ saveSurplus: true })` y de vuelta a `false`.
-- [ ] T007 Correr `pnpm typecheck` y corregir los literales de `UserSettings` en pruebas y fixtures que pidan el campo nuevo.
+- [X] T007 Correr `pnpm typecheck` y corregir los literales de `UserSettings` en pruebas y fixtures que pidan el campo nuevo.
 
 ## Phase 2: US1 — El sobrante se guarda y no infla la quincena siguiente (P1) 🎯 MVP
 

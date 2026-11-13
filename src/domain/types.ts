@@ -60,6 +60,8 @@ export interface UserSettings {
   yellowMinBps: BasisPoints; // por defecto 2000
   collectionLeadDays: number; // por defecto 3
   emergencyFundMonths: number; // por defecto 6
+  /** true = el sobrante de cada quincena va a Ahorrado; spec 013. */
+  saveSurplus: boolean;
 }
 
 export type AccountKind = "checking" | "savings" | "credit_card" | "investment" | "cash";

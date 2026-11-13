@@ -89,6 +89,7 @@ export function snapshotToCsvBundle(
         "yellow_min_bps",
         "collection_lead_days",
         "emergency_fund_months",
+        "save_surplus",
       ],
       [
         [
@@ -99,6 +100,7 @@ export function snapshotToCsvBundle(
           s.settings.yellowMinBps,
           s.settings.collectionLeadDays,
           s.settings.emergencyFundMonths,
+          s.settings.saveSurplus,
         ],
       ],
     ),

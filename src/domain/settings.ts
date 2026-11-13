@@ -15,4 +15,5 @@ export const DEFAULT_USER_SETTINGS: UserSettings = {
   yellowMinBps: bps(2000),
   collectionLeadDays: 3,
   emergencyFundMonths: 6,
+  saveSurplus: false,
 };
