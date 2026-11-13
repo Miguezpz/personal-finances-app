@@ -74,7 +74,7 @@
     - Apagar y guardar: `saved-card` desaparece.
 - [X] T019 Puertas: `pnpm typecheck && pnpm lint && pnpm format:check && pnpm test && pnpm build`; `pnpm test:contract:local`; `pnpm db:test`; `E2E_MODES=demo pnpm test:e2e`; y `pnpm test:e2e:local tests/e2e/us17-save-surplus.spec.ts`.
 - [X] T020 [P] En `README.md`, mencionar en la fila de Safe-to-Spend el ajuste opcional "Guardar el sobrante": lo que sobra va a Ahorrado y no se arrastra.
-- [ ] T021 **Nube (con confirmación del dueño)**:
+- [X] T021 **Nube (con confirmación del dueño)**:
   - Aplicar `0013` con el MCP de Supabase (`apply_migration`) al proyecto `potodtpkgadgsmeuuafx`.
   - Corregir la versión en `supabase_migrations.schema_migrations` al prefijo `0013`.
   - Verificar con `list_migrations`.
