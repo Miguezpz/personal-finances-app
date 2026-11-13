@@ -4,11 +4,14 @@
  *               + Σ goal contributions from Needs/Wants + Σ third-party installments still owed
  *               + current available Needs and Wants (signed)
  *               + Saved total (spec 013: what saveSurplus took out of the available)
+ *               − Σ net from Saved of completed purchase goals (spec 014: that money was spent;
+ *                 assigning and returning only move it inside Saved, so they don't count)
  *   liabilities = Σ total card debt (includes the full outstanding MSI)
  * A snapshot is stored once per month (dated the 1st) for the historical chart.
  */
 import { cardStatus } from "./credit";
 import { monthStart } from "./dates";
+import { netFromSaved } from "./goals";
 import { buildPayCalendar, periodOfDate } from "./pay-calendar";
 import { computeSafeToSpend } from "./safe-to-spend";
 import type { Cents, FinanceSnapshot, IsoDate, NetWorthSnapshot } from "./types";
@@ -39,6 +42,7 @@ export function computeNetWorth(s: FinanceSnapshot, asOf: IsoDate): NetWorth {
     contributions: s.contributions,
   });
   assets += sts.needs.available + sts.wants.available + (sts.saved?.total ?? 0);
+  for (const g of s.goals) if (g.completed) assets -= netFromSaved(g.id, s.savedMoves);
 
   let liabilities = 0;
   for (const card of s.accounts) {

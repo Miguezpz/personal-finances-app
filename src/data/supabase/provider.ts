@@ -110,6 +110,7 @@ export function createSupabaseProvider(options: SupabaseProviderOptions = {}): D
         installments: receivableData.installments,
         goals: goalData.goals,
         contributions: goalData.contributions,
+        savedMoves: goalData.savedMoves,
         netWorthSnapshots,
         expenseTemplates: templateList,
       };

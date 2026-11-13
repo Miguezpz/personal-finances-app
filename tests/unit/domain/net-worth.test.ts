@@ -135,6 +135,47 @@ describe("computeNetWorth", () => {
     expect(computeNetWorth(on, asOf)).toEqual(computeNetWorth(off, asOf));
   });
 
+  describe("Saved in goals (spec 014)", () => {
+    const laptop = makeGoal({
+      kind: "purchase",
+      sourceBucket: "investment",
+      annual: null,
+      monthly: null,
+      target: cents(2_500_000),
+    });
+    const withLaptop = { ...snapshot, goals: [...snapshot.goals, laptop] };
+    const moves = (...amounts: number[]) =>
+      amounts.map((amount) => ({
+        id: testId(),
+        goalId: laptop.id,
+        movedOn: d("2026-11-12"),
+        amount: cents(amount),
+      }));
+    const asOf = d("2026-11-12");
+
+    it("assigning and returning don't change it (FR-012)", () => {
+      const before = computeNetWorth(withLaptop, asOf);
+      expect(computeNetWorth({ ...withLaptop, savedMoves: moves(500_000) }, asOf)).toEqual(before);
+      expect(
+        computeNetWorth({ ...withLaptop, savedMoves: moves(500_000, -200_000) }, asOf),
+      ).toEqual(before);
+    });
+
+    it("'I bought it' lowers it by the goal's net from Saved; restoring gives it back (FR-018)", () => {
+      const open = { ...withLaptop, savedMoves: moves(700_000, -200_000) };
+      const bought = {
+        ...open,
+        goals: open.goals.map((g) =>
+          g.id === laptop.id ? { ...g, archived: true, completed: true } : g,
+        ),
+      };
+      const before = computeNetWorth(open, asOf);
+      const after = computeNetWorth(bought, asOf);
+      expect(before.assets - after.assets).toBe(500_000);
+      expect(after.liabilities).toBe(before.liabilities);
+    });
+  });
+
   it("is zero for an empty snapshot", () => {
     expect(computeNetWorth(emptySnapshot(), d("2026-11-12"))).toEqual({
       assets: 0,

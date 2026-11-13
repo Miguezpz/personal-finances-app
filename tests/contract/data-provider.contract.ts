@@ -172,7 +172,33 @@ async function seedThroughProvider(p: DataProvider) {
     targetMonths: null,
     annual: cents(1_200_000),
     monthly: cents(100_000),
+    target: null,
+    targetMonth: null,
     archived: false,
+    completed: false,
+  });
+  // Spec 014: a purchase with one assignment and one return.
+  const purchase = await p.goals.create({
+    kind: "purchase",
+    name: "Laptop",
+    sourceBucket: "investment",
+    targetMonths: null,
+    annual: null,
+    monthly: null,
+    target: cents(2_500_000),
+    targetMonth: d("2027-03-01"),
+    archived: false,
+    completed: false,
+  });
+  await p.goals.addSavedMove({
+    goalId: purchase.id,
+    movedOn: d("2026-11-13"),
+    amount: cents(500_000),
+  });
+  await p.goals.addSavedMove({
+    goalId: purchase.id,
+    movedOn: d("2026-11-13"),
+    amount: cents(-200_000),
   });
   await p.goals.addContributions([
     {
@@ -196,7 +222,7 @@ async function seedThroughProvider(p: DataProvider) {
     sort: 0,
     archived: false,
   });
-  return { debit, card, stocks, sub, rule, recurring, receivable, goal, template };
+  return { debit, card, stocks, sub, rule, recurring, receivable, goal, purchase, template };
 }
 
 function expectForeignKeysResolved(s: FinanceSnapshot) {
@@ -242,6 +268,7 @@ function expectForeignKeysResolved(s: FinanceSnapshot) {
   });
   s.installments.forEach((x) => has(receivables, x.receivableId, "installment.receivableId"));
   s.contributions.forEach((x) => has(goals, x.goalId, "contribution.goalId"));
+  s.savedMoves.forEach((x) => has(goals, x.goalId, "savedMove.goalId"));
   s.expenseTemplates.forEach((x) => {
     has(subcategories, x.subcategoryId, "expenseTemplate.subcategoryId");
     has(accounts, x.paymentAccountId, "expenseTemplate.paymentAccountId");
@@ -348,6 +375,7 @@ export function runDataProviderContract(
       expect(sortById(receivables.installments)).toEqual(sortById(s.installments));
       expect(sortById(goals.goals)).toEqual(sortById(s.goals));
       expect(sortById(goals.contributions)).toEqual(sortById(s.contributions));
+      expect(sortById(goals.savedMoves)).toEqual(sortById(s.savedMoves));
       expect(sortById(netWorth)).toEqual(sortById(s.netWorthSnapshots));
       expect(sortById(templates)).toEqual(sortById(s.expenseTemplates));
     });
@@ -496,6 +524,26 @@ export function runDataProviderContract(
         expect((await provider.settings.get()).saveSurplus).toBe(true);
         expect((await provider.settings.update({ saveSurplus: false })).saveSurplus).toBe(false);
         expect((await provider.settings.get()).saveSurplus).toBe(false);
+      });
+
+      it("purchase goals and saved moves round-trip (spec 014)", async () => {
+        const { goals, savedMoves } = await provider.goals.list();
+        const laptop = goals.find((g) => g.kind === "purchase");
+        expect(laptop).toMatchObject({
+          target: 2_500_000,
+          targetMonth: "2027-03-01",
+          monthly: null,
+          completed: false,
+        });
+        const net = savedMoves
+          .filter((m) => m.goalId === laptop?.id)
+          .reduce((s, m) => s + m.amount, 0);
+        expect(net).toBe(300_000);
+
+        const done = await provider.goals.update(laptop!.id, { archived: true, completed: true });
+        expect(done).toMatchObject({ archived: true, completed: true });
+        const back = await provider.goals.update(laptop!.id, { archived: false, completed: false });
+        expect(back).toMatchObject({ archived: false, completed: false });
       });
 
       it("refuses to archive a card with pending installments (CONFLICT)", async () => {
@@ -977,6 +1025,11 @@ export function runDataProviderContract(
           ["goals.create", () => p.goals.create(before.goals[0] as never)],
           ["goals.update", () => p.goals.update(anyId, { name: "x" })],
           ["goals.addContributions", () => p.goals.addContributions([])],
+          [
+            "goals.addSavedMove",
+            () =>
+              p.goals.addSavedMove({ goalId: anyId, movedOn: d("2026-11-13"), amount: cents(1) }),
+          ],
           [
             "netWorth.upsertMonthly",
             () => p.netWorth.upsertMonthly(before.netWorthSnapshots[0] as never),

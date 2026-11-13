@@ -134,10 +134,15 @@ export function createMockProvider(options: MockProviderOptions = {}): DataProvi
     },
 
     goals: {
-      list: async () => ({ goals: [...s().goals], contributions: [...s().contributions] }),
+      list: async () => ({
+        goals: [...s().goals],
+        contributions: [...s().contributions],
+        savedMoves: [...s().savedMoves],
+      }),
       create: () => denyWrite("goals.create"),
       update: () => denyWrite("goals.update"),
       addContributions: () => denyWrite("goals.addContributions"),
+      addSavedMove: () => denyWrite("goals.addSavedMove"),
     },
 
     netWorth: {

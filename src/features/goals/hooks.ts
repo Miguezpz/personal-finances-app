@@ -4,11 +4,12 @@
 import type { NewEntity, Patch } from "@/data/provider";
 import { replaceTemp, useSnapshotMutation } from "@/data/snapshot-cache";
 import { useFinanceSnapshot } from "@/data/useFinanceSnapshot";
-import type { FinanceSnapshot, Goal, Uuid } from "@/domain/types";
+import type { FinanceSnapshot, Goal, SavedMove, Uuid } from "@/domain/types";
 
 const selectGoalData = (s: FinanceSnapshot) => ({
   goals: s.goals,
   contributions: s.contributions,
+  savedMoves: s.savedMoves,
   expenses: s.expenses,
 });
 
@@ -35,5 +36,17 @@ export function useUpdateGoal() {
       ...s,
       goals: s.goals.map((g) => (g.id === id ? { ...g, ...patch } : g)),
     }),
+  });
+}
+
+/** Spec 014: assign Saved to a goal (+) or return it (−). */
+export function useAddSavedMove() {
+  return useSnapshotMutation<NewEntity<SavedMove>, SavedMove>({
+    mutationFn: (provider, input) => provider.goals.addSavedMove(input),
+    optimistic: (s, input, { tempId }) => ({
+      ...s,
+      savedMoves: [...s.savedMoves, { ...input, id: tempId }],
+    }),
+    created: (s, row, { tempId }) => ({ ...s, savedMoves: replaceTemp(s.savedMoves, tempId, row) }),
   });
 }

@@ -18,6 +18,7 @@ import type {
   FinanceSnapshot,
   Goal,
   GoalContribution,
+  SavedMove,
   Income,
   IncomeAllocation,
   Installment,
@@ -214,11 +215,13 @@ export interface ReceivablesRepository {
 }
 
 export interface GoalsRepository {
-  list(): Promise<{ goals: Goal[]; contributions: GoalContribution[] }>;
+  list(): Promise<{ goals: Goal[]; contributions: GoalContribution[]; savedMoves: SavedMove[] }>;
   create(input: NewEntity<Goal>): Promise<Goal>;
   update(id: Uuid, patch: Patch<Goal>): Promise<Goal>;
   /** Idempotente por (goalId, periodStart). */
   addContributions(items: ReadonlyArray<NewEntity<GoalContribution>>): Promise<GoalContribution[]>;
+  /** Spec 014: una asignación (+) o un regreso (−) de Ahorrado. */
+  addSavedMove(input: NewEntity<SavedMove>): Promise<SavedMove>;
 }
 
 export interface NetWorthRepository {

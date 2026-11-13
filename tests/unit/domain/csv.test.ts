@@ -101,6 +101,7 @@ describe("snapshotToCsvBundle", () => {
         "expense_templates.csv",
         "expenses.csv",
         "goal_contributions.csv",
+        "goal_saved_moves.csv",
         "goals.csv",
         "income_allocations.csv",
         "incomes.csv",

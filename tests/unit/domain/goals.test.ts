@@ -7,9 +7,16 @@
  *    complete months (fewer if there is less history); progress = saved / vital expenses.
  */
 import { describe, expect, it } from "vitest";
-import { dueContributions, emergencyFundProgress, suggestedMonthly } from "@/domain/goals";
+import {
+  availableToAssign,
+  dueContributions,
+  emergencyFundProgress,
+  netFromSaved,
+  purchaseProgress,
+  suggestedMonthly,
+} from "@/domain/goals";
 import { cents } from "@/domain/money";
-import type { GoalContribution } from "@/domain/types";
+import type { GoalContribution, SavedMove, Uuid } from "@/domain/types";
 import { d, makeExpense, makeGoal, testId } from "../../utils/fixtures";
 
 const contribution = (goalId: string, periodStart: string, amount = 100_000): GoalContribution => ({
@@ -122,5 +129,77 @@ describe("emergencyFundProgress", () => {
       target: 0,
       monthsCovered: 0,
     });
+  });
+});
+
+const move = (goalId: Uuid, amount: number): SavedMove => ({
+  id: testId(),
+  goalId,
+  movedOn: d("2026-11-13"),
+  amount: cents(amount),
+});
+
+describe("saved moves (spec 014)", () => {
+  const laptop = makeGoal({
+    kind: "purchase",
+    sourceBucket: "investment",
+    annual: null,
+    monthly: null,
+    target: cents(2_500_000),
+  });
+  const other = makeGoal();
+
+  it("available = total saved − assigned + returned", () => {
+    expect(availableToAssign(cents(232_790), [move(laptop.id, 100_000)])).toEqual({
+      available: 132_790,
+      over: false,
+    });
+    expect(
+      availableToAssign(cents(232_790), [move(laptop.id, 100_000), move(laptop.id, -20_000)]),
+    ).toEqual({ available: 152_790, over: false });
+    expect(availableToAssign(cents(232_790), [])).toEqual({ available: 232_790, over: false });
+  });
+
+  it("flags when what's assigned exceeds what's saved (the UI floors it at $0)", () => {
+    expect(availableToAssign(cents(50_000), [move(laptop.id, 80_000)])).toEqual({
+      available: -30_000,
+      over: true,
+    });
+  });
+
+  it("a goal's net only counts its own moves", () => {
+    const moves = [move(laptop.id, 500_000), move(laptop.id, -200_000), move(other.id, 70_000)];
+    expect(netFromSaved(laptop.id, moves)).toBe(300_000);
+    expect(netFromSaved(other.id, moves)).toBe(70_000);
+  });
+
+  it("the emergency fund adds what came from Saved to its contributions", () => {
+    const fund = makeGoal({ kind: "emergency_fund", targetMonths: 6, annual: null });
+    const p = emergencyFundProgress(
+      fund,
+      [contribution(fund.id, "2026-10-01", 1_000_000)],
+      [],
+      d("2026-11-13"),
+      [move(fund.id, 100_000), move(other.id, 999)],
+    );
+    expect(p.saved).toBe(1_100_000);
+  });
+
+  it("purchase progress: net / target, capped at 100% while the real amount still shows", () => {
+    expect(purchaseProgress(laptop, [move(laptop.id, 500_000)])).toEqual({
+      saved: 500_000,
+      target: 2_500_000,
+      ratio: 0.2,
+    });
+    expect(purchaseProgress(laptop, [move(laptop.id, 3_000_000)])).toEqual({
+      saved: 3_000_000,
+      target: 2_500_000,
+      ratio: 1,
+    });
+    expect(purchaseProgress(laptop, []).ratio).toBe(0);
+  });
+
+  it("a purchase never gets monthly contributions", () => {
+    expect(dueContributions([laptop], [], d("2026-11-20"))).toEqual([]);
   });
 });

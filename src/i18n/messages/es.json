@@ -279,7 +279,11 @@
     "savedTitle": "Ahorrado",
     "savedLastPeriod": "Quincena pasada",
     "savedTotal": "Total ahorrado",
-    "savedHint": "Lo que te sobró de quincenas anteriores; no se suma a lo disponible."
+    "savedHint": "Lo que te sobró de quincenas anteriores; no se suma a lo disponible.",
+    "savedAvailable": "Disponible para asignar",
+    "savedOver": "Tus metas tienen más de lo que has ahorrado, así que no queda nada por asignar. Regresa dinero de alguna meta si lo necesitas.",
+    "savedAssign": "Asignar",
+    "savedNoGoals": "Crea una meta para asignarle lo ahorrado."
   },
   "expenses": {
     "addTitle": "Registrar gasto",
@@ -803,23 +807,26 @@
   },
   "goals": {
     "title": "Metas",
-    "description": "Tu fondo de emergencia y tus apartados. Cada mes retienen un monto de la bolsa que elijas.",
+    "description": "Tu fondo de emergencia, tus apartados y tus compras. Los apartados retienen un monto cada mes; a cualquiera le puedes asignar lo ahorrado.",
     "addTitle": "Agregar meta",
     "editTitle": "Editar meta",
     "formHint": "Los cambios aplican desde la próxima aportación; las anteriores se quedan como estaban.",
     "kind": "Tipo",
     "kinds": {
       "emergency_fund": "Fondo de emergencia",
-      "sinking_fund": "Apartado"
+      "sinking_fund": "Apartado",
+      "purchase": "Compra"
     },
     "kindHints": {
       "emergency_fund": "Un colchón medido en meses de tus gastos vitales (Necesidades).",
-      "sinking_fund": "Un gasto anual que se ahorra poco a poco, p. ej. seguro o predial."
+      "sinking_fund": "Un gasto anual que se ahorra poco a poco, p. ej. seguro o predial.",
+      "purchase": "Algo que quieres comprar, con dinero de lo ahorrado."
     },
     "name": "Nombre",
     "namePlaceholders": {
       "emergency_fund": "p. ej. Fondo de emergencia",
-      "sinking_fund": "p. ej. Seguro del auto"
+      "sinking_fund": "p. ej. Seguro del auto",
+      "purchase": "p. ej. Laptop nueva"
     },
     "targetMonths": "Meta (meses)",
     "targetMonthsHint": "Cuántos meses de gastos vitales debe cubrir (1–36).",
@@ -852,7 +859,30 @@
     "progressLabel": "Avance de {name}",
     "monthsCovered": "{covered} de {target} meses cubiertos",
     "annualTarget": "Monto anual: <amount></amount>",
-    "savedThisYear": "ahorrado en {year}"
+    "savedThisYear": "ahorrado en {year}",
+    "targetAmount": "Monto objetivo (MXN)",
+    "targetMonth": "Mes objetivo (opcional)",
+    "targetMonthHint": "Solo de referencia, p. ej. 2027-03.",
+    "invalidMonth": "Usa año y mes, p. ej. 2027-03.",
+    "targetBy": "para {month}",
+    "goal": "Meta",
+    "amount": "Monto (MXN)",
+    "assign": "Asignar",
+    "assignTitle": "Asignar desde Ahorrado",
+    "assignHint": "Pasa dinero de Ahorrado a esta meta. Tu disponible para gastar y tu patrimonio no cambian.",
+    "returnTitle": "Regresar a Ahorrado",
+    "returnHint": "Pasa dinero de esta meta de vuelta a lo disponible para asignar.",
+    "returnToSaved": "Regresar a Ahorrado",
+    "maxAvailable": "Disponible para asignar: <max></max>",
+    "maxReturnable": "Puedes regresar hasta <max></max>",
+    "overMax": "Lo máximo que puedes usar es <max></max>",
+    "goalRequired": "Elige una meta.",
+    "assigned": "Asignado a la meta.",
+    "returned": "Regresado a Ahorrado.",
+    "bought": "Lo compré",
+    "markedBought": "Marcada como comprada. No registres la compra también como gasto, o se contará dos veces.",
+    "completedBadge": "Cumplida",
+    "fromSaved": "<amount></amount> desde Ahorrado"
   },
   "netWorth": {
     "title": "Patrimonio",

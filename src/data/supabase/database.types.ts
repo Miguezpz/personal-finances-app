@@ -185,16 +185,36 @@ isOneToOne: false
       referencedColumns: ["user_id","id"]
     }
                   ]
-                },"goals": {
+                },"goal_saved_moves": {
                   Row: {
-                    "annual_cents": number | null,"archived_at": string | null,"created_at": string,"due_month": string | null,"id": string,"kind": Database["public"]['Enums']["goal_kind"],"monthly_cents": number | null,"name": string,"source_bucket": Database["public"]['Enums']["bucket_kind"],"target_months": number | null,"user_id": string
+                    "amount_cents": number,"created_at": string,"goal_id": string,"id": string,"moved_on": string,"user_id": string
                   }
                   ComputedFields: never
                   Insert: {
-                    "annual_cents"?: number | null,"archived_at"?: string | null,"created_at"?: string,"due_month"?: string | null,"id"?: string,"kind": Database["public"]['Enums']["goal_kind"],"monthly_cents"?: number | null,"name": string,"source_bucket": Database["public"]['Enums']["bucket_kind"],"target_months"?: number | null,"user_id"?: string
+                    "amount_cents": number,"created_at"?: string,"goal_id": string,"id"?: string,"moved_on": string,"user_id"?: string
                   }
                   Update: {
-                    "annual_cents"?: number | null,"archived_at"?: string | null,"created_at"?: string,"due_month"?: string | null,"id"?: string,"kind"?: Database["public"]['Enums']["goal_kind"],"monthly_cents"?: number | null,"name"?: string,"source_bucket"?: Database["public"]['Enums']["bucket_kind"],"target_months"?: number | null,"user_id"?: string
+                    "amount_cents"?: number,"created_at"?: string,"goal_id"?: string,"id"?: string,"moved_on"?: string,"user_id"?: string
+                  }
+                  Relationships: [
+                    {
+      foreignKeyName: "goal_saved_moves_user_id_goal_id_fkey"
+      columns: ["user_id","goal_id"]
+isOneToOne: false
+      referencedRelation: "goals"
+      referencedColumns: ["user_id","id"]
+    }
+                  ]
+                },"goals": {
+                  Row: {
+                    "annual_cents": number | null,"archived_at": string | null,"completed_at": string | null,"created_at": string,"due_month": string | null,"id": string,"kind": Database["public"]['Enums']["goal_kind"],"monthly_cents": number | null,"name": string,"source_bucket": Database["public"]['Enums']["bucket_kind"],"target_cents": number | null,"target_months": number | null,"user_id": string
+                  }
+                  ComputedFields: never
+                  Insert: {
+                    "annual_cents"?: number | null,"archived_at"?: string | null,"completed_at"?: string | null,"created_at"?: string,"due_month"?: string | null,"id"?: string,"kind": Database["public"]['Enums']["goal_kind"],"monthly_cents"?: number | null,"name": string,"source_bucket": Database["public"]['Enums']["bucket_kind"],"target_cents"?: number | null,"target_months"?: number | null,"user_id"?: string
+                  }
+                  Update: {
+                    "annual_cents"?: number | null,"archived_at"?: string | null,"completed_at"?: string | null,"created_at"?: string,"due_month"?: string | null,"id"?: string,"kind"?: Database["public"]['Enums']["goal_kind"],"monthly_cents"?: number | null,"name"?: string,"source_bucket"?: Database["public"]['Enums']["bucket_kind"],"target_cents"?: number | null,"target_months"?: number | null,"user_id"?: string
                   }
                   Relationships: [
                     
@@ -454,7 +474,7 @@ isOneToOne: false
       } }
           }
           Enums: {
-            "account_kind": "checking"|"savings"|"credit_card"|"investment"|"cash","bucket_kind": "needs"|"wants"|"investment","expense_origin": "manual"|"recurring","goal_kind": "emergency_fund"|"sinking_fund","income_type": "salary"|"gift"|"debt_repayment"|"cashback"|"extra"|"sales"|"savings"|"investment_returns"|"other","installment_status": "pending"|"partial"|"collected","spend_bucket": "needs"|"wants"
+            "account_kind": "checking"|"savings"|"credit_card"|"investment"|"cash","bucket_kind": "needs"|"wants"|"investment","expense_origin": "manual"|"recurring","goal_kind": "emergency_fund"|"sinking_fund"|"purchase","income_type": "salary"|"gift"|"debt_repayment"|"cashback"|"extra"|"sales"|"savings"|"investment_returns"|"other","installment_status": "pending"|"partial"|"collected","spend_bucket": "needs"|"wants"
           }
           CompositeTypes: {
             [_ in never]: never
@@ -570,7 +590,7 @@ export type CompositeTypes<
 export const Constants = {
   "public": {
           Enums: {
-            "account_kind": ["checking", "savings", "credit_card", "investment", "cash"],"bucket_kind": ["needs", "wants", "investment"],"expense_origin": ["manual", "recurring"],"goal_kind": ["emergency_fund", "sinking_fund"],"income_type": ["salary", "gift", "debt_repayment", "cashback", "extra", "sales", "savings", "investment_returns", "other"],"installment_status": ["pending", "partial", "collected"],"spend_bucket": ["needs", "wants"]
+            "account_kind": ["checking", "savings", "credit_card", "investment", "cash"],"bucket_kind": ["needs", "wants", "investment"],"expense_origin": ["manual", "recurring"],"goal_kind": ["emergency_fund", "sinking_fund", "purchase"],"income_type": ["salary", "gift", "debt_repayment", "cashback", "extra", "sales", "savings", "investment_returns", "other"],"installment_status": ["pending", "partial", "collected"],"spend_bucket": ["needs", "wants"]
           }
         }
 } as const

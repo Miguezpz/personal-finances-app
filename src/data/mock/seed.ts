@@ -44,6 +44,7 @@ import type {
   FinanceSnapshot,
   Goal,
   GoalContribution,
+  SavedMove,
   Income,
   IncomeAllocation,
   Installment,
@@ -569,7 +570,10 @@ export function generateDemoSnapshot(options: SeedOptions): FinanceSnapshot {
       targetMonths: 6,
       annual: null,
       monthly: cents(200_000),
+      target: null,
+      targetMonth: null,
       archived: false,
+      completed: false,
     },
     {
       id: propertyTaxId,
@@ -579,7 +583,10 @@ export function generateDemoSnapshot(options: SeedOptions): FinanceSnapshot {
       targetMonths: null,
       annual: cents(600_000),
       monthly: cents(50_000),
+      target: null,
+      targetMonth: null,
       archived: false,
+      completed: false,
     },
   ];
   const contributions: GoalContribution[] = [];
@@ -596,6 +603,26 @@ export function generateDemoSnapshot(options: SeedOptions): FinanceSnapshot {
       });
     }
   }
+
+  // --- Spec 014: a purchase funded from Saved (no monthly contributions, so it goes after them).
+  // $3,000 stays below the demo's Saved total on every seeded "today" (mock-seed-consistency).
+  const laptopId = nextId();
+  goals.push({
+    id: laptopId,
+    kind: "purchase",
+    name: "New laptop",
+    sourceBucket: "investment",
+    targetMonths: null,
+    annual: null,
+    monthly: null,
+    target: cents(2_500_000),
+    targetMonth: addMonthsToMonthStart(monthStart(today), 4),
+    archived: false,
+    completed: false,
+  });
+  const savedMoves: SavedMove[] = [
+    { id: nextId(), goalId: laptopId, movedOn: today, amount: cents(300_000) },
+  ];
 
   // --- Monthly net worth snapshots (approximate history for the chart; not a domain formula)
   const netWorthSnapshots: NetWorthSnapshot[] = [];
@@ -677,6 +704,7 @@ export function generateDemoSnapshot(options: SeedOptions): FinanceSnapshot {
     installments,
     goals,
     contributions,
+    savedMoves,
     netWorthSnapshots,
     expenseTemplates: [
       {

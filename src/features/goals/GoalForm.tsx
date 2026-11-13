@@ -3,6 +3,8 @@
 /**
  * Create / edit a goal (T145, FR-030). The kind is fixed once created. Changing the source bucket
  * or the monthly amount only affects future contributions (past ones are snapshots).
+ * Spec 014: a purchase has a target and an optional month; no source bucket or monthly amount,
+ * and editing it never touches what was assigned from Saved.
  */
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useTranslations } from "next-intl";
@@ -61,6 +63,8 @@ export function GoalForm({ open, onOpenChange, goal }: Props) {
           targetMonths: goal.targetMonths === null ? "" : String(goal.targetMonths),
           annual: goal.annual === null ? "" : formatCentsAsInput(goal.annual),
           monthly: goal.monthly === null ? "" : formatCentsAsInput(goal.monthly),
+          target: goal.target === null ? "" : formatCentsAsInput(goal.target),
+          targetMonth: goal.targetMonth?.slice(0, 7) ?? "",
         }
       : {
           kind: "sinking_fund",
@@ -69,6 +73,8 @@ export function GoalForm({ open, onOpenChange, goal }: Props) {
           targetMonths: "6",
           annual: "",
           monthly: "",
+          target: "",
+          targetMonth: "",
         },
   });
   const [kind, annualText] = useWatch({ control: form.control, name: ["kind", "annual"] });
@@ -111,10 +117,12 @@ export function GoalForm({ open, onOpenChange, goal }: Props) {
         targetMonths: values.targetMonths,
         annual: values.annual,
         monthly: values.monthly,
+        target: values.target,
+        targetMonth: values.targetMonth,
       };
       update.mutate({ id: goal.id, patch }, callbacks);
     } else {
-      create.mutate({ ...values, archived: false }, callbacks);
+      create.mutate({ ...values, archived: false, completed: false }, callbacks);
     }
     onOpenChange(false);
   }
@@ -162,7 +170,38 @@ export function GoalForm({ open, onOpenChange, goal }: Props) {
               {errors.name && <FieldError>{errorText(errors.name.message)}</FieldError>}
             </Field>
 
-            {kind === "emergency_fund" ? (
+            {kind === "purchase" ? (
+              <>
+                <Field data-invalid={Boolean(errors.target)}>
+                  <FieldLabel htmlFor="goal-target">{t("targetAmount")}</FieldLabel>
+                  <Input
+                    id="goal-target"
+                    data-money
+                    inputMode="decimal"
+                    autoComplete="off"
+                    className="tabular-nums"
+                    {...form.register("target")}
+                  />
+                  {errors.target && <FieldError>{errorText(errors.target.message)}</FieldError>}
+                </Field>
+                <Field data-invalid={Boolean(errors.targetMonth)}>
+                  <FieldLabel htmlFor="goal-target-month">{t("targetMonth")}</FieldLabel>
+                  {/* Without a month picker (Safari, Firefox) it's a text field; the schema checks YYYY-MM. */}
+                  <Input
+                    id="goal-target-month"
+                    type="month"
+                    placeholder="YYYY-MM"
+                    className="w-44"
+                    {...form.register("targetMonth")}
+                  />
+                  {errors.targetMonth ? (
+                    <FieldError>{errorText(errors.targetMonth.message)}</FieldError>
+                  ) : (
+                    <FieldDescription>{t("targetMonthHint")}</FieldDescription>
+                  )}
+                </Field>
+              </>
+            ) : kind === "emergency_fund" ? (
               <Field data-invalid={Boolean(errors.targetMonths)}>
                 <FieldLabel htmlFor="goal-months">{t("targetMonths")}</FieldLabel>
                 <Input
@@ -193,36 +232,42 @@ export function GoalForm({ open, onOpenChange, goal }: Props) {
               </Field>
             )}
 
-            <Field data-invalid={Boolean(errors.monthly)}>
-              <FieldLabel htmlFor="goal-monthly">
-                {kind === "emergency_fund" ? t("monthlyOptional") : t("monthly")}
-              </FieldLabel>
-              <Input
-                id="goal-monthly"
-                data-money
-                inputMode="decimal"
-                autoComplete="off"
-                className="tabular-nums"
-                {...form.register("monthly")}
-              />
-              {errors.monthly ? (
-                <FieldError>{errorText(errors.monthly.message)}</FieldError>
-              ) : (
-                <FieldDescription>{t(`monthlyHints.${kind}`)}</FieldDescription>
-              )}
-            </Field>
+            {kind !== "purchase" && (
+              <>
+                <Field data-invalid={Boolean(errors.monthly)}>
+                  <FieldLabel htmlFor="goal-monthly">
+                    {kind === "emergency_fund" ? t("monthlyOptional") : t("monthly")}
+                  </FieldLabel>
+                  <Input
+                    id="goal-monthly"
+                    data-money
+                    inputMode="decimal"
+                    autoComplete="off"
+                    className="tabular-nums"
+                    {...form.register("monthly")}
+                  />
+                  {errors.monthly ? (
+                    <FieldError>{errorText(errors.monthly.message)}</FieldError>
+                  ) : (
+                    <FieldDescription>
+                      {t(`monthlyHints.${kind as "emergency_fund" | "sinking_fund"}`)}
+                    </FieldDescription>
+                  )}
+                </Field>
 
-            <Field>
-              <FieldLabel htmlFor="goal-source">{t("sourceBucket")}</FieldLabel>
-              <NativeSelect id="goal-source" {...form.register("sourceBucket")}>
-                {GOAL_BUCKETS.map((b) => (
-                  <NativeSelectOption key={b} value={b}>
-                    {tb(b)}
-                  </NativeSelectOption>
-                ))}
-              </NativeSelect>
-              <FieldDescription>{t("sourceBucketHint")}</FieldDescription>
-            </Field>
+                <Field>
+                  <FieldLabel htmlFor="goal-source">{t("sourceBucket")}</FieldLabel>
+                  <NativeSelect id="goal-source" {...form.register("sourceBucket")}>
+                    {GOAL_BUCKETS.map((b) => (
+                      <NativeSelectOption key={b} value={b}>
+                        {tb(b)}
+                      </NativeSelectOption>
+                    ))}
+                  </NativeSelect>
+                  <FieldDescription>{t("sourceBucketHint")}</FieldDescription>
+                </Field>
+              </>
+            )}
           </FieldGroup>
         </form>
 

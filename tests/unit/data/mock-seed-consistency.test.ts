@@ -5,6 +5,9 @@
 import { describe, expect, it } from "vitest";
 import { generateDemoSnapshot } from "@/data/mock/seed";
 import { cardStatementSummary } from "@/domain/credit";
+import { availableToAssign } from "@/domain/goals";
+import { buildPayCalendar, periodOfDate } from "@/domain/pay-calendar";
+import { computeSafeToSpend } from "@/domain/safe-to-spend";
 import { isCategoryIconKey } from "@/domain/icons";
 import { isIncomeType } from "@/domain/income-types";
 import { installmentStatusFor } from "@/domain/installments";
@@ -15,6 +18,26 @@ const TODAYS = ["2026-01-01", "2026-02-28", "2026-07-15", "2026-11-03", "2026-12
 
 describe.each(TODAYS)("demo snapshot for %s", (today) => {
   const s = generateDemoSnapshot({ today });
+
+  it("the demo purchase leaves something available to assign (spec 014, no $0 notice)", () => {
+    const calendar = buildPayCalendar(s.settings, s.incomes);
+    const { saved } = computeSafeToSpend({
+      period: periodOfDate(today, calendar),
+      calendar,
+      today,
+      settings: s.settings,
+      allocations: s.allocations,
+      expenses: s.expenses,
+      recurring: s.recurring,
+      goals: s.goals,
+      contributions: s.contributions,
+    });
+    expect(s.goals.some((g) => g.kind === "purchase")).toBe(true);
+    expect(s.savedMoves.length).toBeGreaterThan(0);
+    const { available, over } = availableToAssign(saved!.total, s.savedMoves);
+    expect(over).toBe(false);
+    expect(available).toBeGreaterThan(0);
+  });
 
   it("allocations of every distributed income add up to it exactly", () => {
     for (const income of s.incomes.filter((i) => i.distributed)) {

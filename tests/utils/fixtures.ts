@@ -43,6 +43,7 @@ export const emptySnapshot = (overrides: Partial<FinanceSnapshot> = {}): Finance
   receivables: [],
   installments: [],
   goals: [],
+  savedMoves: [],
   contributions: [],
   netWorthSnapshots: [],
   expenseTemplates: [],
@@ -195,6 +196,9 @@ export const makeGoal = (o: Partial<Goal> = {}): Goal => ({
   targetMonths: null,
   annual: cents(1_200_000),
   monthly: cents(100_000),
+  target: null,
+  targetMonth: null,
   archived: false,
+  completed: false,
   ...o,
 });

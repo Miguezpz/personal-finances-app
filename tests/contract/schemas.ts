@@ -195,13 +195,24 @@ export const installmentSchema = z
 
 export const goalSchema = z.strictObject({
   id: uuid,
-  kind: z.enum(["emergency_fund", "sinking_fund"]),
+  kind: z.enum(["emergency_fund", "sinking_fund", "purchase"]),
   name: z.string().min(1).max(80),
   sourceBucket: bucket,
   targetMonths: z.number().int().min(1).max(36).nullable(),
   annual: positiveCents.nullable(),
   monthly: positiveCents.nullable(),
+  target: positiveCents.nullable(),
+  targetMonth: isoDate.refine((v) => v.endsWith("-01"), "first day of month").nullable(),
   archived: z.boolean(),
+  completed: z.boolean(),
+});
+
+/** Spec 014: + assign, − return; never 0. */
+export const savedMoveSchema = z.strictObject({
+  id: uuid,
+  goalId: uuid,
+  movedOn: isoDate,
+  amount: cents.refine((v) => v !== 0, "≠ 0"),
 });
 
 export const contributionSchema = z.strictObject({
@@ -256,6 +267,7 @@ export const financeSnapshotSchema = z.strictObject({
   installments: z.array(installmentSchema),
   goals: z.array(goalSchema),
   contributions: z.array(contributionSchema),
+  savedMoves: z.array(savedMoveSchema),
   netWorthSnapshots: z.array(netWorthSnapshotSchema),
   expenseTemplates: z.array(expenseTemplateSchema),
 });

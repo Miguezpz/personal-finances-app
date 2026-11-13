@@ -20,6 +20,7 @@ import {
   type DataProvider,
   type ExpenseTemplatesRepository,
   type ExpensesRepository,
+  type GoalsRepository,
   type NewEntity,
   type RecurringRepository,
 } from "@/data/provider";
@@ -47,6 +48,7 @@ export interface MemoryProvider extends DataProvider {
   };
   readonly recurring: RecurringRepository & { create: Mock<CreateRecurringFn> };
   readonly accounts: AccountsRepository & { update: Mock<UpdateAccountFn> };
+  readonly goals: GoalsRepository & { addSavedMove: Mock<GoalsRepository["addSavedMove"]> };
   readonly expenseTemplates: {
     list: Templates["list"];
     create: Mock<Templates["create"]>;
@@ -174,6 +176,13 @@ export function createMemoryProvider(initial: FinanceSnapshot): MemoryProvider {
     return row;
   });
 
+  // Spec 014: assign / return Saved over the snapshot.
+  const addSavedMove = vi.fn<GoalsRepository["addSavedMove"]>(async (input) => {
+    const row = { ...input, id: newId() };
+    state.snapshot = { ...state.snapshot, savedMoves: [...state.snapshot.savedMoves, row] };
+    return row;
+  });
+
   const holdOpen = (set: (p: Promise<void> | null) => void) => {
     let release!: () => void;
     set(new Promise<void>((r) => (release = r)));
@@ -196,6 +205,7 @@ export function createMemoryProvider(initial: FinanceSnapshot): MemoryProvider {
     },
     recurring: { ...base.recurring, create },
     accounts: { ...base.accounts, update: updateAccount },
+    goals: { ...base.goals, addSavedMove },
     expenseTemplates,
     loadSnapshot: vi.fn(async () => state.snapshot),
     holdRecurringCreate: () => holdOpen((p) => (hold = p)),

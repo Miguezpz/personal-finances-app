@@ -3,9 +3,39 @@
  * measured against N months of vital expenses. Contributions are dated on the first quincena of
  * the month and, when their source is Needs or Wants, lower that bucket's Safe-to-Spend
  * (safe-to-spend.ts); Investment contributions don't.
+ *
+ * Spec 014: Saved (spec 013) can be assigned to a goal and returned. Moves carry a signed amount
+ * (+ assign, − return), so everything is a sum and nothing derived is stored:
+ *   net(goal)  = Σ its moves
+ *   available  = Saved total − Σ all moves (every goal, archived and completed too)
+ * A purchase goal only grows from Saved; the emergency fund and sinking funds add their net.
  */
 import { addMonthsToMonthStart, monthStart } from "./dates";
-import type { Cents, Expense, Goal, GoalContribution, IsoDate } from "./types";
+import type { Cents, Expense, Goal, GoalContribution, IsoDate, SavedMove, Uuid } from "./types";
+
+/** What the goal holds from Saved (assigned − returned). */
+export function netFromSaved(goalId: Uuid, moves: readonly SavedMove[]): Cents {
+  return moves.filter((m) => m.goalId === goalId).reduce((s, m) => s + m.amount, 0) as Cents;
+}
+
+/** FR-001/002: the real value can be negative; the UI shows max(·, 0) and a notice when `over`. */
+export function availableToAssign(
+  savedTotal: Cents,
+  moves: readonly SavedMove[],
+): { available: Cents; over: boolean } {
+  const available = moves.reduce((s, m) => s - m.amount, savedTotal as number);
+  return { available: available as Cents, over: available < 0 };
+}
+
+/** FR-007: the bar is capped at 1; `saved` is the real net, which can pass the target. */
+export function purchaseProgress(
+  goal: Goal,
+  moves: readonly SavedMove[],
+): { saved: Cents; target: Cents; ratio: number } {
+  const saved = netFromSaved(goal.id, moves);
+  const target = (goal.target ?? 0) as Cents;
+  return { saved, target, ratio: target > 0 ? Math.min(Math.max(saved / target, 0), 1) : 0 };
+}
 
 /** Monthly hold-back for an annual amount, rounded up so 12 months cover it. */
 export function suggestedMonthly(annual: Cents): Cents {
@@ -52,10 +82,11 @@ export function emergencyFundProgress(
   contributions: readonly GoalContribution[],
   expenses: readonly Expense[],
   today: IsoDate,
+  moves: readonly SavedMove[] = [],
 ): EmergencyFundProgress {
-  const saved = contributions
-    .filter((c) => c.goalId === goal.id)
-    .reduce((sum, c) => sum + c.amount, 0);
+  const saved =
+    contributions.filter((c) => c.goalId === goal.id).reduce((sum, c) => sum + c.amount, 0) +
+    netFromSaved(goal.id, moves);
 
   const windowEnd = monthStart(today); // exclusive: the current month isn't complete
   const windowStart = addMonthsToMonthStart(windowEnd, -VITAL_EXPENSE_MONTHS);

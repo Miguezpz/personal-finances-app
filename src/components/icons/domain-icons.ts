@@ -17,6 +17,7 @@ import {
   type LucideIcon,
   PiggyBank,
   ShieldCheck,
+  ShoppingBag,
   Sparkles,
   Sprout,
   TrendingUp,
@@ -59,4 +60,5 @@ export const RECEIVABLE_STATUS_ICONS = {
 export const GOAL_KIND_ICONS = {
   emergency_fund: LifeBuoy,
   sinking_fund: PiggyBank,
+  purchase: ShoppingBag,
 } as const satisfies Record<GoalKind, LucideIcon>;

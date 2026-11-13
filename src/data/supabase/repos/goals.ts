@@ -6,6 +6,7 @@ import {
   toGoal,
   toLedgerEntry,
   toNetWorthSnapshot,
+  toSavedMove,
   type Insert,
 } from "../mappers";
 import { exec, selectAll, withinRange } from "./query";
@@ -13,13 +14,20 @@ import { exec, selectAll, withinRange } from "./query";
 export function createGoalsRepository(db: AppSupabaseClient): GoalsRepository {
   return {
     async list() {
-      const [goals, contributions] = await Promise.all([
+      const [goals, contributions, savedMoves] = await Promise.all([
         selectAll((from, to) => db.from("goals").select("*").order("id").range(from, to)),
         selectAll((from, to) =>
           db.from("goal_contributions").select("*").order("id").range(from, to),
         ),
+        selectAll((from, to) =>
+          db.from("goal_saved_moves").select("*").order("id").range(from, to),
+        ),
       ]);
-      return { goals: goals.map(toGoal), contributions: contributions.map(toContribution) };
+      return {
+        goals: goals.map(toGoal),
+        contributions: contributions.map(toContribution),
+        savedMoves: savedMoves.map(toSavedMove),
+      };
     },
 
     async create(input) {
@@ -58,6 +66,17 @@ export function createGoalsRepository(db: AppSupabaseClient): GoalsRepository {
           .select("*"),
       );
       return rows.map(toContribution);
+    },
+
+    async addSavedMove(input) {
+      const row = await exec(
+        db
+          .from("goal_saved_moves")
+          .insert({ goal_id: input.goalId, moved_on: input.movedOn, amount_cents: input.amount })
+          .select("*")
+          .single(),
+      );
+      return toSavedMove(row);
     },
   };
 }

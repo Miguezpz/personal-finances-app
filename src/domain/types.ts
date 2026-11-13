@@ -216,7 +216,7 @@ export interface Installment extends Owned {
   status: InstallmentStatus;
 }
 
-export type GoalKind = "emergency_fund" | "sinking_fund";
+export type GoalKind = "emergency_fund" | "sinking_fund" | "purchase";
 
 export interface Goal extends Owned {
   kind: GoalKind;
@@ -227,7 +227,13 @@ export interface Goal extends Owned {
   /** Apartado: monto anual y retención mensual. */
   annual: Cents | null;
   monthly: Cents | null;
+  /** Compra (spec 014): monto objetivo. */
+  target: Cents | null;
+  /** Compra: mes objetivo (día 1), informativo. */
+  targetMonth: IsoDate | null;
   archived: boolean;
+  /** Compra: "Lo compré". Implica archived. */
+  completed: boolean;
 }
 
 export interface GoalContribution extends Owned {
@@ -235,6 +241,13 @@ export interface GoalContribution extends Owned {
   periodStart: IsoDate;
   amount: Cents;
   sourceBucket: Bucket;
+}
+
+/** Spec 014: Ahorrado → meta (+, asignación) o meta → Ahorrado (−, regreso). Nunca 0. */
+export interface SavedMove extends Owned {
+  goalId: Uuid;
+  movedOn: IsoDate;
+  amount: Cents;
 }
 
 export interface NetWorthSnapshot extends Owned {
@@ -295,6 +308,8 @@ export interface FinanceSnapshot {
   installments: readonly Installment[];
   goals: readonly Goal[];
   contributions: readonly GoalContribution[];
+  /** Spec 014: asignaciones y regresos de Ahorrado. */
+  savedMoves: readonly SavedMove[];
   netWorthSnapshots: readonly NetWorthSnapshot[];
   /** Gastos rápidos (spec 005), incluidas las archivadas. */
   expenseTemplates: readonly ExpenseTemplate[];

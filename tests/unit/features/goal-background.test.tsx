@@ -112,6 +112,8 @@ describe("goalFormSchema", () => {
     targetMonths: "",
     annual: "",
     monthly: "",
+    target: "",
+    targetMonth: "",
   };
   const messages = (input: Parameters<typeof goalFormSchema.safeParse>[0]) => {
     const r = goalFormSchema.safeParse(input);
@@ -126,6 +128,8 @@ describe("goalFormSchema", () => {
       targetMonths: null,
       annual: 1_200_000,
       monthly: 100_000,
+      target: null,
+      targetMonth: null,
     });
     expect(
       goalFormSchema.parse({ ...base, kind: "sinking_fund", annual: "12000", monthly: "1500" })

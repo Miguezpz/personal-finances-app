@@ -13,6 +13,7 @@ import type {
   ExpenseTemplate,
   Goal,
   GoalContribution,
+  SavedMove,
   Income,
   IncomeAllocation,
   Installment,
@@ -201,7 +202,17 @@ export const toGoal = (r: Row<"goals">): Goal => ({
   targetMonths: r.target_months,
   annual: centsOrNull(r.annual_cents),
   monthly: centsOrNull(r.monthly_cents),
+  target: centsOrNull(r.target_cents),
+  targetMonth: dateOrNull(r.due_month),
   archived: r.archived_at !== null,
+  completed: r.completed_at !== null,
+});
+
+export const toSavedMove = (r: Row<"goal_saved_moves">): SavedMove => ({
+  id: uuid(r.id),
+  goalId: uuid(r.goal_id),
+  movedOn: date(r.moved_on),
+  amount: cents(r.amount_cents),
 });
 
 export const toContribution = (r: Row<"goal_contributions">): GoalContribution => ({
@@ -333,7 +344,10 @@ export const fromGoal = (g: Partial<Omit<Goal, "id">>): Update<"goals"> => ({
   ...(g.targetMonths !== undefined && { target_months: g.targetMonths }),
   ...(g.annual !== undefined && { annual_cents: g.annual }),
   ...(g.monthly !== undefined && { monthly_cents: g.monthly }),
+  ...(g.target !== undefined && { target_cents: g.target }),
+  ...(g.targetMonth !== undefined && { due_month: g.targetMonth }),
   ...(g.archived !== undefined && { archived_at: archivedAt(g.archived) }),
+  ...(g.completed !== undefined && { completed_at: archivedAt(g.completed) }),
 });
 
 // ---------------------------------------------------------------------------

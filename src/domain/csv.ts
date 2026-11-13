@@ -307,7 +307,10 @@ export function snapshotToCsvBundle(
         "target_months",
         "annual_mxn",
         "monthly_mxn",
+        "target_mxn",
+        "target_month",
         "archived",
+        "completed",
       ],
       s.goals.map((g) => [
         g.id,
@@ -317,12 +320,20 @@ export function snapshotToCsvBundle(
         g.targetMonths,
         money(g.annual),
         money(g.monthly),
+        money(g.target),
+        g.targetMonth,
         g.archived,
+        g.completed,
       ]),
     ),
     "goal_contributions.csv": toCsv(
       ["id", "goal_id", "period_start", "amount_mxn", "source_bucket"],
       s.contributions.map((c) => [c.id, c.goalId, c.periodStart, money(c.amount), c.sourceBucket]),
+    ),
+    // Spec 014: signed amount, + assign (Saved → goal), − return.
+    "goal_saved_moves.csv": toCsv(
+      ["id", "goal_id", "moved_on", "amount_mxn"],
+      s.savedMoves.map((m) => [m.id, m.goalId, m.movedOn, money(m.amount)]),
     ),
     "net_worth_snapshots.csv": toCsv(
       ["id", "snapshot_on", "assets_mxn", "liabilities_mxn", "net_worth_mxn"],

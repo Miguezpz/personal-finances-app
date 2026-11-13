@@ -279,7 +279,11 @@
     "savedTitle": "Saved",
     "savedLastPeriod": "Last pay period",
     "savedTotal": "Total saved",
-    "savedHint": "What you had left from past pay periods; not added to what you can spend."
+    "savedHint": "What you had left from past pay periods; not added to what you can spend.",
+    "savedAvailable": "Available to assign",
+    "savedOver": "Your goals hold more than what is saved, so there is nothing left to assign. Return some money from a goal if you need to.",
+    "savedAssign": "Assign",
+    "savedNoGoals": "Create a goal to assign what you saved."
   },
   "expenses": {
     "addTitle": "Add expense",
@@ -803,23 +807,26 @@
   },
   "goals": {
     "title": "Goals",
-    "description": "Your emergency fund and sinking funds. Each month they hold back an amount from the bucket you choose.",
+    "description": "Your emergency fund, sinking funds and purchases. Sinking funds hold back an amount each month; anything can receive what you saved.",
     "addTitle": "Add goal",
     "editTitle": "Edit goal",
     "formHint": "Changes apply from the next contribution; past ones stay as they were.",
     "kind": "Type",
     "kinds": {
       "emergency_fund": "Emergency fund",
-      "sinking_fund": "Sinking fund"
+      "sinking_fund": "Sinking fund",
+      "purchase": "Purchase"
     },
     "kindHints": {
       "emergency_fund": "A cushion measured in months of your vital (Needs) expenses.",
-      "sinking_fund": "A yearly expense saved little by little, e.g. insurance or property tax."
+      "sinking_fund": "A yearly expense saved little by little, e.g. insurance or property tax.",
+      "purchase": "Something you want to buy, funded with what you saved."
     },
     "name": "Name",
     "namePlaceholders": {
       "emergency_fund": "e.g. Emergency fund",
-      "sinking_fund": "e.g. Car insurance"
+      "sinking_fund": "e.g. Car insurance",
+      "purchase": "e.g. New laptop"
     },
     "targetMonths": "Target (months)",
     "targetMonthsHint": "How many months of vital expenses it should cover (1–36).",
@@ -852,7 +859,30 @@
     "progressLabel": "Progress of {name}",
     "monthsCovered": "{covered} of {target} months covered",
     "annualTarget": "Yearly amount: <amount></amount>",
-    "savedThisYear": "saved in {year}"
+    "savedThisYear": "saved in {year}",
+    "targetAmount": "Target amount (MXN)",
+    "targetMonth": "Target month (optional)",
+    "targetMonthHint": "For reference only, e.g. 2027-03.",
+    "invalidMonth": "Use year and month, e.g. 2027-03.",
+    "targetBy": "by {month}",
+    "goal": "Goal",
+    "amount": "Amount (MXN)",
+    "assign": "Assign",
+    "assignTitle": "Assign from Saved",
+    "assignHint": "Moves money from Saved to this goal. Your safe-to-spend balance and net worth stay the same.",
+    "returnTitle": "Return to Saved",
+    "returnHint": "Moves money from this goal back to what you can assign.",
+    "returnToSaved": "Return to Saved",
+    "maxAvailable": "Available to assign: <max></max>",
+    "maxReturnable": "You can return up to <max></max>",
+    "overMax": "The most you can use is <max></max>",
+    "goalRequired": "Choose a goal.",
+    "assigned": "Assigned to the goal.",
+    "returned": "Returned to Saved.",
+    "bought": "I bought it",
+    "markedBought": "Marked as bought. Don't record the purchase as an expense too, or it will count twice.",
+    "completedBadge": "Completed",
+    "fromSaved": "<amount></amount> from Saved"
   },
   "netWorth": {
     "title": "Net worth",
