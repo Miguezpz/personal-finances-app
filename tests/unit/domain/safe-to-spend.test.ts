@@ -330,7 +330,10 @@ describe("recurring charges in the Safe-to-Spend (T083, FR-008a, US3-1)", () => 
 describe("quincena by the real payday (spec 006)", () => {
   // Nov 15 2026 is Sunday: the second half of November starts on Fri Nov 13.
   const NOV_2_REAL = periodOfDate(d("2026-11-13"), calendar);
-  const allocations = [alloc("wants", 300_000, "2026-11-01"), alloc("wants", 300_000, "2026-11-16")];
+  const allocations = [
+    alloc("wants", 300_000, "2026-11-01"),
+    alloc("wants", 300_000, "2026-11-16"),
+  ];
 
   it("on payday the current quincena already has the new allocation", () => {
     expect(NOV_2_REAL).toMatchObject({ key: "2026-11-2", from: "2026-11-13", to: "2026-11-29" });
@@ -357,7 +360,10 @@ describe("quincena by the real payday (spec 006)", () => {
 
   it("Sat Oct 31 2026 belongs to the first half of November (paid Fri Oct 30)", () => {
     const chain = computeCarryChain(
-      input({ allocations: [alloc("wants", 100_000, "2026-10-16")], expenses: [spend("wants", 10_000, "2026-10-31")] }),
+      input({
+        allocations: [alloc("wants", 100_000, "2026-10-16")],
+        expenses: [spend("wants", 10_000, "2026-10-31")],
+      }),
       "2026-11-1" as PeriodKey,
     );
     expect(chain.get("2026-10-2" as PeriodKey)).toEqual({ needs: 0, wants: 100_000 });

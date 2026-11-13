@@ -285,7 +285,10 @@ export function RegisterIncomeDialog({ open, onOpenChange, income, draft }: Prop
                     onChange: (e: React.ChangeEvent<HTMLInputElement>) => {
                       const value = e.target.value;
                       if (isIsoDate(value))
-                        form.setValue("fundedPeriodStart", fundedPeriodFor(value, calendar.settings).start);
+                        form.setValue(
+                          "fundedPeriodStart",
+                          fundedPeriodFor(value, calendar.settings).start,
+                        );
                     },
                   })}
                 />

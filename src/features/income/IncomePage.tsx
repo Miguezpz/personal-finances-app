@@ -75,7 +75,10 @@ function IncomeCard({
           <p className="text-sm text-muted-foreground">
             {t("receivedLabel", { date: formatDate(income.receivedOn, locale) })} ·{" "}
             {t("fundsLabel", {
-              range: t("periodRange", formatPeriodRange(withRange(periodOf(income.fundedPeriodStart), calendar), locale)),
+              range: t(
+                "periodRange",
+                formatPeriodRange(withRange(periodOf(income.fundedPeriodStart), calendar), locale),
+              ),
             })}
           </p>
         </div>

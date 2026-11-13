@@ -212,7 +212,11 @@ describe("quincena by the real payday (spec 006)", () => {
 
   it("the status list uses the effective range too", () => {
     const nov1 = periodOfDate(d("2026-11-01"), calendar);
-    const items = recurringStatusForPeriod([day31], [apply(day31, "2026-10-31", cents(1_000))], nov1);
+    const items = recurringStatusForPeriod(
+      [day31],
+      [apply(day31, "2026-10-31", cents(1_000))],
+      nov1,
+    );
     expect(items).toEqual([expect.objectContaining({ date: "2026-10-31", status: "applied" })]);
   });
 });
