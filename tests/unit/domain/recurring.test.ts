@@ -5,7 +5,9 @@
  */
 import { describe, expect, it } from "vitest";
 import { cents } from "@/domain/money";
+import { buildPayCalendar, periodOfDate } from "@/domain/pay-calendar";
 import { periodOf } from "@/domain/periods";
+import { DEFAULT_USER_SETTINGS } from "@/domain/settings";
 import {
   dueOccurrences,
   pendingOccurrences,
@@ -194,6 +196,24 @@ describe("recurringStatusForPeriod", () => {
         status: "pending",
       }),
     ]);
+  });
+});
+
+describe("quincena by the real payday (spec 006)", () => {
+  const calendar = buildPayCalendar(DEFAULT_USER_SETTINGS, []);
+  const day31 = makeRecurring({ name: "Gym", chargeDay: 31, startsOn: d("2026-01-01") });
+
+  it("a charge on Sat Oct 31 2026 is reserved in the first half of November (paid Fri Oct 30)", () => {
+    const nov1 = periodOfDate(d("2026-10-30"), calendar);
+    const oct2 = periodOfDate(d("2026-10-29"), calendar);
+    expect(dates(pendingOccurrences([day31], [], nov1, d("2026-10-30")))).toEqual(["2026-10-31"]);
+    expect(pendingOccurrences([day31], [], oct2, d("2026-10-20"))).toEqual([]);
+  });
+
+  it("the status list uses the effective range too", () => {
+    const nov1 = periodOfDate(d("2026-11-01"), calendar);
+    const items = recurringStatusForPeriod([day31], [apply(day31, "2026-10-31", cents(1_000))], nov1);
+    expect(items).toEqual([expect.objectContaining({ date: "2026-10-31", status: "applied" })]);
   });
 });
 

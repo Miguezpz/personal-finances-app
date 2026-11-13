@@ -39,6 +39,10 @@ export interface Period {
   /** Último día (15 o fin de mes). */
   end: IsoDate;
   half: 1 | 2;
+  /** Inicio efectivo: el día en que llega el pago que la financia (spec 006). Por defecto, start. */
+  from: IsoDate;
+  /** Fin efectivo: el día anterior al inicio efectivo de la siguiente. Por defecto, end. */
+  to: IsoDate;
 }
 
 // ---------------------------------------------------------------------------

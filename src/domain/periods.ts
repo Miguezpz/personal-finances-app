@@ -1,26 +1,23 @@
 /**
- * Quincenas (semi-monthly pay periods, research.md R2):
+ * Quincenas (semi-monthly pay periods, research.md R2), by their NOMINAL halves:
  *   half 1 = days 1–15  → key `YYYY-MM-1`
  *   half 2 = day 16–end → key `YYYY-MM-2`
+ * The key and nominal start identify a quincena; the effective range (`from..to`, the real payday
+ * to the day before the next one) comes from pay-calendar.ts (spec 006). Here from/to = start/end.
  * Pure: "today" is always injected (see todayIn).
  */
-import { daysBetween, daysInMonth, isoDate, parseIsoDate } from "./dates";
+import { daysInMonth, isoDate, parseIsoDate } from "./dates";
 import { InvalidDateError } from "./errors";
-import type { IsoDate, Period, PeriodKey, UserSettings } from "./types";
+import type { IsoDate, Period, PeriodKey } from "./types";
 
 const KEY_RE = /^(\d{4})-(\d{2})-([12])$/;
 
 function makePeriod(year: number, month: number, half: 1 | 2): Period {
   const key =
     `${String(year).padStart(4, "0")}-${String(month).padStart(2, "0")}-${half}` as PeriodKey;
-  return half === 1
-    ? { key, start: isoDate(year, month, 1), end: isoDate(year, month, 15), half }
-    : {
-        key,
-        start: isoDate(year, month, 16),
-        end: isoDate(year, month, daysInMonth(year, month)),
-        half,
-      };
+  const start = isoDate(year, month, half === 1 ? 1 : 16);
+  const end = isoDate(year, month, half === 1 ? 15 : daysInMonth(year, month));
+  return { key, start, end, half, from: start, to: end };
 }
 
 export function periodOf(date: IsoDate): Period {
@@ -73,37 +70,8 @@ export function todayIn(timezone: string, now: Date): IsoDate {
   return isoDate(get("year"), get("month"), get("day"));
 }
 
-/**
- * Quincena funded by an income received on `receivedOn` (clarification 3, research.md R3): the
- * first period that starts strictly after the date — the 15th funds the 16th–end, the last day
- * funds the 1st–15th of the next month. The user may override it when registering.
- */
-export function fundedPeriodFor(receivedOn: IsoDate): Period {
-  return nextPeriod(periodOf(receivedOn));
-}
-
 /** True if `date` is the first day of a quincena (day 1 or 16). */
 export function isPeriodStart(date: IsoDate): boolean {
   const { day } = parseIsoDate(date);
   return day === 1 || day === 16;
-}
-
-/**
- * Days from `today` to the next payday (FR-019); 0 when today is a payday. Paydays are days of
- * the month (31 = last day, clamped in short months).
- */
-export function daysUntilNextPayday(
-  today: IsoDate,
-  settings: Pick<UserSettings, "firstPayday" | "secondPayday">,
-): number {
-  const { year, month } = parseIsoDate(today);
-  const next = month === 12 ? { year: year + 1, month: 1 } : { year, month: month + 1 };
-  let best = Number.POSITIVE_INFINITY;
-  for (const m of [{ year, month }, next]) {
-    for (const day of [settings.firstPayday, settings.secondPayday]) {
-      const diff = daysBetween(today, clampChargeDay(m.year, m.month, day));
-      if (diff >= 0 && diff < best) best = diff;
-    }
-  }
-  return best;
 }

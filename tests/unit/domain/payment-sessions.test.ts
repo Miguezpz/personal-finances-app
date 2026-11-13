@@ -31,14 +31,16 @@ describe("sessionWindow (FR-027)", () => {
       "2026-11-10",
       "2026-11-12",
     ],
-    ["payday with room → starts on it", "2026-11-13", "2026-11-20", "2026-11-15", "2026-11-17"],
+    ["payday with room → starts on it", "2026-12-14", "2026-12-20", "2026-12-15", "2026-12-17"],
     [
       "payday near the end → ends on the cross's last day",
-      "2026-11-13",
-      "2026-11-16",
-      "2026-11-14",
-      "2026-11-16",
+      "2026-12-13",
+      "2026-12-16",
+      "2026-12-14",
+      "2026-12-16",
     ],
+    // Nov 15 2026 is Sunday: the money arrives Friday Nov 13 (spec 006).
+    ["weekend payday → the Friday before", "2026-11-12", "2026-11-20", "2026-11-13", "2026-11-15"],
     ["a 2-day cross → the whole cross", "2026-11-11", "2026-11-12", "2026-11-11", "2026-11-12"],
     ["a 1-day cross → that day", "2026-11-29", "2026-11-29", "2026-11-29", "2026-11-29"],
     ["31 = last day of the month", "2026-11-28", "2026-12-03", "2026-11-30", "2026-12-02"],
@@ -65,7 +67,7 @@ describe("paymentSessions (FR-025, FR-026)", () => {
     const sessions = paymentSessions([A, B, C], s, s.settings, d("2026-11-01"));
     expect(sessions.map((x) => names(x.cards))).toEqual([["C", "B"], ["A"]]);
     expect(sessions[0]?.cross).toEqual({ from: "2026-10-29", to: "2026-11-03" });
-    expect(sessions[1]?.window).toEqual({ start: "2026-11-15", end: "2026-11-17" });
+    expect(sessions[1]?.window).toEqual({ start: "2026-11-13", end: "2026-11-15" }); // paid Fri Nov 13
   });
 
   it("archived cards and cards without terms don't take part", () => {

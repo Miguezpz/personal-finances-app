@@ -1,22 +1,21 @@
 /**
- * T057 · An income funds the first quincena that starts strictly after it was received
- * (clarification 3, US1-5/6, research.md R3).
+ * T057 / spec 006 · An income funds the quincena whose expected payday (moved to Friday on
+ * weekends) is closest to the date it was received; ties go to the later one (research.md R7).
  */
 import fc from "fast-check";
 import { describe, expect, it } from "vitest";
-import { fundedPeriodFor } from "@/domain/periods";
+import { daysBetween } from "@/domain/dates";
+import { expectedStart, fundedPeriodFor } from "@/domain/pay-calendar";
+import { DEFAULT_USER_SETTINGS } from "@/domain/settings";
 import type { IsoDate } from "@/domain/types";
 
-const start = (s: string) => fundedPeriodFor(s as IsoDate).start;
+const settings = DEFAULT_USER_SETTINGS;
+const start = (s: string) => fundedPeriodFor(s as IsoDate, settings).start;
 
 describe("fundedPeriodFor", () => {
   it("day 15 funds the 16th–end of the same month (US1-5)", () => {
-    expect(fundedPeriodFor("2026-11-15" as IsoDate)).toEqual({
-      key: "2026-11-2",
-      start: "2026-11-16",
-      end: "2026-11-30",
-      half: 2,
-    });
+    expect(fundedPeriodFor("2026-12-15" as IsoDate, settings).key).toBe("2026-12-2");
+    expect(start("2026-11-15")).toBe("2026-11-16");
   });
 
   it("the last day of the month funds the 1st–15th of the next month (US1-6)", () => {
@@ -27,17 +26,22 @@ describe("fundedPeriodFor", () => {
   });
 
   it("December 31st funds January 1st of the next year", () => {
-    expect(fundedPeriodFor("2026-12-31" as IsoDate).key).toBe("2027-01-1");
+    expect(fundedPeriodFor("2026-12-31" as IsoDate, settings).key).toBe("2027-01-1");
   });
 
-  it("an early or late payment still funds the next period start", () => {
-    expect(start("2026-11-01")).toBe("2026-11-16");
-    expect(start("2026-11-14")).toBe("2026-11-16");
-    expect(start("2026-11-16")).toBe("2026-12-01");
+  it("a payday moved to Friday funds the quincena of that payday", () => {
+    expect(start("2026-11-13")).toBe("2026-11-16"); // Nov 15 is Sunday
+    expect(start("2026-10-30")).toBe("2026-11-01"); // Oct 31 is Saturday
+  });
+
+  it("a late payment still funds the quincena of the closest expected payday", () => {
+    expect(start("2026-11-16")).toBe("2026-11-16");
+    expect(start("2026-11-18")).toBe("2026-11-16");
+    expect(start("2026-11-03")).toBe("2026-11-01");
     expect(start("2026-11-29")).toBe("2026-12-01");
   });
 
-  it("property: the funded period starts strictly after the date and at most 16 days later", () => {
+  it("property: no other quincena has an expected payday closer to the date", () => {
     const dateArb = fc
       .date({
         min: new Date("2000-01-01T00:00:00Z"),
@@ -47,12 +51,9 @@ describe("fundedPeriodFor", () => {
       .map((dt) => dt.toISOString().slice(0, 10) as IsoDate);
     fc.assert(
       fc.property(dateArb, (date) => {
-        const p = fundedPeriodFor(date);
-        expect(p.start > date).toBe(true);
-        const gap = (Date.parse(p.start) - Date.parse(date)) / 86_400_000;
-        expect(gap).toBeGreaterThanOrEqual(1);
-        expect(gap).toBeLessThanOrEqual(16);
+        const p = fundedPeriodFor(date, settings);
         expect(["01", "16"]).toContain(p.start.slice(8));
+        expect(Math.abs(daysBetween(date, expectedStart(p, settings)))).toBeLessThanOrEqual(9);
       }),
     );
   });

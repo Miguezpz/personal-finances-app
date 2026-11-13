@@ -1,12 +1,13 @@
 import { formatDate } from "@/i18n/format";
-import { periodOf } from "@/domain/periods";
-import type { IsoDate, Locale } from "@/domain/types";
+import type { Locale, Period } from "@/domain/types";
 
-/** "Nov 16 – Nov 30" for the quincena starting on `start`. */
-export function formatPeriodRange(start: IsoDate, locale: Locale): { start: string; end: string } {
-  const period = periodOf(start);
+/** "Nov 13 – Nov 29": the effective range of a quincena (spec 006); nominal if it has no calendar. */
+export function formatPeriodRange(
+  period: Pick<Period, "from" | "to">,
+  locale: Locale,
+): { start: string; end: string } {
   return {
-    start: formatDate(period.start, locale, "short"),
-    end: formatDate(period.end, locale, "short"),
+    start: formatDate(period.from, locale, "short"),
+    end: formatDate(period.to, locale, "short"),
   };
 }

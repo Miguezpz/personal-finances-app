@@ -3,10 +3,11 @@
 /**
  * Safe-to-Spend of the current quincena (T073): a derived selector over the single snapshot, so
  * any optimistic change to an expense, income or recurring charge re-renders it at once (SC-004).
+ * The current quincena is the one whose effective range holds today (spec 006).
  */
 import { useMemo } from "react";
 import { useFinanceSnapshot } from "@/data/useFinanceSnapshot";
-import { periodOf } from "@/domain/periods";
+import { buildPayCalendar, periodOfDate } from "@/domain/pay-calendar";
 import { recurringStatusForPeriod, type RecurringStatusItem } from "@/domain/recurring";
 import { computeSafeToSpend, type SafeToSpend } from "@/domain/safe-to-spend";
 import { useToday } from "@/lib/use-today";
@@ -23,15 +24,22 @@ export function useSafeToSpend(): {
 } {
   const today = useToday();
   const snapshot = useFinanceSnapshot();
-  const recurringItems = useMemo(() => {
-    const s = snapshot.data;
-    return s ? recurringStatusForPeriod(s.recurring, s.expenses, periodOf(today)) : [];
-  }, [snapshot.data, today]);
-  const data = useMemo(() => {
+  const current = useMemo(() => {
     const s = snapshot.data;
     if (!s) return undefined;
+    const calendar = buildPayCalendar(s.settings, s.incomes);
+    return { calendar, period: periodOfDate(today, calendar) };
+  }, [snapshot.data, today]);
+  const recurringItems = useMemo(() => {
+    const s = snapshot.data;
+    return s && current ? recurringStatusForPeriod(s.recurring, s.expenses, current.period) : [];
+  }, [snapshot.data, current]);
+  const data = useMemo(() => {
+    const s = snapshot.data;
+    if (!s || !current) return undefined;
     return computeSafeToSpend({
-      period: periodOf(today),
+      period: current.period,
+      calendar: current.calendar,
       today,
       settings: s.settings,
       allocations: s.allocations,
@@ -40,7 +48,7 @@ export function useSafeToSpend(): {
       goals: s.goals,
       contributions: s.contributions,
     });
-  }, [snapshot.data, today]);
+  }, [snapshot.data, current, today]);
 
   return {
     data,

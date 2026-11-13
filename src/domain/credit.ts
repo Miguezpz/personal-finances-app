@@ -18,6 +18,7 @@ import { addDays, addMonthsToMonthStart, parseIsoDate } from "./dates";
 import { InvalidDateError } from "./errors";
 import { clampChargeDay } from "./periods";
 import type { Account, Cents, FinanceSnapshot, IsoDate, StatementMark, Uuid } from "./types";
+import { toPrevFridayIfWeekend } from "./pay-calendar";
 
 export interface CardStatus {
   cardId: Account["id"];
@@ -251,7 +252,7 @@ export function creditTimeline(
 
   for (const { year, month } of monthsBetween(from, to)) {
     for (const day of new Set([s.settings.firstPayday, s.settings.secondPayday])) {
-      const date = clampChargeDay(year, month, day);
+      const date = toPrevFridayIfWeekend(clampChargeDay(year, month, day)); // spec 006
       if (inRange(date))
         events.push({ date, kind: "payday", label: "", amount: null, refId: null });
     }

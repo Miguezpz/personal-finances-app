@@ -11,7 +11,8 @@
  * Pure and O(movements + periods).
  */
 import { BPS_TOTAL, ZERO_CENTS } from "./money";
-import { daysUntilNextPayday, nextPeriod, periodFromKey, periodOf } from "./periods";
+import { daysUntilNextPayday, type PayCalendar, periodOfDate } from "./pay-calendar";
+import { nextPeriod, periodFromKey, periodOf } from "./periods";
 import { unappliedOccurrences } from "./recurring";
 import type {
   BasisPoints,
@@ -54,9 +55,11 @@ export interface SafeToSpend {
 }
 
 export interface SafeToSpendInput {
+  /** Current quincena with its effective range (pay-calendar.ts, spec 006). */
   period: Period;
+  calendar: PayCalendar;
   today: IsoDate;
-  settings: Pick<UserSettings, "greenMinBps" | "yellowMinBps" | "firstPayday" | "secondPayday">;
+  settings: Pick<UserSettings, "greenMinBps" | "yellowMinBps">;
   allocations: readonly IncomeAllocation[];
   expenses: readonly Expense[];
   recurring: readonly RecurringExpense[];
@@ -82,14 +85,17 @@ const emptyMovements = (): Movements => ({
 const closingDelta = (m: Movements) =>
   m.allocated - m.fixedApplied - m.manual - m.goalContributions;
 
-/** Groups every movement by period key and bucket, ignoring anything after `upTo`. */
+/**
+ * Groups every movement by period key and bucket, ignoring anything after `upTo`. Expenses go to
+ * the quincena whose effective range holds their date; allocations and goal contributions to the
+ * quincena they were stored for (spec 006, research.md R2).
+ */
 function groupByPeriod(input: Omit<SafeToSpendInput, "period">, upTo: Period) {
   const byPeriod = new Map<PeriodKey, Record<SpendBucket, Movements>>();
   let first: Period | null = null;
 
-  const at = (date: IsoDate, bucket: SpendBucket): Movements | null => {
-    if (date > upTo.end) return null;
-    const period = periodOf(date);
+  const at = (period: Period, bucket: SpendBucket): Movements | null => {
+    if (period.key > upTo.key) return null; // keys are zero-padded, so they sort by date
     if (!first || period.start < first.start) first = period;
     let entry = byPeriod.get(period.key);
     if (!entry) {
@@ -101,18 +107,21 @@ function groupByPeriod(input: Omit<SafeToSpendInput, "period">, upTo: Period) {
 
   for (const a of input.allocations) {
     if (a.bucket === "investment") continue;
-    const m = at(a.periodStart, a.bucket);
+    const m = at(periodOf(a.periodStart), a.bucket);
     if (m) m.allocated += a.amount;
   }
+  const byDate = new Map<IsoDate, Period>(); // many expenses share a date
   for (const e of input.expenses) {
-    const m = at(e.spentOn, e.bucket);
+    let period = byDate.get(e.spentOn);
+    if (!period) byDate.set(e.spentOn, (period = periodOfDate(e.spentOn, input.calendar)));
+    const m = at(period, e.bucket);
     if (!m) continue;
     if (e.origin === "recurring") m.fixedApplied += e.amount;
     else m.manual += e.amount;
   }
   for (const c of input.contributions) {
     if (c.sourceBucket === "investment") continue; // investment never touches Safe-to-Spend
-    const m = at(c.periodStart, c.sourceBucket);
+    const m = at(periodOf(c.periodStart), c.sourceBucket);
     if (m) m.goalContributions += c.amount;
   }
   return { byPeriod, first: first as Period | null };
@@ -205,6 +214,6 @@ export function computeSafeToSpend(input: SafeToSpendInput): SafeToSpend {
     period,
     needs: bucket("needs"),
     wants: bucket("wants"),
-    daysUntilPayday: daysUntilNextPayday(input.today, input.settings),
+    daysUntilPayday: daysUntilNextPayday(input.today, input.calendar),
   };
 }

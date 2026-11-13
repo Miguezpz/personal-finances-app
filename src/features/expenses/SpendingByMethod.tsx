@@ -15,12 +15,14 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useFinanceSnapshot } from "@/data/useFinanceSnapshot";
-import { nextPeriod, periodOf, previousPeriod } from "@/domain/periods";
+import { periodOfDate, withRange } from "@/domain/pay-calendar";
+import { nextPeriod, previousPeriod } from "@/domain/periods";
 import { spendingByPaymentMethod } from "@/domain/spending-by-method";
 import { ZERO_CENTS } from "@/domain/money";
 import type { FinanceSnapshot, Period } from "@/domain/types";
 import { formatPeriodRange } from "@/features/income/format";
 import { groupPaymentAccounts } from "@/features/settings/accounts/PaymentAccountOptions";
+import { usePayCalendar } from "@/lib/use-pay-calendar";
 import { useToday } from "@/lib/use-today";
 import { selectLocale, usePreferences } from "@/store/preferences";
 
@@ -37,27 +39,28 @@ export function PeriodNavigator({
   const t = useTranslations("expenses");
   const locale = usePreferences(selectLocale);
   const today = useToday();
-  const isCurrent = period.start >= periodOf(today).start;
+  const calendar = usePayCalendar();
+  const isCurrent = period.key >= periodOfDate(today, calendar).key;
   return (
     <div className="flex items-center gap-1 text-sm" data-testid="expenses-period">
       <Button
         variant="outline"
         size="icon-sm"
         aria-label={t("previousQuincena")}
-        onClick={() => onChange(previousPeriod(period))}
+        onClick={() => onChange(withRange(previousPeriod(period), calendar))}
         data-testid="spending-previous"
       >
         <ChevronLeft aria-hidden="true" />
       </Button>
       <span className="px-2 tabular-nums" data-testid="spending-period">
-        {t("spendingPeriod", formatPeriodRange(period.start, locale))}
+        {t("spendingPeriod", formatPeriodRange(period, locale))}
       </span>
       <Button
         variant="outline"
         size="icon-sm"
         aria-label={t("nextQuincena")}
         disabled={isCurrent}
-        onClick={() => onChange(nextPeriod(period))}
+        onClick={() => onChange(withRange(nextPeriod(period), calendar))}
         data-testid="spending-next"
       >
         <ChevronRight aria-hidden="true" />

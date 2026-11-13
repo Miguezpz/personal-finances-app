@@ -245,6 +245,7 @@
     "period": "Quincena {start} – {end}",
     "paydayToday": "Hoy es día de pago",
     "paydayIn": "{days, plural, one {Falta # día} other {Faltan # días}} para el pago",
+    "paydayMovedEarly": "Pago adelantado",
     "addExpense": "Registrar gasto",
     "safeToSpend": "Disponible para gastar",
     "ofBasePrefix": "de",

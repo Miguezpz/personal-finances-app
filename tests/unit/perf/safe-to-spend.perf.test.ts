@@ -5,6 +5,7 @@
  */
 import { describe, expect, it } from "vitest";
 import { generateHistory, HISTORY_TODAY } from "@/data/mock/seed";
+import { buildPayCalendar } from "@/domain/pay-calendar";
 import { periodOf } from "@/domain/periods";
 import { computeSafeToSpend } from "@/domain/safe-to-spend";
 
@@ -32,6 +33,7 @@ describe("computeSafeToSpend · 5 years of history", () => {
     const ms = bestOf(5, () =>
       computeSafeToSpend({
         period: periodOf(HISTORY_TODAY),
+        calendar: buildPayCalendar(s.settings, s.incomes),
         today: HISTORY_TODAY,
         settings: s.settings,
         allocations: s.allocations,

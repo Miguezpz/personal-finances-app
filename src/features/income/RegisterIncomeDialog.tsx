@@ -2,7 +2,9 @@
 
 /**
  * Register / edit an income (T064, US1).
- *  - Funded quincena suggested by fundedPeriodFor(receivedOn), editable (research.md R3).
+ *  - Funded quincena suggested by fundedPeriodFor(receivedOn, paydays): the one whose expected
+ *    payday is closest, so a late or early (Friday) payment still suggests the right one; editable
+ *    (spec 006, research.md R7). Options show each quincena's effective range.
  *  - Recurring incomes are split by the rule in effect on the received date; one-off incomes let
  *    the user choose to split or not (US1-7). Without a rule: configure one or record unsplit.
  *  - Editing recalculates with the income's ORIGINAL rule (rule_id snapshot, FR-005).
@@ -46,9 +48,11 @@ import { useFinanceSnapshot } from "@/data/useFinanceSnapshot";
 import { isIsoDate } from "@/domain/dates";
 import { isIncomeType } from "@/domain/income-types";
 import { formatCentsAsInput, parseMoneyInput } from "@/domain/parse";
-import { fundedPeriodFor, nextPeriod, previousPeriod, periodOf } from "@/domain/periods";
+import { fundedPeriodFor, type PayCalendar, withRange } from "@/domain/pay-calendar";
+import { nextPeriod, previousPeriod, periodOf } from "@/domain/periods";
 import { effectiveRule, splitIncome, type SplitResult } from "@/domain/splitter";
 import type { Account, DistributionRule, FinanceSnapshot, Income, IsoDate } from "@/domain/types";
+import { usePayCalendar } from "@/lib/use-pay-calendar";
 import { useToday } from "@/lib/use-today";
 import { selectLocale, usePreferences } from "@/store/preferences";
 import { formatPeriodRange } from "./format";
@@ -73,7 +77,11 @@ interface Props {
   draft?: Partial<IncomeFormInput>;
 }
 
-function defaultsFor(income: Income | null | undefined, today: IsoDate): IncomeFormInput {
+function defaultsFor(
+  income: Income | null | undefined,
+  today: IsoDate,
+  paydays: PayCalendar["settings"],
+): IncomeFormInput {
   if (income) {
     return {
       incomeType: income.incomeType,
@@ -91,7 +99,7 @@ function defaultsFor(income: Income | null | undefined, today: IsoDate): IncomeF
     label: "",
     amount: "",
     receivedOn: today,
-    fundedPeriodStart: fundedPeriodFor(today).start,
+    fundedPeriodStart: fundedPeriodFor(today, paydays).start,
     kind: "recurring",
     split: true,
     depositAccountId: "",
@@ -128,6 +136,7 @@ export function RegisterIncomeDialog({ open, onOpenChange, income, draft }: Prop
   const tc = useTranslations("common");
   const locale = usePreferences(selectLocale);
   const today = useToday();
+  const calendar = usePayCalendar();
   const { data } = useFinanceSnapshot(selectFormData);
   const register = useRegisterIncome();
   const lastUsed = useLastUsedDefaults();
@@ -136,7 +145,7 @@ export function RegisterIncomeDialog({ open, onOpenChange, income, draft }: Prop
   const form = useForm<IncomeFormInput, unknown, IncomeFormOutput>({
     resolver: zodResolver(incomeFormSchema),
     defaultValues: {
-      ...defaultsFor(income, today),
+      ...defaultsFor(income, today, calendar.settings),
       // Spec 009 (FR-002): the last deposit account for a new income.
       ...(income ? {} : { depositAccountId: lastUsed.depositAccountId }),
       ...draft,
@@ -154,13 +163,16 @@ export function RegisterIncomeDialog({ open, onOpenChange, income, draft }: Prop
 
   const periodOptions = useMemo(() => {
     if (!isIsoDate(receivedOn)) return [];
-    const suggested = fundedPeriodFor(receivedOn);
+    const suggested = fundedPeriodFor(receivedOn, calendar.settings);
     const options = [previousPeriod(suggested), suggested, nextPeriod(suggested)];
     if (isIsoDate(fundedPeriodStart) && !options.some((p) => p.start === fundedPeriodStart)) {
       options.push(periodOf(fundedPeriodStart));
     }
-    return options.map((p) => ({ start: p.start, suggested: p.key === suggested.key }));
-  }, [receivedOn, fundedPeriodStart]);
+    return options.map((p) => ({
+      period: withRange(p, calendar),
+      suggested: p.key === suggested.key,
+    }));
+  }, [receivedOn, fundedPeriodStart, calendar]);
 
   /** Label filled in by the last type choice; replaced on the next choice, never typed text. */
   const suggestedLabel = useRef<string | null>(null);
@@ -273,7 +285,7 @@ export function RegisterIncomeDialog({ open, onOpenChange, income, draft }: Prop
                     onChange: (e: React.ChangeEvent<HTMLInputElement>) => {
                       const value = e.target.value;
                       if (isIsoDate(value))
-                        form.setValue("fundedPeriodStart", fundedPeriodFor(value).start);
+                        form.setValue("fundedPeriodStart", fundedPeriodFor(value, calendar.settings).start);
                     },
                   })}
                 />
@@ -286,9 +298,9 @@ export function RegisterIncomeDialog({ open, onOpenChange, income, draft }: Prop
                 <FieldLabel htmlFor="income-period">{t("fundedPeriod")}</FieldLabel>
                 <NativeSelect id="income-period" {...form.register("fundedPeriodStart")}>
                   {periodOptions.map((p) => {
-                    const range = formatPeriodRange(p.start, locale);
+                    const range = formatPeriodRange(p.period, locale);
                     return (
-                      <NativeSelectOption key={p.start} value={p.start}>
+                      <NativeSelectOption key={p.period.start} value={p.period.start}>
                         {t("periodRange", range)}
                         {p.suggested ? ` (${t("suggested")})` : ""}
                       </NativeSelectOption>

@@ -7,16 +7,19 @@ import { screen, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { describe, expect, it } from "vitest";
 import { cents } from "@/domain/money";
-import { periodOf, previousPeriod, todayIn } from "@/domain/periods";
-import { DEFAULT_TIMEZONE } from "@/domain/settings";
+import { buildPayCalendar, periodOfDate, withRange } from "@/domain/pay-calendar";
+import { previousPeriod, todayIn } from "@/domain/periods";
+import { DEFAULT_TIMEZONE, DEFAULT_USER_SETTINGS } from "@/domain/settings";
 import { useState } from "react";
 import type { Period } from "@/domain/types";
 import { PeriodNavigator, SpendingByMethod } from "@/features/expenses/SpendingByMethod";
 import { emptySnapshot, makeAccount, makeCard, makeExpense } from "../../utils/fixtures";
 import { renderWithProviders } from "../../utils/renderWithProviders";
 
-const current = periodOf(todayIn(DEFAULT_TIMEZONE, new Date()));
-const previous = previousPeriod(current);
+// Effective quincenas (spec 006): the navigator walks the real-payday ranges.
+const calendar = buildPayCalendar(DEFAULT_USER_SETTINGS, []);
+const current = periodOfDate(todayIn(DEFAULT_TIMEZONE, new Date()), calendar);
+const previous = withRange(previousPeriod(current), calendar);
 
 const cash = makeAccount({ kind: "cash", name: "Efectivo" });
 const nu = makeCard({ name: "Nu" });
@@ -56,12 +59,12 @@ describe("SpendingByMethod", () => {
       snapshot: emptySnapshot({
         accounts: [debit, nu, cash],
         expenses: [
-          makeExpense({ spentOn: current.start, amount: cents(12_400), paymentAccountId: cash.id }),
-          makeExpense({ spentOn: current.start, amount: cents(5_000), paymentAccountId: nu.id }),
-          makeExpense({ spentOn: current.start, amount: cents(4_100), paymentAccountId: debit.id }),
-          makeExpense({ spentOn: current.start, amount: cents(950), paymentAccountId: null }),
+          makeExpense({ spentOn: current.from, amount: cents(12_400), paymentAccountId: cash.id }),
+          makeExpense({ spentOn: current.from, amount: cents(5_000), paymentAccountId: nu.id }),
+          makeExpense({ spentOn: current.from, amount: cents(4_100), paymentAccountId: debit.id }),
+          makeExpense({ spentOn: current.from, amount: cents(950), paymentAccountId: null }),
           makeExpense({
-            spentOn: previous.start,
+            spentOn: previous.from,
             amount: cents(99_900),
             paymentAccountId: cash.id,
           }),
@@ -84,7 +87,7 @@ describe("SpendingByMethod", () => {
       snapshot: emptySnapshot({
         accounts: [cash],
         expenses: [
-          makeExpense({ spentOn: previous.end, amount: cents(30_000), paymentAccountId: cash.id }),
+          makeExpense({ spentOn: previous.to, amount: cents(30_000), paymentAccountId: cash.id }),
         ],
       }),
     });

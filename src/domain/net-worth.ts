@@ -8,7 +8,7 @@
  */
 import { cardStatus } from "./credit";
 import { monthStart } from "./dates";
-import { periodOf } from "./periods";
+import { buildPayCalendar, periodOfDate } from "./pay-calendar";
 import { computeSafeToSpend } from "./safe-to-spend";
 import type { Cents, FinanceSnapshot, IsoDate, NetWorthSnapshot } from "./types";
 
@@ -25,8 +25,10 @@ export function computeNetWorth(s: FinanceSnapshot, asOf: IsoDate): NetWorth {
   for (const c of s.contributions) if (c.sourceBucket !== "investment") assets += c.amount;
   for (const n of s.installments) assets += Math.max(0, n.amount - n.collected);
 
+  const calendar = buildPayCalendar(s.settings, s.incomes);
   const sts = computeSafeToSpend({
-    period: periodOf(asOf),
+    period: periodOfDate(asOf, calendar),
+    calendar,
     today: asOf,
     settings: s.settings,
     allocations: s.allocations,

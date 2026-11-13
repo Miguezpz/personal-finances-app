@@ -13,6 +13,7 @@ import { statementOf, type CardData, type StatementView } from "./credit";
 import { addDays, addMonthsToMonthStart, daysBetween, parseIsoDate } from "./dates";
 import { clampChargeDay } from "./periods";
 import type { Account, IsoDate, UserSettings } from "./types";
+import { toPrevFridayIfWeekend } from "./pay-calendar";
 
 export const SESSION_DAYS = 3;
 /** How many monthly cycles ahead `nextPaymentSession` looks for an unfinished session. */
@@ -36,13 +37,13 @@ export interface PaymentSession {
   phase: "upcoming" | "today" | "past";
 }
 
-/** Paydays (1st/2nd of the preferences, 31 = last day) between `from` and `to`, ascending. */
+/** Paydays (1st/2nd of the preferences, 31 = last day; Friday before on weekends) between `from` and `to`, ascending. */
 function paydaysIn(from: IsoDate, to: IsoDate, settings: Paydays): IsoDate[] {
   const out: IsoDate[] = [];
   for (let m = addMonthsToMonthStart(from, 0); m <= to; m = addMonthsToMonthStart(m, 1)) {
     const { year, month } = parseIsoDate(m);
     for (const day of [settings.firstPayday, settings.secondPayday]) {
-      const date = clampChargeDay(year, month, day);
+      const date = toPrevFridayIfWeekend(clampChargeDay(year, month, day)); // spec 006
       if (date >= from && date <= to) out.push(date);
     }
   }

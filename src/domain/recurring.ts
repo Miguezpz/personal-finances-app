@@ -99,7 +99,7 @@ export function unappliedOccurrences(
   const done = appliedMonths(applied);
   const out: RecurringOccurrence[] = [];
   for (const r of recurring) {
-    for (const date of occurrencesBetween(r, period.start, period.end)) {
+    for (const date of occurrencesBetween(r, period.from, period.to)) {
       if (!done.has(`${r.id}|${monthKey(date)}`)) out.push(toOccurrence(r, date));
     }
   }
@@ -128,7 +128,7 @@ export function recurringStatusForPeriod(
   const items: RecurringStatusItem[] = [];
   for (const e of expenses) {
     if (e.origin !== "recurring" || !e.recurringExpenseId) continue;
-    if (e.spentOn < period.start || e.spentOn > period.end) continue;
+    if (e.spentOn < period.from || e.spentOn > period.to) continue;
     const r = byId.get(e.recurringExpenseId);
     if (!r) continue;
     items.push({

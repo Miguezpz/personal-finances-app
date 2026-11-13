@@ -33,6 +33,7 @@ import {
 } from "@/domain/dates";
 import { dueDateFor } from "@/domain/card-terms";
 import { allocateByWeights, cents } from "@/domain/money";
+import { toPrevFridayIfWeekend } from "@/domain/pay-calendar";
 import { clampChargeDay } from "@/domain/periods";
 import { DEFAULT_USER_SETTINGS } from "@/domain/settings";
 import type {
@@ -345,9 +346,12 @@ export function generateDemoSnapshot(options: SeedOptions): FinanceSnapshot {
     const { year, month } = parseIsoDate(addMonthsToMonthStart(rangeStart, m));
     paydays.push(isoDate(year, month, 15), lastDayOf(year, month));
   }
-  for (const receivedOn of paydays.filter((d) => d <= today)) {
+  // Paid the Friday before when the payday falls on a weekend (spec 006, research.md R6).
+  for (const payday of paydays) {
+    const receivedOn = toPrevFridayIfWeekend(payday);
+    if (receivedOn > today) continue;
     const incomeId = nextId();
-    const periodStart = fundedPeriodStart(receivedOn);
+    const periodStart = fundedPeriodStart(payday);
     incomes.push({
       id: incomeId,
       label: "Salary",

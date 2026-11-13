@@ -16,14 +16,14 @@ export interface SpendingByMethod {
 export function spendingByPaymentMethod(
   expenses: readonly Expense[],
   accounts: readonly Pick<Account, "id">[],
-  period: Pick<Period, "start" | "end">,
+  period: Pick<Period, "from" | "to">,
 ): SpendingByMethod {
   const known = new Set(accounts.map((a) => a.id));
   const byAccount = new Map<Uuid, Cents>();
   let unspecified = ZERO_CENTS;
   let total = ZERO_CENTS;
   for (const e of expenses) {
-    if (e.spentOn < period.start || e.spentOn > period.end) continue;
+    if (e.spentOn < period.from || e.spentOn > period.to) continue;
     total = addCents(total, e.amount);
     const id = e.paymentAccountId;
     if (id && known.has(id)) byAccount.set(id, addCents(byAccount.get(id) ?? ZERO_CENTS, e.amount));

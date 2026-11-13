@@ -20,7 +20,10 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useFinanceSnapshot } from "@/data/useFinanceSnapshot";
 import type { Account, FinanceSnapshot, Income, IncomeAllocation } from "@/domain/types";
+import { withRange } from "@/domain/pay-calendar";
+import { periodOf } from "@/domain/periods";
 import { formatDate } from "@/i18n/format";
+import { usePayCalendar } from "@/lib/use-pay-calendar";
 import { selectLocale, usePreferences } from "@/store/preferences";
 import { openCreate } from "@/store/ui";
 import { useRowMotion } from "@/components/motion/use-row-motion";
@@ -53,6 +56,7 @@ function IncomeCard({
   const t = useTranslations("income");
   const tb = useTranslations("buckets");
   const locale = usePreferences(selectLocale);
+  const calendar = usePayCalendar();
   const sorted = [...allocations].sort((a, b) => BUCKET_ORDER[a.bucket] - BUCKET_ORDER[b.bucket]);
   const TypeIcon = INCOME_TYPE_ICONS[income.incomeType];
 
@@ -71,7 +75,7 @@ function IncomeCard({
           <p className="text-sm text-muted-foreground">
             {t("receivedLabel", { date: formatDate(income.receivedOn, locale) })} ·{" "}
             {t("fundsLabel", {
-              range: t("periodRange", formatPeriodRange(income.fundedPeriodStart, locale)),
+              range: t("periodRange", formatPeriodRange(withRange(periodOf(income.fundedPeriodStart), calendar), locale)),
             })}
           </p>
         </div>

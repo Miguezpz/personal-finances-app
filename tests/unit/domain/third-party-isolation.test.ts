@@ -8,7 +8,7 @@
 import { describe, expect, it } from "vitest";
 import { generateDemoSnapshot } from "@/data/mock/seed";
 import { cents } from "@/domain/money";
-import { periodOf } from "@/domain/periods";
+import { buildPayCalendar, periodOfDate } from "@/domain/pay-calendar";
 import { computeCarryChain, computeSafeToSpend } from "@/domain/safe-to-spend";
 import type { FinanceSnapshot, IsoDate } from "@/domain/types";
 import { d, makeInstallment, makeReceivable, testId } from "../../utils/fixtures";
@@ -16,10 +16,11 @@ import { d, makeInstallment, makeReceivable, testId } from "../../utils/fixtures
 const today = d("2026-11-12") as IsoDate;
 
 function personalMetrics(s: FinanceSnapshot) {
-  const input = { ...s, today, period: periodOf(today) };
+  const calendar = buildPayCalendar(s.settings, s.incomes);
+  const input = { ...s, today, calendar, period: periodOfDate(today, calendar) };
   return {
     safeToSpend: computeSafeToSpend(input),
-    chain: [...computeCarryChain(input, periodOf(today).key).entries()],
+    chain: [...computeCarryChain(input, input.period.key).entries()],
   };
 }
 

@@ -245,6 +245,7 @@
     "period": "Pay period {start} – {end}",
     "paydayToday": "Payday is today",
     "paydayIn": "{days, plural, one {# day} other {# days}} to payday",
+    "paydayMovedEarly": "Paid early",
     "addExpense": "Add expense",
     "safeToSpend": "Safe to spend",
     "ofBasePrefix": "of",

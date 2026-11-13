@@ -33,7 +33,8 @@ import { useFinanceSnapshot, useSnapshotStatus } from "@/data/useFinanceSnapshot
 import { groupByDay } from "@/domain/day-groups";
 import { taxonomyIconFor } from "@/domain/icons";
 import { negateCents } from "@/domain/money";
-import { periodFromKey, periodOf } from "@/domain/periods";
+import { periodOfDate, withRange } from "@/domain/pay-calendar";
+import { periodFromKey } from "@/domain/periods";
 import type {
   Expense,
   FinanceSnapshot,
@@ -46,6 +47,7 @@ import { groupPaymentAccounts } from "@/features/settings/accounts/PaymentAccoun
 import { useTaxonomyName } from "@/features/settings/taxonomy/useTaxonomyName";
 import { useDeferredDelete } from "@/features/shared/use-deferred-delete";
 import { formatDate } from "@/i18n/format";
+import { usePayCalendar } from "@/lib/use-pay-calendar";
 import { useToday } from "@/lib/use-today";
 import { cn } from "@/lib/utils";
 import { useRowMotion } from "@/components/motion/use-row-motion";
@@ -68,11 +70,12 @@ function useExpenseFilters() {
   const router = useRouter();
   const pathname = usePathname();
   const today = useToday();
-  const current = periodOf(today);
+  const calendar = usePayCalendar();
+  const current = periodOfDate(today, calendar);
   const rawPeriod = params.get("periodo");
   const period: Period =
     rawPeriod && PERIOD_KEY_RE.test(rawPeriod) && rawPeriod <= current.key
-      ? periodFromKey(rawPeriod as PeriodKey)
+      ? withRange(periodFromKey(rawPeriod as PeriodKey), calendar)
       : current;
   const rawBucket = params.get("bucket");
   const bucket = BUCKETS.find((b) => b === rawBucket) ?? null;
@@ -114,7 +117,7 @@ export function ExpensesPage() {
 
   const inPeriod = useMemo<Row[]>(() => {
     if (!data) return [];
-    const within = (date: IsoDate) => date >= period.start && date <= period.end;
+    const within = (date: IsoDate) => date >= period.from && date <= period.to;
     return data.expenses
       .filter((e) => within(e.spentOn))
       .map((item): Row => ({ kind: "expense", date: item.spentOn, item }))

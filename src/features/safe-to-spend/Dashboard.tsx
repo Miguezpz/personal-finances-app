@@ -2,7 +2,8 @@
 
 /**
  * Dashboard (T075): "how much can I spend today?" — Needs and Wants of the current quincena with
- * their semáforo, the quincena dates and the days to the next payday. Loading, empty and error
+ * their semáforo, the quincena dates (effective range: from the real payday, spec 006) and the
+ * days to the next payday. Loading, empty and error
  * states; a clear warning when a bucket is overspent that never blocks recording (FR-021).
  */
 import { CircleAlert, TriangleAlert } from "lucide-react";
@@ -11,7 +12,9 @@ import { useEffect } from "react";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
+import { nominalPayday } from "@/domain/pay-calendar";
 import { formatPeriodRange } from "@/features/income/format";
+import { usePayCalendar } from "@/lib/use-pay-calendar";
 import { useMediaQuery } from "@/lib/use-media-query";
 import { CollectionAlerts } from "@/features/receivables/CollectionAlerts";
 import { selectLocale, usePreferences } from "@/store/preferences";
@@ -36,6 +39,8 @@ export function Dashboard() {
   const tc = useTranslations("common");
   const locale = usePreferences(selectLocale);
   const { data, recurringItems, hasAllocations, isPending, isError, refetch } = useSafeToSpend();
+  const paydays = usePayCalendar().settings;
+  const paidEarly = data ? data.period.from < nominalPayday(data.period, paydays) : false;
   const openCreate = useUi((s) => s.openCreate);
   const introPlayed = useUi((s) => s.dashboardIntroPlayed);
   const markIntroPlayed = useUi((s) => s.markDashboardIntroPlayed);
@@ -64,10 +69,13 @@ export function Dashboard() {
           <>
             {data && (
               <p className="text-sm text-muted-foreground" data-testid="period-info">
-                {t("period", formatPeriodRange(data.period.start, locale))} ·{" "}
+                {t("period", formatPeriodRange(data.period, locale))} ·{" "}
                 {data.daysUntilPayday === 0
                   ? t("paydayToday")
                   : t("paydayIn", { days: data.daysUntilPayday })}
+                {paidEarly && (
+                  <span data-testid="payday-moved-early"> · {t("paydayMovedEarly")}</span>
+                )}
               </p>
             )}
           </>

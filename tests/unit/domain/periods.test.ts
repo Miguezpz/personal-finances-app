@@ -49,6 +49,8 @@ describe("periodOf", () => {
       start: "2026-11-01",
       end: "2026-11-15",
       half: 1,
+      from: "2026-11-01",
+      to: "2026-11-15",
     });
     expect(periodOf(d("2026-11-15")).key).toBe("2026-11-1");
     expect(periodOf(d("2026-11-16"))).toEqual({
@@ -56,6 +58,8 @@ describe("periodOf", () => {
       start: "2026-11-16",
       end: "2026-11-30",
       half: 2,
+      from: "2026-11-16",
+      to: "2026-11-30",
     });
     expect(periodOf(d("2026-02-28")).end).toBe("2026-02-28");
     expect(periodOf(d("2024-02-29")).end).toBe("2024-02-29");

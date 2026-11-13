@@ -58,7 +58,7 @@ describe("creditTimeline", () => {
 
   it("lists paydays, card due dates and collections ordered by date", () => {
     expect(events.map((e) => [e.date, e.kind])).toEqual([
-      ["2026-11-15", "payday"],
+      ["2026-11-13", "payday"], // Nov 15 is Sunday → paid Friday (spec 006)
       ["2026-11-27", "collection_due"],
       ["2026-11-30", "payday"], // 31 → last day of November
       ["2026-11-30", "card_due"],
