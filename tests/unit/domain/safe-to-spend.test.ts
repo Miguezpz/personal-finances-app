@@ -370,3 +370,104 @@ describe("quincena by the real payday (spec 006)", () => {
     expect(chain.get("2026-11-1" as PeriodKey)).toEqual({ needs: 0, wants: 90_000 });
   });
 });
+
+describe("save surplus (spec 013)", () => {
+  const on = { ...settings, saveSurplus: true };
+
+  it("a +$400 Wants closing goes to Saved and doesn't carry", () => {
+    const r = computeSafeToSpend(
+      input({
+        settings: on,
+        allocations: [alloc("wants", 100_000, "2026-11-01"), alloc("wants", 100_000, "2026-11-16")],
+        expenses: [spend("wants", 60_000, "2026-11-05")],
+      }),
+    );
+    expect(r.wants).toMatchObject({ carryIn: 0, available: 100_000, base: 100_000 });
+    expect(r.saved).toEqual({ lastPeriod: 40_000, total: 40_000 });
+  });
+
+  it("a −$400 closing still carries and adds nothing to Saved", () => {
+    const r = computeSafeToSpend(
+      input({
+        settings: on,
+        allocations: [alloc("wants", 100_000, "2026-11-01"), alloc("wants", 100_000, "2026-11-16")],
+        expenses: [spend("wants", 140_000, "2026-11-05")],
+      }),
+    );
+    expect(r.wants).toMatchObject({ carryIn: -40_000, available: 60_000 });
+    expect(r.saved).toEqual({ lastPeriod: 0, total: 0 });
+  });
+
+  it("mixed buckets: Needs −$100 carries, Wants +$300 is saved", () => {
+    const r = computeSafeToSpend(
+      input({
+        settings: on,
+        allocations: [alloc("needs", 10_000, "2026-11-01"), alloc("wants", 30_000, "2026-11-01")],
+        expenses: [spend("needs", 20_000, "2026-11-05")],
+      }),
+    );
+    expect(r.needs.carryIn).toBe(-10_000);
+    expect(r.wants.carryIn).toBe(0);
+    expect(r.saved).toEqual({ lastPeriod: 30_000, total: 30_000 });
+  });
+
+  it("three quincenas of $100, $200 and $300 add up to 600; the last one is 300", () => {
+    const r = computeSafeToSpend(
+      input({
+        settings: on,
+        period: periodOfDate(d("2026-11-20"), calendar),
+        allocations: [
+          alloc("wants", 10_000, "2026-10-01"),
+          alloc("wants", 20_000, "2026-10-16"),
+          alloc("wants", 30_000, "2026-11-01"),
+        ],
+      }),
+    );
+    expect(r.wants.carryIn).toBe(0);
+    expect(r.saved).toEqual({ lastPeriod: 30_000, total: 60_000 });
+  });
+
+  it("off: saved is null and the surplus carries as before", () => {
+    const r = computeSafeToSpend(
+      input({
+        allocations: [alloc("wants", 100_000, "2026-11-01"), alloc("wants", 100_000, "2026-11-16")],
+        expenses: [spend("wants", 60_000, "2026-11-05")],
+      }),
+    );
+    expect(r.saved).toBeNull();
+    expect(r.wants.carryIn).toBe(40_000);
+  });
+
+  it("computeCarryChain keeps the closing before the transfer", () => {
+    const chain = computeCarryChain(
+      input({ settings: on, allocations: [alloc("wants", 10_000, "2026-11-01")] }),
+      "2026-11-2" as PeriodKey,
+    );
+    expect(chain.get("2026-11-1" as PeriodKey)).toEqual({ needs: 0, wants: 10_000 });
+    expect(chain.get("2026-11-2" as PeriodKey)).toEqual({ needs: 0, wants: 0 });
+  });
+
+  it("owner's data on Nov 13 2026: Needs 2,442.87, Wants 1,470.93, Saved 2,327.90", () => {
+    const today = d("2026-11-13");
+    const r = computeSafeToSpend(
+      input({
+        settings: on,
+        period: periodOfDate(today, calendar),
+        today,
+        allocations: [
+          alloc("needs", 294_187, "2026-11-16"),
+          alloc("needs", 250_794, "2026-11-01"),
+          alloc("wants", 147_093, "2026-11-16"),
+          alloc("wants", 125_396, "2026-11-01"),
+        ],
+        expenses: [spend("needs", 112_900, "2026-11-05"), spend("wants", 30_500, "2026-11-05")],
+        recurring: [
+          makeRecurring({ chargeDay: 18, amount: cents(49_900), startsOn: d("2026-11-05") }),
+        ],
+      }),
+    );
+    expect(r.needs.available).toBe(244_287);
+    expect(r.wants.available).toBe(147_093);
+    expect(r.saved).toEqual({ lastPeriod: 232_790, total: 232_790 });
+  });
+});

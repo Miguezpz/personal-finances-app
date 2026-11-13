@@ -26,21 +26,21 @@
 
 **Independent test**: con `saveSurplus: true`, un cierre de +$400 en Gustos da `carryIn = 0` y `saved.lastPeriod = 400`; un cierre de −$400 se sigue arrastrando.
 
-- [ ] T008 [US1] En `tests/unit/domain/safe-to-spend.test.ts`, nuevo `describe("save surplus (spec 013)")` con los casos de quickstart §1, que fallan primero:
+- [X] T008 [US1] En `tests/unit/domain/safe-to-spend.test.ts`, nuevo `describe("save surplus (spec 013)")` con los casos de quickstart §1, que fallan primero:
   - Sobrante.
   - Faltante.
   - Buckets mixtos.
   - Tres quincenas (total 600 y quincena pasada 300).
   - Ajuste apagado da `saved === null`.
   - Datos del dueño: Necesidades 294,187 en `2026-11-16` y 250,794 en `2026-11-01`; Gustos 147,093 y 125,396; gastos de Necesidades por 112,900 y de Gustos por 30,500 en `2026-11-1`; Gym de 49,900 el día 18 con inicio el `2026-11-05`; hoy `2026-11-13`. Resultado esperado: Necesidades 244,287, Gustos 147,093 y quincena pasada 232,790.
-- [ ] T009 [US1] En `src/domain/safe-to-spend.ts` (según `contracts/domain.md` y R1/R2):
+- [X] T009 [US1] En `src/domain/safe-to-spend.ts` (según `contracts/domain.md` y R1/R2):
   - `SafeToSpendInput.settings` incluye `saveSurplus`.
   - Una función interna `carryChain(input, upTo)` hace la transferencia al entrar a cada quincena después de la primera: si el ajuste está encendido, por bucket `saved += max(balance, 0)` y `balance = min(balance, 0)`. Registra la última transferencia y el total.
   - `computeCarryChain` devuelve `carryChain(...).chain`, con la misma firma.
   - `SafeToSpend.saved` vale `{ lastPeriod, total }`, o `null` si el ajuste está apagado.
   - Actualizar las fórmulas del comentario de cabecera.
   - T008 debe pasar y la prueba de rendimiento debe seguir por debajo de 50 ms.
-- [ ] T010 [P] [US1] En `tests/unit/domain/net-worth.test.ts`, un caso con dos quincenas con sobrante: `computeNetWorth` es igual con `saveSurplus` encendido y apagado. Implementar en `src/domain/net-worth.ts`: `assets += sts.saved?.total ?? 0`, y actualizar el comentario de cabecera.
+- [X] T010 [P] [US1] En `tests/unit/domain/net-worth.test.ts`, un caso con dos quincenas con sobrante: `computeNetWorth` es igual con `saveSurplus` encendido y apagado. Implementar en `src/domain/net-worth.ts`: `assets += sts.saved?.total ?? 0`, y actualizar el comentario de cabecera.
 
 ## Phase 3: US2 — Encender o apagar el ajuste (P1)
 

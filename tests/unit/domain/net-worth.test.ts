@@ -2,7 +2,7 @@
  * T140 · Net worth (FR-031, US10-4).
  *   assets      = Σ opening balances of non-card accounts + Σ allocations to Investment
  *               + Σ goal contributions from Needs/Wants + Σ third-party installments still owed
- *               + current available Needs and Wants (signed)
+ *               + current available Needs and Wants (signed) + Saved total (spec 013)
  *   liabilities = Σ total card debt: what is recorded after the latest statement marked as paid
  *                 (spec 011), MSI installments included
  * The monthly snapshot is taken once per month (idempotent).
@@ -119,6 +119,20 @@ describe("computeNetWorth", () => {
       ],
     };
     expect(computeNetWorth(overspent, d("2026-11-12")).assets).toBe(2_050_000);
+  });
+
+  it("is the same with saveSurplus on and off: Saved moves out of available into assets (spec 013)", () => {
+    const twoSurpluses = {
+      ...snapshot,
+      allocations: [
+        ...snapshot.allocations,
+        makeAllocation({ bucket: "wants", amount: cents(70_000), periodStart: d("2026-10-16") }),
+      ],
+    };
+    const on = { ...twoSurpluses, settings: { ...twoSurpluses.settings, saveSurplus: true } };
+    const off = { ...twoSurpluses, settings: { ...twoSurpluses.settings, saveSurplus: false } };
+    const asOf = d("2026-11-20");
+    expect(computeNetWorth(on, asOf)).toEqual(computeNetWorth(off, asOf));
   });
 
   it("is zero for an empty snapshot", () => {

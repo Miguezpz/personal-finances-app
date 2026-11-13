@@ -3,6 +3,7 @@
  *   assets      = Σ opening balances of non-card accounts + Σ allocations to Investment
  *               + Σ goal contributions from Needs/Wants + Σ third-party installments still owed
  *               + current available Needs and Wants (signed)
+ *               + Saved total (spec 013: what saveSurplus took out of the available)
  *   liabilities = Σ total card debt (includes the full outstanding MSI)
  * A snapshot is stored once per month (dated the 1st) for the historical chart.
  */
@@ -37,7 +38,7 @@ export function computeNetWorth(s: FinanceSnapshot, asOf: IsoDate): NetWorth {
     goals: s.goals,
     contributions: s.contributions,
   });
-  assets += sts.needs.available + sts.wants.available;
+  assets += sts.needs.available + sts.wants.available + (sts.saved?.total ?? 0);
 
   let liabilities = 0;
   for (const card of s.accounts) {

@@ -3,6 +3,7 @@
  *
  *   closing(b,p)   = carry(b,p) + allocated − fixedApplied − manual − goalContrib
  *   carry(b,p+1)   = closing(b,p)              (the first period with data starts at 0)
+ *   saveSurplus on (spec 013): carry(b,p+1) = min(closing(b,p), 0); max(closing(b,p), 0) is Saved
  *   available(b,p) = carry + allocated − fixedApplied − fixedPending − manual − goalContrib
  *   base(b,p)      = allocated + max(carry, 0)  (a negative carry never raises the base)
  *
@@ -52,6 +53,15 @@ export interface SafeToSpend {
   needs: BucketSafeToSpend;
   wants: BucketSafeToSpend;
   daysUntilPayday: number;
+  /** null when settings.saveSurplus is off (spec 013, FR-006). */
+  saved: SavedSummary | null;
+}
+
+export interface SavedSummary {
+  /** Σ needs+wants moved to Saved when the previous quincena closed. */
+  lastPeriod: Cents;
+  /** Σ of every transfer up to the current quincena. */
+  total: Cents;
 }
 
 export interface SafeToSpendInput {
@@ -59,7 +69,7 @@ export interface SafeToSpendInput {
   period: Period;
   calendar: PayCalendar;
   today: IsoDate;
-  settings: Pick<UserSettings, "greenMinBps" | "yellowMinBps">;
+  settings: Pick<UserSettings, "greenMinBps" | "yellowMinBps" | "saveSurplus">;
   allocations: readonly IncomeAllocation[];
   expenses: readonly Expense[];
   recurring: readonly RecurringExpense[];
@@ -127,25 +137,43 @@ function groupByPeriod(input: Omit<SafeToSpendInput, "period">, upTo: Period) {
   return { byPeriod, first: first as Period | null };
 }
 
-/** Closing balance of every quincena (with or without data) from the first one with data to `upTo`. */
-export function computeCarryChain(
-  input: Omit<SafeToSpendInput, "period">,
-  upTo: PeriodKey,
-): ReadonlyMap<PeriodKey, Record<SpendBucket, Cents>> {
+/**
+ * Walks the quincenas from the first one with data to `upTo`. With saveSurplus on, entering each
+ * quincena after the first moves the positive balance of every bucket to Saved (spec 013, R1).
+ */
+function carryChain(input: Omit<SafeToSpendInput, "period">, upTo: PeriodKey) {
   const target = periodFromKey(upTo);
   const { byPeriod, first } = groupByPeriod(input, target);
   const chain = new Map<PeriodKey, Record<SpendBucket, Cents>>();
-  if (!first) return chain;
+  let lastPeriod = 0;
+  let total = 0;
+  if (!first) return { chain, lastPeriod, total };
 
   const balance: Record<SpendBucket, number> = { needs: 0, wants: 0 };
   for (let p: Period = first; p.start <= target.start; p = nextPeriod(p)) {
+    if (input.settings.saveSurplus && p !== first) {
+      lastPeriod = 0;
+      for (const b of BUCKETS) {
+        lastPeriod += Math.max(balance[b], 0);
+        balance[b] = Math.min(balance[b], 0);
+      }
+      total += lastPeriod;
+    }
     const movements = byPeriod.get(p.key);
     for (const b of BUCKETS) {
       if (movements) balance[b] += closingDelta(movements[b]);
     }
     chain.set(p.key, { needs: balance.needs as Cents, wants: balance.wants as Cents });
   }
-  return chain;
+  return { chain, lastPeriod, total };
+}
+
+/** Closing balance of every quincena (with or without data) from the first one with data to `upTo`. */
+export function computeCarryChain(
+  input: Omit<SafeToSpendInput, "period">,
+  upTo: PeriodKey,
+): ReadonlyMap<PeriodKey, Record<SpendBucket, Cents>> {
+  return carryChain(input, upTo).chain;
 }
 
 /** Color of a bucket (FR-017). Integer comparison (no division); exact for any safe amount. */
@@ -182,7 +210,7 @@ function pendingFixedOf(input: SafeToSpendInput): Record<SpendBucket, Cents> {
 
 export function computeSafeToSpend(input: SafeToSpendInput): SafeToSpend {
   const { period } = input;
-  const chain = computeCarryChain(input, period.key);
+  const { chain, lastPeriod, total } = carryChain(input, period.key);
   const { byPeriod } = groupByPeriod(input, period);
   const current = byPeriod.get(period.key);
   const pending = pendingFixedOf(input);
@@ -215,5 +243,8 @@ export function computeSafeToSpend(input: SafeToSpendInput): SafeToSpend {
     needs: bucket("needs"),
     wants: bucket("wants"),
     daysUntilPayday: daysUntilNextPayday(input.today, input.calendar),
+    saved: input.settings.saveSurplus
+      ? { lastPeriod: lastPeriod as Cents, total: total as Cents }
+      : null,
   };
 }
