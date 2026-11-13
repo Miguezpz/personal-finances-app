@@ -132,6 +132,7 @@ describe("preferencesFormSchema", () => {
     firstPayday: "15",
     secondPayday: "31",
     timezone: "America/Mexico_City",
+    saveSurplus: true,
   };
 
   it("converts to exact settings values", () => {
@@ -143,6 +144,7 @@ describe("preferencesFormSchema", () => {
       firstPayday: 15,
       secondPayday: 31,
       timezone: "America/Mexico_City",
+      saveSurplus: true,
     });
   });
 

@@ -2,13 +2,13 @@
 
 /**
  * Calculation preferences (T124, FR-041): traffic-light thresholds, paydays, collection lead days,
- * emergency fund months and time zone. Saved to `user_settings`; every derived figure (semáforo,
+ * emergency fund months, time zone and the save-surplus switch (spec 013). Saved to `user_settings`; every derived figure (semáforo,
  * collection alerts, "today") follows at once through the snapshot.
  */
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useTranslations } from "next-intl";
 import { useMemo } from "react";
-import { useForm } from "react-hook-form";
+import { Controller, useForm } from "react-hook-form";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -16,6 +16,7 @@ import { Field, FieldDescription, FieldError, FieldGroup, FieldLabel } from "@/c
 import { Input } from "@/components/ui/input";
 import { NativeSelect, NativeSelectOption } from "@/components/ui/native-select";
 import { Skeleton } from "@/components/ui/skeleton";
+import { Switch } from "@/components/ui/switch";
 import { isNotifiedGlobally } from "@/data/errors";
 import { formatBpsAsPercentInput } from "@/domain/parse";
 import type { UserSettings } from "@/domain/types";
@@ -69,6 +70,7 @@ function PreferencesForm({ settings }: { settings: UserSettings }) {
       firstPayday: String(settings.firstPayday),
       secondPayday: String(settings.secondPayday),
       timezone: settings.timezone,
+      saveSurplus: settings.saveSurplus,
     },
   });
   const errors = form.formState.errors;
@@ -159,6 +161,27 @@ function PreferencesForm({ settings }: { settings: UserSettings }) {
                 true,
               )}
             </FieldGroup>
+            <Field className="mt-6">
+              <div className="flex items-center gap-3">
+                <Controller
+                  control={form.control}
+                  name="saveSurplus"
+                  render={({ field }) => (
+                    <Switch
+                      id="pref-save-surplus"
+                      checked={field.value}
+                      onCheckedChange={field.onChange}
+                      aria-describedby="pref-save-surplus-hint"
+                      data-testid="pref-save-surplus"
+                    />
+                  )}
+                />
+                <FieldLabel htmlFor="pref-save-surplus">{t("saveSurplusLabel")}</FieldLabel>
+              </div>
+              <FieldDescription id="pref-save-surplus-hint">
+                {t("saveSurplusHint")}
+              </FieldDescription>
+            </Field>
           </CardContent>
         </Card>
 

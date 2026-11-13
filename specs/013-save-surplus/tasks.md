@@ -46,12 +46,12 @@
 
 **Independent test**: en Preferencias, encender el interruptor y guardar; el Dashboard cambia sin recargar.
 
-- [ ] T011 [US2] En `src/features/settings/preferences/schema.ts`, agregar `saveSurplus: z.boolean()`. En `tests/unit/features/settings-schemas.test.ts`, el valor pasa sin cambios.
-- [ ] T012 [US2] En `src/features/settings/preferences/PreferencesForm.tsx`:
+- [X] T011 [US2] En `src/features/settings/preferences/schema.ts`, agregar `saveSurplus: z.boolean()`. En `tests/unit/features/settings-schemas.test.ts`, el valor pasa sin cambios.
+- [X] T012 [US2] En `src/features/settings/preferences/PreferencesForm.tsx`:
   - `defaultValues.saveSurplus = settings.saveSurplus`.
   - Un `Controller` con `Switch` (`id="pref-save-surplus"`, `data-testid="pref-save-surplus"`, mismo patrón que `AddExpenseDialog.tsx` ~L349) dentro de un `Field` con `FieldLabel` y `FieldDescription`, debajo de los días de pago.
   - Se guarda con el `onSubmit` que ya existe.
-- [ ] T013 [P] [US2] Agregar en `src/i18n/messages/es.json` y `en.json` las llaves `settings.saveSurplusLabel` y `settings.saveSurplusHint`, con los textos de la tabla en `contracts/domain.md`.
+- [X] T013 [P] [US2] Agregar en `src/i18n/messages/es.json` y `en.json` las llaves `settings.saveSurplusLabel` y `settings.saveSurplusHint`, con los textos de la tabla en `contracts/domain.md`.
 
 ## Phase 4: US3 — Ver lo ahorrado (P2)
 

@@ -1,8 +1,8 @@
 /**
  * Calculation preferences (T124, FR-041), mirroring the `user_settings` CHECKs: traffic-light
  * thresholds with yellow < green, collection lead days 0–15, emergency fund months 1–36,
- * paydays 1–31 (the second one after the first) and an IANA time zone. Messages are i18n keys
- * of the `settings` namespace.
+ * paydays 1–31 (the second one after the first), an IANA time zone and the save-surplus switch
+ * (spec 013). Messages are i18n keys of the `settings` namespace.
  */
 import { z } from "zod";
 import { parsePercentInput } from "@/domain/parse";
@@ -36,6 +36,7 @@ export const preferencesFormSchema = z
     firstPayday: intIn(1, 31, "invalidPayday"),
     secondPayday: intIn(1, 31, "invalidPayday"),
     timezone: z.string().min(1, "timezoneRequired"),
+    saveSurplus: z.boolean(),
   })
   .superRefine((v, ctx) => {
     if (v.greenMinBps < 1) {

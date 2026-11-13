@@ -685,7 +685,9 @@
     },
     "quickExpensesTitle": "Gastos rápidos",
     "quickExpensesLinkHint": "Crea, ordena y edita tus gastos de un toque.",
-    "quickExpensesDescription": "Los gastos que registras con un toque al registrar un gasto."
+    "quickExpensesDescription": "Los gastos que registras con un toque al registrar un gasto.",
+    "saveSurplusLabel": "Guardar el sobrante de cada quincena",
+    "saveSurplusHint": "Lo que sobra al cerrar una quincena va a Ahorrado y no se suma a la siguiente. Los sobregiros se siguen restando."
   },
   "ledger": {
     "title": "Bitácora",

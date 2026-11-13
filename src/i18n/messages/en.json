@@ -685,7 +685,9 @@
     },
     "quickExpensesTitle": "Quick expenses",
     "quickExpensesLinkHint": "Create, order and edit your one-tap expenses.",
-    "quickExpensesDescription": "The expenses you record with one tap when registering an expense."
+    "quickExpensesDescription": "The expenses you record with one tap when registering an expense.",
+    "saveSurplusLabel": "Save each pay period's leftover",
+    "saveSurplusHint": "What's left when a pay period ends goes to Saved instead of the next one. Overspending still carries over."
   },
   "ledger": {
     "title": "Ledger",
