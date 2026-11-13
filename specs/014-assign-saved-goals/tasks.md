@@ -118,7 +118,7 @@ US5 (Fondo de emergencia y Apartados) usa el mismo código que US1, así que va 
   - **Live**: sembrar ajuste encendido y una quincena pasada con sobrante (como US17); crear una Compra; asignar desde la tarjeta Ahorrado y ver el disponible bajar sin recargar; regresar; "Lo compré" y ver "Cumplida"; restaurar.
 - [X] T037 Puertas: `pnpm typecheck && pnpm lint && pnpm format:check && pnpm test && pnpm build`; `pnpm test:contract:local`; `pnpm db:test`; `E2E_MODES=demo pnpm test:e2e`; `pnpm test:e2e:local tests/e2e/us18-assign-saved.spec.ts`.
 - [X] T038 [P] En `README.md`, en la fila de Metas: tipo Compra, asignar y regresar lo Ahorrado, "Lo compré".
-- [ ] T039 **Nube (con confirmación del dueño)**:
+- [X] T039 **Nube (con confirmación del dueño)**:
   - Aplicar `0014` con el MCP de Supabase (`apply_migration`) al proyecto `potodtpkgadgsmeuuafx`.
   - Corregir la versión en `supabase_migrations.schema_migrations` al prefijo `0014` y verificar con `list_migrations`.
   - `get_advisors` (security) sin avisos nuevos de `goal_saved_moves`.
