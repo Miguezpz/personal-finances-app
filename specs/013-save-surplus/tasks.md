@@ -66,14 +66,14 @@
 
 ## Phase 5: Cierre
 
-- [ ] T018 Crear `tests/e2e/us17-save-surplus.spec.ts`:
+- [X] T018 Crear `tests/e2e/us17-save-surplus.spec.ts`:
   - **Demo** (EN y ES): `saved-card` visible con `saved-last` y `saved-total`. Con el modo privacidad, sin montos legibles, con el mismo patrón que `READABLE_AMOUNT` de `matrix.spec.ts`. En `/settings/preferences`, cambiar `pref-save-surplus` y guardar muestra el aviso de solo lectura.
   - **Live**:
     - Se siembra con `currentQuincena(today)`: una asignación de Gustos de $1,000 en la quincena anterior y un gasto de $300 dentro de su rango.
     - Encender y guardar, y sin recargar el Dashboard: `saved-last` muestra $700 y el arrastre de Gustos es $0.
     - Apagar y guardar: `saved-card` desaparece.
-- [ ] T019 Puertas: `pnpm typecheck && pnpm lint && pnpm format:check && pnpm test && pnpm build`; `pnpm test:contract:local`; `pnpm db:test`; `E2E_MODES=demo pnpm test:e2e`; y `pnpm test:e2e:local tests/e2e/us17-save-surplus.spec.ts`.
-- [ ] T020 [P] En `README.md`, mencionar en la fila de Safe-to-Spend el ajuste opcional "Guardar el sobrante": lo que sobra va a Ahorrado y no se arrastra.
+- [X] T019 Puertas: `pnpm typecheck && pnpm lint && pnpm format:check && pnpm test && pnpm build`; `pnpm test:contract:local`; `pnpm db:test`; `E2E_MODES=demo pnpm test:e2e`; y `pnpm test:e2e:local tests/e2e/us17-save-surplus.spec.ts`.
+- [X] T020 [P] En `README.md`, mencionar en la fila de Safe-to-Spend el ajuste opcional "Guardar el sobrante": lo que sobra va a Ahorrado y no se arrastra.
 - [ ] T021 **Nube (con confirmación del dueño)**:
   - Aplicar `0013` con el MCP de Supabase (`apply_migration`) al proyecto `potodtpkgadgsmeuuafx`.
   - Corregir la versión en `supabase_migrations.schema_migrations` al prefijo `0013`.
