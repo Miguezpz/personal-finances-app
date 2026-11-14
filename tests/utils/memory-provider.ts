@@ -48,7 +48,10 @@ export interface MemoryProvider extends DataProvider {
   };
   readonly recurring: RecurringRepository & { create: Mock<CreateRecurringFn> };
   readonly accounts: AccountsRepository & { update: Mock<UpdateAccountFn> };
-  readonly goals: GoalsRepository & { addSavedMove: Mock<GoalsRepository["addSavedMove"]> };
+  readonly goals: GoalsRepository & {
+    addSavedMove: Mock<GoalsRepository["addSavedMove"]>;
+    remove: Mock<GoalsRepository["remove"]>;
+  };
   readonly expenseTemplates: {
     list: Templates["list"];
     create: Mock<Templates["create"]>;
@@ -182,6 +185,16 @@ export function createMemoryProvider(initial: FinanceSnapshot): MemoryProvider {
     state.snapshot = { ...state.snapshot, savedMoves: [...state.snapshot.savedMoves, row] };
     return row;
   });
+  // Like the FK cascade: the goal's contributions and Saved moves go with it.
+  const removeGoal = vi.fn<GoalsRepository["remove"]>(async (id) => {
+    const s = state.snapshot;
+    state.snapshot = {
+      ...s,
+      goals: s.goals.filter((g) => g.id !== id),
+      contributions: s.contributions.filter((c) => c.goalId !== id),
+      savedMoves: s.savedMoves.filter((m) => m.goalId !== id),
+    };
+  });
 
   const holdOpen = (set: (p: Promise<void> | null) => void) => {
     let release!: () => void;
@@ -205,7 +218,7 @@ export function createMemoryProvider(initial: FinanceSnapshot): MemoryProvider {
     },
     recurring: { ...base.recurring, create },
     accounts: { ...base.accounts, update: updateAccount },
-    goals: { ...base.goals, addSavedMove },
+    goals: { ...base.goals, addSavedMove, remove: removeGoal },
     expenseTemplates,
     loadSnapshot: vi.fn(async () => state.snapshot),
     holdRecurringCreate: () => holdOpen((p) => (hold = p)),

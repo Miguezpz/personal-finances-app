@@ -61,8 +61,8 @@
 
 ## R7 — Borrar una meta (FR-014)
 
-- **Decision**: no se agrega un botón para borrar metas; hoy la app no lo tiene (solo archivar). FR-014 se cumple por construcción: la FK `on delete cascade` borra los movimientos y `available` es derivado. Lo cubre el pgTAP (borrar meta ⇒ sus movimientos desaparecen).
-- **Rationale**: borrar metas es una función nueva que la spec no pide como historia. Si se agrega después, FR-014 ya se cumple.
+- **Decision**: FR-014 se cumple por construcción: la FK `on delete cascade` borra los movimientos y `available` es derivado. Lo cubre el pgTAP (borrar meta ⇒ sus movimientos desaparecen). Botón "Eliminar" (con Deshacer, spec 009) solo en metas **sin aportaciones** (`goal_contributions`); las demás se archivan.
+- **Rationale**: la cascada también borraría las aportaciones y reescribiría el Disponible para gastar y el patrimonio neto. La guarda vive en la UI (un solo usuario por cuenta).
 
 ## R8 — Validación en la base
 

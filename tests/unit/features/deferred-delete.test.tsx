@@ -8,11 +8,11 @@ import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { createMockProvider } from "@/data/mock/provider";
 import { useFinanceSnapshot } from "@/data/useFinanceSnapshot";
 import { cents } from "@/domain/money";
-import type { FinanceSnapshot } from "@/domain/types";
+import type { FinanceSnapshot, Uuid } from "@/domain/types";
 import { UNDO_TOAST_MS } from "@/features/expenses/quick-expense-hooks";
 import { ROW_EXIT_MS, useDeferredDelete } from "@/features/shared/use-deferred-delete";
 import { usePendingDeletes } from "@/store/pending-deletes";
-import { emptySnapshot, makeExpense } from "../../utils/fixtures";
+import { d, emptySnapshot, makeExpense, makeGoal, testId } from "../../utils/fixtures";
 import { createMemoryProvider } from "../../utils/memory-provider";
 import { renderHookWithProviders } from "../../utils/renderWithProviders";
 
@@ -82,6 +82,41 @@ describe("useDeferredDelete", () => {
     });
     await waitFor(() => expect(provider.expenses.remove).toHaveBeenCalled());
     await waitFor(() => expect(result.current.ids).toEqual([coffee.id]));
+  });
+
+  it("deleting a goal drops its Saved moves too (spec 014, FR-014)", async () => {
+    const goal = makeGoal({
+      kind: "purchase",
+      monthly: null,
+      annual: null,
+      target: cents(900_000),
+    });
+    const other = makeGoal({ name: "Other" });
+    const move = (goalId: Uuid) => ({
+      id: testId(),
+      goalId,
+      movedOn: d("2026-11-13"),
+      amount: cents(300_000),
+    });
+    const provider = createMemoryProvider(
+      emptySnapshot({ goals: [goal, other], savedMoves: [move(goal.id), move(other.id)] }),
+    );
+    const { result } = renderHookWithProviders(
+      () => ({
+        remove: useDeferredDelete().remove,
+        moves: useFinanceSnapshot((s) => s.savedMoves.map((m) => m.goalId)).data,
+      }),
+      { provider },
+    );
+    await waitFor(() => expect(result.current.moves).toEqual([goal.id, other.id]));
+
+    act(() => result.current.remove({ kind: "goal", id: goal.id, label: "Deleted" }));
+    await act(async () => {
+      vi.advanceTimersByTime(UNDO_TOAST_MS);
+    });
+    await waitFor(() => expect(provider.goals.remove).toHaveBeenCalledWith(goal.id));
+    expect(result.current.moves).toEqual([other.id]);
+    expect(provider.state.snapshot.goals.map((g) => g.id)).toEqual([other.id]);
   });
 
   it("the read-only demo never hides the row", async () => {

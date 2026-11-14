@@ -19,6 +19,7 @@ import {
   PiggyBank,
   Plus,
   ShoppingBag,
+  Trash2,
 } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { useState } from "react";
@@ -41,6 +42,7 @@ import { formatMonth, formatNumber } from "@/i18n/format";
 import { useToday } from "@/lib/use-today";
 import { selectLocale, usePreferences } from "@/store/preferences";
 import { GoalForm } from "./GoalForm";
+import { useDeferredDelete } from "@/features/shared/use-deferred-delete";
 import { useGoalData, useUpdateGoal } from "./hooks";
 import { SavedMoveDialog } from "./SavedMoveDialog";
 import { useSafeToSpend } from "@/features/safe-to-spend/useSafeToSpend";
@@ -84,6 +86,7 @@ export function GoalsPage() {
   const today = useToday();
   const { data } = useGoalData();
   const update = useUpdateGoal();
+  const { remove } = useDeferredDelete();
   const [form, setForm] = useState<{ open: boolean; goal: Goal | null }>({
     open: false,
     goal: null,
@@ -167,6 +170,20 @@ export function GoalsPage() {
           {g.archived ? <ArchiveRestore aria-hidden="true" /> : <Archive aria-hidden="true" />}
           {g.archived ? t("restore") : t("archive")}
         </Button>
+        {/* Only without contributions: deleting those would rewrite Safe-to-Spend and net worth. */}
+        {!data?.contributions.some((c) => c.goalId === g.id) && (
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={() =>
+              remove({ kind: "goal", id: g.id, label: tc("deletedItem", { name: g.name }) })
+            }
+            data-testid="goal-delete"
+          >
+            <Trash2 aria-hidden="true" />
+            {t("delete")}
+          </Button>
+        )}
       </div>
     );
   };

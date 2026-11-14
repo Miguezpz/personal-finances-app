@@ -1030,6 +1030,7 @@ export function runDataProviderContract(
             () =>
               p.goals.addSavedMove({ goalId: anyId, movedOn: d("2026-11-13"), amount: cents(1) }),
           ],
+          ["goals.remove", () => p.goals.remove(anyId)],
           [
             "netWorth.upsertMonthly",
             () => p.netWorth.upsertMonthly(before.netWorthSnapshots[0] as never),

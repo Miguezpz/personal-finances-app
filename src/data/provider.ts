@@ -222,6 +222,8 @@ export interface GoalsRepository {
   addContributions(items: ReadonlyArray<NewEntity<GoalContribution>>): Promise<GoalContribution[]>;
   /** Spec 014: una asignación (+) o un regreso (−) de Ahorrado. */
   addSavedMove(input: NewEntity<SavedMove>): Promise<SavedMove>;
+  /** La cascada borra sus movimientos de Ahorrado (FR-014); la UI solo lo ofrece sin aportaciones. */
+  remove(id: Uuid): Promise<void>;
 }
 
 export interface NetWorthRepository {

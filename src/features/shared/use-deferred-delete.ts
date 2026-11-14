@@ -27,7 +27,7 @@ import { notifyDemoReadOnly, notifyOffline } from "@/lib/demo-notice";
 import { usePendingDeletes } from "@/store/pending-deletes";
 import { UNDO_TOAST_MS } from "@/features/expenses/quick-expense-hooks";
 
-export type DeletableKind = "expense" | "income" | "recurring";
+export type DeletableKind = "expense" | "income" | "recurring" | "goal";
 
 interface Spec {
   remove: (provider: DataProvider, id: Uuid) => Promise<void>;
@@ -51,6 +51,16 @@ const SPECS: Record<DeletableKind, Spec> = {
       expenses: s.expenses.map((e) =>
         e.recurringExpenseId === id ? { ...e, recurringExpenseId: null } : e,
       ),
+    }),
+  },
+  // Spec 014 FR-014: its Saved moves go with it (FK cascade), so "Available to assign" goes up.
+  goal: {
+    remove: (p, id) => p.goals.remove(id),
+    apply: (s, id) => ({
+      ...s,
+      goals: s.goals.filter((g) => g.id !== id),
+      contributions: s.contributions.filter((c) => c.goalId !== id),
+      savedMoves: s.savedMoves.filter((m) => m.goalId !== id),
     }),
   },
 };

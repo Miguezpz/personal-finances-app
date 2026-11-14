@@ -848,6 +848,7 @@
     "empty": "No goals yet. Start with an emergency fund or a sinking fund for a yearly expense.",
     "edit": "Edit",
     "archive": "Archive",
+    "delete": "Delete",
     "restore": "Restore",
     "archived": "Goal archived — its contributions are paused.",
     "restored": "Goal restored.",

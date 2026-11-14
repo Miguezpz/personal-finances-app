@@ -9,7 +9,7 @@ import {
   toSavedMove,
   type Insert,
 } from "../mappers";
-import { exec, selectAll, withinRange } from "./query";
+import { exec, execNullable, selectAll, withinRange } from "./query";
 
 export function createGoalsRepository(db: AppSupabaseClient): GoalsRepository {
   return {
@@ -77,6 +77,12 @@ export function createGoalsRepository(db: AppSupabaseClient): GoalsRepository {
           .single(),
       );
       return toSavedMove(row);
+    },
+
+    async remove(id) {
+      // shortcut: "no contributions" is only checked in the UI (the FK would cascade them too);
+      // add a `before delete` trigger if goals ever get deleted from anywhere else.
+      await execNullable(db.from("goals").delete().eq("id", id));
     },
   };
 }

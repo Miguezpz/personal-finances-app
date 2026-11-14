@@ -143,6 +143,7 @@ export function createMockProvider(options: MockProviderOptions = {}): DataProvi
       update: () => denyWrite("goals.update"),
       addContributions: () => denyWrite("goals.addContributions"),
       addSavedMove: () => denyWrite("goals.addSavedMove"),
+      remove: () => denyWrite("goals.remove"),
     },
 
     netWorth: {
