@@ -4,12 +4,21 @@
  * An income is split first between Needs / Wants / Investment with `allocateByWeights` (cents
  * remainder → largest share; ties: Needs > Wants > Investment), then the Investment share is
  * split between its vehicles by the sub-rules. Σ allocations === amount, always (SC-001).
+ * A one-off income can instead go whole to one bucket (spec 015, `singleBucketAllocation`).
  */
 import { addDays } from "./dates";
 import { InvalidDateError, InvalidWeightsError, RuleNotConfiguredError } from "./errors";
 import { allocateByWeights } from "./money";
 import { isPeriodStart } from "./periods";
-import type { Cents, DistributionRule, Income, IncomeAllocation, IsoDate } from "./types";
+import type {
+  Bucket,
+  Cents,
+  DistributionRule,
+  Income,
+  IncomeAllocation,
+  IsoDate,
+  Uuid,
+} from "./types";
 
 export type NewAllocation = Omit<IncomeAllocation, "id" | "incomeId">;
 
@@ -78,6 +87,31 @@ export function splitIncome(
   }
 
   return { allocations, total: amount };
+}
+
+/**
+ * Spec 015: a one-off income added whole to one bucket of the quincena it funds, without a rule.
+ * `vehicleId` is required for investment and ignored otherwise (the table forbids it there).
+ * @throws InvalidWeightsError when bucket is investment without a vehicle.
+ * @throws InvalidDateError when `fundedPeriodStart` isn't day 1 or 16.
+ */
+export function singleBucketAllocation(
+  amount: Cents,
+  bucket: Bucket,
+  vehicleId: Uuid | null,
+  fundedPeriodStart: IsoDate,
+): SplitResult {
+  if (!isPeriodStart(fundedPeriodStart)) {
+    throw new InvalidDateError(`A funded period starts on day 1 or 16, got ${fundedPeriodStart}`);
+  }
+  if (bucket === "investment" && !vehicleId) {
+    throw new InvalidWeightsError("Investment requires a vehicle");
+  }
+  const accountId = bucket === "investment" ? vehicleId : null;
+  return {
+    allocations: [{ bucket, accountId, amount, periodStart: fundedPeriodStart }],
+    total: amount,
+  };
 }
 
 /**

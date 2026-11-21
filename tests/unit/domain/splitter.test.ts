@@ -4,9 +4,14 @@
  */
 import fc from "fast-check";
 import { describe, expect, it } from "vitest";
-import { RuleNotConfiguredError, InvalidWeightsError } from "@/domain/errors";
+import { InvalidDateError, RuleNotConfiguredError, InvalidWeightsError } from "@/domain/errors";
 import { bps, cents } from "@/domain/money";
-import { effectiveRule, nextRuleEffectiveDate, splitIncome } from "@/domain/splitter";
+import {
+  effectiveRule,
+  nextRuleEffectiveDate,
+  singleBucketAllocation,
+  splitIncome,
+} from "@/domain/splitter";
 import type { BasisPoints, DistributionRule, IsoDate, Uuid } from "@/domain/types";
 import { d, makeIncome, makeRule, testId } from "../../utils/fixtures";
 
@@ -166,6 +171,40 @@ describe("nextRuleEffectiveDate (FR-005 + same-day edge case)", () => {
     const todays = makeRule({ effectiveFrom: today });
     expect(nextRuleEffectiveDate([todays], [makeIncome({ ruleId: todays.id })], today)).toBe(
       "2026-11-16",
+    );
+  });
+});
+
+describe("singleBucketAllocation (spec 015)", () => {
+  const period = d("2026-11-16");
+
+  it.each(["needs", "wants"] as const)(
+    "puts the whole amount in %s, without a vehicle",
+    (bucket) => {
+      const r = singleBucketAllocation(cents(50_000), bucket, STOCKS, period);
+      expect(r.allocations).toEqual([
+        { bucket, accountId: null, amount: 50_000, periodStart: period },
+      ]);
+      expect(r.total).toBe(50_000);
+    },
+  );
+
+  it("puts investment in its vehicle", () => {
+    const r = singleBucketAllocation(cents(100_000), "investment", STOCKS, period);
+    expect(r.allocations).toEqual([
+      { bucket: "investment", accountId: STOCKS, amount: 100_000, periodStart: period },
+    ]);
+  });
+
+  it("rejects investment without a vehicle", () => {
+    expect(() => singleBucketAllocation(cents(100), "investment", null, period)).toThrow(
+      InvalidWeightsError,
+    );
+  });
+
+  it("rejects a funded period that doesn't start on day 1 or 16", () => {
+    expect(() => singleBucketAllocation(cents(100), "wants", null, d("2026-11-15"))).toThrow(
+      InvalidDateError,
     );
   });
 });

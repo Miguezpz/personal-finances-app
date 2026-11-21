@@ -435,6 +435,38 @@ export function runDataProviderContract(
         );
       });
 
+      it("accepts a one-off income added whole to one bucket, without a rule (spec 015)", async () => {
+        const s = await provider.loadSnapshot();
+        const vehicle = s.accounts.find((a) => a.kind === "investment");
+        if (!vehicle) throw new Error("seed missing");
+        for (const [bucket, accountId] of [
+          ["wants", null],
+          ["investment", vehicle.id],
+        ] as const) {
+          const income = await provider.incomes.register({
+            income: {
+              label: `Gift to ${bucket}`,
+              amount: cents(50_000),
+              receivedOn: d("2026-11-17"),
+              fundedPeriodStart: d("2026-11-16"),
+              isRecurring: false,
+              distributed: true,
+              ruleId: null,
+              depositAccountId: null,
+              incomeType: "gift",
+            },
+            allocations: [
+              { bucket, accountId, amount: cents(50_000), periodStart: d("2026-11-16") },
+            ],
+          });
+          expect(income).toMatchObject({ distributed: true, ruleId: null });
+          const after = await provider.loadSnapshot();
+          expect(after.allocations.filter((a) => a.incomeId === income.id)).toMatchObject([
+            { bucket, accountId, amount: 50_000 },
+          ]);
+        }
+      });
+
       it("rejects installments that don't sum to the total with VALIDATION", async () => {
         const s = await provider.loadSnapshot();
         const card = s.accounts.find((a) => a.kind === "credit_card");

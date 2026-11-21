@@ -6,8 +6,10 @@
  *    payday is closest, so a late or early (Friday) payment still suggests the right one; editable
  *    (spec 006, research.md R7). Options show each quincena's effective range.
  *  - Recurring incomes are split by the rule in effect on the received date; one-off incomes let
- *    the user choose to split or not (US1-7). Without a rule: configure one or record unsplit.
- *  - Editing recalculates with the income's ORIGINAL rule (rule_id snapshot, FR-005).
+ *    the user choose to split, add it whole to one bucket (spec 015) or not split it (US1-7).
+ *    Without a rule: configure one, add it to one bucket or record unsplit.
+ *  - Editing recalculates with the income's ORIGINAL rule (rule_id snapshot, FR-005). An income
+ *    distributed without a rule was added to one bucket: editing keeps that mode, never re-splits.
  *  - Live preview of the split, computed by the same pure function that is saved.
  *  - Income type (spec 004): mandatory, nothing preselected when registering. Choosing a type while
  *    the label is empty (or still holds the previous suggestion) fills in the type's name.
@@ -50,22 +52,44 @@ import { isIncomeType } from "@/domain/income-types";
 import { formatCentsAsInput, parseMoneyInput } from "@/domain/parse";
 import { fundedPeriodFor, type PayCalendar, withRange } from "@/domain/pay-calendar";
 import { nextPeriod, previousPeriod, periodOf } from "@/domain/periods";
-import { effectiveRule, splitIncome, type SplitResult } from "@/domain/splitter";
-import type { Account, DistributionRule, FinanceSnapshot, Income, IsoDate } from "@/domain/types";
+import {
+  effectiveRule,
+  singleBucketAllocation,
+  splitIncome,
+  type SplitResult,
+} from "@/domain/splitter";
+import type {
+  Account,
+  Bucket,
+  DistributionRule,
+  FinanceSnapshot,
+  Income,
+  IncomeAllocation,
+  IsoDate,
+  Uuid,
+} from "@/domain/types";
 import { usePayCalendar } from "@/lib/use-pay-calendar";
 import { useToday } from "@/lib/use-today";
 import { selectLocale, usePreferences } from "@/store/preferences";
 import { formatPeriodRange } from "./format";
 import { useRegisterIncome, useReplaceIncome } from "./hooks";
 import { IncomeTypeField } from "./IncomeTypeField";
-import { incomeFormSchema, type IncomeFormInput, type IncomeFormOutput } from "./schemas";
+import {
+  incomeFormSchema,
+  type IncomeAllocationMode,
+  type IncomeFormInput,
+  type IncomeFormOutput,
+} from "./schemas";
 
 type IncomeMessageKey = Parameters<ReturnType<typeof useTranslations<"income">>>[0];
+
+const BUCKETS: readonly Bucket[] = ["needs", "wants", "investment"];
 
 const selectFormData = (s: FinanceSnapshot) => ({
   rules: s.rules,
   depositAccounts: s.accounts.filter((a) => a.kind !== "credit_card" && !a.archived),
   allAccounts: s.accounts,
+  allocations: s.allocations,
 });
 
 interface Props {
@@ -77,12 +101,22 @@ interface Props {
   draft?: Partial<IncomeFormInput>;
 }
 
+/** How a saved income was recorded: distributed without a rule = added to one bucket (spec 015). */
+function allocationOf(income: Income): IncomeAllocationMode {
+  if (!income.distributed) return "none";
+  return income.ruleId ? "rules" : "bucket";
+}
+
 function defaultsFor(
   income: Income | null | undefined,
+  allocations: readonly IncomeAllocation[],
   today: IsoDate,
   paydays: PayCalendar["settings"],
 ): IncomeFormInput {
   if (income) {
+    const allocation = allocationOf(income);
+    const single =
+      allocation === "bucket" ? allocations.find((a) => a.incomeId === income.id) : undefined;
     return {
       incomeType: income.incomeType,
       label: income.label,
@@ -90,7 +124,9 @@ function defaultsFor(
       receivedOn: income.receivedOn,
       fundedPeriodStart: income.fundedPeriodStart,
       kind: income.isRecurring ? "recurring" : "oneOff",
-      split: income.distributed,
+      allocation,
+      bucket: single?.bucket ?? "wants",
+      vehicleId: single?.accountId ?? "",
       depositAccountId: income.depositAccountId ?? "",
     };
   }
@@ -101,7 +137,9 @@ function defaultsFor(
     receivedOn: today,
     fundedPeriodStart: fundedPeriodFor(today, paydays).start,
     kind: "recurring",
-    split: true,
+    allocation: "rules",
+    bucket: "wants",
+    vehicleId: "",
     depositAccountId: "",
   };
 }
@@ -130,6 +168,21 @@ function safeSplit(
   }
 }
 
+function safeBucket(
+  amountInput: string,
+  bucket: Bucket,
+  vehicleId: string,
+  periodStart: string,
+): SplitResult | null {
+  const amount = parseMoneyInput(amountInput);
+  if (amount === null || amount <= 0 || !isIsoDate(periodStart)) return null;
+  try {
+    return singleBucketAllocation(amount, bucket, (vehicleId || null) as Uuid | null, periodStart);
+  } catch {
+    return null;
+  }
+}
+
 export function RegisterIncomeDialog({ open, onOpenChange, income, draft }: Props) {
   const t = useTranslations("income");
   const tb = useTranslations("buckets");
@@ -145,21 +198,38 @@ export function RegisterIncomeDialog({ open, onOpenChange, income, draft }: Prop
   const form = useForm<IncomeFormInput, unknown, IncomeFormOutput>({
     resolver: zodResolver(incomeFormSchema),
     defaultValues: {
-      ...defaultsFor(income, today, calendar.settings),
+      ...defaultsFor(income, data?.allocations ?? [], today, calendar.settings),
       // Spec 009 (FR-002): the last deposit account for a new income.
       ...(income ? {} : { depositAccountId: lastUsed.depositAccountId }),
       ...draft,
     },
   });
-  const [amount, receivedOn, fundedPeriodStart, kind, split] = useWatch({
+  const [amount, receivedOn, fundedPeriodStart, kind, allocation, bucket, vehicleId] = useWatch({
     control: form.control,
-    name: ["amount", "receivedOn", "fundedPeriodStart", "kind", "split"],
+    name: [
+      "amount",
+      "receivedOn",
+      "fundedPeriodStart",
+      "kind",
+      "allocation",
+      "bucket",
+      "vehicleId",
+    ],
   });
 
   const rules = data?.rules ?? [];
   const rule = ruleFor(rules, income, receivedOn);
-  const preview = split ? safeSplit(amount, rule, fundedPeriodStart) : null;
+  const preview =
+    allocation === "rules"
+      ? safeSplit(amount, rule, fundedPeriodStart)
+      : allocation === "bucket"
+        ? safeBucket(amount, bucket, vehicleId, fundedPeriodStart)
+        : null;
   const accountName = (id: string | null) => data?.allAccounts.find((a) => a.id === id)?.name ?? "";
+  // Spec 015: active investment accounts; an edited income keeps its own vehicle even if archived.
+  const vehicles = (data?.allAccounts ?? []).filter(
+    (a) => a.kind === "investment" && (!a.archived || a.id === vehicleId),
+  );
 
   const periodOptions = useMemo(() => {
     if (!isIsoDate(receivedOn)) return [];
@@ -177,18 +247,23 @@ export function RegisterIncomeDialog({ open, onOpenChange, income, draft }: Prop
   /** Label filled in by the last type choice; replaced on the next choice, never typed text. */
   const suggestedLabel = useRef<string | null>(null);
 
-  const showSplitChoice = kind === "oneOff" || !rule || !split;
+  const byRules = allocation === "rules";
+  const showSplitChoice = kind === "oneOff" || !rule || !byRules;
   const errors = form.formState.errors;
   const errorText = (key: string | undefined) => (key ? t(key as IncomeMessageKey) : null);
 
   function onSubmit(values: IncomeFormOutput) {
-    if (values.distributed && !rule) return; // the alert already explains what to do
+    const { allocation: mode, bucket: target, vehicleId: vehicle, ...fields } = values;
+    if (mode === "rules" && !rule) return; // the alert already explains what to do
     const allocations =
-      values.distributed && rule
-        ? splitIncome(values.amount, rule, values.fundedPeriodStart).allocations
-        : [];
+      mode === "rules" && rule
+        ? splitIncome(fields.amount, rule, fields.fundedPeriodStart).allocations
+        : mode === "bucket"
+          ? singleBucketAllocation(fields.amount, target, vehicle, fields.fundedPeriodStart)
+              .allocations
+          : [];
     const input = {
-      income: { ...values, ruleId: values.distributed && rule ? rule.id : null },
+      income: { ...fields, ruleId: mode === "rules" && rule ? rule.id : null },
       allocations,
     };
     const typed = form.getValues();
@@ -326,7 +401,7 @@ export function RegisterIncomeDialog({ open, onOpenChange, income, draft }: Prop
                     value={field.value}
                     onValueChange={(v) => {
                       field.onChange(v);
-                      if (v === "recurring") form.setValue("split", true);
+                      if (v === "recurring") form.setValue("allocation", "rules");
                     }}
                     className="flex flex-wrap gap-4"
                   >
@@ -345,28 +420,91 @@ export function RegisterIncomeDialog({ open, onOpenChange, income, draft }: Prop
 
             {showSplitChoice && (
               <Controller
-                name="split"
+                name="allocation"
                 control={form.control}
                 render={({ field }) => (
                   <FieldSet>
                     <FieldLegend variant="label">{t("splitQuestion")}</FieldLegend>
                     <RadioGroup
-                      value={field.value ? "split" : "noSplit"}
-                      onValueChange={(v) => field.onChange(v === "split")}
+                      value={field.value}
+                      onValueChange={field.onChange}
                       className="flex flex-col gap-2"
                     >
                       <div className="flex items-center gap-2">
-                        <RadioGroupItem id="income-split-yes" value="split" />
+                        <RadioGroupItem id="income-split-yes" value="rules" />
                         <Label htmlFor="income-split-yes">{t("splitByRules")}</Label>
                       </div>
+                      {/* Spec 015: only a one-off income can go whole to one bucket. */}
+                      {kind === "oneOff" && (
+                        <div className="flex items-center gap-2">
+                          <RadioGroupItem id="income-split-bucket" value="bucket" />
+                          <Label htmlFor="income-split-bucket">{t("splitToBucket")}</Label>
+                        </div>
+                      )}
                       <div className="flex items-center gap-2">
-                        <RadioGroupItem id="income-split-no" value="noSplit" />
+                        <RadioGroupItem id="income-split-no" value="none" />
                         <Label htmlFor="income-split-no">{t("recordWithoutSplit")}</Label>
                       </div>
                     </RadioGroup>
                   </FieldSet>
                 )}
               />
+            )}
+
+            {allocation === "bucket" && (
+              <Controller
+                name="bucket"
+                control={form.control}
+                render={({ field }) => (
+                  <FieldSet>
+                    <FieldLegend variant="label">{t("bucketQuestion")}</FieldLegend>
+                    <RadioGroup
+                      value={field.value}
+                      onValueChange={(v) => {
+                        field.onChange(v);
+                        if (v === "investment" && !vehicleId && vehicles[0]) {
+                          form.setValue("vehicleId", vehicles[0].id);
+                        }
+                      }}
+                      className="flex flex-wrap gap-4"
+                    >
+                      {BUCKETS.map((b) => (
+                        <div key={b} className="flex items-center gap-2">
+                          <RadioGroupItem
+                            id={`income-bucket-${b}`}
+                            value={b}
+                            disabled={b === "investment" && vehicles.length === 0}
+                          />
+                          <Label htmlFor={`income-bucket-${b}`}>{tb(b)}</Label>
+                        </div>
+                      ))}
+                    </RadioGroup>
+                    {vehicles.length === 0 && (
+                      <p className="text-sm text-muted-foreground">{t("noVehicles")}</p>
+                    )}
+                  </FieldSet>
+                )}
+              />
+            )}
+
+            {allocation === "bucket" && bucket === "investment" && (
+              <Field data-invalid={Boolean(errors.vehicleId)}>
+                <FieldLabel htmlFor="income-vehicle">{t("vehicle")}</FieldLabel>
+                <NativeSelect
+                  id="income-vehicle"
+                  data-testid="income-vehicle"
+                  {...form.register("vehicleId")}
+                >
+                  <NativeSelectOption value="">{t("noAccount")}</NativeSelectOption>
+                  {vehicles.map((a) => (
+                    <NativeSelectOption key={a.id} value={a.id}>
+                      {a.name}
+                    </NativeSelectOption>
+                  ))}
+                </NativeSelect>
+                <p className="text-sm text-muted-foreground">{t("investmentNote")}</p>
+                {errors.vehicleId && <FieldError>{errorText(errors.vehicleId.message)}</FieldError>}
+              </Field>
             )}
 
             <Field>
@@ -382,7 +520,7 @@ export function RegisterIncomeDialog({ open, onOpenChange, income, draft }: Prop
             </Field>
           </FieldGroup>
 
-          {split && !rule && (
+          {byRules && !rule && (
             <Alert>
               <AlertTitle>{t("noRuleTitle")}</AlertTitle>
               <AlertDescription className="flex flex-col items-start gap-2">
@@ -395,7 +533,7 @@ export function RegisterIncomeDialog({ open, onOpenChange, income, draft }: Prop
                     type="button"
                     size="sm"
                     variant="secondary"
-                    onClick={() => form.setValue("split", false)}
+                    onClick={() => form.setValue("allocation", "none")}
                   >
                     {t("recordWithoutSplit")}
                   </Button>
@@ -404,7 +542,7 @@ export function RegisterIncomeDialog({ open, onOpenChange, income, draft }: Prop
             </Alert>
           )}
 
-          {split && rule && (
+          {((byRules && rule) || allocation === "bucket") && (
             <section aria-labelledby="income-preview" className="rounded-lg border p-3">
               <h3 id="income-preview" className="mb-2 text-sm font-medium">
                 {t("preview")}
@@ -444,7 +582,7 @@ export function RegisterIncomeDialog({ open, onOpenChange, income, draft }: Prop
             type="submit"
             form="income-form"
             data-testid="save-income"
-            disabled={split && !rule}
+            disabled={byRules && !rule}
           >
             {t("save")}
           </Button>

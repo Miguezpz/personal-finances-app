@@ -403,6 +403,34 @@ export function generateDemoSnapshot(options: SeedOptions): FinanceSnapshot {
       incomeType: "extra",
     });
   }
+  // Spec 015: a one-off gift added whole to Wants of the quincena it arrived in.
+  const giftOn = addDays(today, -3);
+  if (giftOn >= rangeStart) {
+    const incomeId = nextId();
+    const { year, month, day } = parseIsoDate(giftOn);
+    const periodStart = isoDate(year, month, day <= 15 ? 1 : 16);
+    const amount = cents(150_000);
+    incomes.push({
+      id: incomeId,
+      label: "Birthday gift",
+      amount,
+      receivedOn: giftOn,
+      fundedPeriodStart: periodStart,
+      isRecurring: false,
+      distributed: true,
+      ruleId: null,
+      depositAccountId: ACCOUNT_IDS.debit,
+      incomeType: "gift",
+    });
+    allocations.push({
+      id: nextId(),
+      incomeId,
+      bucket: "wants",
+      accountId: null,
+      amount,
+      periodStart,
+    });
+  }
 
   // --- Recurring expenses and their applied occurrences
   const recurring: RecurringExpense[] = RECURRING.map((r) => ({

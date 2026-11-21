@@ -13,7 +13,9 @@ const valid: IncomeFormInput = {
   receivedOn: "2026-11-15",
   fundedPeriodStart: "2026-11-16",
   kind: "recurring",
-  split: true,
+  allocation: "rules",
+  bucket: "wants",
+  vehicleId: "",
   depositAccountId: "",
 };
 
@@ -47,5 +49,44 @@ describe("incomeFormSchema · income type", () => {
       depositAccountId: null,
       incomeType: "salary",
     });
+  });
+});
+
+describe("incomeFormSchema · allocation mode (spec 015)", () => {
+  const VEHICLE = "00000000-0000-4000-8000-0000000000a1";
+  const oneOff = { ...valid, kind: "oneOff" as const };
+
+  it.each([
+    ["rules", true],
+    ["bucket", true],
+    ["none", false],
+  ] as const)("%s ⇒ distributed %s", (allocation, distributed) => {
+    const r = incomeFormSchema.parse({ ...oneOff, allocation });
+    expect(r).toMatchObject({ allocation, distributed });
+  });
+
+  it("passes the bucket through and drops the vehicle outside investment", () => {
+    const r = incomeFormSchema.parse({ ...oneOff, allocation: "bucket", vehicleId: VEHICLE });
+    expect(r).toMatchObject({ bucket: "wants", vehicleId: null });
+  });
+
+  it("requires a vehicle for investment", () => {
+    expect(messages({ ...oneOff, allocation: "bucket", bucket: "investment" })).toContain(
+      "vehicleId:vehicleRequired",
+    );
+  });
+
+  it("accepts investment with a vehicle", () => {
+    const r = incomeFormSchema.parse({
+      ...oneOff,
+      allocation: "bucket",
+      bucket: "investment",
+      vehicleId: VEHICLE,
+    });
+    expect(r).toMatchObject({ bucket: "investment", vehicleId: VEHICLE, distributed: true });
+  });
+
+  it("doesn't ask for a vehicle when investment isn't the mode", () => {
+    expect(messages({ ...oneOff, allocation: "rules", bucket: "investment" })).toEqual([]);
   });
 });
