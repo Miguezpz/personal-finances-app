@@ -374,7 +374,13 @@ export function RegisterIncomeDialog({ open, onOpenChange, income, draft }: Prop
 
               <Field data-invalid={Boolean(errors.fundedPeriodStart)}>
                 <FieldLabel htmlFor="income-period">{t("fundedPeriod")}</FieldLabel>
-                <NativeSelect id="income-period" {...form.register("fundedPeriodStart")}>
+                {/* Controlled: the options change with the date, and an uncontrolled select set
+                    before they re-render keeps showing the old option. */}
+                <NativeSelect
+                  id="income-period"
+                  {...form.register("fundedPeriodStart")}
+                  value={fundedPeriodStart}
+                >
                   {periodOptions.map((p) => {
                     const range = formatPeriodRange(p.period, locale);
                     return (
