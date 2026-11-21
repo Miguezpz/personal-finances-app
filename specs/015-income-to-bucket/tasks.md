@@ -51,7 +51,7 @@ Va antes de US2 porque corrige un riesgo real: hoy `ruleFor` volvería a reparti
   - `defaultsFor` deriva el modo: `!distributed` ⇒ `none`; `distributed && ruleId == null` ⇒ `bucket` con el bucket y el vehículo de su única asignación; si no, `rules`.
   - `ruleFor` y la vista previa no deben repartir por regla un ingreso en modo `bucket`.
   - Cambiar de Eventual a Fijo al editar vuelve a `rules`.
-- [ ] T012 [US3] E2E `@live` en `us1-income-split.spec.ts`: editar el regalo de Gustos a Necesidades y comprobar que el disponible de Gustos baja y el de Necesidades sube por el monto; reabrir Editar conserva el bucket. Editar un ingreso repartido por reglas sigue recalculándose con su regla original (FR-009).
+- [X] T012 [US3] E2E `@live` en `us1-income-split.spec.ts`: editar el regalo de Gustos a Necesidades y comprobar que el disponible de Gustos baja y el de Necesidades sube por el monto; reabrir Editar conserva el bucket. Editar un ingreso repartido por reglas sigue recalculándose con su regla original (FR-009).
 
 ## Phase 4: US2 — Ingreso eventual a Inversión (P2)
 
@@ -73,8 +73,8 @@ Va antes de US2 porque corrige un riesgo real: hoy `ruleFor` volvería a reparti
 
 ## Phase 6: Cierre
 
-- [ ] T019 Correr las puertas: `pnpm typecheck`, `pnpm lint`, `pnpm format:check`, `pnpm test`, `pnpm build`. Todas las pruebas existentes de ingresos, splitter y Safe-to-Spend pasan sin cambios (SC-005).
-- [ ] T020 E2E completo de la feature en demo y `@live`, EN y ES (`us1-income-split.spec.ts`).
+- [X] T019 Correr las puertas: `pnpm typecheck`, `pnpm lint`, `pnpm format:check`, `pnpm test`, `pnpm build`. Todas las pruebas existentes de ingresos, splitter y Safe-to-Spend pasan sin cambios (SC-005).
+- [X] T020 E2E completo de la feature en demo y `@live`, EN y ES (`us1-income-split.spec.ts`).
 - [ ] T021 Commit y push a `main` (sin migración, se puede subir directo). Revisar el CI.
 - [ ] T022 Verificación manual en la app personal: registrar un ingreso eventual pequeño a Gustos, ver subir Gustos, editarlo a Necesidades, y eliminarlo.
 
@@ -101,9 +101,11 @@ Va antes de US2 porque corrige un riesgo real: hoy `ruleFor` volvería a reparti
 
 ## Notas de implementación
 
-- T001: el caso de `data-provider.contract.ts` cerca de la 420 era de **rechazo** (suma incorrecta), no un caso válido. T018 añadió el caso positivo (Gustos e Inversión con vehículo); corre solo con Supabase local (`canWrite`), así que todavía no se ha ejecutado.
+- T001: el caso de `data-provider.contract.ts` cerca de la 420 era de **rechazo** (suma incorrecta), no un caso válido. T018 añadió el caso positivo (Gustos e Inversión con vehículo); corre solo con Supabase local (`canWrite`) y pasa (contrato 48/48).
 - T009, T012: las e2e quedaron en un archivo nuevo, `tests/e2e/us19-income-to-bucket.spec.ts` (demo y `@live`), no en `us1-income-split.spec.ts`. Ids nuevos: `#income-split-bucket`, `#income-bucket-{needs,wants,investment}`, `income-vehicle`; `#income-split-yes` y `#income-split-no` se conservan (los usa `us11`).
 - T010: en vez de pasar una prop, el diálogo lee las asignaciones del snapshot (`selectFormData.allocations`) para derivar bucket y vehículo al editar.
 - T015: sin e2e `@live` de Inversión; el caso demo cubre el selector de vehículo y la nota, y el contrato (T018) cubre la escritura.
 - T017: el borrador de "Reintentar" es `form.getValues()`, así que ya trae `allocation`, `bucket` y `vehicleId`; no hubo que cambiar `retry-toast.ts` ni `DialogHost.tsx`.
-- T019/T020: Next.js 16.4.3 cortaba `next dev` y `next build` con `SecurityFatalError` (6 avisos moderados, corregidos desde 16.4.5); se subió `next` y `eslint-config-next` a 16.4.6. Después: `typecheck`, `lint`, `format:check`, `test` (820; el perf de Safe-to-Spend falla a veces bajo carga y pasa solo) y `build` pasan. E2E del demo con builds de producción (`CI=1`): `us19`, `us2`, `us9`, `us17` y `matrix`, 14/14 en EN y ES. Con `next dev` en frío agotan el tiempo. **Pendiente**: e2e `@live` y contrato con Supabase local (Docker).
+- T019/T020: Next.js 16.4.3 cortaba `next dev` y `next build` con `SecurityFatalError` (6 avisos moderados, corregidos desde 16.4.5); se subió `next` y `eslint-config-next` a 16.4.6. Después: `typecheck`, `lint`, `format:check`, `test` (820; el perf de Safe-to-Spend falla a veces bajo carga y pasa solo) y `build` pasan. E2E del demo con builds de producción (`CI=1`): `us19`, `us2`, `us9`, `us17` y `matrix`, 14/14 en EN y ES. Con `next dev` en frío agotan el tiempo.
+- E2E `@live` con Supabase local (`node scripts/with-local-supabase.mjs env CI=1 pnpm test:e2e …`; en segundo plano el wrapper no encuentra Supabase, en primer plano sí): `us19`, `us1`, `us11`, `us2`, `us17` pasan en EN y ES.
+- `us1` destapó un bug previo, dependiente de la fecha: el `<select>` de "Financia la quincena" no era controlado y, al cambiar la fecha a otro mes, seguía mostrando la opción vieja aunque la sugerida cambiara. Ahora es controlado (`value={fundedPeriodStart}`). Solo fallaba cuando el "próximo 15" cae en otra quincena que la de hoy.
