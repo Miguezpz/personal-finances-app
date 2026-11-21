@@ -38,7 +38,7 @@
   - `onSubmit`: en este modo guarda `distributed: true`, `ruleId: null` y la asignación de `singleBucketAllocation`; **no exige regla** (FR-006).
   - El botón Guardar y la alerta "sin regla" solo aplican al modo `rules`.
 - [X] T008 [P] [US1] i18n `src/i18n/messages/en.json` y `es.json` (en serie, mismo bloque `income`): `splitToBucket`, `bucketLabel`, `previewBucket`, `vehicleRequired`. Revisar que pase el test de paridad.
-- [ ] T009 [US1] E2E en `tests/e2e/us1-income-split.spec.ts` (demo y `@live`, EN y ES): registrar un regalo eventual de $500 a Gustos y comprobar que el disponible de Gustos sube $500 y el de Necesidades no cambia. En el demo, comprobar el aviso de solo lectura al guardar.
+- [X] T009 [US1] E2E en `tests/e2e/us1-income-split.spec.ts` (demo y `@live`, EN y ES): registrar un regalo eventual de $500 a Gustos y comprobar que el disponible de Gustos sube $500 y el de Necesidades no cambia. En el demo, comprobar el aviso de solo lectura al guardar.
 
 ## Phase 3: US3 — Editar un ingreso mandado a un bucket (P2)
 
@@ -106,4 +106,4 @@ Va antes de US2 porque corrige un riesgo real: hoy `ruleFor` volvería a reparti
 - T010: en vez de pasar una prop, el diálogo lee las asignaciones del snapshot (`selectFormData.allocations`) para derivar bucket y vehículo al editar.
 - T015: sin e2e `@live` de Inversión; el caso demo cubre el selector de vehículo y la nota, y el contrato (T018) cubre la escritura.
 - T017: el borrador de "Reintentar" es `form.getValues()`, así que ya trae `allocation`, `bucket` y `vehicleId`; no hubo que cambiar `retry-toast.ts` ni `DialogHost.tsx`.
-- T019/T020: `typecheck`, `lint`, `format:check` y `test` (820) pasan. `build` y las e2e **no corren**: Next.js 16.4 corta `next dev` y `next build` con `SecurityFatalError` (aviso de seguridad de la propia versión, previo a esta spec). Hay que actualizar Next antes de poder correrlas.
+- T019/T020: Next.js 16.4.3 cortaba `next dev` y `next build` con `SecurityFatalError` (6 avisos moderados, corregidos desde 16.4.5); se subió `next` y `eslint-config-next` a 16.4.6. Después: `typecheck`, `lint`, `format:check`, `test` (820; el perf de Safe-to-Spend falla a veces bajo carga y pasa solo) y `build` pasan. E2E del demo con builds de producción (`CI=1`): `us19`, `us2`, `us9`, `us17` y `matrix`, 14/14 en EN y ES. Con `next dev` en frío agotan el tiempo. **Pendiente**: e2e `@live` y contrato con Supabase local (Docker).
