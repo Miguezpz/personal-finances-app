@@ -123,7 +123,7 @@ US5 (Fondo de emergencia y Apartados) usa el mismo código que US1, así que va 
   - Corregir la versión en `supabase_migrations.schema_migrations` al prefijo `0014` y verificar con `list_migrations`.
   - `get_advisors` (security) sin avisos nuevos de `goal_saved_moves`.
   - Solo entonces, push del código y revisar el CI.
-- [ ] T040 Verificación manual en la app personal (quickstart, escenarios 1–7).
+- [X] T040 Verificación manual en la app personal (quickstart, escenarios 1–7).
 
 ## Notas de implementación
 

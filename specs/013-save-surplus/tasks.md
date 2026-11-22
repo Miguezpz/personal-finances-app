@@ -79,7 +79,7 @@
   - Corregir la versión en `supabase_migrations.schema_migrations` al prefijo `0013`.
   - Verificar con `list_migrations`.
   - Solo entonces, commit y push del código y revisar el CI.
-- [ ] T022 Verificación manual en la app personal (quickstart §3).
+- [X] T022 Verificación manual en la app personal (quickstart §3).
 
 ## Dependencies
 
