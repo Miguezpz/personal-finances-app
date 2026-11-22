@@ -63,7 +63,7 @@ Va antes de US2 porque corrige un riesgo real: hoy `ruleFor` volvería a reparti
   - Sin cuentas de inversión: la opción Inversión queda deshabilitada con un aviso.
   - Al cambiar de Inversión a otro bucket, limpiar `vehicleId`.
 - [X] T014 [P] [US2] i18n EN/ES: `vehicle`, `investmentNote`, `noVehicles`. Paridad.
-- [ ] T015 [US2] E2E `@live`: $1,000 a Inversión con vehículo ⇒ el STS de Necesidades y Gustos no cambia y el patrimonio sube $1,000.
+- [X] T015 [US2] E2E `@live`: $1,000 a Inversión con vehículo ⇒ el STS de Necesidades y Gustos no cambia y el patrimonio sube $1,000.
 
 ## Phase 5: US4 — Demo, reintento y contrato (P3)
 
@@ -75,7 +75,7 @@ Va antes de US2 porque corrige un riesgo real: hoy `ruleFor` volvería a reparti
 
 - [X] T019 Correr las puertas: `pnpm typecheck`, `pnpm lint`, `pnpm format:check`, `pnpm test`, `pnpm build`. Todas las pruebas existentes de ingresos, splitter y Safe-to-Spend pasan sin cambios (SC-005).
 - [X] T020 E2E completo de la feature en demo y `@live`, EN y ES (`us1-income-split.spec.ts`).
-- [ ] T021 Commit y push a `main` (sin migración, se puede subir directo). Revisar el CI.
+- [X] T021 Commit y push a `main` (sin migración, se puede subir directo). Revisar el CI.
 - [ ] T022 Verificación manual en la app personal: registrar un ingreso eventual pequeño a Gustos, ver subir Gustos, editarlo a Necesidades, y eliminarlo.
 
 ## Dependencies
@@ -104,7 +104,7 @@ Va antes de US2 porque corrige un riesgo real: hoy `ruleFor` volvería a reparti
 - T001: el caso de `data-provider.contract.ts` cerca de la 420 era de **rechazo** (suma incorrecta), no un caso válido. T018 añadió el caso positivo (Gustos e Inversión con vehículo); corre solo con Supabase local (`canWrite`) y pasa (contrato 48/48).
 - T009, T012: las e2e quedaron en un archivo nuevo, `tests/e2e/us19-income-to-bucket.spec.ts` (demo y `@live`), no en `us1-income-split.spec.ts`. Ids nuevos: `#income-split-bucket`, `#income-bucket-{needs,wants,investment}`, `income-vehicle`; `#income-split-yes` y `#income-split-no` se conservan (los usa `us11`).
 - T010: en vez de pasar una prop, el diálogo lee las asignaciones del snapshot (`selectFormData.allocations`) para derivar bucket y vehículo al editar.
-- T015: sin e2e `@live` de Inversión; el caso demo cubre el selector de vehículo y la nota, y el contrato (T018) cubre la escritura.
+- T015: la e2e `@live` de Inversión quedó en `us19-income-to-bucket.spec.ts` (crea una cuenta de inversión con `userClient`, el vehículo sale preseleccionado y se guarda con su `account_id`); pasa en EN y ES.
 - T017: el borrador de "Reintentar" es `form.getValues()`, así que ya trae `allocation`, `bucket` y `vehicleId`; no hubo que cambiar `retry-toast.ts` ni `DialogHost.tsx`.
 - T019/T020: Next.js 16.4.3 cortaba `next dev` y `next build` con `SecurityFatalError` (6 avisos moderados, corregidos desde 16.4.5); se subió `next` y `eslint-config-next` a 16.4.6. Después: `typecheck`, `lint`, `format:check`, `test` (820; el perf de Safe-to-Spend falla a veces bajo carga y pasa solo) y `build` pasan. E2E del demo con builds de producción (`CI=1`): `us19`, `us2`, `us9`, `us17` y `matrix`, 14/14 en EN y ES. Con `next dev` en frío agotan el tiempo.
 - E2E `@live` con Supabase local (`node scripts/with-local-supabase.mjs env CI=1 pnpm test:e2e …`; en segundo plano el wrapper no encuentra Supabase, en primer plano sí): `us19`, `us1`, `us11`, `us2`, `us17` pasan en EN y ES.

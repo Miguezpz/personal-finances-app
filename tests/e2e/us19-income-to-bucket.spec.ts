@@ -3,7 +3,8 @@
  *  - demo (demo-en, demo-es): the seeded "Birthday gift" shows Wants only, editing opens with that
  *    mode and bucket, Investment asks for a vehicle, and saving is a blocked write.
  *  - live (live-en, live-es): with no rule configured, a $500 gift goes to Wants (one allocation,
- *    distributed, no rule); editing keeps the mode and moving it to Needs moves the allocation.
+ *    distributed, no rule); editing keeps the mode and moving it to Needs moves the allocation;
+ *    a one-off income goes to Investment in the chosen vehicle.
  */
 import en from "../../src/i18n/messages/en.json";
 import es from "../../src/i18n/messages/es.json";
@@ -96,5 +97,39 @@ test.describe("Spec 015 · income to one bucket (live)", { tag: "@live" }, () =>
         income_allocations: [{ bucket: "needs", account_id: null, amount_cents: 50_000 }],
       },
     ]);
+  });
+
+  test("a one-off income goes to Investment in its vehicle", async ({
+    ownerPage: page,
+    admin,
+    owner,
+    userClient,
+  }) => {
+    const { data: vehicle, error } = await userClient
+      .from("accounts")
+      .insert({ kind: "investment", name: "Stocks" })
+      .select("id")
+      .single();
+    expect(error).toBeNull();
+
+    await page.goto("/income");
+    await openCreate(page, "income");
+    await page.getByTestId("income-type-investment_returns").click();
+    await page.locator("#income-amount").fill("1,000");
+    await page.locator("#income-kind-oneOff").click();
+    await page.locator("#income-split-bucket").click();
+    await page.locator("#income-bucket-investment").click();
+    await expect(page.getByTestId("income-vehicle")).toHaveValue(vehicle!.id);
+    await page.getByTestId("save-income").click();
+
+    await expect
+      .poll(async () => {
+        const { data } = await admin
+          .from("income_allocations")
+          .select("bucket, account_id, amount_cents")
+          .eq("user_id", owner.id);
+        return data;
+      })
+      .toEqual([{ bucket: "investment", account_id: vehicle!.id, amount_cents: 100_000 }]);
   });
 });
